@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import Loading from "@/components/Loading";
 
 export default function ProtectedLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function ProtectedLayout({ children }: Readonly<{ children: React
   }, [router]);
 
   if (loading) {
-    return <p className="text-center">Cargando...</p>;
+    return <Loading/>;
   }
 
   return <>{children}</>;
