@@ -1,23 +1,43 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
+import { useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import { useRouter } from 'next/navigation';
 
-export default function AuthCallback() {
-  const router = useRouter()
+export default function CallbackPage() {
+  const router = useRouter();
 
   useEffect(() => {
-    const handleSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error) console.error(error)
-      if (session) {
-        console.log('Usuario logueado:', session.user)
-        router.push('/') // redirige al home
-      }
-    }
-    handleSession()
-  }, [router])
+    const checkUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-  return <p>Procesando login...</p>
+      if (!user?.email) {
+        router.push('/login');
+        return;
+      }
+
+      // Consultar si el email está en allowed_emails
+      const { data: allowed } = await supabase
+        .from('allowed_emails')
+        .select('email')
+        .eq('email', user.email)
+        .maybeSingle();
+
+      if (!allowed) {
+        await supabase.auth.signOut();
+        alert('Your account is not authorized');
+        router.push('/login');
+        return;
+      }
+
+      // OK → redirige al home
+      router.push('/');
+    };
+
+    checkUser();
+  }, [router]);
+
+  return <p>Validating...</p>;
 }
