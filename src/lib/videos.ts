@@ -4,6 +4,7 @@ export async function getVideosByCategory(category: "match" | "training") {
     const { data, error } = await supabase
         .from("videos")
         .select("*")
+        .eq("category", category)
         .order("created_at", { ascending: false });
 
     if (error) {
