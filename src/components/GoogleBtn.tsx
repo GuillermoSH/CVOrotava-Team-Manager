@@ -17,7 +17,7 @@ export default function GoogleBtn() {
   return (
     <button
       onClick={handleLogin}
-      className="w-full focus:border-none focus:outline-none focus:ring-2 focus:ring-royalblue-500 flex items-center justify-center h-10 px-[12px] border border-[#747775] rounded-full py-2 bg-white hover:bg-gray-50"
+      className="w-full text-black focus:border-none focus:outline-none focus:ring-2 focus:ring-black flex items-center justify-center h-10 px-[12px] border border-[#747775] rounded-full py-2 bg-white hover:bg-gray-50"
     >
       <Image
         src="/assets/svgs/google-logo.svg"
