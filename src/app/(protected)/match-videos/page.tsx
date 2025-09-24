@@ -3,7 +3,6 @@ import VideoCard from "@/components/VideoCard";
 
 export default async function PartidosPage() {
   const videos = await getVideosByCategory("match");
-  console.log(videos);
 
   return (
     <main className="min-h-screen p-6">

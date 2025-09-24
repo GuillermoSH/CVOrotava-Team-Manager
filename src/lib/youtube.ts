@@ -1,21 +1,25 @@
 // Extrae el ID de un video de YouTube a partir de la URL
 export function getYouTubeId(url: string): string | null {
-    try {
-        const parsedUrl = new URL(url);
+    const parsedUrl = new URL(url);
 
-        if (parsedUrl.hostname === "youtu.be") {
-            return parsedUrl.pathname.slice(1);
-        }
-
-        if (parsedUrl.hostname.includes("youtube.com")) {
-            return parsedUrl.searchParams.get("v");
-        }
-
-        return null;
-    } catch {
-        return null;
+    // Caso típico: https://www.youtube.com/watch?v=VIDEO_ID
+    if (parsedUrl.searchParams.has("v")) {
+        return parsedUrl.searchParams.get("v");
     }
+
+    // Caso live: https://www.youtube.com/live/VIDEO_ID
+    if (parsedUrl.pathname.startsWith("/live/")) {
+        return parsedUrl.pathname.split("/live/")[1];
+    }
+
+    // Caso short: https://youtu.be/VIDEO_ID
+    if (parsedUrl.hostname === "youtu.be") {
+        return parsedUrl.pathname.substring(1);
+    }
+
+    return null;
 }
+
 
 // Devuelve la URL de la miniatura en distintas calidades
 export function getThumbnailUrl(
@@ -23,7 +27,10 @@ export function getThumbnailUrl(
     quality: "mq" | "hq" | "max" = "hq"
 ): string {
     const id = getYouTubeId(url);
+    console.log(id);
     if (!id) return "";
+
+    console.log(`https://img.youtube.com/vi/${id}/mqdefault.jpg`)
 
     switch (quality) {
         case "mq":
