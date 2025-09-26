@@ -21,8 +21,8 @@ export default function ProtectedHome() {
     ];
 
     return (
-        <main className="min-h-screen bg-gray-100 dark:bg-gray-600 flex flex-col items-center p-6">
-            <h1 className="text-3xl text-gray-500 dark:text-gray-950 font-bold mb-8 text-center">
+        <main className="min-h-screen bg-[url(/assets/svgs/circle-scatter-RB-shape.svg)] bg-center bg-cover flex flex-col items-center p-6">
+            <h1 className="text-3xl text-white font-bold mb-8 text-center">
                 Bienvenido a tu Panel
             </h1>
 

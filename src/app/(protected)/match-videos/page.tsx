@@ -5,10 +5,10 @@ export default async function PartidosPage() {
   const videos = await getVideosByCategory("match");
 
   return (
-    <main className="min-h-screen bg-gray-100 dark:bg-gray-600 p-6">
+    <main className="min-h-screen bg-[url(/assets/svgs/circle-scatter-RB-shape.svg)] bg-center bg-cover p-6">
       <h1 className="text-2xl font-bold mb-6">Videos de Partidos</h1>
       {videos.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {videos.map((video) => (
             <VideoCard
               key={video.id}
