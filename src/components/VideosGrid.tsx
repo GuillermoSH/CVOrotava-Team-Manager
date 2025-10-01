@@ -15,8 +15,14 @@ type VideoGridProps = {
   filters: Filters;
 };
 
+type Video = {
+  id: string;
+  url: string;
+  created_at: string;
+};
+
 export default function VideosGrid({ category, filters }: Readonly<VideoGridProps>) {
-  const [videos, setVideos] = useState<any[]>([]);
+  const [videos, setVideos] = useState<Video[]>([]);
 
   useEffect(() => {
     const fetchVideos = async () => {
