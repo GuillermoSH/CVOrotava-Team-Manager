@@ -12,7 +12,7 @@ type Filters = {
 
 type VideoGridProps = {
   category: "match" | "training";
-  filters: Filters;
+  filters?: Filters;
 };
 
 type Video = {
