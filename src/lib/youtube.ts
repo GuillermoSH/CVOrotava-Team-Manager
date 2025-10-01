@@ -27,10 +27,7 @@ export function getThumbnailUrl(
     quality: "mq" | "hq" | "max" = "hq"
 ): string {
     const id = getYouTubeId(url);
-    console.log(id);
     if (!id) return "";
-
-    console.log(`https://img.youtube.com/vi/${id}/mqdefault.jpg`)
 
     switch (quality) {
         case "mq":
@@ -42,21 +39,30 @@ export function getThumbnailUrl(
     }
 }
 
-// Devuelve el titulo del video
-export async function getYoutubeTitle(videoId?: string): Promise<string | null> {
-    if (!videoId) return null;
+export async function getYoutubeTitle(url: string): Promise<string | null> {
+  const videoId = getYouTubeId(url);
+  if (!videoId) return null;
 
-    const apiKey = process.env.YOUTUBE_API_KEY!;
-    const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`;
+  const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+  if (!apiKey) {
+    console.error("YouTube API key not set");
+    return null;
+  }
 
-    try {
-        const res = await fetch(url);
-        const data = await res.json();
+  const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`;
 
-        return data.items?.[0]?.snippet?.title || null;
-    } catch (err) {
-        console.error("Error fetching YouTube title:", err);
-        return null;
+  try {
+    const res = await fetch(apiUrl);
+    if (!res.ok) {
+      console.error("YouTube API error:", res.status, await res.text());
+      return null;
     }
+
+    const data = await res.json();
+    return data.items?.[0]?.snippet?.title || null;
+  } catch (err) {
+    console.error("Error fetching YouTube title:", err);
+    return null;
+  }
 }
 
