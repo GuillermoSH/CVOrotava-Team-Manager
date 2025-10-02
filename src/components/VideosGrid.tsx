@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getVideosByCategory } from "@/lib/videos";
 import VideoCard from "@/components/VideoCard";
+import { useInfiniteVideos } from "@/hooks/useInfiniteVideos";
 
 type Filters = {
   season?: string;
@@ -22,24 +21,24 @@ type Video = {
 };
 
 export default function VideosGrid({ category, filters }: Readonly<VideoGridProps>) {
-  const [videos, setVideos] = useState<Video[]>([]);
-
-  useEffect(() => {
-    const fetchVideos = async () => {
-      const data = await getVideosByCategory(category, filters);
-      setVideos(data);
-    };
-    fetchVideos();
-  }, [filters, category]);
+  const { videos, loaderRef, loading, hasMore } = useInfiniteVideos(category, filters);
 
   return (
     <>
       {videos.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {videos.map((video) => (
-            <VideoCard key={video.id} url={video.url} created_at={video.created_at} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {videos.map((video: Video) => (
+              <VideoCard key={video.id} url={video.url} created_at={video.created_at} />
+            ))}
+          </div>
+          {/* Loader */}
+          {(hasMore || loading) && (
+            <div ref={loaderRef} className="h-12 mt-6 flex justify-center items-center">
+              {loading && <p className="text-gray-500">Cargando más…</p>}
+            </div>
+          )}
+        </>
       ) : (
         <p className="text-gray-600">No hay videos disponibles.</p>
       )}
