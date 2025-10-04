@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --bgGrayColor: #1C1C1A;
 }
 
 @theme inline {
@@ -23,4 +24,16 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.glass-form-label {
+  @apply block text-sm mb-1 font-medium text-neutral-400;
+}
+
+.glass-form-input {
+  @apply w-full border rounded px-3 py-2;
+}
+
+.glass-form-input option {
+  color: var(--bgGrayColor);
 }
