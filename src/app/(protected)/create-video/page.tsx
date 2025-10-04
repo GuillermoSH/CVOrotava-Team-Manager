@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { useRouter } from "next/navigation";
+import router from "next/navigation";
+import type { Session } from "@supabase/supabase-js";
 
 const ADMIN_EMAILS = ["siciliahernandezguillermo@gmail.com"];
 
 export default function VideoCreatePage() {
-  const router = useRouter();
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
   const [form, setForm] = useState({
@@ -66,9 +66,13 @@ export default function VideoCreatePage() {
       setMessage("✅ Video creado con éxito");
       setForm({ url: "", category: "match", season: "", competition_type: "league", gender: "male" });
 
-      router.push("/match-videos");
-    } catch (err: any) {
-      setMessage(`❌ ${err.message}`);
+      router.redirect("/match-videos");
+    } catch (err) {
+      if (err instanceof Error) {
+        setMessage(`❌ ${err.message}`);
+      } else {
+        setMessage("❌ Error desconocido");
+      }
     } finally {
       setLoading(false);
     }
