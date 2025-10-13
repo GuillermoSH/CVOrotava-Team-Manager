@@ -80,7 +80,7 @@ export default function VideoCreatePage() {
   };
 
   return (
-    <main className="w-full flex flex-col items-center text-white bg-[url(/assets/svgs/circle-scatter-RB-shape.svg)] bg-center bg-fixed bg-cover p-6" style={{ minHeight: "calc(var(--vh, 1vh) * 100)" }}>
+    <main className="w-full flex flex-col items-center text-white p-6">
       <h1 className="text-2xl font-bold mb-6">Añadir Video</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl flex flex-col border border-white/30 overflow-hidden bg-white/5 backdrop-blur-sm shadow-lg rounded-lg p-6">

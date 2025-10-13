@@ -20,6 +20,12 @@ export default function ProtectedHome() {
 
   const cards = [
     {
+      title: "Calendario de Partidos",
+      description: "Consulta el calendario completo de la temporada.",
+      href: "/calendar",
+      disabled: false,
+    },
+    {
       title: "Videos de Partidos",
       description: "Accede a la lista de partidos grabados.",
       href: "/match-videos",
@@ -40,16 +46,24 @@ export default function ProtectedHome() {
   ];
 
   if (isAdmin) {
-    cards.unshift({
-      title: "Crear Videos",
-      description: "Sube nuevos videos a la plataforma.",
-      href: "/create-video",
-      disabled: false,
-    });
+    cards.unshift(
+      {
+        title: "Crear Videos",
+        description: "Sube nuevos videos a la plataforma.",
+        href: "/create-video",
+        disabled: false,
+      },
+      {
+        title: "Crear Partidos",
+        description: "Añade nuevos partidos al calendario.",
+        href: "/create-match",
+        disabled: false,
+      }
+    );
   }
 
   return (
-    <main className="min-h-screen bg-[url(/assets/svgs/circle-scatter-RB-shape.svg)] bg-center bg-cover flex flex-col items-center p-6">
+    <main className="flex flex-col items-center p-6">
       <h1 className="text-3xl text-white font-bold mb-8 text-center">
         Bienvenido a tu Panel
       </h1>

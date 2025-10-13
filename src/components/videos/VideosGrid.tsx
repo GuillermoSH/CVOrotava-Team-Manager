@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence, easeOut } from "framer-motion";
-import VideoCard from "@/components/VideoCard";
+import VideoCard from "@/components/videos/VideoCard";
 import { useInfiniteVideos } from "@/hooks/useInfiniteVideos";
 
 type Filters = {

@@ -1,5 +1,5 @@
 "use client";
-import GoogleBtn from "@/components/GoogleBtn";
+import GoogleBtn from "@/components/ui/GoogleBtn";
 import Image from "next/image";
 
 export default function LoginPage() {
