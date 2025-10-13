@@ -27,14 +27,16 @@ export default function FilterDropdown({ label, options, value, onChange }: Read
   }, []);
 
   return (
-    <div className="relative inline-block text-left text-xs text-gray-800" ref={dropdownRef}>
-      {/* Botón */}
+    <div className="relative inline-block text-left text-xs" ref={dropdownRef}>
+      {/* Botón principal */}
       <button
         type="button"
-        className={`w-full font-medium py-2 px-2 md:px-4 rounded-lg flex justify-between items-center transition
-          ${value 
-            ? "bg-[#12E7DC] text-gray-800 hover:bg-[#12E7DC] font-semibold" 
-            : "bg-gray-200 text-gray-800 hover:bg-gray-300"}
+        className={`w-full font-medium py-2 px-3 md:px-4 rounded-lg flex justify-between items-center transition-all duration-200
+          ${
+            value
+              ? "bg-[#FF2E2E] text-white hover:bg-[#FF4646]"
+              : "bg-[#2A2A2A] text-white/70 hover:bg-[#3A3A3A] hover:text-white"
+          }
         `}
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -56,7 +58,7 @@ export default function FilterDropdown({ label, options, value, onChange }: Read
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute z-10 mt-2 min-w-max w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto text-xs"
+            className="absolute z-10 mt-2 min-w-max w-full bg-[#141414] rounded-lg shadow-lg border border-white/10 max-h-60 overflow-y-auto text-xs"
           >
             {options.map((option) => (
               <button
@@ -65,24 +67,29 @@ export default function FilterDropdown({ label, options, value, onChange }: Read
                   onChange(option);
                   setIsOpen(false);
                 }}
-                className={`block w-full text-left px-4 py-2 text-xs transition ${
-                  option === value ? "bg-[#12E7DC] text-gray-800 hover:bg-[#12E7DC]/50 font-semibold" : "hover:bg-gray-100"
-                }`}
+                className={`block w-full text-left px-4 py-2 transition-all duration-150
+                  ${
+                    option === value
+                      ? "bg-[#FF2E2E] text-white"
+                      : "text-white/80 hover:bg-[#2A2A2A] hover:text-white"
+                  }
+                `}
               >
                 {option}
               </button>
             ))}
-            <button
-              onClick={() => {
-                onChange("");
-                setIsOpen(false);
-            }}
-              className={`w-full text-left px-4 py-2 text-xs text-red-500 hover:bg-red-100
-                ${!value ? "hidden" : ""} transition"
-              `}
-            >
-              <FontAwesomeIcon icon={faTrash} /> Limpiar
-            </button>
+
+            {value && (
+              <button
+                onClick={() => {
+                  onChange("");
+                  setIsOpen(false);
+                }}
+                className="w-full text-left px-4 py-2 text-red-400 hover:bg-red-500/20 transition-all"
+              >
+                <FontAwesomeIcon icon={faTrash} className="mr-1" /> Limpiar
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
