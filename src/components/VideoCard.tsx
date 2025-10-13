@@ -56,7 +56,7 @@ export default function VideoCard({
 
       {/* Info */}
       <div className="p-3 flex flex-col gap-1 pointer-events-none">
-        <h2 className="text-sm font-semibold line-clamp-2">{title}</h2>
+        <h2 className="text-sm text-white font-semibold line-clamp-2">{title}</h2>
         <span className="text-xs text-white/40">
           {getDateByTimestampz(created_at)}
         </span>
