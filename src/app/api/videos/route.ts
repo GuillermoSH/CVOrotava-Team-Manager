@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { sendNewVideoEmail } from "@/lib/email";
 
 const ADMIN_EMAILS = ["siciliahernandezguillermo@gmail.com"];
 
@@ -39,6 +40,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    // 1️⃣ Validar autenticación
     const authHeader = req.headers.get("authorization");
     if (!authHeader) {
       return NextResponse.json({ error: "No token provided" }, { status: 401 });
@@ -55,6 +57,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // 2️⃣ Validar body
     const body = await req.json();
     const { url, category, season, competition_type, gender } = body;
 
@@ -62,6 +65,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
+    // 3️⃣ Insertar video
     const { data, error } = await supabaseServer
       .from("videos")
       .insert([{ url, category, season, competition_type, gender }])
@@ -72,9 +76,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data[0], { status: 201 });
+    const newVideo = data[0];
+
+    // 4️⃣ Buscar jugadores por género
+    const { data: players, error: playersError } = await supabaseServer
+      .from("players")
+      .select("email")
+      .eq("gender", gender);
+
+    if (playersError) {
+      console.error("Error fetching players:", playersError);
+    }
+
+    const emails = (players || []).map((p) => p.email).filter(Boolean);
+
+    // 5️⃣ Enviar email con servicio de lib/email.ts
+    await sendNewVideoEmail({ to: emails, category, url, gender, season });
+
+    // 6️⃣ OK
+    return NextResponse.json({ success: true, data: newVideo }, { status: 201 });
+
   } catch (err) {
+    console.error("POST /api/videos error:", err);
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
+
