@@ -46,9 +46,9 @@ export default function MatchForm() {
       }
 
       router.push("/calendar");
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       console.error(err);
-      setError(err.message || "Error al crear el partido.");
+      setError(err instanceof Error ? err.message : "Error al crear el partido.");
       setLoading(false);
     }
   };

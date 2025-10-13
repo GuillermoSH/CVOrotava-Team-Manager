@@ -28,7 +28,7 @@ export default function CalendarioPage() {
         if (!res.ok) throw new Error('Error al obtener partidos');
         const data = await res.json();
         setMatches(data);
-      } catch (err: any) {
+          } catch (err: unknown) {
         console.error(err);
         setError('No se pudo cargar el calendario.');
       } finally {
