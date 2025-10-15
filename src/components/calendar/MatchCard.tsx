@@ -34,8 +34,7 @@ enum OutsideIslandVenues {
 }
 
 enum AwayVenues {
-  YEJARAFE = "CEIP San Matías",
-  SONAM = "CEIP San Matías",
+  YEJARAFE_SONAM = "CEIP San Matías",
   VICTORIA = "Pab. Mun. La Victoria",
 }
 
