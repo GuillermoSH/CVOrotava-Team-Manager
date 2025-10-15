@@ -55,7 +55,7 @@ export function useInfiniteVideos(filters?: Filters) {
         ...(filters?.season && { season: filters.season }),
         ...(filters?.competition_type && { competition_type: filters.competition_type }),
         ...(filters?.gender && { gender: filters.gender }),
-        ...(filters?.category && { category: filters.category }), // ✅ ahora sí
+        ...(filters?.category && { category: filters.category }),
       });
 
       try {
