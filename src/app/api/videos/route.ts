@@ -17,12 +17,12 @@ export async function GET(req: Request) {
 
   let query = supabase
     .from("videos")
-    .select("*")
-    .eq("category", category);
+    .select("*");
 
   if (season) query = query.eq("season", season);
   if (competition_type) query = query.eq("competition_type", competition_type);
   if (gender) query = query.eq("gender", gender);
+  if (category) query = query.eq("category", category);
 
   const from = (page - 1) * limit;
   const to = from + limit - 1;

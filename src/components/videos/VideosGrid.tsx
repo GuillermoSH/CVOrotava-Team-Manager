@@ -8,10 +8,10 @@ type Filters = {
   season?: string;
   competition_type?: string;
   gender?: string;
+  category?: "match" | "training"; // ✅ ahora viene aquí
 };
 
 type VideoGridProps = {
-  category: "match" | "training";
   filters?: Filters;
 };
 
@@ -21,15 +21,14 @@ type Video = {
   created_at: string;
 };
 
-export default function VideosGrid({ category, filters }: Readonly<VideoGridProps>) {
-  const { videos, loaderRef, loading, hasMore } = useInfiniteVideos(category, filters);
+export default function VideosGrid({ filters }: Readonly<VideoGridProps>) {
+  const { videos, loaderRef, loading, hasMore } = useInfiniteVideos(filters);
 
-  // Variants for Framer Motion
   const containerVariants = {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.08, // small delay between cards
+        staggerChildren: 0.08,
       },
     },
   };
@@ -67,7 +66,6 @@ export default function VideosGrid({ category, filters }: Readonly<VideoGridProp
             </AnimatePresence>
           </motion.div>
 
-          {/* Loader */}
           {(hasMore || loading) && (
             <div
               ref={loaderRef}

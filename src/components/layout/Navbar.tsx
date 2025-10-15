@@ -7,7 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { faRightFromBracket, faUser } from "@fortawesome/free-solid-svg-icons";
 
 export default function Navbar() {
   const router = useRouter();
@@ -35,7 +35,6 @@ export default function Navbar() {
 
     getSession();
 
-    // opcional: suscribirse a cambios de auth (si quieres logout en otras pestañas)
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUserEmail(session?.user?.email ?? null);
       setIsAdmin(ADMIN_EMAILS.includes(session?.user?.email ?? ""));
@@ -54,8 +53,7 @@ export default function Navbar() {
   const navItems = [
     { name: "Inicio", href: "/" },
     { name: "Calendario", href: "/calendar" },
-    { name: "Partidos", href: "/match-videos" },
-    { name: "Entrenamientos", href: "/training-videos" },
+    { name: "Videos", href: "/videos" },
   ];
 
   if (isAdmin) {
@@ -64,7 +62,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="w-full bg-black/40 backdrop-blur-md border-b border-white/10 fixed top-0 z-50">
+    <header className="w-full bg-black/70 backdrop-blur-md border-b border-white/10 fixed top-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
         {/* LEFT: Logo */}
         <div className="flex items-center gap-3">
@@ -88,7 +86,7 @@ export default function Navbar() {
               className={
                 "text-sm font-medium transition " +
                 (pathname === item.href
-                  ? "text-red-400"
+                  ? "text-red-500"
                   : "text-white/80 hover:text-red-300")
               }
             >
@@ -99,17 +97,11 @@ export default function Navbar() {
 
         {/* RIGHT: user + hamburger */}
         <div className="flex items-center gap-3">
-          {userEmail && (
-            <span className="hidden sm:inline text-sm text-white/70 truncate max-w-[12rem]">
-              {userEmail}
-            </span>
-          )}
-
           {/* Logout button (uses FontAwesomeIcon) */}
           <button
             onClick={handleLogout}
             title="Cerrar sesión"
-            className="flex items-center gap-2 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white px-3 py-1.5 rounded-lg text-sm transition-shadow shadow-md"
+            className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white px-3 py-1.5 rounded-lg text-sm shadow-md transition duration-200"
           >
             <FontAwesomeIcon icon={faRightFromBracket} />
             <span className="hidden sm:inline">Salir</span>

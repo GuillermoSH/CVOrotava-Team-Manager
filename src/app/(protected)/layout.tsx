@@ -33,7 +33,7 @@ export default function ProtectedLayout({
   return (
     <>
       <Navbar />
-      <div className="pt-16 min-h-screen bg-[url(/assets/svgs/circle-scatter-RB-shape.svg)] bg-center bg-cover p-6">
+      <div className="pt-16 min-h-screen bg-[url(/assets/svgs/circle-scatter-RB-shape.svg)] bg-center bg-cover bg-fixed p-6">
         {children}
       </div>
     </>
