@@ -44,39 +44,33 @@ export default function VideosGrid({ filters }: Readonly<VideoGridProps>) {
 
   return (
     <>
-      {videos.length > 0 ? (
-        <>
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <AnimatePresence>
-              {videos.map((video: Video) => (
-                <motion.div
-                  key={video.id}
-                  variants={cardVariants}
-                  layout
-                  exit={{ opacity: 0, y: 10, transition: { duration: 0.2 } }}
-                >
-                  <VideoCard url={video.url} created_at={video.created_at} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-
-          {(hasMore || loading) && (
-            <div
-              ref={loaderRef}
-              className="h-12 mt-6 flex justify-center items-center text-sm text-white/60"
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <AnimatePresence>
+          {videos.map((video: Video) => (
+            <motion.div
+              key={video.id}
+              variants={cardVariants}
+              layout
+              exit={{ opacity: 0, y: 10, transition: { duration: 0.2 } }}
             >
-              {loading && <p>Cargando más…</p>}
-            </div>
-          )}
-        </>
-      ) : (
-        <p className="text-white/50 text-center">No hay videos disponibles.</p>
+              <VideoCard url={video.url} created_at={video.created_at} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
+
+      {(hasMore || loading) && (
+        <div
+          ref={loaderRef}
+          className="h-12 mt-6 flex justify-center items-center text-sm text-white/60"
+        >
+          {loading && <p>Cargando más…</p>}
+        </div>
       )}
     </>
   );

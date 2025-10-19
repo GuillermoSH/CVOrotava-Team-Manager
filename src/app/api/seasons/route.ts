@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { supabaseServer } from "@/lib/supabase/server";
 
 export async function GET() {
+  const supabase = await supabaseServer();
   const { data, error } = await supabase
     .from("videos")
     .select("season")

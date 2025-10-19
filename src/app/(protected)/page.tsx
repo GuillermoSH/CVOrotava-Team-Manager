@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabase/client";
 
 const ADMIN_EMAILS = ["siciliahernandezguillermo@gmail.com"];
 
@@ -26,15 +26,9 @@ export default function ProtectedHome() {
       disabled: false,
     },
     {
-      title: "Videos de Partidos",
-      description: "Accede a la lista de partidos grabados.",
-      href: "/match-videos",
-      disabled: false,
-    },
-    {
-      title: "Videos de Entrenamientos",
-      description: "Consulta las sesiones de entrenamiento disponibles.",
-      href: "/training-videos",
+      title: "Videos",
+      description: "Accede a la lista de videos grabados.",
+      href: "/videos",
       disabled: false,
     },
     {
@@ -63,7 +57,7 @@ export default function ProtectedHome() {
   }
 
   return (
-    <main className="flex flex-col items-center p-6">
+    <main className="flex flex-col w-full items-center p-6">
       <h1 className="text-3xl text-white font-bold mb-8 text-center">
         Bienvenido a tu Panel
       </h1>

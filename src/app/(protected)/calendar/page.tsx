@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import MatchCard from '@/components/calendar/MatchCard';
-import Loading from '@/components/common/Loading';
-import FilterBar, { FilterConfig } from '@/components/ui/FilterBar';
-import { getCurrentSeason } from '@/utils/getCurrentSeason';
+import { useEffect, useState } from "react";
+import MatchCard from "@/components/calendar/MatchCard";
+import Loading from "@/components/common/Loading";
+import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
+import { getCurrentSeason } from "@/utils/getCurrentSeason";
 
 type Match = {
   id: string;
@@ -35,52 +35,70 @@ export default function CalendarPage() {
   });
   const [seasons, setSeasons] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // 🔹 Obtener partidos y temporadas
   useEffect(() => {
-    const fetchMatches = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch('/api/matches');
-        if (!res.ok) throw new Error('Error al obtener partidos');
+        const res = await fetch("/api/matches");
+        if (!res.ok) throw new Error("Error al obtener partidos");
         const data = (await res.json()) as Match[];
         setMatches(data);
         setFilteredMatches(data);
 
-        const uniqueSeasons = Array.from(new Set(data.map((m) => m.season))) as string[];
+        const uniqueSeasons = Array.from(
+          new Set(data.map((m) => m.season))
+        ) as string[];
         setSeasons(uniqueSeasons);
+
+        const resGender = await fetch("/api/user-gender");
+        const dataGender = await resGender.json();
+        const userGender = dataGender.gender as "male" | "female";
+        console.log("Género del usuario:", dataGender);
+
+        if (userGender) {
+          setFilters((prev) => ({
+            ...prev,
+            gender: userGender,
+          }));
+        }
       } catch (err) {
         console.error(err);
-        setError('No se pudo cargar el calendario.');
+        setError("No se pudo cargar el calendario.");
       } finally {
         setLoading(false);
       }
     };
-    fetchMatches();
+    fetchData();
   }, []);
 
   const filterConfigs: FilterConfig[] = [
     {
-      key: 'season',
-      label: 'Temporada',
+      key: "season",
+      label: "Temporada",
       options: seasons.map((s) => ({ label: s, value: s })),
     },
     {
-      key: 'gender',
-      label: 'Género',
+      key: "gender",
+      label: "Género",
       options: [
-        { label: 'Masculino', value: 'male' },
-        { label: 'Femenino', value: 'female' },
+        { label: "Masculino", value: "male" },
+        { label: "Femenino", value: "female" },
       ],
     },
   ];
 
   useEffect(() => {
     let filtered = [...matches];
-    if (filters.season) filtered = filtered.filter((m) => m.season === filters.season);
-    if (filters.gender) filtered = filtered.filter((m) => m.gender === filters.gender);
+    if (filters.season)
+      filtered = filtered.filter((m) => m.season === filters.season);
+    if (filters.gender)
+      filtered = filtered.filter((m) => m.gender === filters.gender);
     if (filters.competition_type)
-      filtered = filtered.filter((m) => m.competition_type === filters.competition_type);
+      filtered = filtered.filter(
+        (m) => m.competition_type === filters.competition_type
+      );
     setFilteredMatches(filtered);
   }, [filters, matches]);
 
@@ -94,13 +112,19 @@ export default function CalendarPage() {
     );
 
   return (
-    <main className="p-6">
+    <main className="p-6 w-full flex-1">
       <div className="max-w-6xl mx-auto mb-6">
-        <FilterBar filters={filters} setFilters={setFilters} configs={filterConfigs} />
+        <FilterBar
+          filters={filters}
+          setFilters={setFilters}
+          configs={filterConfigs}
+        />
       </div>
 
       {filteredMatches.length === 0 ? (
-        <p className="text-center text-gray-100">No hay partidos que coincidan con los filtros.</p>
+        <p className="text-center text-gray-100">
+          No hay partidos que coincidan con los filtros.
+        </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {filteredMatches.map((match) => (

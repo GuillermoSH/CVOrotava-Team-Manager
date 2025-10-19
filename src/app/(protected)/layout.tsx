@@ -3,7 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabase/client";
 import Loading from "@/components/common/Loading";
 import Navbar from "@/components/layout/Navbar";
 
@@ -33,7 +33,7 @@ export default function ProtectedLayout({
   return (
     <>
       <Navbar />
-      <div className="pt-16 min-h-screen bg-[url(/assets/svgs/circle-scatter-RB-shape.svg)] bg-center bg-cover bg-fixed p-6">
+      <div className="min-h-screen bg-[url(/assets/svgs/circle-scatter-RB-shape.svg)] bg-center bg-cover bg-fixed pt-16 pb-6 px-3 md:px-6 flex justify-center">
         {children}
       </div>
     </>

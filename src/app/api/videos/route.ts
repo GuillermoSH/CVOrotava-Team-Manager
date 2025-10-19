@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
-import { supabaseServer } from "@/lib/supabaseServer";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendNewVideoEmail } from "@/lib/email";
-
-const ADMIN_EMAILS = ["siciliahernandezguillermo@gmail.com"];
+import { ADMIN_EMAILS } from "@/constants/common";
+import { supabaseServer } from "@/lib/supabase/server";
 
 export async function GET(req: Request) {
+  const supabase = await supabaseServer(); // ✅ este es el correcto
   const { searchParams } = new URL(req.url);
 
   const category = searchParams.get("category") as "match" | "training";
@@ -38,6 +38,7 @@ export async function GET(req: Request) {
   return NextResponse.json(data || []);
 }
 
+
 export async function POST(req: Request) {
   try {
     // 1️⃣ Validar autenticación
@@ -47,7 +48,7 @@ export async function POST(req: Request) {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: userError } = await supabaseServer.auth.getUser(token);
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
 
     if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
     }
 
     // 3️⃣ Insertar video
-    const { data, error } = await supabaseServer
+    const { data, error } = await supabaseAdmin
       .from("videos")
       .insert([{ url, category, season, competition_type, gender }])
       .select();
@@ -79,7 +80,7 @@ export async function POST(req: Request) {
     const newVideo = data[0];
 
     // 4️⃣ Buscar jugadores por género
-    const { data: players, error: playersError } = await supabaseServer
+    const { data: players, error: playersError } = await supabaseAdmin
       .from("players")
       .select("email")
       .eq("gender", gender);

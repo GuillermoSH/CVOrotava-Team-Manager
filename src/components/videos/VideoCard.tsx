@@ -26,7 +26,7 @@ export default function VideoCard({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block relative overflow-hidden rounded-xl border border-white/10 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:border-white/30 focus:outline-none focus:ring-2 focus:ring-red-500"
+      className="group flex flex-col relative overflow-hidden h-full rounded-xl border border-white/10 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:border-white/30 focus:outline-none focus:ring-2 focus:ring-red-500"
     >
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden">
@@ -55,7 +55,7 @@ export default function VideoCard({
       </div>
 
       {/* Info */}
-      <div className="p-3 flex flex-col gap-1 pointer-events-none">
+      <div className="p-3 flex-1 flex flex-col justify-between gap-1 pointer-events-none">
         <h2 className="text-sm text-white font-semibold line-clamp-2">{title}</h2>
         <span className="text-xs text-white/40">
           {getDateByTimestampz(created_at)}

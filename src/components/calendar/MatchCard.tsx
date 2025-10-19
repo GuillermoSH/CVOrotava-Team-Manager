@@ -8,6 +8,7 @@ import {
   faVideo,
   faLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
+import { bg } from "zod/v4/locales";
 
 type Match = {
   id: string;
@@ -43,20 +44,46 @@ const HOME_VENUE = "Pabellón Quiquirá";
 export default function MatchCard({ match }: { match: Match }) {
   const matchDate = new Date(`${match.date}T${match.time}`);
   const now = new Date();
-  const isPast = now > matchDate;
+  const matchEnd = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000);
+  const isPast = now > matchEnd;
   const isUpcoming = !isPast;
 
-  // Color de borde según resultado
+  // 🎨 Estilos de borde y estado
   let borderColor = "border-white/10";
-  if (isPast && !match.result) borderColor = "border-gray-500/30";
-  if (match.result) {
-    const [ourScore, theirScore] = match.result.split("-").map(Number);
-    if (ourScore > theirScore) borderColor = "border-green-500/40";
-    else if (ourScore < theirScore) borderColor = "border-red-500/40";
-    else borderColor = "border-yellow-500/40";
+  let cardOpacity = "opacity-100";
+  let cardOverlay = "";
+  let pendingBadge = null;
+  let bgColor = "bg-white/5";
+  let borderHovercolor = "hover:border-white/30";
+  let bgHoverColor = "hover:bg-white/10";
+
+  if (isPast && !match.result) {
+    borderColor = "border-gray-500/30";
+    cardOpacity = "opacity-70";
+    cardOverlay = "bg-gray-900/30";
+    pendingBadge = (
+      <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-gray-700/30 border border-gray-500/30 text-gray-300">
+        Pendiente resultado
+      </span>
+    );
   }
 
-  // Tipo de partido
+  if (match.result) {
+    const [ourScore, theirScore] = match.result.split("-").map(Number);
+    if (ourScore > theirScore) {
+      bgColor = "bg-green-700/5";
+      bgHoverColor = "hover:bg-green-700/10";
+      borderColor = "border-green-700/30";
+      borderHovercolor = "hover:border-green-700/40";
+    } else {
+      bgColor = "bg-red-700/5";
+      bgHoverColor = "hover:bg-red-700/10";
+      borderColor = "border-red-700/30";
+      borderHovercolor = "hover:border-red-700/40";
+    }
+  }
+
+  // 🏐 Tipo de partido
   const isOutsideIsland = Object.values(OutsideIslandVenues).some((name) =>
     match.location.toLowerCase().includes(name.toLowerCase())
   );
@@ -81,7 +108,7 @@ export default function MatchCard({ match }: { match: Match }) {
     minute: "2-digit",
   });
 
-  // Google Calendar link
+  // 📅 Google Calendar link
   const startUTC = matchDate.toISOString().replace(/-|:|\.\d+/g, "");
   const endUTC = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000)
     .toISOString()
@@ -92,7 +119,7 @@ export default function MatchCard({ match }: { match: Match }) {
     match.notes || ""
   )}&location=${encodeURIComponent(match.location)}`;
 
-  // ✈️ Etiqueta visual (badges)
+  // 🏷️ Etiquetas visuales
   const Tag = () => {
     const base =
       "inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-md border transition hover:brightness-110";
@@ -128,72 +155,75 @@ export default function MatchCard({ match }: { match: Match }) {
 
   return (
     <div
-      className={`bg-white/5 backdrop-blur-md rounded-2xl p-5 flex flex-col justify-between border ${borderColor} hover:border-white/30 hover:bg-white/10 transition-all duration-300`}
+      className={`relative backdrop-blur-md rounded-2xl p-5 flex flex-col justify-between border transition-all duration-300 ${borderColor} ${cardOpacity} ${bgColor} ${borderHovercolor} ${bgHoverColor}`}
     >
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-semibold text-white tracking-tight">
-            {match.opponent}
-          </h2>
+      {cardOverlay && <div className={`absolute inset-0 rounded-2xl ${cardOverlay}`} />}
+
+      <div className="relative z-10 space-y-2.5">
+        {/* 🏷️ Badges */}
+        <div className="flex flex-wrap items-center gap-2">
           <Tag />
+          {pendingBadge}
         </div>
 
-        <p className="text-sm text-white/70 mb-2">
+        {/* 🆚 Oponente */}
+        <h2 className="text-xl font-semibold text-white tracking-tight leading-tight">
+          {match.opponent}
+        </h2>
+
+        {/* 📅 Fecha y hora */}
+        <p className="text-sm text-white/80">
           {formattedDate} • {formattedTime}
         </p>
 
-        {/* 📍 Localización clicable */}
+        {/* 📍 Localización */}
         {match.location_url ? (
           <a
             href={match.location_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-white/80 font-medium hover:text-blue-400 transition-colors underline underline-offset-2"
+            className="inline-flex underline items-center text-white/90 font-medium hover:text-blue-400 transition-colors"
           >
             <FontAwesomeIcon
               icon={faLocationDot}
-              className="mr-1 text-red-400"
+              className="mr-1.5 text-red-400"
             />
             {match.location}
           </a>
         ) : (
-          <p className="text-white/80 font-medium">
+          <p className="text-white/80 font-medium flex items-center">
             <FontAwesomeIcon
               icon={faLocationDot}
-              className="mr-1 text-red-400"
+              className="mr-1.5 text-red-400"
             />
             {match.location}
           </p>
         )}
-
-        <p className="text-sm text-white/60 mt-1">
-          Temporada: <span className="font-semibold">{match.season}</span>
-        </p>
-
-        {match.result && (
-          <p className="mt-2 text-white font-semibold">
-            🏁 Resultado: {match.result}
-          </p>
-        )}
-
-        {match.notes && (
-          <p className="mt-2 text-white/70 italic text-sm border-t border-white/10 pt-2">
-            “{match.notes}”
-          </p>
-        )}
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      {/* 🎥 Acciones */}
+      <div className="mt-4 z-10 flex flex-wrap justify-between gap-2 relative">
         {match.video_url && (
           <a
             href={match.video_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-red-600 text-white py-2 px-4 rounded-xl text-center hover:bg-red-700 transition text-sm flex items-center gap-2"
+            className="bg-red-600 text-white px-4 rounded-xl text-center hover:bg-red-700 transition text-sm flex items-center gap-2"
           >
             <FontAwesomeIcon icon={faVideo} />
             Ver vídeo
           </a>
+        )}
+
+        {/* 🏆 Resultado */}
+        {match.result && (
+          <div className="pt-2 border-white/10 space-y-1.5">
+            {match.result && (
+              <p className="text-neutral-400 text-3xl font-semibold">
+                {match.result}
+              </p>
+            )}
+          </div>
         )}
 
         {isUpcoming && (

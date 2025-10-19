@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabaseServer";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 /**
  * GET /api/matches
@@ -9,7 +9,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const season = searchParams.get("season");
 
-    let query = supabaseServer.from("matches").select("*");
+    let query = supabaseAdmin.from("matches").select("*");
 
     if (season) query = query.eq("season", season);
     try {
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
             );
         }
 
-        const { data, error } = await supabaseServer
+        const { data, error } = await supabaseAdmin
             .from("matches")
             .insert([body])
             .select();

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+// @ts-ignore: side-effect import of CSS without types; add a `*.css` declaration file to avoid using ts-ignore
 import "./globals.css";
 
 const poppins = Poppins({
@@ -20,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${poppins.className} antialiased bg-gray-100`}>
+      <body className={`${poppins.className} antialiased min-h-screen bg-gray-100`}>
         {children}
       </body>
     </html>

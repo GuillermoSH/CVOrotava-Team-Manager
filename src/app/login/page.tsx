@@ -1,29 +1,56 @@
 "use client";
-import GoogleBtn from "@/components/ui/GoogleBtn";
+
 import Image from "next/image";
+import GoogleBtn from "@/components/ui/GoogleBtn";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
+  return (
+    <main className="relative flex items-center justify-center min-h-[100svh] overflow-hidden bg-[#1C1C1A]">
+      {/* 🎨 Fondo: degradado dinámico rojizo con brillo */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,#D7263D_0%,transparent_60%),radial-gradient(circle_at_80%_80%,#3a3a38_0%,transparent_70%)] animate-pulse-slow opacity-80" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#1C1C1A]/95 via-[#2A2A28]/90 to-[#1C1C1A]/95 backdrop-blur-3xl" />
 
-    return (
-        <main className="flex items-center justify-center min-h-[100svh] px-4 bg-[url(/assets/svgs/blurry-gradient-RW.svg)] dark:bg-[url(/assets/svgs/blurry-gradient-RB.svg)] bg-center bg-cover">
-            <div className="flex flex-col justify-center items-center w-full max-w-[350px] py-8 px-10 space-y-6 hover:shadow-xl duration-200 border border-white/30 rounded-lg overflow-hidden bg-white/20 backdrop-blur-sm shadow-lg">
-                <div className="relative w-2/5 bg-[#1C1C1A] aspect-square rounded-full overflow-hidden flex items-center justify-center border border-white/30">
-                    <Image
-                        src="/assets/imgs/voleipuerto_128x128.webp"
-                        alt="Logo Voleipuerto"
-                        width={90}
-                        height={90}
-                    />
-                </div>
-                <div className="w-full text-center">
-                    <h1 className="font-bold text-[#1C1C1A] dark:text-white text-lg">C.V. Orotava - Pto. de la Cruz</h1>
-                    <h2 className="text-black/50 dark:text-white/50 text-sm">Cuadro de mando</h2>
-                </div>
-                <hr className="w-full border-white/30"></hr>
-                <div className="w-full">
-                    <GoogleBtn />
-                </div>
-            </div>
-        </main>
-    );
+      {/* 🪟 Tarjeta de login */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="relative z-10 flex flex-col items-center w-full max-w-[360px] p-8 space-y-6 rounded-2xl bg-white/10 border border-white/20 shadow-[0_0_25px_rgba(255,255,255,0.1)] backdrop-blur-2xl"
+      >
+        {/* 🏐 Logo */}
+        <div className="relative w-24 h-24 rounded-full border border-white/30 overflow-hidden bg-white/10 shadow-inner">
+          <Image
+            src="/assets/imgs/voleipuerto_128x128.webp"
+            alt="Logo Voleipuerto"
+            width={96}
+            height={96}
+            priority
+          />
+        </div>
+
+        {/* 🏷️ Títulos */}
+        <div className="text-center space-y-1">
+          <h1 className="font-bold text-white text-xl">
+            C.V. Orotava - Pto. de la Cruz
+          </h1>
+          <h2 className="text-white/70 text-sm">
+            Cuadro de mando y gestión
+          </h2>
+        </div>
+
+        <div className="w-full border-t border-white/20" />
+
+        {/* 🔐 Botón Google */}
+        <div className="w-full">
+          <GoogleBtn />
+        </div>
+
+        {/* 🧾 Nota */}
+        <p className="text-xs text-center text-white/50 mt-2">
+          Acceso restringido a personal autorizado
+        </p>
+      </motion.div>
+    </main>
+  );
 }

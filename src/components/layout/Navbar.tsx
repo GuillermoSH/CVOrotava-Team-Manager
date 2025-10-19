@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabase/client";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightFromBracket, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { ADMIN_EMAILS } from "@/constants/common";
 
 export default function Navbar() {
   const router = useRouter();
@@ -16,8 +16,6 @@ export default function Navbar() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [openMobile, setOpenMobile] = useState(false);
-
-  const ADMIN_EMAILS = ["siciliahernandezguillermo@gmail.com"];
 
   useEffect(() => {
     const getSession = async () => {
