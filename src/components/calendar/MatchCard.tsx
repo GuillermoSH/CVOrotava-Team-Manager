@@ -8,7 +8,6 @@ import {
   faVideo,
   faLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
-import { bg } from "zod/v4/locales";
 
 type Match = {
   id: string;
