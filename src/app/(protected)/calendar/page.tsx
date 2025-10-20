@@ -6,19 +6,22 @@ import Loading from "@/components/common/Loading";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
 
-type Match = {
+export type Match = {
   id: string;
   date: string;
   time: string;
   opponent: string;
-  location: string;
-  location_url?: string;
+  season: string;
   result?: string;
   video_url?: string;
-  season: string;
   notes?: string;
-  gender?: string;
-  competition_type?: string;
+  gender: "male" | "female";
+  venues: {
+    id: string;
+    venue_name: string;
+    location_url?: string;
+    location_type: "home" | "away" | "outside_island";
+  };
 };
 
 type Filters = {
@@ -55,7 +58,6 @@ export default function CalendarPage() {
         const resGender = await fetch("/api/user-gender");
         const dataGender = await resGender.json();
         const userGender = dataGender.gender as "male" | "female";
-        console.log("Género del usuario:", dataGender);
 
         if (userGender) {
           setFilters((prev) => ({
@@ -95,10 +97,6 @@ export default function CalendarPage() {
       filtered = filtered.filter((m) => m.season === filters.season);
     if (filters.gender)
       filtered = filtered.filter((m) => m.gender === filters.gender);
-    if (filters.competition_type)
-      filtered = filtered.filter(
-        (m) => m.competition_type === filters.competition_type
-      );
     setFilteredMatches(filtered);
   }, [filters, matches]);
 

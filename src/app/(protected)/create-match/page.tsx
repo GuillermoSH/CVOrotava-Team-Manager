@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,41 +9,121 @@ import {
   FormInput,
   FormDate,
   FormTime,
+  FormSelect,
 } from "@/components/ui/forms";
+import { getCurrentSeason } from "@/utils/getCurrentSeason";
 
 const matchSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),
   time: z.string().min(1, "La hora es obligatoria"),
   opponent: z.string().min(2, "El rival es obligatorio"),
-  location: z.string().min(2, "El lugar es obligatorio"),
   season: z.string().min(4, "Ej: 2025/2026"),
-  location_url: z.string().url("Debe ser una URL válida").optional().or(z.literal("")),
   result: z.string().optional(),
-  video_url: z.string().url("Debe ser una URL válida").optional().or(z.literal("")),
+  video_url: z
+    .string()
+    .url("Debe ser una URL válida")
+    .optional()
+    .or(z.literal("")),
   notes: z.string().optional(),
+  gender: z.enum(["male", "female"], { message: "El género es obligatorio" }),
+  venue_id: z.string().uuid("Selecciona un pabellón válido"),
 });
 
 type MatchFormValues = z.infer<typeof matchSchema>;
+
+type VenueOption = {
+  id: string;
+  venue_name: string;
+  location_type: string;
+  gender: "male" | "female" | "both";
+};
 
 export default function MatchCreatePage() {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    watch,
+    reset,
   } = useForm<MatchFormValues>({
     resolver: zodResolver(matchSchema),
     defaultValues: {
       date: "",
       time: "",
       opponent: "",
-      location: "",
-      season: "",
-      location_url: "",
+      season: getCurrentSeason(),
       result: "",
       video_url: "",
       notes: "",
+      gender: "male",
+      venue_id: "",
     },
   });
+
+  const [venues, setVenues] = useState<VenueOption[]>([]);
+  const selectedGender = watch("gender");
+
+  useEffect(() => {
+    async function fetchVenues() {
+      const res = await fetch("/api/venues");
+      const data = await res.json();
+      setVenues(data);
+    }
+    fetchVenues();
+  }, []);
+
+  const uniqueVenues = Array.from(
+    new Map(venues.map((v) => [v.venue_name, v])).values()
+  );
+
+  const groupedVenues = uniqueVenues.reduce(
+    (acc, v) => {
+      if (v.location_type === "home") acc.home.push(v);
+      else if (v.location_type === "away") acc.away.push(v);
+      else if (v.location_type === "outside_island") acc.trip.push(v);
+      return acc;
+    },
+    { home: [], away: [], trip: [] } as Record<
+      "home" | "away" | "trip",
+      VenueOption[]
+    >
+  );
+
+  const venueOptions = [
+    ...(groupedVenues.home.length > 0
+      ? [
+          {
+            label: "🏠 Casa",
+            options: groupedVenues.home.map((v) => ({
+              value: v.id,
+              label: v.venue_name,
+            })),
+          },
+        ]
+      : []),
+    ...(groupedVenues.away.length > 0
+      ? [
+          {
+            label: "🚗 Fuera (misma isla)",
+            options: groupedVenues.away.map((v) => ({
+              value: v.id,
+              label: v.venue_name,
+            })),
+          },
+        ]
+      : []),
+    ...(groupedVenues.trip.length > 0
+      ? [
+          {
+            label: "✈️ Viaje (fuera de la isla)",
+            options: groupedVenues.trip.map((v) => ({
+              value: v.id,
+              label: v.venue_name,
+            })),
+          },
+        ]
+      : []),
+  ];
 
   const onSubmit = async (data: MatchFormValues) => {
     const res = await fetch("/api/matches", {
@@ -51,36 +132,76 @@ export default function MatchCreatePage() {
       body: JSON.stringify(data),
     });
 
-    if (!res.ok) alert("Error al crear el partido");
-    else alert("✅ Partido creado con éxito");
+    if (!res.ok) alert("❌ Error al crear el partido");
+    else {
+      alert("✅ Partido creado con éxito");
+      reset();
+    }
   };
 
   return (
-    <main className="flex justify-center w-full px-1 py-4 md:px-4 md:py-10">
-      <div className="w-full max-w-3xl">
+    <main className="flex justify-center w-full px-2 py-4 md:px-4 md:py-10">
+      <div className="w-full max-w-2xl">
         <FormLayout
-          title="⚽ Crear Partido"
+          title="🏐 Crear Partido"
           description="Introduce los datos del encuentro."
           onSubmit={handleSubmit(onSubmit)}
           loading={isSubmitting}
           buttonText="Guardar Partido"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormDate label="Fecha *" name="date" register={register("date")} error={errors.date} />
-            <FormTime label="Hora *" name="time" register={register("time")} error={errors.time} />
+          {/* 📅 Fecha y hora */}
+          <div className="grid grid-cols-2 gap-4">
+            <FormDate
+              label="Fecha *"
+              name="date"
+              register={register("date")}
+              error={errors.date}
+            />
+            <FormTime
+              label="Hora *"
+              name="time"
+              register={register("time")}
+              error={errors.time}
+            />
           </div>
 
-          <FormInput label="Rival *" name="opponent" register={register("opponent")} error={errors.opponent} />
-          <FormInput label="Lugar *" name="location" register={register("location")} error={errors.location} />
-          <FormInput label="Temporada *" name="season" register={register("season")} error={errors.season} />
+          {/* ⚔️ Rival y Género */}
+          <div className="grid grid-cols-2 gap-4">
+            <FormInput
+              label="Rival *"
+              name="opponent"
+              register={register("opponent")}
+              error={errors.opponent}
+            />
+            <FormSelect
+              label="Género *"
+              name="gender"
+              register={register("gender")}
+              options={[
+                { value: "male", label: "Masculino" },
+                { value: "female", label: "Femenino" },
+              ]}
+              error={errors.gender}
+            />
+          </div>
 
-          <FormInput
-            label="URL del lugar (Google Maps)"
-            name="location_url"
-            type="url"
-            register={register("location_url")}
-            error={errors.location_url}
-          />
+          {/* 🗓️ Temporada, Resultado, Vídeo */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* 🏟️ Pabellón */}
+            <FormSelect
+              label="Pabellón *"
+              name="venue_id"
+              register={register("venue_id")}
+              options={venueOptions}
+              error={errors.venue_id}
+            />
+            <FormInput
+              label="Temporada *"
+              name="season"
+              register={register("season")}
+              error={errors.season}
+            />
+          </div>
         </FormLayout>
       </div>
     </main>

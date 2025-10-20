@@ -9,38 +9,26 @@ import {
   faLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
 
-type Match = {
+export type Match = {
   id: string;
   date: string;
   time: string;
   opponent: string;
-  location: string;
   season: string;
-  location_url?: string;
   result?: string;
   video_url?: string;
   notes?: string;
+  gender: "male" | "female";
+  venues: {
+    id: string;
+    venue_name: string;
+    location_url?: string;
+    location_type: "home" | "away" | "outside_island";
+  };
 };
 
-enum OutsideIslandVenues {
-  MEET_MUSIC = "IES Doctoral",
-  LOS_GERANIOS = "IES Playa Honda",
-  GUPANE = "Pab. Mun. Beatriz Mendoza",
-  DOS_19_ARINAGA = "Pol. Mun. Playa de Arinaga",
-  ALHAMBRA_AXINAMAR = "Pab. Mun. Juan Carlos Hernández",
-  SAN_ROQUE = "Pab. Mun. El Batán",
-  SUAC_CANARIAS = "Pab. García San Román",
-  XACAY_TEROR = "Pab. Municipal de Teror",
-}
-
-enum AwayVenues {
-  YEJARAFE_SONAM = "CEIP San Matías",
-  VICTORIA = "Pab. Mun. La Victoria",
-}
-
-const HOME_VENUE = "Pabellón Quiquirá";
-
 export default function MatchCard({ match }: { match: Match }) {
+  console.log(match);
   const matchDate = new Date(`${match.date}T${match.time}`);
   const now = new Date();
   const matchEnd = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000);
@@ -57,12 +45,14 @@ export default function MatchCard({ match }: { match: Match }) {
   let bgHoverColor = "hover:bg-white/10";
 
   if (isPast && !match.result) {
-    borderColor = "border-gray-500/30";
+    bgColor = "bg-yellow-500/5";
+    bgHoverColor = "hover:bg-yellow-500/10";
+    borderColor = "border-yellow-500/30";
+    borderHovercolor = "hover:border-yellow-500/40";
     cardOpacity = "opacity-70";
-    cardOverlay = "bg-gray-900/30";
     pendingBadge = (
       <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-gray-700/30 border border-gray-500/30 text-gray-300">
-        Pendiente resultado
+        Pte. de resultado
       </span>
     );
   }
@@ -81,18 +71,6 @@ export default function MatchCard({ match }: { match: Match }) {
       borderHovercolor = "hover:border-red-700/40";
     }
   }
-
-  // 🏐 Tipo de partido
-  const isOutsideIsland = Object.values(OutsideIslandVenues).some((name) =>
-    match.location.toLowerCase().includes(name.toLowerCase())
-  );
-  const isAway =
-    !isOutsideIsland &&
-    Object.values(AwayVenues).some((name) =>
-      match.location.toLowerCase().includes(name.toLowerCase())
-    );
-  const isHome =
-    !isOutsideIsland && !isAway && match.location.includes(HOME_VENUE);
 
   const formattedDate = matchDate
     .toLocaleDateString("es-ES", {
@@ -116,13 +94,13 @@ export default function MatchCard({ match }: { match: Match }) {
     "Partido vs " + match.opponent
   )}&dates=${startUTC}/${endUTC}&details=${encodeURIComponent(
     match.notes || ""
-  )}&location=${encodeURIComponent(match.location)}`;
+  )}&location=${encodeURIComponent(match.venues.venue_name || "")}`;
 
   // 🏷️ Etiquetas visuales
   const Tag = () => {
     const base =
       "inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-md border transition hover:brightness-110";
-    if (isOutsideIsland)
+    if (match.venues.location_type == "outside_island")
       return (
         <span
           className={`${base} bg-blue-500/20 border-blue-500/30 text-blue-300`}
@@ -131,7 +109,7 @@ export default function MatchCard({ match }: { match: Match }) {
           Viaje
         </span>
       );
-    if (isAway)
+    if (match.venues.location_type == "away")
       return (
         <span
           className={`${base} bg-yellow-400/20 border-yellow-400/40 text-yellow-300`}
@@ -140,7 +118,7 @@ export default function MatchCard({ match }: { match: Match }) {
           Fuera
         </span>
       );
-    if (isHome)
+    if (match.venues.location_type == "home")
       return (
         <span
           className={`${base} bg-green-500/20 border-green-500/40 text-green-300`}
@@ -156,7 +134,9 @@ export default function MatchCard({ match }: { match: Match }) {
     <div
       className={`relative backdrop-blur-md rounded-2xl p-5 flex flex-col justify-between border transition-all duration-300 ${borderColor} ${cardOpacity} ${bgColor} ${borderHovercolor} ${bgHoverColor}`}
     >
-      {cardOverlay && <div className={`absolute inset-0 rounded-2xl ${cardOverlay}`} />}
+      {cardOverlay && (
+        <div className={`absolute inset-0 rounded-2xl ${cardOverlay}`} />
+      )}
 
       <div className="relative z-10 space-y-2.5">
         {/* 🏷️ Badges */}
@@ -176,9 +156,9 @@ export default function MatchCard({ match }: { match: Match }) {
         </p>
 
         {/* 📍 Localización */}
-        {match.location_url ? (
+        {match.venues.location_url ? (
           <a
-            href={match.location_url}
+            href={match.venues.location_url}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex underline items-center text-white/90 font-medium hover:text-blue-400 transition-colors"
@@ -187,7 +167,7 @@ export default function MatchCard({ match }: { match: Match }) {
               icon={faLocationDot}
               className="mr-1.5 text-red-400"
             />
-            {match.location}
+            {match.venues.venue_name}
           </a>
         ) : (
           <p className="text-white/80 font-medium flex items-center">
@@ -195,7 +175,7 @@ export default function MatchCard({ match }: { match: Match }) {
               icon={faLocationDot}
               className="mr-1.5 text-red-400"
             />
-            {match.location}
+            {match.venues.venue_name}
           </p>
         )}
       </div>
