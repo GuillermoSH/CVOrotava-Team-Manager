@@ -38,7 +38,6 @@ export default function MatchCard({ match }: { match: Match }) {
   // 🎨 Estilos de borde y estado
   let borderColor = "border-white/10";
   let cardOpacity = "opacity-100";
-  let cardOverlay = "";
   let pendingBadge = null;
   let bgColor = "bg-white/5";
   let borderHovercolor = "hover:border-white/30";
@@ -134,10 +133,6 @@ export default function MatchCard({ match }: { match: Match }) {
     <div
       className={`relative backdrop-blur-md rounded-2xl p-5 flex flex-col justify-between border transition-all duration-300 ${borderColor} ${cardOpacity} ${bgColor} ${borderHovercolor} ${bgHoverColor}`}
     >
-      {cardOverlay && (
-        <div className={`absolute inset-0 rounded-2xl ${cardOverlay}`} />
-      )}
-
       <div className="relative z-10 space-y-2.5">
         {/* 🏷️ Badges */}
         <div className="flex flex-wrap items-center gap-2">

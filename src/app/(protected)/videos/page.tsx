@@ -33,7 +33,6 @@ export default function PartidosPage() {
         const resGender = await fetch("/api/user-gender");
         const dataGender = await resGender.json();
         const userGender = dataGender.gender as "male" | "female";
-        console.log("Género del usuario:", dataGender);
 
         if (userGender) {
           setFilters((prev) => ({

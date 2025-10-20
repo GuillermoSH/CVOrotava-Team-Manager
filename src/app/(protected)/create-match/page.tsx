@@ -35,15 +35,29 @@ type VenueOption = {
   id: string;
   venue_name: string;
   location_type: string;
-  gender: "male" | "female" | "both";
 };
 
 export default function MatchCreatePage() {
+  const [venues, setVenues] = useState<VenueOption[]>([]);
+  const [userGender, setUserGender] = useState<"male" | "female" | "">("");
+
+  useEffect(() => {
+    async function fetchVenues() {
+      const res = await fetch("/api/venues");
+      const data = await res.json();
+      setVenues(data);
+
+      const resGender = await fetch("/api/user-gender");
+      const dataGender = await resGender.json();
+      setUserGender(dataGender.gender as "male" | "female");
+    }
+    fetchVenues();
+  }, []);
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    watch,
     reset,
   } = useForm<MatchFormValues>({
     resolver: zodResolver(matchSchema),
@@ -55,22 +69,26 @@ export default function MatchCreatePage() {
       result: "",
       video_url: "",
       notes: "",
-      gender: "male",
       venue_id: "",
     },
   });
 
-  const [venues, setVenues] = useState<VenueOption[]>([]);
-  const selectedGender = watch("gender");
-
+  // when the user's gender is fetched, update the form's gender value
   useEffect(() => {
-    async function fetchVenues() {
-      const res = await fetch("/api/venues");
-      const data = await res.json();
-      setVenues(data);
+    if (userGender) {
+      reset({
+        date: "",
+        time: "",
+        opponent: "",
+        season: getCurrentSeason(),
+        result: "",
+        video_url: "",
+        notes: "",
+        gender: userGender,
+        venue_id: "",
+      });
     }
-    fetchVenues();
-  }, []);
+  }, [userGender, reset]);
 
   const uniqueVenues = Array.from(
     new Map(venues.map((v) => [v.venue_name, v])).values()
