@@ -2,17 +2,22 @@
 
 import MatchCard from "./MatchCard";
 
-type Match = {
+export type Match = {
   id: string;
   date: string;
   time: string;
   opponent: string;
-  location: string;
   season: string;
-  location_url?: string;
   result?: string;
   video_url?: string;
   notes?: string;
+  gender: "male" | "female";
+  venues: {
+    id: string;
+    venue_name: string;
+    location_url?: string;
+    location_type: "home" | "away" | "outside_island";
+  };
 };
 
 interface CalendarTableProps {
