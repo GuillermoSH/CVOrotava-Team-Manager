@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
-// 🟢 GET /api/matches/[id]  → devuelve partido + sets
+// 🟢 GET /api/matches/[id] → devuelve partido + sets
 export async function GET(
-  req: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -38,18 +38,22 @@ export async function GET(
       .eq("id", params.id)
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    if (error)
+      return NextResponse.json({ error: error.message }, { status: 400 });
 
     return NextResponse.json(data, { status: 200 });
   } catch (err) {
     console.error("Error en GET /matches/[id]:", err);
-    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
   }
 }
 
-// 🟠 PUT /api/matches/[id]  → actualiza partido
+// 🟠 PUT /api/matches/[id] → actualiza partido
 export async function PUT(
-  req: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -71,11 +75,15 @@ export async function PUT(
       .select()
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    if (error)
+      return NextResponse.json({ error: error.message }, { status: 400 });
 
     return NextResponse.json(data, { status: 200 });
   } catch (err) {
     console.error("Error en PUT /matches/[id]:", err);
-    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
   }
 }
