@@ -4,13 +4,22 @@ import Navbar from "@/components/layout/Navbar";
 import Loading from "@/components/common/Loading";
 import { UserProvider, useUser } from "@/contexts/UserContext";
 import { SeasonProvider } from "@/contexts/SeasonContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 function ProtectedContent({ children }: { children: React.ReactNode }) {
   const { user, loading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login");
+    }
+  }, [loading, user, router]);
 
   if (loading) return <Loading />;
-  if (!user)
-    return <p className="text-center mt-10 text-red-500">No autorizado</p>;
+
+  if (!user) return null;
 
   return (
     <>

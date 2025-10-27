@@ -125,7 +125,7 @@ export default function EditMatchPage() {
       if (!setRes.ok) throw new Error("Error al actualizar los sets");
 
       alert("✅ Partido actualizado correctamente");
-      router.push("/(protected)/calendar");
+      router.push("/calendar");
     } catch (err) {
       console.error(err);
       alert("❌ Error guardando los cambios");
