@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
+type MatchParams = { id: string };
+
 // 🟢 GET /api/matches/[id] → devuelve partido + sets
 export async function GET(
   req: NextRequest,
-  { params }: { params: any }
+  { params }: { params: MatchParams }
 ) {
   try {
     const { data, error } = await supabaseAdmin
@@ -54,7 +56,7 @@ export async function GET(
 // 🟠 PUT /api/matches/[id] → actualiza partido
 export async function PUT(
   req: NextRequest,
-  { params }: { params: any }
+  { params }: { params: MatchParams }
 ) {
   try {
     const body = await req.json();
