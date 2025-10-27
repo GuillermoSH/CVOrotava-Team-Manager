@@ -1,5 +1,15 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { z } from "zod";
+
+const matchSchema = z.object({
+    date: z.string(),
+    time: z.string(),
+    opponent: z.string(),
+    season: z.string(),
+    gender: z.enum(["male", "female"]),
+    venue_id: z.string().uuid(),
+});
 
 /**
  * GET /api/matches
@@ -42,29 +52,22 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { date, time, opponent, season, result, video_url, notes, gender, venue_id } = body;
+        const parsed = matchSchema.safeParse(body);
 
-        // Validación rápida por si el front no la hace
-        if (!date || !time || !opponent || !season || !gender || !venue_id) {
+        if (!parsed.success) {
             return NextResponse.json(
-                { error: "Faltan campos obligatorios" },
+                { error: parsed.error.flatten() },
                 { status: 400 }
             );
         }
 
-        const { data, error } = await supabaseAdmin.from("matches").insert([
-            {
-                date,
-                time,
-                opponent,
-                season,
-                result: result || null,
-                video_url: video_url || null,
-                notes: notes || null,
-                gender,
-                venue_id,
-            },
-        ]);
+        const match = parsed.data;
+
+        const { data, error } = await supabaseAdmin
+            .from("matches")
+            .insert([match])
+            .select()
+            .single();
 
         if (error) {
             console.error("❌ Error al insertar partido:", error);

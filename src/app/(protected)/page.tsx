@@ -1,22 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase/client";
-
-const ADMIN_EMAILS = ["siciliahernandezguillermo@gmail.com"];
+import { useUser } from "@/contexts/UserContext";
 
 export default function ProtectedHome() {
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    const checkAdmin = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.email && ADMIN_EMAILS.includes(session.user.email)) {
-        setIsAdmin(true);
-      }
-    };
-    checkAdmin();
-  }, []);
+  const { user, loading } = useUser();
 
   const cards = [
     {
@@ -39,7 +26,7 @@ export default function ProtectedHome() {
     },
   ];
 
-  if (isAdmin) {
+  if (!loading && user?.isAdmin) {
     cards.unshift(
       {
         title: "Crear Videos",

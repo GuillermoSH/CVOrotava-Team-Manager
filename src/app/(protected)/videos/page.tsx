@@ -5,7 +5,8 @@ import VideosGrid from "@/components/videos/VideosGrid";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import useViewportHeight from "@/hooks/useViewportHeight";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
-import Loading from "@/components/common/Loading";
+import { useUser } from "@/contexts/UserContext";
+import { useSeasons } from "@/contexts/SeasonContext";
 
 type Filters = {
   season?: string;
@@ -15,40 +16,19 @@ type Filters = {
 };
 
 export default function PartidosPage() {
+  const {user } = useUser();
   const [filters, setFilters] = useState<Filters>({
     season: getCurrentSeason(),
+    gender: user?.gender ?? undefined,
   });
-  const [seasons, setSeasons] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { seasons } = useSeasons();
   useViewportHeight();
 
   useEffect(() => {
-    const fetchSeasons = async () => {
-      try {
-        const res = await fetch("/api/seasons");
-        const data = await res.json();
-        setSeasons(data);
-
-        const resGender = await fetch("/api/user-gender");
-        const dataGender = await resGender.json();
-        const userGender = dataGender.gender as "male" | "female";
-
-        if (userGender) {
-          setFilters((prev) => ({
-            ...prev,
-            gender: userGender,
-          }));
-        }
-      } catch (err) {
-        console.error(err);
-        setError("No se pudo cargar la lista de videos.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSeasons();
-  }, []);
+    if (!filters.gender && user?.gender) {
+      setFilters((prev) => ({ ...prev, gender: user.gender! }));
+    }
+  }, [user]);
 
   const filterConfigs: FilterConfig[] = [
     {
@@ -81,15 +61,6 @@ export default function PartidosPage() {
       ],
     },
   ];
-
-  if (loading) return <Loading />;
-
-  if (error)
-    return (
-      <main className="flex justify-center items-center flex-1">
-        <p className="text-red-500">{error}</p>
-      </main>
-    );
 
   return (
     <main className="w-full max-w-6xl p-6">

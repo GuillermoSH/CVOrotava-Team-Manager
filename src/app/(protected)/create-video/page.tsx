@@ -1,157 +1,179 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase/client";
-import type { Session } from "@supabase/supabase-js";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {
+  FormLayout,
+  FormInput,
+  FormSelect,
+} from "@/components/ui/forms";
+import { getCurrentSeason } from "@/utils/getCurrentSeason";
+import { useUser } from "@/contexts/UserContext";
 
-const ADMIN_EMAILS = ["siciliahernandezguillermo@gmail.com"];
+// 🧩 Schema de validación
+const videoSchema = z.object({
+  url: z
+    .string()
+    .url("Debe ser una URL válida")
+    .min(1, "La URL es obligatoria"),
+  category: z.enum(["match", "training"], {
+    message: "Selecciona una categoría",
+  }),
+  season: z.string().min(4, "Ejemplo: 2025/2026"),
+  competition_type: z.enum(["league", "friendly"], {
+    message: "Selecciona el tipo de competición",
+  }),
+  gender: z.enum(["male", "female"], {
+    message: "Selecciona el género",
+  }),
+});
+
+type VideoFormValues = z.infer<typeof videoSchema>;
 
 export default function VideoCreatePage() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
-
-  const [form, setForm] = useState({
-    url: "",
-    category: "match",
-    season: "",
-    competition_type: "league",
-    gender: "male",
-  });
-  const [loading, setLoading] = useState(false);
+  const { user } = useUser();
   const [message, setMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-      if (data.session?.user?.email && ADMIN_EMAILS.includes(data.session.user.email)) {
-        setIsAdmin(true);
-      }
-    };
-    getSession();
-  }, []);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<VideoFormValues>({
+    resolver: zodResolver(videoSchema),
+    defaultValues: {
+      url: "",
+      category: "match",
+      season: getCurrentSeason(),
+      competition_type: "league",
+      gender: user?.gender ?? "male",
+    },
+  });
 
-  if (!session) {
-    return <p className="text-center mt-10">Cargando sesión...</p>;
+  if (!user?.isAdmin) {
+    return (
+      <main className="flex justify-center items-center min-h-screen text-red-600 font-semibold">
+        Acceso denegado ❌
+      </main>
+    );
   }
 
-  if (!isAdmin) {
-    return <p className="text-center mt-10 text-red-600">Acceso denegado</p>;
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  // 🚀 Envío del formulario
+  const onSubmit = async (data: VideoFormValues) => {
     setMessage(null);
 
-    console.log(form);
-
     try {
-      const token = session?.access_token;
+      const token = (await (await import("@/lib/supabase/client")).supabase.auth.getSession())
+        .data.session?.access_token;
+
+      if (!token) {
+        throw new Error("No hay sesión activa");
+      }
+
       const res = await fetch("/api/videos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(data),
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        router.push("/");
-      } else {
-        throw new Error(data.error || "Error creando video");
+      const responseData = await res.json();
+
+      if (!res.ok) {
+        throw new Error(responseData.error || "Error al crear el video");
       }
 
       setMessage("✅ Video creado con éxito");
-      setForm({ url: "", category: "match", season: "", competition_type: "league", gender: "male" });
+      reset();
+      router.push("/videos");
     } catch (err) {
-      if (err instanceof Error) {
-        setMessage(`❌ ${err.message}`);
-      } else {
-        setMessage("❌ Error desconocido");
-      }
-    } finally {
-      setLoading(false);
+      if (err instanceof Error) setMessage(`❌ ${err.message}`);
+      else setMessage("❌ Error desconocido");
     }
   };
 
   return (
-    <main className="w-full flex flex-col items-center text-white p-6">
-      <h1 className="text-2xl font-bold mb-6">Añadir Video</h1>
-
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl flex flex-col border border-white/30 overflow-hidden bg-white/5 backdrop-blur-sm shadow-lg rounded-lg p-6">
-        <div>
-          <label className="glass-form-label">URL de YouTube</label>
-          <input
-            type="text"
-            value={form.url}
-            onChange={(e) => setForm({ ...form, url: e.target.value })}
-            className="glass-form-input"
-            required
+    <main className="flex justify-center w-full px-2 py-4 md:px-4 md:py-10">
+      <div className="w-full max-w-2xl">
+        <FormLayout
+          title="📹 Añadir Video"
+          description="Introduce los detalles del video que deseas subir."
+          onSubmit={handleSubmit(onSubmit)}
+          loading={isSubmitting}
+          buttonText="Guardar Video"
+        >
+          {/* 🎥 URL del video */}
+          <FormInput
+            label="URL de YouTube *"
+            name="url"
+            register={register("url")}
+            error={errors.url}
+            placeholder="https://youtube.com/watch?v=..."
           />
-        </div>
 
-        <div>
-          <label className="glass-form-label">Categoría</label>
-          <select
-            value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
-            className="glass-form-input"
-          >
-            <option value="match">Partido</option>
-            <option value="training">Entrenamiento</option>
-          </select>
-        </div>
+          {/* 📂 Categoría */}
+          <FormSelect
+            label="Categoría *"
+            name="category"
+            register={register("category")}
+            options={[
+              { value: "match", label: "Partido" },
+              { value: "training", label: "Entrenamiento" },
+            ]}
+            error={errors.category}
+          />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="glass-form-label">Temporada</label>
-            <input
-              type="text"
-              value={form.season}
-              onChange={(e) => setForm({ ...form, season: e.target.value })}
-              className="glass-form-input"
-              placeholder="e.g., 2023/2024"
+          {/* 🗓️ Temporada / Competición / Género */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <FormInput
+              label="Temporada *"
+              name="season"
+              register={register("season")}
+              error={errors.season}
+              placeholder="2025/26"
+            />
+            <FormSelect
+              label="Competición *"
+              name="competition_type"
+              register={register("competition_type")}
+              options={[
+                { value: "league", label: "Liga" },
+                { value: "friendly", label: "Amistoso" },
+              ]}
+              error={errors.competition_type}
+            />
+            <FormSelect
+              label="Género *"
+              name="gender"
+              register={register("gender")}
+              options={[
+                { value: "male", label: "Masculino" },
+                { value: "female", label: "Femenino" },
+              ]}
+              error={errors.gender}
             />
           </div>
-          <div>
-            <label className="glass-form-label">Competición</label>
-            <select
-              value={form.competition_type}
-              onChange={(e) => setForm({ ...form, competition_type: e.target.value })}
-              className="glass-form-input"
+
+          {/* 💬 Mensaje de estado */}
+          {message && (
+            <p
+              className={`text-sm mt-2 p-2 rounded ${
+                message.startsWith("✅")
+                  ? "bg-green-600/20 text-green-300"
+                  : "bg-red-600/20 text-red-300"
+              }`}
             >
-              <option value="league">Liga</option>
-              <option value="friendly">Amistoso</option>
-            </select>
-          </div>
-          <div>
-            <label className="glass-form-label">Género</label>
-            <select
-              value={form.gender}
-              onChange={(e) => setForm({ ...form, gender: e.target.value })}
-              className="glass-form-input"
-            >
-              <option value="male">Masculino</option>
-              <option value="female">Femenino</option>
-            </select>
-          </div>
-        </div>
-        <div className="flex justify-end gap-2">
-            {message && <p className="flex-1 bg-white text-xs p-2 text-red-600">{message}</p>}
-            <button
-                type="submit"
-                disabled={loading}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-            >
-                {loading ? "Guardando..." : "Guardar Video"}
-            </button>
-        </div>
-      </form>
+              {message}
+            </p>
+          )}
+        </FormLayout>
+      </div>
     </main>
   );
 }

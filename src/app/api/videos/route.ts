@@ -27,6 +27,8 @@ export async function GET(req: Request) {
   const from = (page - 1) * limit;
   const to = from + limit - 1;
   query = query.range(from, to).order("created_at", { ascending: false });
+  if (!season && !gender) query = query.limit(50);
+
 
   const { data, error } = await query;
 

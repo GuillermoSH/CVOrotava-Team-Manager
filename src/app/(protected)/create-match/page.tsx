@@ -12,6 +12,7 @@ import {
   FormSelect,
 } from "@/components/ui/forms";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
+import { useUser } from "@/contexts/UserContext";
 
 const matchSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),
@@ -39,17 +40,13 @@ type VenueOption = {
 
 export default function MatchCreatePage() {
   const [venues, setVenues] = useState<VenueOption[]>([]);
-  const [userGender, setUserGender] = useState<"male" | "female" | "">("");
+  const { user } = useUser();
 
   useEffect(() => {
     async function fetchVenues() {
       const res = await fetch("/api/venues");
       const data = await res.json();
       setVenues(data);
-
-      const resGender = await fetch("/api/user-gender");
-      const dataGender = await resGender.json();
-      setUserGender(dataGender.gender as "male" | "female");
     }
     fetchVenues();
   }, []);
@@ -70,25 +67,9 @@ export default function MatchCreatePage() {
       video_url: "",
       notes: "",
       venue_id: "",
+      gender: user?.gender ?? undefined,
     },
   });
-
-  // when the user's gender is fetched, update the form's gender value
-  useEffect(() => {
-    if (userGender) {
-      reset({
-        date: "",
-        time: "",
-        opponent: "",
-        season: getCurrentSeason(),
-        result: "",
-        video_url: "",
-        notes: "",
-        gender: userGender,
-        venue_id: "",
-      });
-    }
-  }, [userGender, reset]);
 
   const uniqueVenues = Array.from(
     new Map(venues.map((v) => [v.venue_name, v])).values()

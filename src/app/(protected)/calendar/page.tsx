@@ -5,6 +5,8 @@ import MatchCard from "@/components/calendar/MatchCard";
 import Loading from "@/components/common/Loading";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
+import { useUser } from "@/contexts/UserContext";
+import { useSeasons } from "@/contexts/SeasonContext";
 
 export type Match = {
   id: string;
@@ -31,40 +33,26 @@ type Filters = {
 };
 
 export default function CalendarPage() {
+  const { user, loading: userLoading } = useUser();
   const [matches, setMatches] = useState<Match[]>([]);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
-  const [filters, setFilters] = useState<Filters>({
+  const [filters, setFilters] = useState<Filters>(() => ({
     season: getCurrentSeason(),
-  });
-  const [seasons, setSeasons] = useState<string[]>([]);
+    gender: user?.gender ?? undefined,
+  }));
+  const { seasons } = useSeasons();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // 🔹 Obtener partidos y temporadas
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchMatches = async () => {
       try {
         const res = await fetch("/api/matches");
         if (!res.ok) throw new Error("Error al obtener partidos");
         const data = (await res.json()) as Match[];
+
         setMatches(data);
         setFilteredMatches(data);
-
-        const uniqueSeasons = Array.from(
-          new Set(data.map((m) => m.season))
-        ) as string[];
-        setSeasons(uniqueSeasons);
-
-        const resGender = await fetch("/api/user-gender");
-        const dataGender = await resGender.json();
-        const userGender = dataGender.gender as "male" | "female";
-
-        if (userGender) {
-          setFilters((prev) => ({
-            ...prev,
-            gender: userGender,
-          }));
-        }
       } catch (err) {
         console.error(err);
         setError("No se pudo cargar el calendario.");
@@ -72,8 +60,33 @@ export default function CalendarPage() {
         setLoading(false);
       }
     };
-    fetchData();
+
+    fetchMatches();
   }, []);
+
+  useEffect(() => {
+    if (!filters.gender && user?.gender) {
+      setFilters((prev) => ({ ...prev, gender: user.gender! }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    let filtered = [...matches];
+    if (filters.season)
+      filtered = filtered.filter((m) => m.season === filters.season);
+    if (filters.gender)
+      filtered = filtered.filter((m) => m.gender === filters.gender);
+    setFilteredMatches(filtered);
+  }, [filters, matches]);
+
+  if (loading || userLoading) return <Loading />;
+
+  if (error)
+    return (
+      <main className="flex justify-center items-center flex-1">
+        <p className="text-red-500">{error}</p>
+      </main>
+    );
 
   const filterConfigs: FilterConfig[] = [
     {
@@ -90,24 +103,6 @@ export default function CalendarPage() {
       ],
     },
   ];
-
-  useEffect(() => {
-    let filtered = [...matches];
-    if (filters.season)
-      filtered = filtered.filter((m) => m.season === filters.season);
-    if (filters.gender)
-      filtered = filtered.filter((m) => m.gender === filters.gender);
-    setFilteredMatches(filtered);
-  }, [filters, matches]);
-
-  if (loading) return <Loading />;
-
-  if (error)
-    return (
-      <main className="flex justify-center items-center flex-1">
-        <p className="text-red-500">{error}</p>
-      </main>
-    );
 
   return (
     <main className="p-6 w-full flex-1">
@@ -126,7 +121,7 @@ export default function CalendarPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {filteredMatches.map((match) => (
-            <MatchCard key={match.id} match={match} />
+            <MatchCard key={match.id} match={match} isAdmin={user?.isAdmin} />
           ))}
         </div>
       )}

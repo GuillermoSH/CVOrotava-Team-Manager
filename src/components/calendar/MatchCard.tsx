@@ -1,7 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlaneDeparture,
@@ -12,8 +10,6 @@ import {
   faLocationDot,
   faPenToSquare,
 } from "@fortawesome/free-solid-svg-icons";
-
-const ADMIN_EMAILS = ["siciliahernandezguillermo@gmail.com"];
 
 export type Match = {
   id: string;
@@ -33,21 +29,8 @@ export type Match = {
   };
 };
 
-export default function MatchCard({ match }: { match: Match }) {
+export default function MatchCard({ match, isAdmin }: { match: Match; isAdmin?: boolean }) {
   const router = useRouter();
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  // 🔐 Verificar si el usuario es admin
-  useEffect(() => {
-    async function checkAdmin() {
-      const { data } = await supabase.auth.getUser();
-      const email = data.user?.email;
-      if (email && ADMIN_EMAILS.includes(email)) {
-        setIsAdmin(true);
-      }
-    }
-    checkAdmin();
-  }, []);
 
   const matchDate = new Date(`${match.date}T${match.time}`);
   const now = new Date();
@@ -151,7 +134,7 @@ export default function MatchCard({ match }: { match: Match }) {
 
   return (
     <div
-      className={`relative backdrop-blur-md rounded-2xl p-5 flex flex-col justify-between border transition-all duration-300 ${borderColor} ${cardOpacity} ${bgColor} ${borderHovercolor} ${bgHoverColor}`}
+      className={`relative backdrop-blur-md rounded-2xl p-5 flex flex-col justify-between border transition duration-200 ${borderColor} ${cardOpacity} ${bgColor} ${borderHovercolor} ${bgHoverColor}`}
     >
       <div className="relative z-10 space-y-2.5">
         <div className="flex flex-wrap items-center gap-2 justify-between">
@@ -161,8 +144,11 @@ export default function MatchCard({ match }: { match: Match }) {
           </div>
           {isAdmin && (
             <button
-              onClick={() => router.push(`/edit-match/${match.id}`)}
-              className="bg-neutral-600/60 hover:bg-neutral-700/80 text-white text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1.5"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/edit-match/${match.id}`);
+              }}
+              className="bg-neutral-600/60 hover:bg-neutral-700/80 text-white text-xs px-2.5 py-1 rounded-lg transition flex items-center gap-1.5"
             >
               <FontAwesomeIcon icon={faPenToSquare} className="text-white/90" />
               Editar
@@ -184,6 +170,7 @@ export default function MatchCard({ match }: { match: Match }) {
         {match.venues.location_url ? (
           <a
             href={match.venues.location_url}
+            onClick={(e) => e.stopPropagation()}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex underline items-center text-white/90 font-medium hover:text-blue-400 transition-colors"
@@ -207,16 +194,24 @@ export default function MatchCard({ match }: { match: Match }) {
 
       {/* 🎥 Acciones */}
       <div className="mt-4 z-10 flex flex-wrap justify-between gap-2 relative">
-        {match.video_url && (
+        {match.video_url ? (
           <a
             href={match.video_url}
+            onClick={(e) => e.stopPropagation()}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-red-600 text-white px-4 rounded-xl text-center hover:bg-red-700 transition text-sm flex items-center gap-2"
+            className="bg-red-600 text-white py-2 px-4 rounded-xl text-center hover:bg-red-700 transition text-sm flex items-center gap-2"
           >
             <FontAwesomeIcon icon={faVideo} />
             Ver vídeo
           </a>
+        ) : (
+          isPast && (
+            <div className="bg-neutral-600 text-white py-2 px-4 rounded-xl text-center text-sm flex items-center gap-2">
+              <FontAwesomeIcon icon={faVideo} />
+              No disponible
+            </div>
+          )
         )}
 
         {/* 🏆 Resultado */}

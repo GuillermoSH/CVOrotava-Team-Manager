@@ -24,11 +24,13 @@ export function useInfiniteVideos(filters?: Filters) {
 
   const [limit, setLimit] = useState(12);
 
+  const { season, competition_type, gender, category } = filters || {};
+
   useEffect(() => {
     const calcLimit = () => {
-      if (window.innerWidth < 640) return 4; // móviles
-      if (window.innerWidth < 1024) return 8; // tablets
-      return 12; // escritorio
+      if (window.innerWidth < 640) return 4;
+      if (window.innerWidth < 1024) return 8;
+      return 12;
     };
 
     const handleResize = () => setLimit(calcLimit());
@@ -39,33 +41,38 @@ export function useInfiniteVideos(filters?: Filters) {
   }, []);
 
   useEffect(() => {
+    // Cuando cambian los filtros o el limit, reiniciamos la paginación
     setVideos([]);
     setPage(1);
     setHasMore(true);
-  }, [JSON.stringify(filters), limit]);
+  }, [season, competition_type, gender, category, limit]);
 
-  // 📦 fetch de videos con paginación
   useEffect(() => {
     const fetchVideos = async () => {
+      if (!hasMore) return;
+
       setLoading(true);
 
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
-        ...(filters?.season && { season: filters.season }),
-        ...(filters?.competition_type && { competition_type: filters.competition_type }),
-        ...(filters?.gender && { gender: filters.gender }),
-        ...(filters?.category && { category: filters.category }),
+        ...(season && { season }),
+        ...(competition_type && { competition_type }),
+        ...(gender && { gender }),
+        ...(category && { category }),
       });
 
       try {
         const res = await fetch(`/api/videos?${params}`);
         if (!res.ok) throw new Error("Error al obtener videos");
-        const data = await res.json();
+        const data: Video[] = await res.json();
+
+        // Evitar duplicados: si page === 1, reemplazamos; si no, agregamos
+        setVideos((prev) =>
+          page === 1 ? data : [...prev.filter(v => !data.some(d => d.id === v.id)), ...data]
+        );
 
         if (data.length < limit) setHasMore(false);
-
-        setVideos((prev) => (page === 1 ? data : [...prev, ...data]));
       } catch (error) {
         console.error("❌ Error cargando videos:", error);
         setHasMore(false);
@@ -75,9 +82,8 @@ export function useInfiniteVideos(filters?: Filters) {
     };
 
     fetchVideos();
-  }, [page, JSON.stringify(filters), limit]);
+  }, [page, limit, season, competition_type, gender, category, hasMore]);
 
-  // 👁️ Intersection Observer
   useEffect(() => {
     if (!hasMore || loading) return;
 
@@ -100,3 +106,4 @@ export function useInfiniteVideos(filters?: Filters) {
 
   return { videos, loaderRef, loading, hasMore };
 }
+

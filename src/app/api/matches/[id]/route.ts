@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
-// 🟢 GET /api/matches/[id] → devuelve partido + sets
+// TODO: params quitar el PROMISE (arreglo de bug temporal en vercel)
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }>}
@@ -52,7 +52,7 @@ export async function GET(
   }
 }
 
-// 🟠 PUT /api/matches/[id] → actualiza partido
+// TODO: params quitar el PROMISE (arreglo de bug temporal en vercel)
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }>}

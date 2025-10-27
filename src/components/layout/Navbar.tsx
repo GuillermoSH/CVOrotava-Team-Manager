@@ -1,47 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
-import { ADMIN_EMAILS } from "@/constants/common";
+import { useUser } from "@/contexts/UserContext";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
+  const { user } = useUser();
 
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [openMobile, setOpenMobile] = useState(false);
-
-  useEffect(() => {
-    const getSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (session?.user) {
-        setUserEmail(session.user.email || null);
-        setIsAdmin(ADMIN_EMAILS.includes(session.user.email || ""));
-      } else {
-        setUserEmail(null);
-      }
-    };
-
-    getSession();
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserEmail(session?.user?.email ?? null);
-      setIsAdmin(ADMIN_EMAILS.includes(session?.user?.email ?? ""));
-    });
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -54,7 +27,7 @@ export default function Navbar() {
     { name: "Videos", href: "/videos" },
   ];
 
-  if (isAdmin) {
+  if (user?.isAdmin) {
     navItems.push({ name: "Crear partido", href: "/create-match" });
     navItems.push({ name: "Subir vídeo", href: "/create-video" });
   }
