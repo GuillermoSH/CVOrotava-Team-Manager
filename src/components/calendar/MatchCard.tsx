@@ -1,4 +1,7 @@
 "use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlaneDeparture,
@@ -7,7 +10,10 @@ import {
   faCalendarPlus,
   faVideo,
   faLocationDot,
+  faPenToSquare,
 } from "@fortawesome/free-solid-svg-icons";
+
+const ADMIN_EMAILS = ["siciliahernandezguillermo@gmail.com"];
 
 export type Match = {
   id: string;
@@ -28,14 +34,28 @@ export type Match = {
 };
 
 export default function MatchCard({ match }: { match: Match }) {
-  console.log(match);
+  const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // 🔐 Verificar si el usuario es admin
+  useEffect(() => {
+    async function checkAdmin() {
+      const { data } = await supabase.auth.getUser();
+      const email = data.user?.email;
+      if (email && ADMIN_EMAILS.includes(email)) {
+        setIsAdmin(true);
+      }
+    }
+    checkAdmin();
+  }, []);
+
   const matchDate = new Date(`${match.date}T${match.time}`);
   const now = new Date();
   const matchEnd = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000);
   const isPast = now > matchEnd;
   const isUpcoming = !isPast;
 
-  // 🎨 Estilos de borde y estado
+  // 🎨 Estilos visuales
   let borderColor = "border-white/10";
   let cardOpacity = "opacity-100";
   let pendingBadge = null;
@@ -84,7 +104,7 @@ export default function MatchCard({ match }: { match: Match }) {
     minute: "2-digit",
   });
 
-  // 📅 Google Calendar link
+  // 📅 Google Calendar
   const startUTC = matchDate.toISOString().replace(/-|:|\.\d+/g, "");
   const endUTC = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000)
     .toISOString()
@@ -95,7 +115,7 @@ export default function MatchCard({ match }: { match: Match }) {
     match.notes || ""
   )}&location=${encodeURIComponent(match.venues.venue_name || "")}`;
 
-  // 🏷️ Etiquetas visuales
+  // 🏷️ Tipo
   const Tag = () => {
     const base =
       "inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-md border transition hover:brightness-110";
@@ -134,10 +154,20 @@ export default function MatchCard({ match }: { match: Match }) {
       className={`relative backdrop-blur-md rounded-2xl p-5 flex flex-col justify-between border transition-all duration-300 ${borderColor} ${cardOpacity} ${bgColor} ${borderHovercolor} ${bgHoverColor}`}
     >
       <div className="relative z-10 space-y-2.5">
-        {/* 🏷️ Badges */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Tag />
-          {pendingBadge}
+        <div className="flex flex-wrap items-center gap-2 justify-between">
+          <div className="flex items-center gap-2">
+            <Tag />
+            {pendingBadge}
+          </div>
+          {isAdmin && (
+            <button
+              onClick={() => router.push(`/edit-match/${match.id}`)}
+              className="bg-neutral-600/60 hover:bg-neutral-700/80 text-white text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1.5"
+            >
+              <FontAwesomeIcon icon={faPenToSquare} className="text-white/90" />
+              Editar
+            </button>
+          )}
         </div>
 
         {/* 🆚 Oponente */}
