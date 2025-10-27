@@ -5,15 +5,10 @@ import Image from "next/image";
 
 export default function GoogleBtn() {
   const handleLogin = async () => {
-    const redirectUrl =
-      process.env.NODE_ENV === "development"
-        ? "http://localhost:3000/auth/callback"
-        : "https://cvorotava-team-manager.vercel.app/auth/callback";
-
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: redirectUrl,
+        redirectTo: `${window.location.origin}/api/auth/callback`,
         queryParams: { prompt: "select_account" },
       },
     });
