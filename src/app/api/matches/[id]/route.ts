@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
-type MatchParams = { id: string };
-
 // 🟢 GET /api/matches/[id] → devuelve partido + sets
 export async function GET(
   req: NextRequest,
-  { params }: { params: MatchParams }
+  { params }: { params: Promise<{ id: string }>}
 ) {
   try {
+    const { id } = await params;
     const { data, error } = await supabaseAdmin
       .from("matches")
       .select(
@@ -37,7 +36,7 @@ export async function GET(
         )
       `
       )
-      .eq("id", params.id)
+      .eq("id", id)
       .single();
 
     if (error)
@@ -56,9 +55,10 @@ export async function GET(
 // 🟠 PUT /api/matches/[id] → actualiza partido
 export async function PUT(
   req: NextRequest,
-  { params }: { params: MatchParams }
+  { params }: { params: Promise<{ id: string }>}
 ) {
   try {
+    const { id } = await params;
     const body = await req.json();
 
     const { data, error } = await supabaseAdmin
@@ -73,7 +73,7 @@ export async function PUT(
         gender: body.gender,
         venue_id: body.venue_id,
       })
-      .eq("id", params.id)
+      .eq("id", id)
       .select()
       .single();
 
