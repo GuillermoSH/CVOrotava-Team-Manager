@@ -23,13 +23,13 @@ export default function Navbar() {
 
   const navItems = [
     { name: "Inicio", href: "/" },
-    { name: "Calendario", href: "/calendar" },
+    { name: "Calendario", href: "/matches" },
     { name: "Videos", href: "/videos" },
   ];
 
   if (user?.isAdmin) {
-    navItems.push({ name: "Crear partido", href: "/create-match" });
-    navItems.push({ name: "Subir vídeo", href: "/create-video" });
+    navItems.push({ name: "Crear partido", href: "/matches/create" });
+    navItems.push({ name: "Subir vídeo", href: "/videos/create" });
   }
 
   return (

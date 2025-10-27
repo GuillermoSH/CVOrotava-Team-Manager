@@ -146,7 +146,7 @@ export default function MatchCard({ match, isAdmin }: { match: Match; isAdmin?: 
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/edit-match/${match.id}`);
+                router.push(`/matches/edit/${match.id}`);
               }}
               className="bg-neutral-600/60 hover:bg-neutral-700/80 text-white text-xs px-2.5 py-1 rounded-lg transition flex items-center gap-1.5"
             >

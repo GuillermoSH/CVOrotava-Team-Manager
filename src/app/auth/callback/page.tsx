@@ -8,34 +8,51 @@ export default function CallbackPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    const handleAuthCallback = async () => {
+      try {
+        // ✅ Intercambiar el código de Google por una sesión activa
+        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
 
-      if (!user?.email) {
+        if (error) {
+          console.error("❌ Error al intercambiar el código:", error.message);
+          router.replace("/login");
+          return;
+        }
+
+        // ✅ Obtener el usuario una vez hay sesión
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user?.email) {
+          router.replace("/login");
+          return;
+        }
+
+        // ✅ Comprobar email permitido
+        const { data: allowed } = await supabase
+          .from("allowed_emails")
+          .select("email")
+          .eq("email", user.email)
+          .maybeSingle();
+
+        if (!allowed) {
+          await supabase.auth.signOut();
+          alert("Tu cuenta no está autorizada.");
+          router.replace("/login");
+          return;
+        }
+
+        // ✅ Redirigir al dashboard
+        router.replace("/");
+      } catch (err) {
+        console.error("💥 Error inesperado en callback:", err);
         router.replace("/login");
-        return;
       }
-
-      const { data: allowed } = await supabase
-        .from("allowed_emails")
-        .select("email")
-        .eq("email", user.email)
-        .maybeSingle();
-
-      if (!allowed) {
-        await supabase.auth.signOut();
-        alert("Tu cuenta no está autorizada");
-        router.replace("/login");
-        return;
-      }
-
-      router.replace("/");
     };
 
-    checkUser();
+    handleAuthCallback();
   }, [router]);
 
-  return <p className="text-center mt-10 text-gray-400">Validando...</p>;
+  return <p className="text-center mt-10 text-gray-400">Validando acceso...</p>;
 }
