@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 // 🟢 GET /api/matches/[id] → devuelve partido + sets
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: any }
 ) {
   try {
     const { data, error } = await supabaseAdmin
@@ -54,7 +54,7 @@ export async function GET(
 // 🟠 PUT /api/matches/[id] → actualiza partido
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: any }
 ) {
   try {
     const body = await req.json();
