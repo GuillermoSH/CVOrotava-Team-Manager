@@ -1,39 +1,51 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-/**
- * 🔐 Cierra la sesión del usuario
- * - Elimina las cookies de Supabase
- * - Redirige de vuelta al login
- */
 export async function POST() {
   const cookieStore = await cookies();
 
-  // ✅ Crear cliente con permisos de escritura (route handlers sí lo permiten)
+  // ✅ Tipado moderno recomendado por @supabase/ssr
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         get: (name: string) => cookieStore.get(name)?.value,
-        set: (name: string, value: string, options: any) => {
-          cookieStore.set({ name, value, ...options });
+        set: (
+          name: string,
+          value: string,
+          options?: CookieOptions
+        ) => {
+          cookieStore.set({
+            name,
+            value,
+            ...options,
+          });
         },
-        remove: (name: string, options: any) => {
-          cookieStore.set({ name, value: "", ...options });
+        remove: (name: string, options?: CookieOptions) => {
+          cookieStore.set({
+            name,
+            value: "",
+            ...options,
+          });
         },
       },
     }
   );
 
-  // 🚪 Cerrar sesión
+  // 🚪 Cerrar sesión correctamente
   await supabase.auth.signOut();
 
-  // 🧹 Eliminar cookies manualmente (seguridad extra)
+  // 🧹 Limpiar cookies de sesión
   cookieStore.delete("sb-access-token");
   cookieStore.delete("sb-refresh-token");
 
-  // 🔁 Redirigir al login (puedes cambiarlo si lo prefieres)
-  return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"));
+  // 🔁 Redirigir al login
+  return NextResponse.redirect(
+    new URL(
+      "/login",
+      process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+    )
+  );
 }
