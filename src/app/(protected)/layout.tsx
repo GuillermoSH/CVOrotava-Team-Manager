@@ -3,8 +3,13 @@ import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import Navbar from "@/components/layout/Navbar";
 import { UserProvider } from "@/contexts/UserContext";
+import { SeasonProvider } from "@/contexts/SeasonContext";
 
-export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
+export default async function ProtectedLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const cookieStore = await cookies();
 
   // ✅ MODO SOLO LECTURA
@@ -20,7 +25,10 @@ export default async function ProtectedLayout({ children }: { children: React.Re
   );
 
   // 1️⃣ Verificar usuario
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
   if (error || !user) redirect("/login");
 
@@ -42,10 +50,12 @@ export default async function ProtectedLayout({ children }: { children: React.Re
   // 3️⃣ Render protegido
   return (
     <UserProvider initialUser={appUser}>
-      <Navbar />
-      <main className="min-h-screen bg-[url(/assets/svgs/circle-scatter-RB-shape.svg)] bg-center bg-cover bg-fixed pt-16 pb-6 px-3 md:px-6 flex justify-center">
-        {children}
-      </main>
+      <SeasonProvider>
+        <Navbar />
+        <main className="min-h-screen bg-[url(/assets/svgs/circle-scatter-RB-shape.svg)] bg-center bg-cover bg-fixed pt-16 pb-6 px-3 md:px-6 flex justify-center">
+          {children}
+        </main>
+      </SeasonProvider>
     </UserProvider>
   );
 }
