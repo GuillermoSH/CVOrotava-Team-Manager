@@ -3,8 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";
@@ -17,8 +15,12 @@ export default function Navbar() {
   const [openMobile, setOpenMobile] = useState(false);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/login");
+    } catch (err) {
+      console.error("❌ Error al cerrar sesión:", err);
+    }
   };
 
   const navItems = [

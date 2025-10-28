@@ -4,38 +4,27 @@ import { createServerClient } from "@supabase/ssr";
 import Navbar from "@/components/layout/Navbar";
 import { UserProvider } from "@/contexts/UserContext";
 
-export default async function ProtectedLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
+
+  // ✅ MODO SOLO LECTURA
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get: (key) => cookieStore.get(key)?.value,
-        set: (key, value, options) => {
-          cookieStore.set({ name: key, value, ...options });
-        },
-        remove: (key, options) => {
-          cookieStore.set({ name: key, value: "", ...options });
-        },
+        get: (name: string) => cookieStore.get(name)?.value,
+        // 🚫 NO incluir set/remove aquí (causa el error)
       },
     }
   );
 
-  // 1️⃣ Obtener sesión del usuario
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // 1️⃣ Verificar usuario
+  const { data: { user }, error } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
+  if (error || !user) redirect("/login");
 
-  // 2️⃣ Obtener perfil de la tabla users
+  // 2️⃣ Obtener perfil del usuario
   const { data: profile } = await supabase
     .from("users")
     .select("gender, role")
@@ -50,7 +39,7 @@ export default async function ProtectedLayout({
     isAdmin: profile?.role === "admin",
   };
 
-  // 3️⃣ Pasar el usuario precargado al contexto
+  // 3️⃣ Render protegido
   return (
     <UserProvider initialUser={appUser}>
       <Navbar />
