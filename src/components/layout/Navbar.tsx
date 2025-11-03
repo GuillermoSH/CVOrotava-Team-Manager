@@ -27,6 +27,7 @@ export default function Navbar() {
     { name: "Inicio", href: "/" },
     { name: "Calendario", href: "/matches" },
     { name: "Videos", href: "/videos" },
+    { name: "Estadísticas", href: "/stats"}
   ];
 
   if (user?.isAdmin) {

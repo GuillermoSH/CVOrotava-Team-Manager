@@ -11,38 +11,38 @@ const matchSchema = z.object({
     venue_id: z.string().uuid(),
 });
 
-/**
- * GET /api/matches
- * Devuelve todos los partidos ordenados por fecha y hora
- */
 export async function GET(req: Request) {
-    const { searchParams } = new URL(req.url);
-    const season = searchParams.get("season");
+  const { searchParams } = new URL(req.url);
 
-    try {
-        let query = supabaseAdmin
-            .from("matches")
-            .select(`*, venues (id, venue_name, location_url, location_type)`)
-            .order("date", { ascending: true })
-            .order("time", { ascending: true });
+  const limit = Number(searchParams.get("limit")) || null;
+  const gender = searchParams.get("gender");
+  const orderParam = searchParams.get("order") || "desc";
+  const hasResult = searchParams.get("hasResult") === "true";
+  const ascending = orderParam === "asc";
 
-        if (season) query = query.eq("season", season);
+  try {
+    let query = supabaseAdmin
+      .from("matches")
+      .select("*, venues(venue_name, location_type)")
+      .order("date", { ascending })
+      .order("time", { ascending });
 
-        const { data, error } = await query;
+    if (gender) query = query.eq("gender", gender);
+    if (limit) query = query.limit(limit);
+    if (hasResult) query = query.not("result", "is", null).neq("result", "");
 
-        if (error) {
-            console.error("Error en GET /matches:", error);
-            return NextResponse.json({ error: error.message }, { status: 400 });
-        }
+    const { data, error } = await query;
 
-        return NextResponse.json(data || [], { status: 200 });
-    } catch (err) {
-        console.error("Error inesperado en GET /matches:", err);
-        return NextResponse.json(
-            { error: "Error interno del servidor" },
-            { status: 500 }
-        );
-    }
+    if (error) throw error;
+
+    return NextResponse.json(data);
+  } catch (err: any) {
+    console.error("❌ Error fetching matches:", err);
+    return NextResponse.json(
+      { error: "Error fetching matches", details: err.message },
+      { status: 500 }
+    );
+  }
 }
 
 /**

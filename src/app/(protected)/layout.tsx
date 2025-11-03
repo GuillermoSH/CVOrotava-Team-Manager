@@ -35,13 +35,14 @@ export default async function ProtectedLayout({
   // 2️⃣ Obtener perfil del usuario
   const { data: profile } = await supabase
     .from("users")
-    .select("gender, role")
+    .select("gender, role, user_name")
     .eq("id", user.id)
     .single();
 
   const appUser = {
     id: user.id,
     email: user.email!,
+    user_name: profile?.user_name ?? user.email!,
     gender: profile?.gender ?? null,
     role: profile?.role ?? null,
     isAdmin: profile?.role === "admin",

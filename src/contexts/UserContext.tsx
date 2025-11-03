@@ -7,6 +7,7 @@ type UserRole = "admin" | "coach" | "player" | null;
 export type AppUser = {
   id: string;
   email: string;
+  user_name: string;
   gender: "male" | "female" | null;
   role: UserRole;
   isAdmin: boolean;

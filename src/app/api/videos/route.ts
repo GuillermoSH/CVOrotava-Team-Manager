@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendNewVideoEmail } from "@/lib/email";
-import { ADMIN_EMAILS } from "@/constants/common";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function GET(req: Request) {
@@ -27,7 +26,7 @@ export async function GET(req: Request) {
   const from = (page - 1) * limit;
   const to = from + limit - 1;
   query = query.range(from, to).order("created_at", { ascending: false });
-  if (!season && !gender) query = query.limit(50);
+  if (!limit && !season && !gender) query = query.limit(20);
 
 
   const { data, error } = await query;
@@ -54,10 +53,6 @@ export async function POST(req: Request) {
 
     if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    if (!ADMIN_EMAILS.includes(user.email!)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // 2️⃣ Validar body

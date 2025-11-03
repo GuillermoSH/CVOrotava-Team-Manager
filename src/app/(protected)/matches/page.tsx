@@ -47,7 +47,7 @@ export default function CalendarPage() {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const res = await fetch("/api/matches");
+        const res = await fetch("/api/matches?order=asc");
         if (!res.ok) throw new Error("Error al obtener partidos");
         const data = (await res.json()) as Match[];
 
