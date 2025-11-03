@@ -106,15 +106,15 @@ export default async function MatchDetailsPage(props: {
             Detalle de Sets
           </h3>
           <ul className="space-y-2">
-            {match.sets.map((s: any) => (
+            {match.sets.map((s: { id: string; set_number: number; team_score: number; opponent_score: number }) => (
               <li
-                key={s.id}
-                className="flex justify-between text-gray-200 bg-white/5 px-4 py-2 rounded-lg"
+              key={s.id}
+              className="flex justify-between text-gray-200 bg-white/5 px-4 py-2 rounded-lg"
               >
-                <span>Set {s.set_number}</span>
-                <span>
-                  {s.team_score} - {s.opponent_score}
-                </span>
+              <span>Set {s.set_number}</span>
+              <span>
+                {s.team_score} - {s.opponent_score}
+              </span>
               </li>
             ))}
           </ul>

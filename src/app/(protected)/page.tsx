@@ -9,7 +9,6 @@ import {
   faCalendarDays,
   faClipboardList,
   faTrophy,
-  faChartLine,
 } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";
 import { getCurrentSeason } from "@/utils/getCurrentSeason"; // ✅ Asegúrate de tener este helper

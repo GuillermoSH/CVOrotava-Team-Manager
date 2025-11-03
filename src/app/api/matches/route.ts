@@ -36,10 +36,10 @@ export async function GET(req: Request) {
     if (error) throw error;
 
     return NextResponse.json(data);
-  } catch (err: any) {
+  } catch (err) {
     console.error("❌ Error fetching matches:", err);
     return NextResponse.json(
-      { error: "Error fetching matches", details: err.message },
+      { error: "Error fetching matches", details: err instanceof Error ? err.message : String(err) },
       { status: 500 }
     );
   }

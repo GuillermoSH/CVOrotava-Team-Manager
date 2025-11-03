@@ -87,11 +87,12 @@ export default function StatsPage() {
   const winRate = total ? Math.round((wins / total) * 100) : 0;
 
   // Distribución de resultados
+  type ResultCount = { [key: string]: number };
   const resultDist = Object.entries(
-    validMatches.reduce((acc: any, m) => {
+    validMatches.reduce((acc: ResultCount, m) => {
       acc[m.result!] = (acc[m.result!] || 0) + 1;
       return acc;
-    }, {})
+    }, {} as ResultCount)
   ).map(([result, count]) => ({ result, count }));
 
   // --- Rendimiento por lugar ---
