@@ -44,7 +44,7 @@ export default function MatchCard({ match, isAdmin }: { match: Match; isAdmin?: 
   let pendingBadge = null;
   let bgColor = "bg-white/5";
   let borderHovercolor = "hover:border-white/30";
-  let bgHoverColor = "hover:bg-white/10";
+  let bgHoverColor = "hover:bg-white/2";
 
   if (isPast && !match.result) {
     bgColor = "bg-yellow-500/5";

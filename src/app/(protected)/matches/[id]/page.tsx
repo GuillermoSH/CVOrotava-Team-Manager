@@ -62,7 +62,7 @@ export default async function MatchDetailsPage(props: {
 
       {/* 📅 Información del partido */}
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-5xl">
-        <div className="backdrop-blur-sm bg-white/10 border border-white/10 rounded-2xl p-6 shadow-md">
+        <div className="backdrop-blur-sm bg-white/2 border border-white/10 rounded-2xl p-6 shadow-md">
           <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
             <FontAwesomeIcon icon={faCalendarDays} className="text-red-500" />
             Fecha
@@ -77,7 +77,7 @@ export default async function MatchDetailsPage(props: {
           </p>
         </div>
 
-        <div className="backdrop-blur-sm bg-white/10 border border-white/10 rounded-2xl p-6 shadow-md">
+        <div className="backdrop-blur-sm bg-white/2 border border-white/10 rounded-2xl p-6 shadow-md">
           <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
             <FontAwesomeIcon icon={faClock} className="text-red-500" />
             Hora
@@ -87,7 +87,7 @@ export default async function MatchDetailsPage(props: {
           </p>
         </div>
 
-        <div className="backdrop-blur-sm bg-white/10 border border-white/10 rounded-2xl p-6 shadow-md sm:col-span-2">
+        <div className="backdrop-blur-sm bg-white/2 border border-white/10 rounded-2xl p-6 shadow-md sm:col-span-2">
           <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
             <FontAwesomeIcon icon={faMapLocationDot} className="text-red-500" />
             Pabellón
@@ -100,7 +100,7 @@ export default async function MatchDetailsPage(props: {
 
       {/* 🏐 Sets */}
       {match.sets && match.sets.length > 0 && (
-        <section className="w-full max-w-5xl mt-8 bg-white/10 border border-white/10 rounded-2xl p-6 shadow-md">
+        <section className="w-full max-w-5xl mt-8 bg-white/2 border border-white/10 rounded-2xl p-6 shadow-md">
           <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
             <FontAwesomeIcon icon={faTrophy} className="text-red-500" />
             Detalle de Sets
@@ -123,7 +123,7 @@ export default async function MatchDetailsPage(props: {
 
       {/* 🎥 Video */}
       {match.video_url && (
-        <section className="w-full max-w-5xl mt-8 bg-white/10 border border-white/10 rounded-2xl p-6 shadow-md">
+        <section className="w-full max-w-5xl mt-8 bg-white/2 border border-white/10 rounded-2xl p-6 shadow-md">
           <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
             <FontAwesomeIcon icon={faVideo} className="text-red-500" />
             Video del Partido
@@ -141,7 +141,7 @@ export default async function MatchDetailsPage(props: {
 
       {/* 🗒️ Notas */}
       {match.notes && (
-        <section className="w-full max-w-5xl mt-8 bg-white/10 border border-white/10 rounded-2xl p-6 shadow-md">
+        <section className="w-full max-w-5xl mt-8 bg-white/2 border border-white/10 rounded-2xl p-6 shadow-md">
           <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
             <FontAwesomeIcon icon={faNoteSticky} className="text-red-500" />
             Notas del partido

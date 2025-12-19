@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { sendNewVideoEmail } from "@/lib/email";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function GET(req: Request) {
@@ -66,7 +65,10 @@ export async function POST(req: Request) {
     // 3️⃣ Insertar video
     const { data, error } = await supabaseAdmin
       .from("videos")
-      .insert([{ url, category, season, competition_type, gender }])
+      .upsert(
+        [{ url, category, season, competition_type, gender }],
+        {onConflict: 'url'}
+      )
       .select();
 
     if (error) {
@@ -76,22 +78,6 @@ export async function POST(req: Request) {
 
     const newVideo = data[0];
 
-    // 4️⃣ Buscar jugadores por género
-    const { data: players, error: playersError } = await supabaseAdmin
-      .from("players")
-      .select("email")
-      .eq("gender", gender);
-
-    if (playersError) {
-      console.error("Error fetching players:", playersError);
-    }
-
-    const emails = (players || []).map((p) => p.email).filter(Boolean);
-
-    // 5️⃣ Enviar email con servicio de lib/email.ts
-    await sendNewVideoEmail({ to: emails, category, url, gender, season });
-
-    // 6️⃣ OK
     return NextResponse.json({ success: true, data: newVideo }, { status: 201 });
 
   } catch (err) {

@@ -92,7 +92,6 @@ export default function EditMatchPage() {
     setSets(updated.map((s, i) => ({ ...s, set_number: i + 1 })));
   };
 
-  // 🧩 Guardar cambios
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -125,12 +124,62 @@ export default function EditMatchPage() {
       if (!setRes.ok) throw new Error("Error al actualizar los sets");
 
       alert("✅ Partido actualizado correctamente");
-      router.push("/calendar");
+      router.push("/matches");
     } catch (err) {
       console.error(err);
       alert("❌ Error guardando los cambios");
     } finally {
       setLoading(false);
+
+      try {
+        const url = match?.video_url?.trim();
+        const token = (await (await import("@/lib/supabase/client")).supabase.auth.getSession())
+        .data.session?.access_token;
+        if (url) {
+          const body = {
+            url,
+            category: "match",
+            season: match.season,
+            competition_type: "league",
+            gender: match.gender,
+          };
+
+          console.log("Enviando video:", body);
+
+          const videoRes = await fetch("/api/videos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify(body),
+          });
+
+          if (!videoRes.ok) {
+            const text = await videoRes.text();
+            console.error("Error posting video:", text);
+          } else {
+            console.log("Video registrado correctamente");
+          }
+        }
+      } catch (videoErr) {
+        console.error("Error enviando video:", videoErr);
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("¿Estás seguro de que quieres eliminar este partido?")) return;
+
+    try {
+      const res = await fetch(`/api/matches/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Error al eliminar el partido");
+
+      alert("✅ Partido eliminado correctamente");
+      router.push("/matches");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Error eliminando el partido");
     }
   };
 
@@ -146,6 +195,7 @@ export default function EditMatchPage() {
           onSubmit={handleSubmit}
           loading={loading}
           buttonText="Guardar Cambios"
+          onDelete={handleDelete}
         >
           {/* 🗓️ Fecha y hora */}
           <div className="grid grid-cols-2 gap-4">

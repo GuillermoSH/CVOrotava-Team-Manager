@@ -89,3 +89,30 @@ export async function PUT(
     );
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const { data, error } = await supabaseAdmin
+      .from("matches")
+      .delete()
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error)
+      return NextResponse.json({ error: error.message }, { status: 400 });
+
+    return NextResponse.json(data, { status: 200 });
+  } catch (err) {
+    console.error("Error en DELETE /matches/[id]:", err);
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
+  }
+}

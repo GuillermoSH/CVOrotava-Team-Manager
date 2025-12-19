@@ -16,10 +16,10 @@ export default function LoginPage() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative z-10 flex flex-col items-center w-full max-w-[360px] p-8 space-y-6 rounded-2xl bg-white/10 border border-white/20 shadow-[0_0_25px_rgba(255,255,255,0.1)] backdrop-blur-2xl"
+        className="relative z-10 flex flex-col items-center w-full max-w-[360px] p-8 space-y-6 rounded-2xl bg-white/2 border border-white/20 shadow-[0_0_25px_rgba(255,255,255,0.1)] backdrop-blur-2xl"
       >
         {/* 🏐 Logo */}
-        <div className="relative w-24 h-24 rounded-full border border-white/30 overflow-hidden bg-white/10 shadow-inner">
+        <div className="relative w-24 h-24 rounded-full border border-white/30 overflow-hidden bg-white/2 shadow-inner">
           <Image
             src="/assets/imgs/voleipuerto_128x128.webp"
             alt="Logo Voleipuerto"

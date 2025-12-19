@@ -111,7 +111,7 @@ export default function ProtectedHome() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white/10 border border-white/10 rounded-xl p-5 text-center shadow-md backdrop-blur-lg"
+            className="bg-white/2 border border-white/10 rounded-xl p-5 text-center shadow-md backdrop-blur-lg"
           >
             <p className="text-3xl font-bold text-red-500">{stat.value}</p>
             <p className="text-sm text-gray-300">{stat.label}</p>
@@ -124,14 +124,14 @@ export default function ProtectedHome() {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-white/10 border border-white/10 rounded-2xl p-6 shadow-md backdrop-blur-lg w-full max-w-6xl mb-8"
+        className="bg-white/2 border border-white/10 rounded-2xl p-6 shadow-md backdrop-blur-lg w-full max-w-6xl mb-8"
       >
         <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
           <FontAwesomeIcon icon={faCalendarDays} className="text-red-500" />
           Próximo partido
         </h2>
         {nextMatch ? (
-          <div className="flex justify-between items-center text-gray-200">
+          <div className="flex flex-col gap-2 md:flex-row md:justify-between md:items-center text-gray-200">
             <div>
               <p className="font-medium text-xl">{nextMatch.opponent}</p>
               <p className="text-sm text-gray-400">
@@ -145,7 +145,7 @@ export default function ProtectedHome() {
             </div>
             <Link
               href={`/matches/${nextMatch.id}`}
-              className="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded-xl"
+              className="self-end bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded-xl"
             >
               Ver detalles
             </Link>
@@ -160,7 +160,7 @@ export default function ProtectedHome() {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="bg-white/10 border border-white/10 rounded-2xl p-6 shadow-md backdrop-blur-lg w-full max-w-6xl"
+        className="bg-white/2 border border-white/10 rounded-2xl p-6 shadow-md backdrop-blur-lg w-full max-w-6xl"
       >
         <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
           <FontAwesomeIcon icon={faTrophy} className="text-red-500" />
@@ -184,7 +184,7 @@ export default function ProtectedHome() {
                 return (
                   <li
                     key={m.id}
-                    className="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition border border-transparent hover:border-white/10 flex justify-between items-end"
+                    className="flex flex-col md:flex-row md:justify-between md:items-center bg-white/5 rounded-xl p-4 hover:bg-white/2 transition border border-transparent hover:border-white/10"
                   >
                     <div>
                       <p className="font-semibold text-base text-white">
@@ -199,7 +199,7 @@ export default function ProtectedHome() {
                         • {m.venues?.venue_name || "Sin pabellón"}
                       </p>
                     </div>
-                    <span className={`${resultColor} font-bold text-lg`}>
+                    <span className={`${resultColor} self-end font-bold text-lg`}>
                       {m.result}
                     </span>
                   </li>
@@ -215,7 +215,7 @@ export default function ProtectedHome() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-white/10 border border-white/10 rounded-2xl p-6 shadow-md backdrop-blur-lg w-full max-w-6xl mt-8"
+          className="bg-white/2 border border-white/10 rounded-2xl p-6 shadow-md backdrop-blur-lg w-full max-w-6xl mt-8"
         >
           <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
             <FontAwesomeIcon icon={faClipboardList} className="text-red-500" />

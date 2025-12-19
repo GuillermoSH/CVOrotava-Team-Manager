@@ -147,7 +147,7 @@ export default function StatsPage() {
           className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl"
         >
           {/* Métricas principales */}
-          <div className="bg-white/10 flex flex-col justify-between p-6 rounded-2xl border border-white/10">
+          <div className="backdrop-blur-lg bg-white/2 flex flex-col justify-between p-6 rounded-2xl border border-white/10">
             <h2 className="text-xl font-semibold mb-4">Resumen general</h2>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
@@ -170,7 +170,7 @@ export default function StatsPage() {
           </div>
 
           {/* Distribución de resultados */}
-          <div className="bg-white/10 p-6 rounded-2xl border border-white/10">
+          <div className="backdrop-blur-lg bg-white/2 p-6 rounded-2xl border border-white/10">
             <h2 className="text-xl font-semibold mb-4">
               Distribución de Resultados
             </h2>
@@ -191,7 +191,7 @@ export default function StatsPage() {
           </div>
 
           {/* Rendimiento por lugar */}
-          <div className="bg-white/10 p-6 rounded-2xl border border-white/10 md:col-span-2">
+          <div className="backdrop-blur-lg bg-white/2 p-6 rounded-2xl border border-white/10 md:col-span-2">
             <h2 className="text-xl font-semibold mb-4">
               Rendimiento por lugar
             </h2>
