@@ -19,7 +19,7 @@ export function FormTextarea({
 }: FormTextareaProps) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={name} className="text-sm font-semibold text-gray-700">
+      <label htmlFor={name} className="text-sm font-semibold text-[var(--text-secondary)]">
         {label}
       </label>
       <textarea
@@ -27,13 +27,13 @@ export function FormTextarea({
         name={name}
         {...register}
         {...props}
-        className={`w-full mt-1 p-3 border rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 ${
+        className={`w-full mt-1 p-3 border rounded-xl bg-white/5 text-white placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 transition-colors ${
           error
             ? "border-red-500 focus:ring-red-500"
-            : "border-gray-300 focus:ring-red-600"
+            : "border-white/10 focus:ring-[var(--accent)] focus:border-[var(--accent)]"
         }`}
       />
-      {error && <p className="text-xs text-red-600 mt-1">{error.message}</p>}
+      {error && <p className="text-xs text-red-400 mt-1">{error.message}</p>}
     </div>
   );
 }

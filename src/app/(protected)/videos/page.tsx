@@ -63,8 +63,11 @@ export default function PartidosPage() {
   ];
 
   return (
-    <main className="w-full max-w-6xl p-6">
-      <h1 className="text-2xl text-white font-bold mb-6">Videos de Partidos</h1>
+    <main className="w-full max-w-6xl py-4">
+      <div className="mb-6">
+        <h1 className="text-2xl text-white font-bold mb-1">🎥 Videos</h1>
+        <p className="text-sm text-[var(--text-muted)]">Partidos y entrenamientos grabados</p>
+      </div>
       <FilterBar
         filters={filters}
         setFilters={setFilters}

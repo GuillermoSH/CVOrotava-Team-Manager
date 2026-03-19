@@ -19,16 +19,17 @@ export default function GoogleBtn() {
   return (
     <button
       onClick={handleLogin}
-      className="w-full text-black flex items-center justify-center h-10 px-[12px] border border-[#747775] rounded-full py-2 bg-white hover:bg-gray-50"
+      className="group w-full flex items-center justify-center gap-3 h-12 px-5 border border-white/10 rounded-2xl bg-white hover:bg-gray-100 transition-all duration-300 shadow-[0_4px_14px_0_rgba(255,255,255,0.05)] hover:shadow-[0_6px_20px_rgba(255,255,255,0.1)] active:scale-[0.98]"
     >
-      <Image
-        src="/assets/svgs/google-logo.svg"
-        alt="Google"
-        width={20}
-        height={20}
-      />
-      <span className="ms-2.5 text-base font-medium">
-        Iniciar sesión con Google
+      <div className="relative w-[22px] h-[22px]">
+        <Image
+          src="/assets/svgs/google-logo.svg"
+          alt="Google"
+          layout="fill"
+        />
+      </div>
+      <span className="text-[15px] font-semibold text-gray-900 tracking-wide">
+        Continuar con Google
       </span>
     </button>
   );

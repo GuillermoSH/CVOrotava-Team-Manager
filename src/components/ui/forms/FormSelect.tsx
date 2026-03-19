@@ -7,7 +7,7 @@ interface BaseOption {
 }
 
 interface GroupedOption {
-  label: string; // encabezado del grupo
+  label: string;
   options: BaseOption[];
 }
 
@@ -30,7 +30,7 @@ export function FormSelect({
 }: FormSelectProps) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={name} className="text-sm font-semibold text-gray-700">
+      <label htmlFor={name} className="text-sm font-semibold text-[var(--text-secondary)]">
         {label}
       </label>
       <select
@@ -38,33 +38,34 @@ export function FormSelect({
         name={name}
         {...register}
         {...props}
-        className={`w-full mt-1 p-3 border rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 ${
+        className={`w-full mt-1 p-3 border rounded-xl bg-white/5 text-white focus:outline-none focus:ring-2 transition-colors ${
           error
             ? "border-red-500 focus:ring-red-500"
-            : "border-gray-300 focus:ring-red-600"
+            : "border-white/10 focus:ring-[var(--accent)] focus:border-[var(--accent)]"
         }`}
       >
-        <option value="">Selecciona una opción</option>
+        <option value="" className="bg-[var(--color-bg-elevated)] text-[var(--text-muted)]">
+          Selecciona una opción
+        </option>
 
-        {/* Soporte para grupos o lista plana */}
         {options.map((opt) =>
           "options" in opt ? (
-            <optgroup key={opt.label} label={opt.label}>
+            <optgroup key={opt.label} label={opt.label} className="bg-[var(--color-bg-elevated)]">
               {opt.options.map((sub) => (
-                <option key={sub.value} value={sub.value}>
+                <option key={sub.value} value={sub.value} className="bg-[var(--color-bg-elevated)] text-white">
                   {sub.label}
                 </option>
               ))}
             </optgroup>
           ) : (
-            <option key={opt.value} value={opt.value}>
+            <option key={opt.value} value={opt.value} className="bg-[var(--color-bg-elevated)] text-white">
               {opt.label}
             </option>
           )
         )}
       </select>
 
-      {error && <p className="text-xs text-red-600 mt-1">{error.message}</p>}
+      {error && <p className="text-xs text-red-400 mt-1">{error.message}</p>}
     </div>
   );
 }

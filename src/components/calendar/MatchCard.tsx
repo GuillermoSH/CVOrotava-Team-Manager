@@ -38,39 +38,27 @@ export default function MatchCard({ match, isAdmin }: { match: Match; isAdmin?: 
   const isPast = now > matchEnd;
   const isUpcoming = !isPast;
 
-  // 🎨 Estilos visuales
-  let borderColor = "border-white/10";
-  let cardOpacity = "opacity-100";
+  // ── Determine card accent ──
+  let accentColor = "var(--glass-border)";
   let pendingBadge = null;
-  let bgColor = "bg-white/5";
-  let borderHovercolor = "hover:border-white/30";
-  let bgHoverColor = "hover:bg-white/2";
+  let cardBorderClass = "border-white/[0.06]";
+  let opacityClass = "";
 
   if (isPast && !match.result) {
-    bgColor = "bg-yellow-500/5";
-    bgHoverColor = "hover:bg-yellow-500/10";
-    borderColor = "border-yellow-500/30";
-    borderHovercolor = "hover:border-yellow-500/40";
-    cardOpacity = "opacity-70";
-    pendingBadge = (
-      <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-gray-700/30 border border-gray-500/30 text-gray-300">
-        Pte. de resultado
-      </span>
-    );
+    accentColor = "var(--color-warning)";
+    cardBorderClass = "border-yellow-500/20";
+    opacityClass = "opacity-70";
+    pendingBadge = <span className="badge badge-warning">Pte. resultado</span>;
   }
 
   if (match.result) {
     const [ourScore, theirScore] = match.result.split("-").map(Number);
     if (ourScore > theirScore) {
-      bgColor = "bg-green-700/5";
-      bgHoverColor = "hover:bg-green-700/10";
-      borderColor = "border-green-700/30";
-      borderHovercolor = "hover:border-green-700/40";
+      accentColor = "var(--color-success)";
+      cardBorderClass = "border-green-500/15";
     } else {
-      bgColor = "bg-red-700/5";
-      bgHoverColor = "hover:bg-red-700/10";
-      borderColor = "border-red-700/30";
-      borderHovercolor = "hover:border-red-700/40";
+      accentColor = "var(--color-danger)";
+      cardBorderClass = "border-red-500/15";
     }
   }
 
@@ -98,45 +86,35 @@ export default function MatchCard({ match, isAdmin }: { match: Match; isAdmin?: 
     match.notes || ""
   )}&location=${encodeURIComponent(match.venues.venue_name || "")}`;
 
-  // 🏷️ Tipo
+  // 🏷️ Location tag
   const Tag = () => {
-    const base =
-      "inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-md border transition hover:brightness-110";
-    if (match.venues.location_type == "outside_island")
-      return (
-        <span
-          className={`${base} bg-blue-500/20 border-blue-500/30 text-blue-300`}
-        >
-          <FontAwesomeIcon icon={faPlaneDeparture} />
-          Viaje
-        </span>
-      );
-    if (match.venues.location_type == "away")
-      return (
-        <span
-          className={`${base} bg-yellow-400/20 border-yellow-400/40 text-yellow-300`}
-        >
-          <FontAwesomeIcon icon={faCarSide} />
-          Fuera
-        </span>
-      );
-    if (match.venues.location_type == "home")
-      return (
-        <span
-          className={`${base} bg-green-500/20 border-green-500/40 text-green-300`}
-        >
-          <FontAwesomeIcon icon={faHouse} />
-          Casa
-        </span>
-      );
-    return null;
+    const tagMap = {
+      outside_island: { icon: faPlaneDeparture, text: "Viaje", cls: "badge-info" },
+      away: { icon: faCarSide, text: "Fuera", cls: "badge-warning" },
+      home: { icon: faHouse, text: "Casa", cls: "badge-success" },
+    };
+    const tag = tagMap[match.venues.location_type];
+    if (!tag) return null;
+    return (
+      <span className={`badge ${tag.cls}`}>
+        <FontAwesomeIcon icon={tag.icon} />
+        {tag.text}
+      </span>
+    );
   };
 
   return (
     <div
-      className={`relative backdrop-blur-md rounded-2xl p-5 flex flex-col justify-between border transition duration-200 ${borderColor} ${cardOpacity} ${bgColor} ${borderHovercolor} ${bgHoverColor}`}
+      className={`relative rounded-2xl overflow-hidden flex flex-col justify-between border backdrop-blur-sm transition-all duration-300 bg-[var(--glass-surface)] hover:bg-[var(--glass-surface-hover)] hover:shadow-lg hover:shadow-black/20 hover:-translate-y-0.5 ${cardBorderClass} ${opacityClass}`}
     >
-      <div className="relative z-10 space-y-2.5">
+      {/* Accent side bar */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl"
+        style={{ background: accentColor }}
+      />
+
+      <div className="relative z-10 p-5 space-y-3 pl-6">
+        {/* Tags row */}
         <div className="flex flex-wrap items-center gap-2 justify-between">
           <div className="flex items-center gap-2">
             <Tag />
@@ -148,93 +126,88 @@ export default function MatchCard({ match, isAdmin }: { match: Match; isAdmin?: 
                 e.stopPropagation();
                 router.push(`/matches/edit/${match.id}`);
               }}
-              className="bg-neutral-600/60 hover:bg-neutral-700/80 text-white text-xs px-2.5 py-1 rounded-lg transition flex items-center gap-1.5"
+              className="btn-secondary !px-2 !py-1 !text-xs !gap-1"
             >
-              <FontAwesomeIcon icon={faPenToSquare} className="text-white/90" />
+              <FontAwesomeIcon icon={faPenToSquare} className="text-[10px]" />
               Editar
             </button>
           )}
         </div>
 
-        {/* 🆚 Oponente */}
-        <h2 className="text-xl font-semibold text-white tracking-tight leading-tight">
+        {/* Opponent */}
+        <h2 className="text-lg font-semibold text-white tracking-tight leading-tight">
           {match.opponent}
         </h2>
 
-        {/* 📅 Fecha y hora */}
-        <p className="text-sm text-white/80">
+        {/* Date & time */}
+        <p className="text-sm text-[var(--text-muted)]">
           {formattedDate} • {formattedTime}
         </p>
 
-        {/* 📍 Localización */}
+        {/* Location */}
         {match.venues.location_url ? (
           <a
             href={match.venues.location_url}
             onClick={(e) => e.stopPropagation()}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex underline items-center text-white/90 font-medium hover:text-blue-400 transition-colors"
+            className="inline-flex items-center text-sm text-[var(--text-secondary)] hover:text-[var(--accent-hover)] transition-colors"
           >
-            <FontAwesomeIcon
-              icon={faLocationDot}
-              className="mr-1.5 text-red-400"
-            />
+            <FontAwesomeIcon icon={faLocationDot} className="mr-1.5 text-red-400 text-xs" />
             {match.venues.venue_name}
           </a>
         ) : (
-          <p className="text-white/80 font-medium flex items-center">
-            <FontAwesomeIcon
-              icon={faLocationDot}
-              className="mr-1.5 text-red-400"
-            />
+          <p className="text-sm text-[var(--text-secondary)] flex items-center">
+            <FontAwesomeIcon icon={faLocationDot} className="mr-1.5 text-red-400 text-xs" />
             {match.venues.venue_name}
           </p>
         )}
       </div>
 
-      {/* 🎥 Acciones */}
-      <div className="mt-4 z-10 flex flex-wrap justify-between gap-2 relative">
-        {match.video_url ? (
-          <a
-            href={match.video_url}
-            onClick={(e) => e.stopPropagation()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-red-600 text-white py-2 px-4 rounded-xl text-center hover:bg-red-700 transition text-sm flex items-center gap-2"
-          >
-            <FontAwesomeIcon icon={faVideo} />
-            Ver vídeo
-          </a>
-        ) : (
-          isPast && (
-            <div className="bg-neutral-600 text-white py-2 px-4 rounded-xl text-center text-sm flex items-center gap-2">
+      {/* Bottom actions */}
+      <div className="px-5 pb-5 pl-6 pt-1 flex flex-wrap justify-between items-end gap-2">
+        <div className="flex gap-2">
+          {match.video_url ? (
+            <a
+              href={match.video_url}
+              onClick={(e) => e.stopPropagation()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary !text-xs !px-3 !py-1.5"
+            >
               <FontAwesomeIcon icon={faVideo} />
-              No disponible
-            </div>
-          )
-        )}
+              Ver vídeo
+            </a>
+          ) : (
+            isPast && (
+              <span className="badge badge-neutral">
+                <FontAwesomeIcon icon={faVideo} />
+                No disponible
+              </span>
+            )
+          )}
 
-        {/* 🏆 Resultado */}
+          {isUpcoming && (
+            <a
+              href={gcalLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary !text-xs !px-3 !py-1.5"
+            >
+              <FontAwesomeIcon icon={faCalendarPlus} />
+              Calendario
+            </a>
+          )}
+        </div>
+
+        {/* Result */}
         {match.result && (
-          <div className="pt-2 border-white/10 space-y-1.5">
-            {match.result && (
-              <p className="text-neutral-400 text-3xl font-semibold">
-                {match.result}
-              </p>
-            )}
-          </div>
-        )}
-
-        {isUpcoming && (
-          <a
-            href={gcalLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-blue-600 text-white py-2 px-4 rounded-xl text-center hover:bg-blue-700 transition text-sm flex items-center gap-2"
+          <span
+            className="font-bold text-2xl tabular-nums"
+            style={{ color: accentColor }}
           >
-            <FontAwesomeIcon icon={faCalendarPlus} />
-            Añadir a Google Calendar
-          </a>
+            {match.result}
+          </span>
         )}
       </div>
     </div>

@@ -105,8 +105,13 @@ export default function CalendarPage() {
   ];
 
   return (
-    <main className="p-6 w-full flex-1">
-      <div className="max-w-6xl mx-auto mb-6">
+    <main className="w-full max-w-6xl py-4">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-white mb-1">📅 Calendario</h1>
+        <p className="text-sm text-[var(--text-muted)]">Partidos de la temporada</p>
+      </div>
+
+      <div className="mb-6">
         <FilterBar
           filters={filters}
           setFilters={setFilters}
@@ -115,11 +120,11 @@ export default function CalendarPage() {
       </div>
 
       {filteredMatches.length === 0 ? (
-        <p className="text-center text-gray-100">
+        <p className="text-center text-[var(--text-muted)] py-8">
           No hay partidos que coincidan con los filtros.
         </p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredMatches.map((match) => (
             <MatchCard key={match.id} match={match} isAdmin={user?.isAdmin} />
           ))}

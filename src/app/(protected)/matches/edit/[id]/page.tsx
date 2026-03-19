@@ -278,18 +278,18 @@ export default function EditMatchPage() {
 
           {/* 🏐 Edición de Sets */}
           <div className="mt-6">
-            <h3 className="text-gray-700 font-semibold mb-3">Sets del Partido</h3>
+            <h3 className="text-[var(--text-secondary)] font-semibold mb-3">Sets del Partido</h3>
             <div className="flex flex-col gap-2">
               {sets.map((set, i) => (
                 <div
                   key={i}
                   className="flex items-center gap-3 bg-white/5 border border-white/10 p-2 rounded-xl"
                 >
-                  <span className="text-sm text-gray-700 w-14">Set {set.set_number}</span>
+                  <span className="text-sm text-[var(--text-secondary)] w-14">Set {set.set_number}</span>
                   <input
                     type="number"
                     min={0}
-                    className="w-16 text-center rounded-lg p-1 text-black"
+                    className="w-16 text-center rounded-lg p-1 bg-white/5 text-white border border-white/10 focus:outline-none focus:ring-1 focus:ring-[var(--accent)] [color-scheme:dark]"
                     value={set.team_score}
                     onChange={(e) => handleSetChange(i, "team_score", Number(e.target.value))}
                   />
@@ -297,7 +297,7 @@ export default function EditMatchPage() {
                   <input
                     type="number"
                     min={0}
-                    className="w-16 text-center rounded-lg p-1 text-black"
+                    className="w-16 text-center rounded-lg p-1 bg-white/5 text-white border border-white/10 focus:outline-none focus:ring-1 focus:ring-[var(--accent)] [color-scheme:dark]"
                     value={set.opponent_score}
                     onChange={(e) => handleSetChange(i, "opponent_score", Number(e.target.value))}
                   />

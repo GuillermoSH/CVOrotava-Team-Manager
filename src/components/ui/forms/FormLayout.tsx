@@ -25,32 +25,42 @@ export function FormLayout({
   return (
     <form
       onSubmit={onSubmit}
-      className="flex flex-col w-full gap-3 md:gap-6 text-gray-800 bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-200 p-6 sm:p-10"
+      className="flex flex-col w-full gap-4 md:gap-6 card-glass p-6 sm:p-8"
     >
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">{title}</h1>
+        <h1 className="text-xl font-bold text-white mb-1">{title}</h1>
         {description && (
-          <p className="text-sm text-gray-500 mb-1">{description}</p>
+          <p className="text-sm text-[var(--text-muted)]">{description}</p>
         )}
       </div>
 
+      <div className="w-full h-px bg-white/5" />
+
       {children}
 
-      <div className="flex gap-2 justify-end">
+      <div className="flex gap-2 justify-end pt-2">
         <button
           type="submit"
           disabled={loading}
-          className="bg-red-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-red-700 transition disabled:opacity-50"
+          className="btn-primary py-2.5 px-6 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Guardando..." : buttonText}
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Guardando...
+            </span>
+          ) : (
+            buttonText
+          )}
         </button>
-        {onDelete && (<button
-          type="button"
-          onClick={onDelete}
-          className="bg-gray-500 text-white font-semibold p-3 rounded-xl hover:bg-gray-600 transition"
-        >
-          <FontAwesomeIcon icon={faTrash} />
-        </button>
+        {onDelete && (
+          <button
+            type="button"
+            onClick={onDelete}
+            className="btn-secondary !px-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 hover:border-red-500/20"
+          >
+            <FontAwesomeIcon icon={faTrash} />
+          </button>
         )}
       </div>
     </form>

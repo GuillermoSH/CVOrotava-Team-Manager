@@ -28,37 +28,34 @@ export default function FilterDropdown({ label, options, value, onChange }: Read
 
   return (
     <div className="relative inline-block text-left text-xs" ref={dropdownRef}>
-      {/* Botón principal */}
+      {/* Trigger button */}
       <button
         type="button"
-        className={`w-full font-medium py-2 px-3 md:px-4 rounded-lg flex justify-between items-center transition-all duration-200
-          ${
-            value
-              ? "bg-[#FF2E2E] text-white hover:bg-[#FF4646]"
-              : "bg-[#2A2A2A] text-white/70 hover:bg-[#3A3A3A] hover:text-white"
-          }
-        `}
+        className={`font-medium py-2 px-3.5 rounded-lg flex items-center gap-2 transition-all duration-200 border ${
+          value
+            ? "bg-[var(--accent-muted)] text-red-400 border-red-500/25 hover:bg-red-500/25"
+            : "bg-[var(--glass-surface)] text-[var(--text-secondary)] border-[var(--glass-border)] hover:bg-[var(--glass-surface-hover)] hover:text-[var(--text-primary)]"
+        }`}
         onClick={() => setIsOpen(!isOpen)}
       >
         {value || label}
         <motion.span
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
-          className="ml-1 md:ml-2"
         >
-          <FontAwesomeIcon icon={faAngleDown} />
+          <FontAwesomeIcon icon={faAngleDown} className="text-[10px]" />
         </motion.span>
       </button>
 
-      {/* Opciones con animación */}
+      {/* Dropdown menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            initial={{ opacity: 0, y: -6, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute z-10 mt-2 min-w-max w-full bg-[#141414] rounded-lg shadow-lg border border-white/10 max-h-60 overflow-y-auto text-xs"
+            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute z-10 mt-1.5 min-w-max w-full bg-[var(--color-bg-elevated)] rounded-lg shadow-xl shadow-black/40 border border-white/8 max-h-60 overflow-y-auto text-xs"
           >
             {options.map((option) => (
               <button
@@ -67,13 +64,11 @@ export default function FilterDropdown({ label, options, value, onChange }: Read
                   onChange(option);
                   setIsOpen(false);
                 }}
-                className={`block w-full text-left px-4 py-2 transition-all duration-150
-                  ${
-                    option === value
-                      ? "bg-[#FF2E2E] text-white"
-                      : "text-white/80 hover:bg-[#2A2A2A] hover:text-white"
-                  }
-                `}
+                className={`block w-full text-left px-3.5 py-2.5 transition-all duration-150 first:rounded-t-lg ${
+                  option === value
+                    ? "bg-[var(--accent-muted)] text-red-400"
+                    : "text-[var(--text-secondary)] hover:bg-white/[0.04] hover:text-[var(--text-primary)]"
+                }`}
               >
                 {option}
               </button>
@@ -85,9 +80,10 @@ export default function FilterDropdown({ label, options, value, onChange }: Read
                   onChange("");
                   setIsOpen(false);
                 }}
-                className="w-full text-left px-4 py-2 text-red-400 hover:bg-red-500/20 transition-all"
+                className="w-full text-left px-3.5 py-2.5 text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/5 transition-all rounded-b-lg border-t border-white/5"
               >
-                <FontAwesomeIcon icon={faTrash} className="mr-1" /> Limpiar
+                <FontAwesomeIcon icon={faTrash} className="mr-1.5" />
+                Limpiar
               </button>
             )}
           </motion.div>

@@ -27,8 +27,10 @@ export default function FilterBar({ filters, setFilters, configs }: Readonly<Fil
     }));
   };
 
+  const activeCount = Object.values(filters).filter(Boolean).length;
+
   return (
-    <div className="grid grid-cols-2 md:flex text-xs gap-2 mb-6 flex-wrap">
+    <div className="flex flex-wrap items-center gap-2 mb-6">
       {configs.map((config) => {
         const currentValue = filters[config.key];
         const selectedLabel = config.options.find((opt) => opt.value === currentValue)?.label;
@@ -46,6 +48,20 @@ export default function FilterBar({ filters, setFilters, configs }: Readonly<Fil
           />
         );
       })}
+
+      {activeCount > 0 && (
+        <button
+          onClick={() => {
+            const cleared = Object.fromEntries(
+              Object.keys(filters).map((k) => [k, undefined])
+            );
+            setFilters(cleared);
+          }}
+          className="text-xs text-[var(--text-muted)] hover:text-red-400 transition-colors px-2 py-1"
+        >
+          Limpiar todo ✕
+        </button>
+      )}
     </div>
   );
 }
