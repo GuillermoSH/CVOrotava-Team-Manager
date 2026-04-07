@@ -20,10 +20,15 @@ const matchSchema = z.object({
   notes: z.string().optional().or(z.literal("")),
   result: z.string().optional().or(z.literal("")),
   gender: z.enum(["male", "female"], { message: "El género es obligatorio" }),
-  match_sets: z.array(z.object({
-    team_score: z.coerce.number().int().min(0),
-    opponent_score: z.coerce.number().int().min(0),
-  })).max(5).optional(),
+  match_sets: z
+    .array(
+      z.object({
+        team_score: z.number().int().min(0),
+        opponent_score: z.number().int().min(0),
+      })
+    )
+    .max(5)
+    .optional(),
 });
 
 export type MatchFormValues = z.infer<typeof matchSchema>;
@@ -315,7 +320,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                           <label className="block text-[10px] text-[var(--text-muted)] uppercase tracking-wider mb-1">Nosotros</label>
                           <input
                             type="number"
-                            {...register(`match_sets.${index}.team_score`)}
+                            {...register(`match_sets.${index}.team_score`, { valueAsNumber: true })}
                             className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-white text-sm focus:border-red-500 outline-none text-center"
                             min={0}
                           />
@@ -325,7 +330,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                           <label className="block text-[10px] text-[var(--text-muted)] uppercase tracking-wider mb-1">Rival</label>
                           <input
                             type="number"
-                            {...register(`match_sets.${index}.opponent_score`)}
+                            {...register(`match_sets.${index}.opponent_score`, { valueAsNumber: true })}
                             className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-white text-sm focus:border-red-500 outline-none text-center"
                             min={0}
                           />

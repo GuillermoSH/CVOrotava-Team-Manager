@@ -28,11 +28,24 @@ const paymentSchema = z.object({
 
 export type PaymentFormValues = z.infer<typeof paymentSchema>;
 
+export type PaymentModalInitialData = {
+  id?: string;
+  user_id: string;
+  concept: string;
+  amount: number;
+  status: "pending" | "paid";
+  due_date: string | null;
+  paid_date: string | null;
+  notes: string | null;
+  season: string | null;
+  isDuplicate?: boolean;
+};
+
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  initialData?: any; // Pasa el objeto del pago si es edición
+  initialData?: PaymentModalInitialData | null;
   fixedUserId?: string; // Pasa el ID si ya estamos en un jugador y no se debe cambiar
   users: { id: string; name: string }[];
   isUsersLoading?: boolean;
@@ -54,7 +67,6 @@ export default function PaymentModal({
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-    setValue,
   } = useForm({
     resolver: zodResolver(paymentSchema),
     defaultValues: {

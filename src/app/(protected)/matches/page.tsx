@@ -57,7 +57,7 @@ export default function CalendarPage() {
     if (!filters.gender && user?.gender) {
       setFilters((prev) => ({ ...prev, gender: user.gender! }));
     }
-  }, [user]);
+  }, [user, filters.gender]);
 
   useEffect(() => {
     let filtered = [...matches];

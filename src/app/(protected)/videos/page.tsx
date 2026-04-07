@@ -35,7 +35,7 @@ export default function PartidosPage() {
     if (!filters.gender && user?.gender) {
       setFilters((prev) => ({ ...prev, gender: user.gender! }));
     }
-  }, [user]);
+  }, [user, filters.gender]);
 
   const filterConfigs: FilterConfig[] = [
     {

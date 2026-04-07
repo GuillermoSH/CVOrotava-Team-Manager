@@ -11,8 +11,6 @@ import {
   faCalendarDays,
   faVideo,
   faChartSimple,
-  faPlus,
-  faUpload,
   faMoneyBill,
 } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";

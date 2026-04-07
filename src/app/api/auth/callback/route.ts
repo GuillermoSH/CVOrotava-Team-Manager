@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const supabase = await supabaseServer();
 
   // 1️⃣ Intercambiar el código por una sesión segura en el servidor
-  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
     console.error("❌ Error intercambiando código:", error);
     return NextResponse.redirect(new URL("/login?error=auth", request.url));

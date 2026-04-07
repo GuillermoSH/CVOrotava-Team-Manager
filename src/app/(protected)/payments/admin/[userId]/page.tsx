@@ -14,7 +14,9 @@ import {
   faEdit,
   faCopy,
 } from "@fortawesome/free-solid-svg-icons";
-import PaymentModal from "@/components/payments/PaymentModal";
+import PaymentModal, {
+  type PaymentModalInitialData,
+} from "@/components/payments/PaymentModal";
 
 // Reutilizamos la interfaz
 interface Payment {
@@ -52,7 +54,8 @@ export default function AdminPlayerPaymentsDetail() {
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalInitialData, setModalInitialData] = useState<any>(null);
+  const [modalInitialData, setModalInitialData] =
+    useState<PaymentModalInitialData | null>(null);
   
   // Nombresito para enseñar
   const playerName = payments.length > 0 && payments[0].users?.user_name ? payments[0].users.user_name : "Jugador";

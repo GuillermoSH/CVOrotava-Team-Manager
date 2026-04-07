@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
+type MatchSetInput = { team_score: number; opponent_score: number };
+
 // TODO: params quitar el PROMISE (arreglo de bug temporal en vercel)
 export async function GET(
   req: NextRequest,
@@ -90,7 +92,7 @@ export async function PUT(
       await supabaseAdmin.from("match_sets").delete().eq("match_id", id);
       
       if (body.match_sets && body.match_sets.length > 0) {
-        const formattedSets = body.match_sets.map((s: any, idx: number) => ({
+        const formattedSets = (body.match_sets as MatchSetInput[]).map((s, idx) => ({
           match_id: id,
           set_number: idx + 1,
           team_score: s.team_score,
