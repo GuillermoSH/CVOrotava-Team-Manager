@@ -11,6 +11,7 @@ import {
   FormTime,
   FormSelect,
 } from "@/components/ui/forms";
+import Loading from "@/components/common/Loading";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
 
@@ -40,13 +41,15 @@ type VenueOption = {
 
 export default function MatchCreatePage() {
   const [venues, setVenues] = useState<VenueOption[]>([]);
-  const { user } = useUser();
+  const [loadingVenues, setLoadingVenues] = useState(true);
+  const { user, loading: userLoading } = useUser();
 
   useEffect(() => {
     async function fetchVenues() {
       const res = await fetch("/api/venues");
       const data = await res.json();
       setVenues(data);
+      setLoadingVenues(false);
     }
     fetchVenues();
   }, []);
@@ -70,6 +73,8 @@ export default function MatchCreatePage() {
       gender: user?.gender ?? undefined,
     },
   });
+
+  if (userLoading || loadingVenues) return <Loading />;
 
   const uniqueVenues = Array.from(
     new Map(venues.map((v) => [v.venue_name, v])).values()

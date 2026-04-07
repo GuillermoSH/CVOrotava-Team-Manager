@@ -51,11 +51,6 @@ export default function Navbar() {
     { name: "Pagos", href: "/payments", icon: faMoneyBill },
   ];
 
-  if (user?.isAdmin) {
-    navItems.push({ name: "Crear partido", href: "/matches/create", icon: faPlus });
-    navItems.push({ name: "Subir vídeo", href: "/videos/create", icon: faUpload });
-  }
-
   const isActive = (href: string) => pathname === href;
 
   // User initials for avatar

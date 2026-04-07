@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { supabaseServer } from "@/lib/supabase/server";
 
 export async function GET(req: Request) {
-  const supabase = await supabaseServer(); // ✅ este es el correcto
   const { searchParams } = new URL(req.url);
 
   const category = searchParams.get("category") as "match" | "training";
@@ -13,7 +11,7 @@ export async function GET(req: Request) {
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "12", 10);
 
-  let query = supabase
+  let query = supabaseAdmin
     .from("videos")
     .select("*");
 

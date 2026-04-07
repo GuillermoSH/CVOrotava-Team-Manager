@@ -7,6 +7,9 @@ import useViewportHeight from "@/hooks/useViewportHeight";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
 import { useSeasons } from "@/contexts/SeasonContext";
+import VideoModal, { VideoFormValues } from "@/components/videos/VideoModal";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 type Filters = {
   season?: string;
@@ -22,6 +25,10 @@ export default function PartidosPage() {
     gender: user?.gender ?? undefined,
   });
   const { seasons } = useSeasons();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingVideo, setEditingVideo] = useState<VideoFormValues | undefined>(undefined);
+  const [refreshKey, setRefreshKey] = useState(0);
+
   useViewportHeight();
 
   useEffect(() => {
@@ -64,16 +71,55 @@ export default function PartidosPage() {
 
   return (
     <main className="w-full max-w-6xl py-4">
-      <div className="mb-6">
-        <h1 className="text-2xl text-white font-bold mb-1">🎥 Videos</h1>
-        <p className="text-sm text-[var(--text-muted)]">Partidos y entrenamientos grabados</p>
+      <div className="mb-6 flex flex-wrap justify-between items-end gap-4">
+        <div>
+          <h1 className="text-2xl text-white font-bold mb-1">🎥 Videos</h1>
+          <p className="text-sm text-[var(--text-muted)]">Partidos y entrenamientos grabados</p>
+        </div>
+        {user?.isAdmin && (
+          <button 
+            type="button" 
+            className="btn-primary flex items-center gap-2"
+            onClick={() => {
+              setEditingVideo(undefined);
+              setIsModalOpen(true);
+            }}
+          >
+            <FontAwesomeIcon icon={faPlus} /> Añadir Vídeo
+          </button>
+        )}
       </div>
+
       <FilterBar
         filters={filters}
         setFilters={setFilters}
         configs={filterConfigs}
       />
-      <VideosGrid filters={filters} />
+      <VideosGrid 
+        key={refreshKey}
+        filters={filters} 
+        isAdmin={user?.isAdmin}
+        onEdit={(v) => {
+          setEditingVideo({
+            id: v.id,
+            url: v.url,
+            category: v.category,
+            season: v.season,
+            competition_type: v.competition_type,
+            gender: v.gender,
+          });
+          setIsModalOpen(true);
+        }}
+      />
+
+      {user?.isAdmin && (
+        <VideoModal 
+          isOpen={isModalOpen}
+          initialData={editingVideo}
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={() => setRefreshKey(k => k + 1)}
+        />
+      )}
     </main>
   );
 }

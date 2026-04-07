@@ -2,11 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 
-type Video = {
-  id: string;
-  url: string;
-  created_at: string;
-};
+import { Video } from "@/components/videos/VideoCard";
 
 type Filters = {
   season?: string;

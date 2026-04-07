@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, Variants } from "framer-motion";
+import Loading from "@/components/common/Loading";
 import { useUser } from "@/contexts/UserContext";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,7 +11,12 @@ import {
   faCheckCircle,
   faCircleExclamation,
   faUsers,
+  faPlus,
 } from "@fortawesome/free-solid-svg-icons";
+import PaymentModal from "@/components/payments/PaymentModal";
+import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
+import { useSeasons } from "@/contexts/SeasonContext";
+import { getCurrentSeason } from "@/utils/getCurrentSeason";
 
 type PaymentStatus = "pending" | "paid";
 
@@ -46,6 +52,22 @@ const stagger: Variants = {
   visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
 };
 
+type AdminSortKey = "name_asc" | "name_desc" | "debt_desc" | "debt_asc" | "status";
+
+function playerInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0]![0]}${parts[parts.length - 1]![0]}`.toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase() || "?";
+}
+
+function statusRank(s: AdminOverviewRow["status"]): number {
+  if (s === "danger") return 2;
+  if (s === "warning") return 1;
+  return 0;
+}
+
 export default function PaymentsPage() {
   const { user } = useUser();
   const router = useRouter();
@@ -55,52 +77,104 @@ export default function PaymentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { seasons } = useSeasons();
+
+  // Filtros
+  const [filters, setFilters] = useState<Record<string, string | undefined>>({
+    season: getCurrentSeason(),
+    gender: user?.gender ?? undefined,
+  });
+
+  // Users for modal
+  const [allUsers, setAllUsers] = useState<{ id: string; name: string }[]>([]);
+  const [usersLoading, setUsersLoading] = useState(true);
+
+  // Sync user gender once it loads if not an admin (admins can see all or explicitly filter)
   useEffect(() => {
-    async function fetchPayments() {
-      try {
-        const res = await fetch("/api/payments");
-        if (!res.ok) throw new Error("Error cargando los pagos");
-        
-        const json = await res.json();
-        const data = json.data as Payment[];
-
-        if (json.isAdmin) {
-          // Procesar para la tabla admin
-          const playerMap = new Map<string, AdminOverviewRow>();
-
-          data.forEach((p) => {
-            if (!playerMap.has(p.user_id)) {
-              playerMap.set(p.user_id, {
-                user_id: p.user_id,
-                player: p.users?.user_name || "Desconocido",
-                pendingAmount: 0,
-                status: "success",
-              });
-            }
-
-            if (p.status === "pending") {
-              const row = playerMap.get(p.user_id)!;
-              row.pendingAmount += Number(p.amount);
-              // Determinar gravedad de la deuda
-              row.status = row.pendingAmount >= 100 ? "danger" : "warning";
-            }
-          });
-
-          setAdminOverview(Array.from(playerMap.values()));
-        } else {
-          // Vista Jugador normal
-          setPayments(data);
-        }
-      } catch (err: unknown) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
+    if (user && !user.isAdmin && user.gender && !filters.gender) {
+      setFilters((prev) => ({ ...prev, gender: user.gender as string }));
     }
+  }, [user, filters.gender]);
 
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [adminSort, setAdminSort] = useState<AdminSortKey>("name_asc");
+
+  const fetchPayments = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (user?.isAdmin) {
+        if (filters.season) params.append("season", filters.season);
+        if (filters.gender) params.append("gender", filters.gender);
+      } else {
+        if (filters.season) params.append("season", filters.season);
+      }
+
+      const res = await fetch(`/api/payments?${params.toString()}`);
+      if (!res.ok) throw new Error("Error cargando los pagos");
+      
+      const json = await res.json();
+      const data = json.data as Payment[];
+
+      if (json.isAdmin) {
+        const playerMap = new Map<string, AdminOverviewRow>();
+        data.forEach((p) => {
+          if (!playerMap.has(p.user_id)) {
+            playerMap.set(p.user_id, {
+              user_id: p.user_id,
+              player: p.users?.user_name || "Desconocido",
+              pendingAmount: 0,
+              status: "success",
+            });
+          }
+          if (p.status === "pending") {
+            const row = playerMap.get(p.user_id)!;
+            row.pendingAmount += Number(p.amount);
+            row.status = row.pendingAmount >= 100 ? "danger" : "warning";
+          }
+        });
+        setAdminOverview(Array.from(playerMap.values()));
+      } else {
+        setPayments(data);
+      }
+    } catch (err: unknown) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (user) {
       fetchPayments();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, filters]);
+
+  // Fetch all users for the Modal
+  useEffect(() => {
+    async function fetchAllUsers() {
+      if (!user?.isAdmin) return;
+      try {
+        const res = await fetch("/api/users");
+        if (res.ok) {
+          const data = await res.json();
+          setAllUsers(
+            data.map((u: { id: string; user_name?: string | null }) => ({
+              id: u.id,
+              name: u.user_name || "Desconocido",
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Error al cargar usuarios", err);
+      } finally {
+        setUsersLoading(false);
+      }
+    }
+    fetchAllUsers();
   }, [user]);
 
   // Metrics calculation (Player Only)
@@ -133,6 +207,45 @@ export default function PaymentsPage() {
     return `${day}/${month}/${year}`;
   };
 
+  const sortedAdminOverview = useMemo(() => {
+    const rows = [...adminOverview];
+    const byName = (a: AdminOverviewRow, b: AdminOverviewRow) =>
+      a.player.localeCompare(b.player, "es", { sensitivity: "base" });
+
+    switch (adminSort) {
+      case "name_asc":
+        return rows.sort(byName);
+      case "name_desc":
+        return rows.sort((a, b) => -byName(a, b));
+      case "debt_desc":
+        return rows.sort((a, b) => b.pendingAmount - a.pendingAmount || byName(a, b));
+      case "debt_asc":
+        return rows.sort((a, b) => a.pendingAmount - b.pendingAmount || byName(a, b));
+      case "status":
+        return rows.sort(
+          (a, b) => statusRank(b.status) - statusRank(a.status) || byName(a, b)
+        );
+      default:
+        return rows;
+    }
+  }, [adminOverview, adminSort]);
+
+  const filterConfigs: FilterConfig[] = [
+    {
+      key: "season",
+      label: "Temporada",
+      options: seasons.map((s) => ({ label: s, value: s })),
+    },
+    ...(user?.isAdmin ? [{
+      key: "gender",
+      label: "Género",
+      options: [
+        { label: "Masculino", value: "male" },
+        { label: "Femenino", value: "female" },
+      ],
+    }] : []),
+  ];
+
   return (
     <motion.main
       className="flex flex-col items-center w-full max-w-6xl py-4 text-white"
@@ -155,19 +268,24 @@ export default function PaymentsPage() {
           <button 
             type="button" 
             className="btn-primary flex items-center gap-2"
-            onClick={() => window.location.href = '/payments/admin'}
+            onClick={() => setIsModalOpen(true)}
           >
-            Gestión de Pagos
+            <FontAwesomeIcon icon={faPlus} /> Añadir Pago
           </button>
         )}
       </motion.div>
 
+      {/* Filters */}
+      <motion.div variants={fadeUp} className="w-full">
+        <FilterBar
+          filters={filters}
+          setFilters={setFilters}
+          configs={filterConfigs}
+        />
+      </motion.div>
+
       {/* Loading / Error states */}
-      {loading && (
-        <div className="w-full flex justify-center py-10 text-[var(--text-muted)]">
-          <p>Cargando información de pagos...</p>
-        </div>
-      )}
+      {loading && <Loading />}
 
       {error && !loading && (
         <div className="w-full p-4 mb-4 bg-red-900/20 border border-red-500/30 rounded-xl">
@@ -181,56 +299,104 @@ export default function PaymentsPage() {
           {user?.isAdmin ? (
             /* ── ADMIN VIEW ── */
             <motion.div variants={stagger} className="w-full space-y-4">
-              <motion.div variants={fadeUp} className="card-glass p-5">
-                <h2 className="section-header mb-4">
-                  <FontAwesomeIcon icon={faUsers} className="text-[var(--text-secondary)] text-sm" />
-                  Jugadores con actividad
-                </h2>
-                
+              <motion.div variants={fadeUp} className="card-glass p-5 sm:p-6">
+                <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <h2 className="section-header mb-0">
+                    <FontAwesomeIcon icon={faUsers} className="text-[var(--text-secondary)] text-sm" />
+                    Jugadores con actividad
+                  </h2>
+                  {adminOverview.length > 0 && (
+                    <label className="flex w-full flex-col gap-1.5 text-xs sm:max-w-xs sm:items-end">
+                      <span className="font-medium uppercase tracking-wide text-[var(--text-muted)]">
+                        Ordenar por
+                      </span>
+                      <select
+                        value={adminSort}
+                        onChange={(e) => setAdminSort(e.target.value as AdminSortKey)}
+                        className="w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2.5 text-sm font-medium text-white shadow-inner outline-none transition hover:border-white/15 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/25 sm:w-auto sm:min-w-[14rem]"
+                      >
+                        <option value="name_asc">Nombre (A → Z)</option>
+                        <option value="name_desc">Nombre (Z → A)</option>
+                        <option value="debt_desc">Deuda (mayor primero)</option>
+                        <option value="debt_asc">Deuda (menor primero)</option>
+                        <option value="status">Estado (crítico primero)</option>
+                      </select>
+                    </label>
+                  )}
+                </div>
+
                 <div className="overflow-x-auto">
                   {adminOverview.length === 0 ? (
-                    <div className="py-8 text-center text-[var(--text-muted)] text-sm bg-white/[0.02] rounded-lg border border-white/5">
+                    <div className="rounded-xl border border-white/5 bg-white/[0.02] py-10 text-center text-sm text-[var(--text-muted)]">
                       No hay datos de pagos registrados en el club.
                     </div>
                   ) : (
-                    <table className="w-full text-left text-sm">
-                      <thead>
-                        <tr className="border-b border-white/10 text-[var(--text-muted)]">
-                          <th className="pb-3 font-medium">Jugador</th>
-                          <th className="pb-3 font-medium">Deuda acumulada</th>
-                          <th className="pb-3 font-medium text-right">Estado</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5">
-                        {adminOverview.map((item) => (
-                          <tr 
-                            key={item.user_id} 
-                            onClick={() => router.push(`/payments/admin/${item.user_id}`)}
-                            className="group hover:bg-white/[0.04] transition-colors cursor-pointer border-b border-white/5 last:border-0"
-                          >
-                            <td className="py-4 px-2 font-medium text-white group-hover:text-[var(--accent-hover)] transition-colors">
-                              {item.player}
-                            </td>
-                            <td className="py-4">
-                              {item.pendingAmount > 0 ? (
-                                <span className="text-red-400 font-semibold">{item.pendingAmount}€</span>
-                              ) : (
-                                <span className="text-green-400 font-medium">Al día</span>
-                              )}
-                            </td>
-                            <td className="py-4 text-right">
-                              {item.pendingAmount > 0 ? (
-                                <span className={`badge ${item.status === 'danger' ? 'badge-danger' : 'badge-warning'}`}>
-                                  {item.status === 'danger' ? 'Crítico' : 'Aviso'}
-                                </span>
-                              ) : (
-                                <span className="badge badge-success">OK</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs text-[var(--text-muted)]">
+                        {sortedAdminOverview.length}{" "}
+                        {sortedAdminOverview.length === 1 ? "jugador" : "jugadores"} · pulsa una fila para el detalle
+                      </p>
+
+                      <ul className="mt-1 flex flex-col gap-2">
+                        {sortedAdminOverview.map((item) => {
+                          const avatarTone =
+                            item.status === "danger"
+                              ? "border-red-500/35 bg-red-500/10 text-red-100"
+                              : item.status === "warning"
+                                ? "border-amber-500/35 bg-amber-500/10 text-amber-100"
+                                : "border-emerald-500/35 bg-emerald-500/10 text-emerald-100";
+
+                          return (
+                            <li key={item.user_id}>
+                              <button
+                                type="button"
+                                onClick={() => router.push(`/payments/admin/${item.user_id}`)}
+                                className="group flex w-full flex-col gap-3 rounded-xl border border-white/[0.07] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-4 text-left shadow-sm transition-all duration-200 hover:border-white/15 hover:from-white/[0.06] hover:to-white/[0.03] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/45 sm:flex-row sm:items-center sm:gap-4 sm:p-4"
+                              >
+                                <div className="flex min-w-0 flex-1 items-center gap-3">
+                                  <div
+                                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border text-sm font-bold ${avatarTone}`}
+                                  >
+                                    {playerInitials(item.player)}
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="truncate font-semibold text-white group-hover:text-white">
+                                      {item.player}
+                                    </p>
+                                    <p className="mt-0.5 text-xs text-[var(--text-muted)] sm:hidden">
+                                      {item.pendingAmount > 0 ? "Pendiente de cuota" : "Sin cuotas pendientes"}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-1 items-center justify-between gap-6 border-t border-white/[0.06] pt-3 sm:flex-initial sm:gap-8 sm:border-0 sm:pt-0">
+                                  <div className="min-w-[5rem] text-left sm:w-28 sm:flex sm:justify-center">
+                                    {item.pendingAmount > 0 ? (
+                                      <span className="text-lg font-bold tabular-nums text-red-400">
+                                        {item.pendingAmount}€
+                                      </span>
+                                    ) : (
+                                      <span className="text-sm font-semibold text-green-400">Al día</span>
+                                    )}
+                                  </div>
+                                  <div className="flex shrink-0 justify-end pr-1 sm:min-w-[6.5rem] sm:justify-center sm:pr-0">
+                                    {item.pendingAmount > 0 ? (
+                                      <span
+                                        className={`badge ${item.status === "danger" ? "badge-danger" : "badge-warning"}`}
+                                      >
+                                        {item.status === "danger" ? "Crítico" : "Aviso"}
+                                      </span>
+                                    ) : (
+                                      <span className="badge badge-success">OK</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
                   )}
                 </div>
               </motion.div>
@@ -301,6 +467,17 @@ export default function PaymentsPage() {
             </motion.div>
           )}
         </>
+      )}
+
+      {/* Admin Add Payment Modal */}
+      {user?.isAdmin && (
+        <PaymentModal 
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={fetchPayments}
+          users={allUsers}
+          isUsersLoading={usersLoading}
+        />
       )}
     </motion.main>
   );

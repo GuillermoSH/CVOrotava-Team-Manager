@@ -10,7 +10,11 @@ import {
   faCircleExclamation,
   faTrash,
   faCheck,
+  faPlus,
+  faEdit,
+  faCopy,
 } from "@fortawesome/free-solid-svg-icons";
+import PaymentModal from "@/components/payments/PaymentModal";
 
 // Reutilizamos la interfaz
 interface Payment {
@@ -22,6 +26,7 @@ interface Payment {
   due_date: string | null;
   paid_date: string | null;
   notes: string | null;
+  season: string | null;
   users?: { user_name: string };
 }
 
@@ -44,6 +49,10 @@ export default function AdminPlayerPaymentsDetail() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalInitialData, setModalInitialData] = useState<any>(null);
   
   // Nombresito para enseñar
   const playerName = payments.length > 0 && payments[0].users?.user_name ? payments[0].users.user_name : "Jugador";
@@ -106,6 +115,22 @@ export default function AdminPlayerPaymentsDetail() {
     }
   };
 
+  const openAddModal = () => {
+    setModalInitialData(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (payment: Payment) => {
+    setModalInitialData(payment);
+    setIsModalOpen(true);
+  };
+
+  const duplicatePayment = (payment: Payment) => {
+    // Se pasa como edición pero se marca que es duplicado
+    setModalInitialData({ ...payment, status: "pending", paid_date: null, isDuplicate: true });
+    setIsModalOpen(true);
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "No especificada";
     const [year, month, day] = dateString.split("T")[0].split("-");
@@ -161,8 +186,14 @@ export default function AdminPlayerPaymentsDetail() {
       </motion.div>
 
       {/* Payment records */}
-      <motion.div variants={fadeUp} className="w-full flex justify-between items-center mb-4 mt-6">
-         <h2 className="text-lg font-semibold border-b border-white/20 pb-2 flex-grow">Historial de Cuotas</h2>
+      <motion.div variants={fadeUp} className="w-full flex flex-col sm:flex-row justify-between items-center mb-4 mt-6 gap-3">
+         <h2 className="text-lg font-semibold border-b border-white/20 pb-2 w-full sm:w-auto flex-grow">Historial de Cuotas</h2>
+         <button 
+           onClick={openAddModal}
+           className="btn-primary py-2 px-4 whitespace-nowrap self-stretch sm:self-auto flex items-center justify-center gap-2"
+         >
+           <FontAwesomeIcon icon={faPlus} /> Añadir Pago
+         </button>
       </motion.div>
 
       <div className="w-full flex flex-col gap-3">
@@ -195,8 +226,9 @@ export default function AdminPlayerPaymentsDetail() {
                 
                 <p className="text-sm text-[var(--text-muted)] mt-1">
                   Fecha límite: <span className="text-white/80 font-mono">{formatDate(p.due_date)}</span>
+                  {p.season && <span className="ml-3 px-2 py-0.5 bg-white/10 rounded text-xs">{p.season}</span>}
                   {p.status === 'paid' && p.paid_date && (
-                    <span className="ml-3 text-green-300/70">Pagado el: <span className="font-mono">{formatDate(p.paid_date)}</span></span>
+                    <span className="ml-3 text-green-300/70 block sm:inline mt-1 sm:mt-0">Pagado el: <span className="font-mono">{formatDate(p.paid_date)}</span></span>
                   )}
                 </p>
                 {p.notes && <p className="text-xs text-[var(--text-muted)] italic mt-2 opacity-80">&quot;{p.notes}&quot;</p>}
@@ -208,18 +240,32 @@ export default function AdminPlayerPaymentsDetail() {
                 </span>
 
                 <div className="flex items-stretch gap-2">
+                  <button
+                    onClick={() => openEditModal(p)}
+                    className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-lg transition-colors text-sm flex items-center justify-center"
+                    title="Editar cuota"
+                  >
+                    <FontAwesomeIcon icon={faEdit} />
+                  </button>
+                  <button
+                    onClick={() => duplicatePayment(p)}
+                    className="px-3 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 rounded-lg transition-colors text-sm flex items-center justify-center"
+                    title="Duplicar cuota"
+                  >
+                    <FontAwesomeIcon icon={faCopy} />
+                  </button>
                   {p.status === 'pending' && (
                     <button
                       onClick={() => markAsPaid(p.id)}
-                      className="px-3 py-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                      className="px-3 py-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 rounded-lg transition-colors text-sm flex items-center justify-center"
                       title="Marcar como pagado"
                     >
-                      <FontAwesomeIcon icon={faCheck} /> Pagado
+                      <FontAwesomeIcon icon={faCheck} />
                     </button>
                   )}
                   <button
                     onClick={() => deletePayment(p.id)}
-                    className="px-3 py-2 bg-red-500/5 hover:bg-red-500/15 text-red-400/70 hover:text-red-400 border border-transparent hover:border-red-500/20 rounded-lg transition-all text-sm flex items-center gap-2"
+                    className="px-3 py-2 bg-red-500/5 hover:bg-red-500/15 text-red-400/70 hover:text-red-400 border border-transparent hover:border-red-500/20 rounded-lg transition-all text-sm flex items-center justify-center"
                     title="Eliminar cuota"
                   >
                     <FontAwesomeIcon icon={faTrash} /> 
@@ -230,6 +276,14 @@ export default function AdminPlayerPaymentsDetail() {
           ))
         )}
       </div>
+      <PaymentModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchPayments}
+        initialData={modalInitialData}
+        fixedUserId={targetUserId}
+        users={payments.length > 0 ? [{ id: targetUserId, name: playerName }] : []} // No precisamos cargar los demás porque está fixed
+      />
     </motion.main>
   );
 }

@@ -4,7 +4,13 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 const patchSchema = z.object({
-  status: z.enum(["pending", "paid"]),
+  concept: z.string().optional(),
+  amount: z.number().optional(),
+  status: z.enum(["pending", "paid"]).optional(),
+  due_date: z.string().optional().nullable(),
+  paid_date: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  season: z.string().optional().nullable(),
 });
 
 // Uso el client administrador de backend genérico
@@ -45,13 +51,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (!id) return NextResponse.json({ error: "ID de pago faltante" }, { status: 400 });
 
     const body = await req.json();
-    const { status: newStatus } = patchSchema.parse(body);
+    const updateData = patchSchema.parse(body);
 
     const supabaseAdmin = getSupaAdmin();
+    
+    // Auto-set paid_date only if we explicitly transitioned to paid and no date was provided
+    if (updateData.status === "paid" && updateData.paid_date === undefined) {
+      updateData.paid_date = new Date().toISOString().split("T")[0];
+    } else if (updateData.status === "pending") {
+      updateData.paid_date = null;
+    }
 
     const { error: updateError } = await supabaseAdmin
       .from("payments")
-      .update({ status: newStatus, paid_date: newStatus === "paid" ? new Date().toISOString().split("T")[0] : null })
+      .update(updateData)
       .eq("id", id);
 
     if (updateError) throw new Error(updateError.message);

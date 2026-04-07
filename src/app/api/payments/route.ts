@@ -6,6 +6,8 @@ import { createClient } from "@supabase/supabase-js";
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const targetUserId = url.searchParams.get("userId");
+  const season = url.searchParams.get("season");
+  const gender = url.searchParams.get("gender");
 
   const supabase = await supabaseServer();
   const {
@@ -38,12 +40,29 @@ export async function GET(req: Request) {
       .from("payments")
       .select(`
         *,
-        users ( user_name )
+        users ( user_name, gender )
       `)
       .order("due_date", { ascending: true, nullsFirst: false });
 
     if (targetUserId) {
       query = query.eq("user_id", targetUserId);
+    }
+    if (season) query = query.eq("season", season);
+    
+    // For manual gender filtering with LEFT JOIN, we can't reliably do .eq("users.gender", gender) in Supabase 
+    // unless we use inner join. So if gender is provided, we MUST use inner join.
+    if (gender) {
+      query = supabaseAdmin
+        .from("payments")
+        .select(`
+          *,
+          users!inner ( user_name, gender )
+        `)
+        .order("due_date", { ascending: true, nullsFirst: false });
+      
+      if (targetUserId) query = query.eq("user_id", targetUserId);
+      if (season) query = query.eq("season", season);
+      query = query.eq("users.gender", gender);
     }
 
     const { data: payments, error } = await query;
@@ -53,10 +72,14 @@ export async function GET(req: Request) {
     return NextResponse.json({ data: payments, isAdmin: true });
   } else {
     // PLAYER VIEW: Obtener solo sus pagos (asegurado por RLS)
-    const { data: payments, error } = await supabase
+    let query = supabase
       .from("payments")
       .select("*")
       .order("due_date", { ascending: true, nullsFirst: false });
+
+    if (season) query = query.eq("season", season);
+
+    const { data: payments, error } = await query;
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
@@ -73,6 +96,7 @@ const paymentPostSchema = z.object({
   due_date: z.string().optional(),
   paid_date: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
+  season: z.string().optional().nullable(),
 });
 
 export async function POST(req: Request) {
@@ -103,12 +127,13 @@ export async function POST(req: Request) {
 
     const { user_id, ...paymentData } = parsedData;
 
-    // FECHAS (asegurar nulos si están vacías en vez de "")
+    // FECHAS y extras (asegurar nulos si están vacías en vez de "")
     const cleanData = {
       ...paymentData,
       due_date: paymentData.due_date || null,
       paid_date: paymentData.paid_date || null,
       notes: paymentData.notes || null,
+      season: paymentData.season || null,
     };
 
     if (user_id === "ALL") {

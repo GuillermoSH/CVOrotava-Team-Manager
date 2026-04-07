@@ -1,30 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import MatchCard from "@/components/calendar/MatchCard";
+import MatchCard, { Match } from "@/components/calendar/MatchCard";
+import MatchModal, { MatchFormValues } from "@/components/calendar/MatchModal";
+import { matchToModalInitialValues } from "@/lib/matchFormValues";
 import Loading from "@/components/common/Loading";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
 import { useSeasons } from "@/contexts/SeasonContext";
-
-export type Match = {
-  id: string;
-  date: string;
-  time: string;
-  opponent: string;
-  season: string;
-  result?: string;
-  video_url?: string;
-  notes?: string;
-  gender: "male" | "female";
-  venues: {
-    id: string;
-    venue_name: string;
-    location_url?: string;
-    location_type: "home" | "away" | "outside_island";
-  };
-};
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 type Filters = {
   season?: string;
@@ -36,23 +22,25 @@ export default function CalendarPage() {
   const { user, loading: userLoading } = useUser();
   const [matches, setMatches] = useState<Match[]>([]);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
-  const [filters, setFilters] = useState<Filters>(() => ({
+  const [filters, setFilters] = useState<Filters>({
     season: getCurrentSeason(),
     gender: user?.gender ?? undefined,
-  }));
+  });
   const { seasons } = useSeasons();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchMatches = async () => {
-      try {
-        const res = await fetch("/api/matches?order=asc");
-        if (!res.ok) throw new Error("Error al obtener partidos");
-        const data = (await res.json()) as Match[];
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingMatch, setEditingMatch] = useState<MatchFormValues | undefined>(undefined);
 
-        setMatches(data);
-        setFilteredMatches(data);
+  const fetchMatches = async () => {
+    try {
+      const res = await fetch("/api/matches?order=asc");
+      if (!res.ok) throw new Error("Error al obtener partidos");
+      const data = (await res.json()) as Match[];
+
+      setMatches(data);
+      setFilteredMatches(data);
       } catch (err) {
         console.error(err);
         setError("No se pudo cargar el calendario.");
@@ -61,6 +49,7 @@ export default function CalendarPage() {
       }
     };
 
+  useEffect(() => {
     fetchMatches();
   }, []);
 
@@ -106,9 +95,23 @@ export default function CalendarPage() {
 
   return (
     <main className="w-full max-w-6xl py-4">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-1">📅 Calendario</h1>
-        <p className="text-sm text-[var(--text-muted)]">Partidos de la temporada</p>
+      <div className="mb-6 flex flex-wrap justify-between items-end gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-1">📅 Calendario</h1>
+          <p className="text-sm text-[var(--text-muted)]">Partidos de la temporada</p>
+        </div>
+        {user?.isAdmin && (
+          <button 
+            type="button" 
+            className="btn-primary flex items-center gap-2"
+            onClick={() => {
+              setEditingMatch(undefined);
+              setIsModalOpen(true);
+            }}
+          >
+            <FontAwesomeIcon icon={faPlus} /> Añadir Partido
+          </button>
+        )}
       </div>
 
       <div className="mb-6">
@@ -126,9 +129,28 @@ export default function CalendarPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredMatches.map((match) => (
-            <MatchCard key={match.id} match={match} isAdmin={user?.isAdmin} />
+            <MatchCard 
+              key={match.id} 
+              match={match} 
+              isAdmin={user?.isAdmin}
+              onEdit={(m) => {
+                setEditingMatch(matchToModalInitialValues(m));
+                setIsModalOpen(true);
+              }}
+            />
           ))}
         </div>
+      )}
+
+      {user?.isAdmin && (
+        <MatchModal 
+          isOpen={isModalOpen}
+          initialData={editingMatch}
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={() => {
+            fetchMatches();
+          }}
+        />
       )}
     </main>
   );

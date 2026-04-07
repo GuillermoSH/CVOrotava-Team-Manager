@@ -3,35 +3,48 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { getThumbnailUrl, getYoutubeTitle } from "@/lib/youtube";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlay } from "@fortawesome/free-solid-svg-icons";
+import { faPlay, faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 import { getDateByTimestampz } from "@/lib/videos";
 
-type VideoCardProps = {
+export type Video = {
+  id: string;
   url: string;
   created_at: string;
+  category: "match" | "training";
+  season: string;
+  competition_type: "league" | "friendly";
+  gender: "male" | "female";
+};
+
+type VideoCardProps = {
+  video: Video;
+  isAdmin?: boolean;
+  onEdit?: (video: Video) => void;
 };
 
 export default function VideoCard({
-  url,
-  created_at,
+  video,
+  isAdmin,
+  onEdit,
 }: Readonly<VideoCardProps>) {
   const [title, setTitle] = useState<string>("");
 
   useEffect(() => {
-    if (url) getYoutubeTitle(url).then((t) => setTitle(t || "Video"));
-  }, [url]);
+    if (video.url) getYoutubeTitle(video.url).then((t) => setTitle(t || "Video"));
+  }, [video.url]);
 
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex flex-col relative overflow-hidden h-full rounded-xl border border-white/[0.06] bg-[var(--glass-surface)] transition-all duration-300 hover:border-white/15 hover:shadow-xl hover:shadow-black/30 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500/50"
-    >
+    <div className="relative group h-full">
+      <a
+        href={video.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex flex-col relative overflow-hidden h-full rounded-xl border border-white/[0.06] bg-[var(--glass-surface)] transition-all duration-300 hover:border-white/15 hover:shadow-xl hover:shadow-black/30 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+      >
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden">
         <Image
-          src={getThumbnailUrl(url, "max")}
+          src={getThumbnailUrl(video.url, "max")}
           alt={title || "Video"}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -57,9 +70,24 @@ export default function VideoCard({
           {title}
         </h2>
         <span className="text-xs text-[var(--text-muted)]">
-          {getDateByTimestampz(created_at)}
+          {getDateByTimestampz(video.created_at)}
         </span>
       </div>
-    </a>
+      </a>
+
+      {isAdmin && (
+        <button
+          className="absolute z-10 top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 hover:bg-black/80 backdrop-blur-sm text-white px-2 py-1.5 rounded-lg border border-white/10 flex items-center gap-1.5 text-xs font-medium"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (onEdit) onEdit(video);
+          }}
+        >
+          <FontAwesomeIcon icon={faPenToSquare} />
+          Editar
+        </button>
+      )}
+    </div>
   );
 }

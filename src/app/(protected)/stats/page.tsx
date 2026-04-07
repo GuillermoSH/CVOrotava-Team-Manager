@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Loading from "@/components/common/Loading";
 import {
   BarChart,
   Bar,
@@ -171,9 +172,7 @@ export default function StatsPage() {
       </motion.div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <div className="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
-        </div>
+        <Loading />
       ) : (
         <motion.div
           variants={stagger}

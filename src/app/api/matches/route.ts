@@ -3,12 +3,23 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { z } from "zod";
 
 const matchSchema = z.object({
-    date: z.string(),
-    time: z.string(),
-    opponent: z.string(),
-    season: z.string(),
-    gender: z.enum(["male", "female"]),
-    venue_id: z.string().uuid(),
+  date: z.string(),
+  time: z.string(),
+  opponent: z.string(),
+  season: z.string(),
+  gender: z.enum(["male", "female"]),
+  venue_id: z.string().uuid(),
+  result: z.string().optional().nullable(),
+  video_url: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  match_sets: z
+    .array(
+      z.object({
+        team_score: z.number().int(),
+        opponent_score: z.number().int(),
+      })
+    )
+    .optional(),
 });
 
 export async function GET(req: Request) {
@@ -23,7 +34,9 @@ export async function GET(req: Request) {
   try {
     let query = supabaseAdmin
       .from("matches")
-      .select("*, venues(venue_name, location_type)")
+      .select(
+        "*, venues(id, venue_name, location_type, location_url), match_sets(id, set_number, team_score, opponent_score)"
+      )
       .order("date", { ascending })
       .order("time", { ascending });
 
@@ -61,17 +74,39 @@ export async function POST(req: Request) {
             );
         }
 
-        const match = parsed.data;
+        const { match_sets, ...match } = parsed.data;
+
+        // Limpiar nulos
+        const matchData = {
+          ...match,
+          result: match.result || null,
+          video_url: match.video_url || null,
+          notes: match.notes || null,
+        };
 
         const { data, error } = await supabaseAdmin
             .from("matches")
-            .insert([match])
+            .insert([matchData])
             .select()
             .single();
 
         if (error) {
             console.error("❌ Error al insertar partido:", error);
             return NextResponse.json({ error: error.message }, { status: 400 });
+        }
+
+        if (match_sets && match_sets.length > 0) {
+            const formattedSets = match_sets.map((s, idx) => ({
+                match_id: data.id,
+                set_number: idx + 1,
+                team_score: s.team_score,
+                opponent_score: s.opponent_score
+            }));
+            const { error: setsError } = await supabaseAdmin.from("match_sets").insert(formattedSets);
+            if (setsError) {
+                console.error("❌ Error al insertar sets:", setsError);
+                return NextResponse.json({ error: "El partido se creó, pero falló la carga de sus sets." }, { status: 500 });
+            }
         }
 
         return NextResponse.json(

@@ -1,45 +1,30 @@
 import { NextResponse } from "next/server";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export async function POST() {
+export async function POST(request: Request) {
   const cookieStore = await cookies();
 
-  // ✅ Tipado moderno recomendado por @supabase/ssr
+  // ✅ API moderna con getAll/setAll (sin deprecation warnings)
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get: (name: string) => cookieStore.get(name)?.value,
-        set: (
-          name: string,
-          value: string,
-          options?: CookieOptions
-        ) => {
-          cookieStore.set({
-            name,
-            value,
-            ...options,
-          });
+        getAll() {
+          return cookieStore.getAll();
         },
-        remove: (name: string, options?: CookieOptions) => {
-          cookieStore.set({
-            name,
-            value: "",
-            ...options,
-          });
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
         },
       },
     }
   );
 
-  // 🚪 Cerrar sesión correctamente
+  // 🚪 Cerrar sesión (Supabase limpia sus propias cookies automáticamente)
   await supabase.auth.signOut();
-
-  // 🧹 Limpiar cookies de sesión
-  cookieStore.delete("sb-access-token");
-  cookieStore.delete("sb-refresh-token");
 
   // 🔁 Redirigir al login
   return NextResponse.redirect(

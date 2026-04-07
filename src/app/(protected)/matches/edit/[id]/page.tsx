@@ -9,6 +9,7 @@ import {
   FormTime,
   FormSelect,
 } from "@/components/ui/forms";
+import Loading from "@/components/common/Loading";
 
 type Match = {
   id: string;
@@ -183,7 +184,7 @@ export default function EditMatchPage() {
     }
   };
 
-  if (loading) return <p className="text-center text-white mt-10">Cargando...</p>;
+  if (loading) return <Loading />;
   if (!match) return <p className="text-center text-red-500 mt-10">Partido no encontrado</p>;
 
   return (
