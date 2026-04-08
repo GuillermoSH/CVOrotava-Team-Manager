@@ -212,15 +212,15 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
   );
 
   const venueOptions = [
-    ...(groupedVenues.home.length > 0 ? [{ label: "🏠 Casa", options: groupedVenues.home.map((v) => ({ value: v.id, label: v.venue_name })) }] : []),
-    ...(groupedVenues.away.length > 0 ? [{ label: "🚗 Fuera (misma isla)", options: groupedVenues.away.map((v) => ({ value: v.id, label: v.venue_name })) }] : []),
-    ...(groupedVenues.trip.length > 0 ? [{ label: "✈️ Viaje (fuera isla)", options: groupedVenues.trip.map((v) => ({ value: v.id, label: v.venue_name })) }] : []),
+    ...(groupedVenues.home.length > 0 ? [{ label: "Casa", options: groupedVenues.home.map((v) => ({ value: v.id, label: v.venue_name })) }] : []),
+    ...(groupedVenues.away.length > 0 ? [{ label: "Fuera (misma isla)", options: groupedVenues.away.map((v) => ({ value: v.id, label: v.venue_name })) }] : []),
+    ...(groupedVenues.trip.length > 0 ? [{ label: "Viaje (fuera isla)", options: groupedVenues.trip.map((v) => ({ value: v.id, label: v.venue_name })) }] : []),
   ];
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
           <motion.div
             variants={backdropVariants}
             initial="hidden"
@@ -235,16 +235,16 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-2xl bg-[#121214] border border-white/10 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]"
+            className="relative w-full max-w-2xl bg-[var(--color-bg-elevated)] border border-[var(--glass-border)] rounded-2xl shadow-2xl flex flex-col max-h-[90vh]"
           >
-            <div className="flex items-center justify-between p-5 border-b border-white/5">
-              <h2 className="text-xl font-bold text-white">
-                {initialData ? "✏️ Editar Partido" : "🏐 Añadir Partido"}
+            <div className="flex items-center justify-between p-5 border-b border-[var(--glass-border)]">
+              <h2 className="text-xl font-bold text-[var(--text-primary)]">
+                {initialData ? "Editar partido" : "Añadir partido"}
               </h2>
               <button
                 type="button"
                 onClick={onClose}
-                className="text-[var(--text-muted)] hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--glass-surface)]"
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>
@@ -259,9 +259,9 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                     {loadingVenues ? (
                       <div className="flex flex-col gap-1.5 justify-end mb-2">
                          <span className="text-sm font-medium text-[var(--text-secondary)]">Pabellón *</span>
-                         <div className="h-10 bg-white/5 rounded-lg border border-white/10 flex items-center px-3 animate-pulse">
-                           <FontAwesomeIcon icon={faSpinner} className="animate-spin text-white/50" />
-                           <span className="ml-2 text-xs text-white/50">Cargando instalaciones...</span>
+                         <div className="h-10 bg-[var(--color-bg-card)] rounded-lg border border-[var(--glass-border)] flex items-center px-3 animate-pulse">
+                           <FontAwesomeIcon icon={faSpinner} className="animate-spin text-[var(--text-muted)]" />
+                           <span className="ml-2 text-xs text-[var(--text-muted)]">Cargando instalaciones...</span>
                          </div>
                       </div>
                     ) : (
@@ -295,14 +295,14 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                   <FormInput label="Notas Externas" name="notes" register={register("notes")} error={errors.notes} placeholder="Alguna lesión, retraso..." />
                 </div>
 
-                <div className="mt-6 border-t border-white/10 pt-4">
+                <div className="mt-6 border-t border-[var(--glass-border)] pt-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-white text-sm font-semibold">Sets Finalizados (Opcional)</h3>
+                    <h3 className="text-[var(--text-primary)] text-sm font-semibold">Sets Finalizados (Opcional)</h3>
                     {fields.length < 5 && (
                       <button
                         type="button"
                         onClick={() => append({ team_score: 0, opponent_score: 0 })}
-                        className="text-xs font-semibold bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition"
+                        className="text-xs font-semibold bg-[var(--glass-surface)] hover:bg-[var(--glass-surface-hover)] text-[var(--text-primary)] border border-[var(--glass-border)] px-3 py-1.5 rounded-lg transition"
                       >
                         <FontAwesomeIcon icon={faPlus} className="mr-1.5" />
                         Añadir Set
@@ -312,7 +312,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                   
                   <div className="space-y-3">
                     {fields.map((field, index) => (
-                      <div key={field.id} className="flex items-end gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+                      <div key={field.id} className="flex items-end gap-3 bg-[var(--color-bg-card)] p-3 rounded-xl border border-[var(--glass-border)]">
                         <div className="w-16 flex-shrink-0 text-center text-xs font-bold text-[var(--text-muted)] self-center pt-1">
                           SET {index + 1}
                         </div>
@@ -321,7 +321,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                           <input
                             type="number"
                             {...register(`match_sets.${index}.team_score`, { valueAsNumber: true })}
-                            className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-white text-sm focus:border-red-500 outline-none text-center"
+                            className="w-full bg-[var(--color-bg-card)] border border-[var(--glass-border)] rounded-lg p-2 text-[var(--text-primary)] text-sm focus:border-red-500 outline-none text-center"
                             min={0}
                           />
                         </div>
@@ -331,7 +331,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                           <input
                             type="number"
                             {...register(`match_sets.${index}.opponent_score`, { valueAsNumber: true })}
-                            className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-white text-sm focus:border-red-500 outline-none text-center"
+                            className="w-full bg-[var(--color-bg-card)] border border-[var(--glass-border)] rounded-lg p-2 text-[var(--text-primary)] text-sm focus:border-red-500 outline-none text-center"
                             min={0}
                           />
                         </div>
@@ -345,7 +345,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                       </div>
                     ))}
                     {fields.length === 0 && (
-                      <div className="text-xs text-center text-white/30 py-3 border border-dashed border-white/10 rounded-xl">
+                      <div className="text-xs text-center text-[var(--text-muted)] py-3 border border-dashed border-[var(--glass-border)] rounded-xl">
                         No hay sets registrados
                       </div>
                     )}
@@ -360,7 +360,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
               </form>
             </div>
 
-            <div className="p-5 border-t border-white/5 flex flex-wrap-reverse sm:flex-nowrap gap-3 items-center justify-between bg-black/20 rounded-b-2xl">
+            <div className="p-5 border-t border-[var(--glass-border)] flex flex-wrap-reverse sm:flex-nowrap gap-3 items-center justify-between bg-[var(--surface-faint)] rounded-b-2xl">
               {initialData ? (
                 <button
                   type="button"
@@ -374,7 +374,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
               ) : <div className="hidden sm:block" />}
 
               <div className="flex gap-3 w-full sm:w-auto justify-end">
-                <button type="button" onClick={onClose} className="px-5 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-white hover:bg-white/5 rounded-lg transition-colors border border-transparent">
+                <button type="button" onClick={onClose} className="px-5 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-surface)] rounded-lg transition-colors border border-transparent">
                   Cancelar
                 </button>
                 <button type="submit" form="matchForm" disabled={isSubmitting || loadingVenues || isDeleting} className="btn-primary min-w-[130px] flex justify-center items-center">

@@ -20,8 +20,8 @@ export function FormInput({ label, name, register, error, ...props }: FormInputP
         name={name}
         {...register}
         {...props}
-        className={`w-full mt-1 p-3 border rounded-xl bg-white/5 text-white placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 transition-colors ${
-          error ? "border-red-500 focus:ring-red-500" : "border-white/10 focus:ring-[var(--accent)] focus:border-[var(--accent)]"
+        className={`w-full mt-1 p-3 border rounded-xl bg-[var(--form-input-bg)] border-[color:var(--form-input-border)] text-[var(--text-primary)] placeholder-[color:var(--form-placeholder)] focus:outline-none focus:ring-2 transition-colors ${
+          error ? "border-red-500 focus:ring-red-500" : "focus:ring-[var(--accent)] focus:border-[var(--accent)]"
         }`}
       />
       {error && <p className="text-xs text-red-400 mt-1">{error.message}</p>}

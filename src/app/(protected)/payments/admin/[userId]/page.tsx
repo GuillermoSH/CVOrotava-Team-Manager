@@ -102,7 +102,7 @@ export default function AdminPlayerPaymentsDetail() {
   };
 
   const deletePayment = async (paymentId: string) => {
-    if (!confirm("⚠️ ¿Estás seguro de que quieres eliminar este pago por completo? Esta acción no se puede deshacer.")) return;
+    if (!confirm("¿Estás seguro de que quieres eliminar este pago por completo? Esta acción no se puede deshacer.")) return;
     try {
       const res = await fetch(`/api/payments/${paymentId}`, {
         method: "DELETE",
@@ -143,7 +143,7 @@ export default function AdminPlayerPaymentsDetail() {
   if (!user?.isAdmin) {
     return (
       <main className="flex justify-center items-center min-h-screen text-red-600 font-semibold">
-        Acceso denegado ❌
+        Acceso denegado
       </main>
     );
   }
@@ -153,7 +153,7 @@ export default function AdminPlayerPaymentsDetail() {
 
   return (
     <motion.main
-      className="flex flex-col items-center w-full max-w-4xl py-4 pt-10 px-4 text-white mx-auto"
+      className="flex flex-col items-center w-full max-w-4xl py-4 pt-10 px-4 text-[var(--text-primary)] mx-auto"
       variants={stagger}
       initial="hidden"
       animate="visible"
@@ -161,7 +161,7 @@ export default function AdminPlayerPaymentsDetail() {
       <div className="w-full flex justify-between items-center mb-6">
         <button 
           onClick={() => router.push('/payments')}
-          className="text-sm text-[var(--text-secondary)] hover:text-white transition flex items-center gap-2"
+          className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition flex items-center gap-2"
         >
           <FontAwesomeIcon icon={faArrowLeft} /> Volver a Panel
         </button>
@@ -174,9 +174,9 @@ export default function AdminPlayerPaymentsDetail() {
 
       {/* Metrics summary */}
       <motion.div variants={fadeUp} className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        <div className="card-glass p-5 flex flex-col justify-center border-l-4 border-l-green-500">
+        <div className="card-glass p-5 flex flex-col justify-center border-l-4 border-l-[color:var(--payment-amount-paid)]">
           <p className="text-sm font-medium text-[var(--text-secondary)] mb-1">Total Pagado</p>
-          <p className="text-4xl font-bold text-white tabular-nums">{totalPaid}€</p>
+          <p className="text-4xl font-bold tabular-nums payment-amount--paid">{totalPaid}€</p>
         </div>
         
         <div className="card-glass p-5 flex flex-col justify-center border-l-4 border-l-red-500 relative overflow-hidden">
@@ -184,13 +184,13 @@ export default function AdminPlayerPaymentsDetail() {
             <FontAwesomeIcon icon={faCircleExclamation} className="text-6xl text-red-500" />
           </div>
           <p className="text-sm font-medium text-[var(--text-secondary)] mb-1">Deuda Pendiente</p>
-          <p className="text-4xl font-bold text-white tabular-nums">{totalPending}€</p>
+          <p className="text-4xl font-bold tabular-nums payment-amount--pending">{totalPending}€</p>
         </div>
       </motion.div>
 
       {/* Payment records */}
       <motion.div variants={fadeUp} className="w-full flex flex-col sm:flex-row justify-between items-center mb-4 mt-6 gap-3">
-         <h2 className="text-lg font-semibold border-b border-white/20 pb-2 w-full sm:w-auto flex-grow">Historial de Cuotas</h2>
+         <h2 className="text-lg font-semibold border-b border-[var(--glass-border)] pb-2 w-full sm:w-auto flex-grow">Historial de Cuotas</h2>
          <button 
            onClick={openAddModal}
            className="btn-primary py-2 px-4 whitespace-nowrap self-stretch sm:self-auto flex items-center justify-center gap-2"
@@ -213,65 +213,87 @@ export default function AdminPlayerPaymentsDetail() {
             <motion.div 
               variants={fadeUp}
               key={p.id}
-              className={`flex flex-col md:flex-row md:items-center justify-between p-5 rounded-xl border backdrop-blur-sm transition-all duration-200 ${
-                p.status === 'paid' ? 'bg-green-500/5 border-green-500/10' : 'bg-red-500/5 border-red-500/20'
+              className={`payment-card flex flex-col md:flex-row md:items-center justify-between rounded-xl p-5 backdrop-blur-sm transition-all duration-200 ${
+                p.status === "paid" ? "payment-card--paid" : "payment-card--pending"
               }`}
             >
-              <div className="flex flex-col gap-1 mb-4 md:mb-0">
-                <div className="flex items-center gap-3">
-                  <span className={`px-2 py-[2px] rounded text-xs font-bold uppercase tracking-wider ${
-                    p.status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                  }`}>
-                    {p.status === 'paid' ? 'Pagado' : 'Pendiente'}
+              <div className="flex flex-col gap-1 mb-4 md:mb-0 min-w-0">
+                <div className="flex flex-wrap items-baseline gap-2 gap-y-1">
+                  <span
+                    className={`payment-badge shrink-0 ${
+                      p.status === "paid" ? "payment-badge--paid" : "payment-badge--pending"
+                    }`}
+                  >
+                    {p.status === "paid" ? "Pagado" : "Pendiente"}
                   </span>
-                  <p className="font-semibold text-lg text-white">{p.concept}</p>
+                  <p className="min-w-0 text-lg font-bold leading-snug text-[var(--text-primary)]">
+                    {p.concept}
+                  </p>
                 </div>
-                
-                <p className="text-sm text-[var(--text-muted)] mt-1">
-                  Fecha límite: <span className="text-white/80 font-mono">{formatDate(p.due_date)}</span>
-                  {p.season && <span className="ml-3 px-2 py-0.5 bg-white/10 rounded text-xs">{p.season}</span>}
-                  {p.status === 'paid' && p.paid_date && (
-                    <span className="ml-3 text-green-300/70 block sm:inline mt-1 sm:mt-0">Pagado el: <span className="font-mono">{formatDate(p.paid_date)}</span></span>
+
+                <p className="mt-1.5 text-sm text-[var(--text-muted)]">
+                  <span>Fecha límite:</span>{" "}
+                  <span className="font-mono text-[var(--text-secondary)]">{formatDate(p.due_date)}</span>
+                  {p.season && (
+                    <span className="ml-2 inline-flex items-center rounded-md border border-[color:var(--form-input-border)] bg-[var(--form-input-bg)] px-2 py-0.5 text-xs font-medium text-[var(--text-secondary)]">
+                      {p.season}
+                    </span>
+                  )}
+                  {p.status === "paid" && p.paid_date && (
+                    <span className="mt-1 block sm:mt-0 sm:ml-2 sm:inline">
+                      <span>Pagado el:</span>{" "}
+                      <span className="font-mono text-[var(--text-secondary)]">
+                        {formatDate(p.paid_date)}
+                      </span>
+                    </span>
                   )}
                 </p>
                 {p.notes && <p className="text-xs text-[var(--text-muted)] italic mt-2 opacity-80">&quot;{p.notes}&quot;</p>}
               </div>
               
               <div className="flex items-center gap-6 self-start md:self-center">
-                <span className={`text-2xl font-bold tabular-nums ${p.status === 'paid' ? 'text-green-400' : 'text-red-400'}`}>
+                <span
+                  className={`text-2xl font-bold tabular-nums ${
+                    p.status === "paid" ? "payment-amount--paid" : "payment-amount--pending"
+                  }`}
+                >
                   {p.amount}€
                 </span>
 
                 <div className="flex items-stretch gap-2">
                   <button
+                    type="button"
                     onClick={() => openEditModal(p)}
-                    className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-lg transition-colors text-sm flex items-center justify-center"
+                    className="payment-action-btn payment-action-btn--edit"
                     title="Editar cuota"
                   >
                     <FontAwesomeIcon icon={faEdit} />
                   </button>
                   <button
+                    type="button"
                     onClick={() => duplicatePayment(p)}
-                    className="px-3 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 rounded-lg transition-colors text-sm flex items-center justify-center"
+                    className="payment-action-btn payment-action-btn--copy"
                     title="Duplicar cuota"
                   >
                     <FontAwesomeIcon icon={faCopy} />
                   </button>
-                  {p.status === 'pending' && (
+                  {p.status === "pending" && (
                     <button
+                      type="button"
                       onClick={() => markAsPaid(p.id)}
-                      className="px-3 py-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 rounded-lg transition-colors text-sm flex items-center justify-center"
+                      className="payment-action-btn payment-action-btn--ok"
                       title="Marcar como pagado"
                     >
                       <FontAwesomeIcon icon={faCheck} />
                     </button>
                   )}
                   <button
+                    type="button"
                     onClick={() => deletePayment(p.id)}
-                    className="px-3 py-2 bg-red-500/5 hover:bg-red-500/15 text-red-400/70 hover:text-red-400 border border-transparent hover:border-red-500/20 rounded-lg transition-all text-sm flex items-center justify-center"
+                    className="payment-action-btn payment-action-btn--delete"
                     title="Eliminar cuota"
                   >
-                    <FontAwesomeIcon icon={faTrash} /> 
+                    <FontAwesomeIcon icon={faTrash} />
                   </button>
                 </div>
               </div>

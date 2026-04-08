@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { createClient } from "@supabase/supabase-js";
+import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 
 export async function GET() {
   const supabase = await supabaseServer();
+  const auth = await requireAllowedUser(supabase);
+  if ("response" in auth) return auth.response;
+
   const {
     data: { user },
-    error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   }
 

@@ -66,7 +66,7 @@ export default function ProtectedHome() {
           setPaymentsData(pData);
         }
       } catch (err) {
-        console.error("❌ Error cargando datos:", err);
+        console.error("Error cargando datos:", err);
       } finally {
         setIsLoading(false);
       }
@@ -130,7 +130,7 @@ export default function ProtectedHome() {
 
   return (
     <motion.main
-      className="flex flex-col items-center w-full max-w-6xl py-4 text-white"
+      className="flex flex-col items-center w-full max-w-6xl py-4 text-[var(--text-primary)]"
       variants={stagger}
       initial="hidden"
       animate="visible"
@@ -148,8 +148,7 @@ export default function ProtectedHome() {
             {user?.gender == "female" ? "Bienvenida" : "Bienvenido"},{" "}
             <span className="bg-gradient-to-r from-red-400 to-red-500 bg-clip-text text-transparent">
               {user?.user_name}
-            </span>{" "}
-            👋
+            </span>
           </h1>
         </div>
         <Image
@@ -171,14 +170,14 @@ export default function ProtectedHome() {
 
         <div className="relative flex flex-col gap-6 p-5 sm:gap-8 sm:p-6">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-muted)] border border-red-500/20">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-muted)] border border-[color-mix(in_srgb,var(--accent)_28%,transparent)]">
               <FontAwesomeIcon
                 icon={faVolleyball}
-                className="text-red-400 text-sm"
+                className="text-[var(--accent)] text-sm"
               />
             </span>
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg font-semibold leading-tight text-white">
+              <h2 className="text-lg font-semibold leading-tight text-[var(--text-primary)]">
                 Tu temporada
               </h2>
               <p className="mt-1 text-sm text-[var(--text-muted)]">
@@ -205,7 +204,7 @@ export default function ProtectedHome() {
                     cy="56"
                     r={ringRadius}
                     fill="none"
-                    stroke="rgba(255,255,255,0.06)"
+                    stroke="var(--progress-track)"
                     strokeWidth="10"
                   />
                   <circle
@@ -234,7 +233,7 @@ export default function ProtectedHome() {
                   </defs>
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-3xl font-bold tabular-nums bg-gradient-to-br from-white to-white/80 bg-clip-text text-transparent">
+                  <span className="text-3xl font-bold tabular-nums bg-gradient-to-br from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent">
                     {winRate}%
                   </span>
                   <span className="text-[0.65rem] uppercase tracking-wider text-[var(--text-muted)] font-semibold mt-0.5">
@@ -276,7 +275,7 @@ export default function ProtectedHome() {
                   </span>
                 </div>
                 <div
-                  className="h-2.5 rounded-full bg-white/[0.06] overflow-hidden flex"
+                  className="h-2.5 rounded-full bg-[var(--progress-track)] overflow-hidden flex"
                   role="img"
                   aria-label={`Progreso del calendario: ${Math.round(playedShare)} por ciento jugado`}
                 >
@@ -285,11 +284,11 @@ export default function ProtectedHome() {
                     style={{ width: `${playedShare}%` }}
                   />
                   <div
-                    className="h-full bg-white/[0.12] transition-all duration-500 ease-out"
+                    className="h-full bg-[var(--progress-segment)] transition-all duration-500 ease-out"
                     style={{ width: `${upcomingShare}%` }}
                   />
                 </div>
-                <p className="text-[0.7rem] text-[var(--text-muted)] mt-1.5">
+                <p className="text-[0.7rem] text-[var(--text-secondary)] mt-1.5">
                   Barra izquierda: partidos ya jugados · derecha: pendientes
                 </p>
               </div>
@@ -300,7 +299,7 @@ export default function ProtectedHome() {
                   <span className="text-sm font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
                     <FontAwesomeIcon
                       icon={faMedal}
-                      className="text-amber-400/90 text-xs"
+                      className="text-amber-600 text-xs"
                     />
                     Ratio de victorias
                   </span>
@@ -310,7 +309,7 @@ export default function ProtectedHome() {
                       : "—"}
                   </span>
                 </div>
-                <div className="h-2.5 rounded-full bg-white/[0.06] overflow-hidden">
+                <div className="h-2.5 rounded-full bg-[var(--progress-track)] overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-emerald-700 to-emerald-400 transition-all duration-500 ease-out"
                     style={{ width: `${winBarPct}%` }}
@@ -320,13 +319,13 @@ export default function ProtectedHome() {
 
               {/* Inline metrics */}
               <div className="flex flex-wrap gap-3 pt-1">
-                <div className="flex items-center gap-2 rounded-xl px-3 py-2 bg-white/[0.03] border border-white/[0.06]">
+                <div className="flex items-center gap-2 rounded-xl px-3 py-2 bg-[var(--color-bg-card)] border border-[var(--glass-border)]">
                   <FontAwesomeIcon
                     icon={faVolleyball}
-                    className="text-red-400 text-xs shrink-0"
+                    className="text-[var(--accent)] text-xs shrink-0"
                   />
                   <div>
-                    <p className="text-lg font-bold tabular-nums leading-none text-white">
+                    <p className="text-lg font-bold tabular-nums leading-none text-[var(--text-primary)]">
                       {totalPlayed}
                     </p>
                     <p className="text-[0.65rem] uppercase tracking-wide text-[var(--text-muted)] font-semibold mt-0.5">
@@ -334,13 +333,13 @@ export default function ProtectedHome() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 rounded-xl px-3 py-2 bg-white/[0.03] border border-white/[0.06]">
+                <div className="flex items-center gap-2 rounded-xl px-3 py-2 bg-[var(--color-bg-card)] border border-[var(--glass-border)]">
                   <FontAwesomeIcon
                     icon={faMedal}
-                    className="text-amber-400/90 text-xs shrink-0"
+                    className="text-amber-600 text-xs shrink-0"
                   />
                   <div>
-                    <p className="text-lg font-bold tabular-nums leading-none text-white">
+                    <p className="text-lg font-bold tabular-nums leading-none text-[var(--text-primary)]">
                       {wins}
                     </p>
                     <p className="text-[0.65rem] uppercase tracking-wide text-[var(--text-muted)] font-semibold mt-0.5">
@@ -348,13 +347,13 @@ export default function ProtectedHome() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 rounded-xl px-3 py-2 bg-white/[0.03] border border-white/[0.06]">
+                <div className="flex items-center gap-2 rounded-xl px-3 py-2 bg-[var(--color-bg-card)] border border-[var(--glass-border)]">
                   <FontAwesomeIcon
                     icon={faClock}
-                    className="text-sky-400/90 text-xs shrink-0"
+                    className="text-sky-600 text-xs shrink-0"
                   />
                   <div>
-                    <p className="text-lg font-bold tabular-nums leading-none text-white">
+                    <p className="text-lg font-bold tabular-nums leading-none text-[var(--text-primary)]">
                       {totalUpcoming}
                     </p>
                     <p className="text-[0.65rem] uppercase tracking-wide text-[var(--text-muted)] font-semibold mt-0.5">
@@ -373,7 +372,7 @@ export default function ProtectedHome() {
         <motion.section variants={fadeUp} className="w-full mb-6">
           <Link
             href="/payments"
-            className="block card-glass overflow-hidden relative group border border-white/[0.08] hover:border-red-500/30 transition-colors"
+            className="block card-glass overflow-hidden relative group border border-[var(--glass-border)] hover:border-red-500/30 transition-colors"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-red-600/[0.06] via-transparent to-violet-600/[0.03] pointer-events-none" />
             {totalPending > 0 && (
@@ -382,14 +381,14 @@ export default function ProtectedHome() {
 
             <div className="relative flex flex-col gap-5 p-5 sm:p-6">
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-muted)] border border-red-500/20">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-muted)] border border-[color-mix(in_srgb,var(--accent)_28%,transparent)]">
                   <FontAwesomeIcon
                     icon={faMoneyBillWave}
-                    className="text-red-400 text-sm"
+                    className="text-[var(--accent)] text-sm"
                   />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-lg font-semibold leading-tight text-white">
+                  <h2 className="text-lg font-semibold leading-tight text-[var(--text-primary)]">
                     Estado de cuotas
                   </h2>
                   <p className="mt-1 text-sm text-[var(--text-muted)]">
@@ -400,7 +399,7 @@ export default function ProtectedHome() {
                 </div>
               </div>
 
-              <div className="w-full min-w-0 space-y-4 border-t border-white/[0.08] pt-5">
+              <div className="w-full min-w-0 space-y-4 border-t border-[var(--glass-border)] pt-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0 flex-1">
                     {paymentsData.isAdmin ? (
@@ -408,17 +407,17 @@ export default function ProtectedHome() {
                         {totalPending > 0 ? (
                           <>
                             Hay{" "}
-                            <strong className="text-white tabular-nums">
+                            <strong className="text-[var(--text-primary)] tabular-nums">
                               {usersInDebt}
                             </strong>{" "}
                             jugador{usersInDebt === 1 ? "" : "es"} con{" "}
-                            <strong className="text-red-400 tabular-nums">
+                            <strong className="text-[var(--accent)] tabular-nums font-semibold">
                               {totalPending}€
                             </strong>{" "}
                             pendiente en total.
                           </>
                         ) : (
-                          <span className="text-emerald-400/95">
+                          <span className="payment-blurb-ok font-medium">
                             Todos los jugadores están al día con sus pagos.
                           </span>
                         )}
@@ -428,25 +427,25 @@ export default function ProtectedHome() {
                         {totalPending > 0 ? (
                           <>
                             Tienes{" "}
-                            <strong className="text-white tabular-nums">
+                            <strong className="text-[var(--text-primary)] tabular-nums">
                               {pendingPayments.length}
                             </strong>{" "}
                             pago{pendingPayments.length === 1 ? "" : "s"} sin
                             liquidar por un total de{" "}
-                            <strong className="text-red-400 tabular-nums">
+                            <strong className="text-[var(--accent)] tabular-nums font-semibold">
                               {totalPending}€
                             </strong>
                             .
                           </>
                         ) : (
-                          <span className="text-emerald-400/95">
+                          <span className="payment-blurb-ok font-medium">
                             ¡Perfecto! Estás al día con todos tus pagos.
                           </span>
                         )}
                       </p>
                     )}
                   </div>
-                  <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-medium text-white transition-colors group-hover:border-red-500/35 group-hover:bg-[var(--accent-muted)] sm:text-sm">
+                  <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-[var(--glass-border)] bg-[var(--glass-surface)] px-3 py-2 text-xs font-medium text-[var(--text-primary)] transition-colors group-hover:border-red-500/35 group-hover:bg-[var(--accent-muted)] sm:text-sm">
                     Ver detalles
                     <FontAwesomeIcon
                       icon={faArrowRight}
@@ -465,21 +464,21 @@ export default function ProtectedHome() {
         {nextMatch ? (
           <Link
             href={`/matches/${nextMatch.id}`}
-            className="block card-glass overflow-hidden relative group border border-white/[0.08] hover:border-red-500/30 transition-colors"
+            className="block card-glass overflow-hidden relative group border border-[var(--glass-border)] hover:border-red-500/30 transition-colors"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-red-600/[0.07] via-transparent to-violet-600/[0.04] pointer-events-none" />
             <div className="absolute bottom-0 right-0 w-36 h-36 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative flex flex-col gap-5 p-5 sm:p-6">
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-muted)] border border-red-500/20">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-muted)] border border-[color-mix(in_srgb,var(--accent)_28%,transparent)]">
                   <FontAwesomeIcon
                     icon={faCalendarDays}
-                    className="text-red-400 text-sm"
+                    className="text-[var(--accent)] text-sm"
                   />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-lg font-semibold leading-tight text-white">
+                  <h2 className="text-lg font-semibold leading-tight text-[var(--text-primary)]">
                     Próximo partido
                   </h2>
                   <p className="mt-1 text-sm text-[var(--text-muted)]">
@@ -488,10 +487,10 @@ export default function ProtectedHome() {
                 </div>
               </div>
 
-              <div className="w-full min-w-0 space-y-4 border-t border-white/[0.08] pt-5">
+              <div className="w-full min-w-0 space-y-4 border-t border-[var(--glass-border)] pt-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0 flex-1">
-                    <p className="text-lg font-bold tracking-tight text-white sm:text-xl">
+                    <p className="text-lg font-bold tracking-tight text-[var(--text-primary)] sm:text-xl">
                       {nextMatch.opponent}
                     </p>
                     <p className="mt-2 text-sm capitalize text-[var(--text-secondary)]">
@@ -511,7 +510,7 @@ export default function ProtectedHome() {
                       </span>
                     </p>
                   </div>
-                  <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-medium text-white transition-colors group-hover:border-red-500/35 group-hover:bg-[var(--accent-muted)] sm:text-sm">
+                  <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-[var(--glass-border)] bg-[var(--glass-surface)] px-3 py-2 text-xs font-medium text-[var(--text-primary)] transition-colors group-hover:border-red-500/35 group-hover:bg-[var(--accent-muted)] sm:text-sm">
                     Ver detalles
                     <FontAwesomeIcon
                       icon={faArrowRight}
@@ -523,20 +522,20 @@ export default function ProtectedHome() {
             </div>
           </Link>
         ) : (
-          <div className="card-glass overflow-hidden relative w-full border border-white/[0.08]">
+          <div className="card-glass overflow-hidden relative w-full border border-[var(--glass-border)]">
             <div className="absolute inset-0 bg-gradient-to-br from-red-600/[0.07] via-transparent to-violet-600/[0.04] pointer-events-none" />
             <div className="absolute bottom-0 right-0 w-36 h-36 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative flex flex-col gap-5 p-5 sm:p-6">
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-muted)] border border-red-500/20">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-muted)] border border-[color-mix(in_srgb,var(--accent)_28%,transparent)]">
                   <FontAwesomeIcon
                     icon={faCalendarDays}
-                    className="text-red-400 text-sm"
+                    className="text-[var(--accent)] text-sm"
                   />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-lg font-semibold leading-tight text-white">
+                  <h2 className="text-lg font-semibold leading-tight text-[var(--text-primary)]">
                     Próximo partido
                   </h2>
                   <p className="mt-1 text-sm text-[var(--text-muted)]">
@@ -545,8 +544,8 @@ export default function ProtectedHome() {
                 </div>
               </div>
 
-              <div className="w-full min-w-0 border-t border-white/[0.08] pt-5">
-                <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-6 text-center">
+              <div className="w-full min-w-0 border-t border-[var(--glass-border)] pt-5">
+                <div className="rounded-xl border border-dashed border-[var(--border-dashed)] bg-[var(--surface-faint)] px-4 py-6 text-center">
                   <p className="text-sm text-[var(--text-muted)]">
                     No hay partidos próximos en el calendario.
                   </p>
@@ -567,14 +566,14 @@ export default function ProtectedHome() {
 
         <div className="relative flex flex-col gap-5 p-5 sm:p-6">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-muted)] border border-red-500/20">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-muted)] border border-[color-mix(in_srgb,var(--accent)_28%,transparent)]">
               <FontAwesomeIcon
                 icon={faTrophy}
-                className="text-red-400 text-sm"
+                className="text-[var(--accent)] text-sm"
               />
             </span>
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg font-semibold leading-tight text-white">
+              <h2 className="text-lg font-semibold leading-tight text-[var(--text-primary)]">
                 Últimos resultados
               </h2>
               <p className="mt-1 text-sm text-[var(--text-muted)]">
@@ -583,9 +582,9 @@ export default function ProtectedHome() {
             </div>
           </div>
 
-          <div className="w-full min-w-0 border-t border-white/[0.08] pt-5">
+          <div className="w-full min-w-0 border-t border-[var(--glass-border)] pt-5">
               {playedMatches.filter((m) => m.result).length === 0 ? (
-                <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-6 text-center">
+                <div className="rounded-xl border border-dashed border-[var(--border-dashed)] bg-[var(--surface-faint)] px-4 py-6 text-center">
                   <p className="text-sm text-[var(--text-muted)]">
                     No hay resultados recientes.
                   </p>
@@ -606,9 +605,7 @@ export default function ProtectedHome() {
                         <li
                           key={m.id}
                           className={`flex items-center justify-between gap-3 rounded-xl p-3.5 sm:p-4 border transition-all duration-200 ${
-                            isWin
-                              ? "bg-emerald-500/[0.06] border-emerald-500/20 hover:border-emerald-500/35"
-                              : "bg-red-500/[0.06] border-red-500/15 hover:border-red-500/30"
+                            isWin ? "match-result-row--win" : "match-result-row--loss"
                           }`}
                         >
                           <div className="flex min-w-0 items-center gap-3">
@@ -618,7 +615,7 @@ export default function ProtectedHome() {
                               }`}
                             />
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-medium text-white">
+                              <p className="truncate text-sm font-medium text-[var(--text-primary)]">
                                 {m.gender === "male" ? "S.M." : "S.F."} vs{" "}
                                 <span className="text-[var(--text-secondary)]">
                                   {m.opponent}
@@ -634,11 +631,7 @@ export default function ProtectedHome() {
                             </div>
                           </div>
                           <span
-                            className={`shrink-0 rounded-lg px-2.5 py-1 text-sm font-bold tabular-nums sm:text-base ${
-                              isWin
-                                ? "border border-emerald-500/25 bg-emerald-500/15 text-emerald-300"
-                                : "border border-red-500/25 bg-red-500/15 text-red-300"
-                            }`}
+                            className={`match-result-score--${isWin ? "win" : "loss"} shrink-0 rounded-lg px-2.5 py-1 text-sm font-bold tabular-nums sm:text-base`}
                           >
                             {m.result}
                           </span>
@@ -661,14 +654,14 @@ export default function ProtectedHome() {
 
           <div className="relative flex flex-col gap-5 p-5 sm:p-6">
             <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-muted)] border border-red-500/20">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-muted)] border border-[color-mix(in_srgb,var(--accent)_28%,transparent)]">
                 <FontAwesomeIcon
                   icon={faClipboardList}
-                  className="text-red-400 text-sm"
+                  className="text-[var(--accent)] text-sm"
                 />
               </span>
               <div className="min-w-0 flex-1">
-                <h2 className="text-lg font-semibold leading-tight text-white">
+                <h2 className="text-lg font-semibold leading-tight text-[var(--text-primary)]">
                   Partidos sin resultado
                 </h2>
                 <p className="mt-1 text-sm text-[var(--text-muted)]">
@@ -677,10 +670,10 @@ export default function ProtectedHome() {
               </div>
             </div>
 
-            <div className="w-full min-w-0 border-t border-white/[0.08] pt-5">
+            <div className="w-full min-w-0 border-t border-[var(--glass-border)] pt-5">
                 {pendingMatches.length === 0 ? (
                   <div className="flex w-full justify-center">
-                    <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+                    <div className="status-chip-all-clear inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium">
                       <span className="relative flex h-2 w-2">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
                         <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
@@ -696,7 +689,7 @@ export default function ProtectedHome() {
                         className="flex flex-col gap-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-3.5 py-3 transition-colors hover:border-amber-500/35 sm:flex-row sm:items-center sm:justify-between sm:px-4"
                       >
                         <span className="text-sm text-[var(--text-secondary)]">
-                          <span className="font-medium text-white">
+                          <span className="font-medium text-[var(--text-primary)]">
                             {m.opponent}
                           </span>
                           <span className="text-[var(--text-muted)]">

@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { supabaseServer } from "@/lib/supabase/server";
+import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }>}
 ) {
   try {
+    const supabase = await supabaseServer();
+    const auth = await requireAllowedUser(supabase);
+    if ("response" in auth) return auth.response;
+
     const { id } = await params;
     const body = await req.json();
 
@@ -40,6 +46,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const supabase = await supabaseServer();
+    const auth = await requireAllowedUser(supabase);
+    if ("response" in auth) return auth.response;
+
     const { id } = await params;
 
     const { data, error } = await supabaseAdmin

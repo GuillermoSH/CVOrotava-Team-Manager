@@ -18,8 +18,8 @@ export async function sendNewVideoEmail({
 }) {
   if (!to.length) return;
   const subject = category === "match"
-      ? "🎥 Nuevo video de Partido disponible"
-      : "🏋️ Nuevo video de Entrenamiento disponible";
+      ? "Nuevo video de partido disponible"
+      : "Nuevo video de entrenamiento disponible";
 
   await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL!,

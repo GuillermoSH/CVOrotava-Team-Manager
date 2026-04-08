@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { supabaseServer } from "@/lib/supabase/server";
+import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { z } from "zod";
 
 const matchSchema = z.object({
@@ -23,6 +25,10 @@ const matchSchema = z.object({
 });
 
 export async function GET(req: Request) {
+  const supabase = await supabaseServer();
+  const auth = await requireAllowedUser(supabase);
+  if ("response" in auth) return auth.response;
+
   const { searchParams } = new URL(req.url);
 
   const limit = Number(searchParams.get("limit")) || null;
@@ -64,6 +70,10 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
     try {
+        const supabase = await supabaseServer();
+        const auth = await requireAllowedUser(supabase);
+        if ("response" in auth) return auth.response;
+
         const body = await req.json();
         const parsed = matchSchema.safeParse(body);
 
@@ -110,7 +120,7 @@ export async function POST(req: Request) {
         }
 
         return NextResponse.json(
-            { message: "✅ Partido creado con éxito", data },
+            { message: "Partido creado con éxito", data },
             { status: 201 }
         );
     } catch (err) {

@@ -83,7 +83,7 @@ export default function VideosGrid({ filters, isAdmin, onEdit }: Readonly<VideoG
                 <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[var(--accent)] animate-spin" />
                 <div className="absolute inset-1 rounded-full border-2 border-transparent border-t-red-400/50 animate-spin" style={{ animationDirection: "reverse", animationDuration: "0.8s" }} />
               </div>
-              <p className="text-xs text-white/40 animate-pulse">Cargando más...</p>
+              <p className="text-xs text-[var(--text-muted)] animate-pulse">Cargando más...</p>
             </div>
           )}
         </div>

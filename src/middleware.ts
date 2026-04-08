@@ -63,8 +63,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Si hay sesión y el usuario intenta acceder al login → redirigir al dashboard
+  // Si hay sesión y el usuario intenta acceder al login → ir al dashboard,
+  // salvo cuando venimos de un fallo de auth (p. ej. email no permitido): debe ver el mensaje.
   if (user && pathname === "/login") {
+    const err = request.nextUrl.searchParams.get("error");
+    if (err === "unauthorized" || err === "auth" || err === "no-email") {
+      return supabaseResponse;
+    }
     const homeUrl = request.nextUrl.clone();
     homeUrl.pathname = "/";
     return NextResponse.redirect(homeUrl);

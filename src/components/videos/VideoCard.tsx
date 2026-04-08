@@ -39,7 +39,7 @@ export default function VideoCard({
         href={video.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex flex-col relative overflow-hidden h-full rounded-xl border border-white/[0.06] bg-[var(--glass-surface)] transition-all duration-300 hover:border-white/15 hover:shadow-xl hover:shadow-black/30 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+        className="flex flex-col relative overflow-hidden h-full rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface)] transition-all duration-300 hover:border-[var(--glass-border-hover)] hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-500/50"
       >
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden">
@@ -66,7 +66,7 @@ export default function VideoCard({
 
       {/* Info */}
       <div className="p-3.5 flex-1 flex flex-col justify-between gap-1.5 pointer-events-none">
-        <h2 className="text-sm text-white font-medium line-clamp-2 leading-snug">
+        <h2 className="text-sm text-[var(--text-primary)] font-medium line-clamp-2 leading-snug">
           {title}
         </h2>
         <span className="text-xs text-[var(--text-muted)]">
@@ -77,7 +77,7 @@ export default function VideoCard({
 
       {isAdmin && (
         <button
-          className="absolute z-10 top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 hover:bg-black/80 backdrop-blur-sm text-white px-2 py-1.5 rounded-lg border border-white/10 flex items-center gap-1.5 text-xs font-medium"
+          className="absolute z-[1] top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 hover:bg-black/80 backdrop-blur-sm text-white px-2 py-1.5 rounded-lg border border-white/10 flex items-center gap-1.5 text-xs font-medium"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

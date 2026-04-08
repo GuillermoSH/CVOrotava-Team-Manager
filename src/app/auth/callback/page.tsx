@@ -38,8 +38,7 @@ export default function CallbackPage() {
 
         if (!allowed) {
           await supabase.auth.signOut();
-          alert("Tu cuenta no está autorizada.");
-          router.replace("/login");
+          router.replace("/login?error=unauthorized");
           return;
         }
 

@@ -9,7 +9,8 @@ import { useUser } from "@/contexts/UserContext";
 import { useSeasons } from "@/contexts/SeasonContext";
 import VideoModal, { VideoFormValues } from "@/components/videos/VideoModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faVideo } from "@fortawesome/free-solid-svg-icons";
+import PageHeader from "@/components/ui/PageHeader";
 
 type Filters = {
   season?: string;
@@ -71,23 +72,26 @@ export default function PartidosPage() {
 
   return (
     <main className="w-full max-w-6xl py-4">
-      <div className="mb-6 flex flex-wrap justify-between items-end gap-4">
-        <div>
-          <h1 className="text-2xl text-white font-bold mb-1">🎥 Videos</h1>
-          <p className="text-sm text-[var(--text-muted)]">Partidos y entrenamientos grabados</p>
-        </div>
-        {user?.isAdmin && (
-          <button 
-            type="button" 
-            className="btn-primary flex items-center gap-2"
-            onClick={() => {
-              setEditingVideo(undefined);
-              setIsModalOpen(true);
-            }}
-          >
-            <FontAwesomeIcon icon={faPlus} /> Añadir Vídeo
-          </button>
-        )}
+      <div className="mb-6">
+        <PageHeader
+          icon={faVideo}
+          title="Videos"
+          subtitle="Partidos y entrenamientos grabados"
+          actions={
+            user?.isAdmin ? (
+              <button
+                type="button"
+                className="btn-primary flex items-center gap-2"
+                onClick={() => {
+                  setEditingVideo(undefined);
+                  setIsModalOpen(true);
+                }}
+              >
+                <FontAwesomeIcon icon={faPlus} /> Añadir Vídeo
+              </button>
+            ) : null
+          }
+        />
       </div>
 
       <FilterBar

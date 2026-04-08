@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { supabaseServer } from "@/lib/supabase/server";
+import { assertEmailAllowed, requireAllowedUser } from "@/lib/auth/require-allowed-user";
 
 export async function GET(req: Request) {
+  const supabase = await supabaseServer();
+  const auth = await requireAllowedUser(supabase);
+  if ("response" in auth) return auth.response;
+
   const { searchParams } = new URL(req.url);
 
   const category = searchParams.get("category") as "match" | "training";
@@ -51,6 +57,13 @@ export async function POST(req: Request) {
     if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    if (!user.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const forbidden = await assertEmailAllowed(supabaseAdmin, user.email);
+    if (forbidden) return forbidden;
 
     // 2️⃣ Validar body
     const body = await req.json();

@@ -78,7 +78,7 @@ export default function AdminPaymentsPage() {
   if (!user?.isAdmin) {
     return (
       <main className="flex justify-center items-center min-h-screen text-red-600 font-semibold">
-        Acceso denegado ❌
+        Acceso denegado
       </main>
     );
   }
@@ -101,18 +101,18 @@ export default function AdminPaymentsPage() {
 
       if (!res.ok) throw new Error(responseJson.error || "Algo salió mal");
 
-      setMessage({ type: "success", text: `✅ ${responseJson.message}` });
+      setMessage({ type: "success", text: responseJson.message || "Guardado correctamente" });
       reset();
       // Volver a la tabla admin después de un tiempo
       setTimeout(() => router.push("/payments"), 2000);
       
     } catch (err: unknown) {
-      setMessage({ type: "error", text: `❌ Error: ${(err as Error).message}` });
+      setMessage({ type: "error", text: `Error: ${(err as Error).message}` });
     }
   };
 
   const userOptions = [
-    { value: "ALL", label: "🌍 A todos los jugadores (Masivo)" },
+    { value: "ALL", label: "A todos los jugadores (masivo)" },
     ...users.map((u) => ({ value: u.id, label: u.name })),
   ];
 
@@ -121,13 +121,13 @@ export default function AdminPaymentsPage() {
       <div className="w-full max-w-2xl">
         <button 
           onClick={() => router.push('/payments')}
-          className="mb-4 text-sm text-[var(--text-secondary)] hover:text-white transition flex items-center gap-2 w-fit"
+          className="mb-4 text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition flex items-center gap-2 w-fit"
         >
           <FontAwesomeIcon icon={faArrowLeft} /> Volver a Pagos
         </button>
 
         <FormLayout
-          title="💳 Añadir/Editar Pago (Admin)"
+          title="Añadir o editar pago (admin)"
           description="Añade una nueva cuota a un jugador o a todo el club a la vez."
           onSubmit={handleSubmit(onSubmit)}
           loading={isSubmitting}

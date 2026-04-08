@@ -158,7 +158,7 @@ export default function MatchCard({
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">
             Rival
           </p>
-          <h2 className="mt-1 text-lg font-semibold leading-tight tracking-tight text-white">
+          <h2 className="mt-1 text-lg font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
             {match.opponent}
           </h2>
         </div>
@@ -167,16 +167,16 @@ export default function MatchCard({
           <time dateTime={`${match.date}T${match.time}`}>
             {formattedDate} · {formattedTime}
           </time>
-          <span className="text-white/25" aria-hidden>
+          <span className="text-[var(--text-muted)]" aria-hidden>
             ·
           </span>
           <span
             className={`rounded-md px-1.5 py-0.5 text-[0.7rem] font-medium ${
               match.result
-                ? "bg-white/[0.06] text-[var(--text-secondary)]"
+                ? "bg-[var(--progress-track)] text-[var(--text-secondary)]"
                 : isPast
-                  ? "bg-amber-500/10 text-amber-200/90"
-                  : "bg-emerald-500/10 text-emerald-200/90"
+                  ? "match-status-pill--past bg-amber-500/15"
+                  : "match-status-pill--upcoming bg-emerald-500/15"
             }`}
           >
             {statusLabel}
@@ -208,7 +208,7 @@ export default function MatchCard({
         )}
       </div>
 
-      <div className="relative z-[3] flex flex-wrap items-end justify-between gap-3 border-t border-white/[0.06] bg-black/10 px-5 pb-4 pl-6 pt-3 pointer-events-none">
+      <div className="relative z-[3] flex flex-wrap items-end justify-between gap-3 border-t border-[var(--glass-border)] bg-[var(--color-bg-card)] px-5 pb-4 pl-6 pt-3 pointer-events-none">
         <div className="flex flex-wrap gap-2 pointer-events-auto">
           {match.video_url ? (
             <a

@@ -1,5 +1,7 @@
 "use client";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import FilterDropdown from "./FilterDropdown";
 
 export type FilterOption = {
@@ -57,9 +59,10 @@ export default function FilterBar({ filters, setFilters, configs }: Readonly<Fil
             );
             setFilters(cleared);
           }}
-          className="text-xs text-[var(--text-muted)] hover:text-red-400 transition-colors px-2 py-1"
+          className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-faint)] hover:text-[var(--accent)]"
         >
-          Limpiar todo ✕
+          <FontAwesomeIcon icon={faXmark} className="text-[10px] opacity-80" />
+          Limpiar todo
         </button>
       )}
     </div>

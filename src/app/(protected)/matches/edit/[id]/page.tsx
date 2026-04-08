@@ -48,7 +48,6 @@ export default function EditMatchPage() {
   const [sets, setSets] = useState<MatchSet[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 🧩 Cargar datos del partido y los pabellones
   useEffect(() => {
     async function fetchData() {
       try {
@@ -74,7 +73,6 @@ export default function EditMatchPage() {
     fetchData();
   }, [id]);
 
-  // 🧱 Funciones para manejar los sets
   const handleSetChange = (index: number, field: "set_number" | "team_score" | "opponent_score", value: number) => {
     const updated = [...sets];
     updated[index] = { ...updated[index], [field]: value };
@@ -101,7 +99,6 @@ export default function EditMatchPage() {
     try {
       setLoading(true);
 
-      // 1️⃣ Actualizamos el partido
       const matchRes = await fetch(`/api/matches/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -110,7 +107,6 @@ export default function EditMatchPage() {
 
       if (!matchRes.ok) throw new Error("Error al actualizar el partido");
 
-      // 2️⃣ Actualizamos los sets
       const setRes = await fetch(`/api/match_sets`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -124,11 +120,11 @@ export default function EditMatchPage() {
 
       if (!setRes.ok) throw new Error("Error al actualizar los sets");
 
-      alert("✅ Partido actualizado correctamente");
+      alert("Partido actualizado correctamente");
       router.push("/matches");
     } catch (err) {
       console.error(err);
-      alert("❌ Error guardando los cambios");
+      alert("Error guardando los cambios");
     } finally {
       setLoading(false);
 
@@ -176,11 +172,11 @@ export default function EditMatchPage() {
 
       if (!res.ok) throw new Error("Error al eliminar el partido");
 
-      alert("✅ Partido eliminado correctamente");
+      alert("Partido eliminado correctamente");
       router.push("/matches");
     } catch (err) {
       console.error(err);
-      alert("❌ Error eliminando el partido");
+      alert("Error eliminando el partido");
     }
   };
 
@@ -191,14 +187,13 @@ export default function EditMatchPage() {
     <main className="flex justify-center w-full px-2 py-4 md:px-4 md:py-10">
       <div className="w-full max-w-3xl">
         <FormLayout
-          title="🏐 Editar Partido"
+          title="Editar partido"
           description="Modifica los datos del partido y los sets."
           onSubmit={handleSubmit}
           loading={loading}
           buttonText="Guardar Cambios"
           onDelete={handleDelete}
         >
-          {/* 🗓️ Fecha y hora */}
           <div className="grid grid-cols-2 gap-4">
             <FormDate
               label="Fecha *"
@@ -277,7 +272,6 @@ export default function EditMatchPage() {
             onChange={(e) => setMatch({ ...match, notes: e.target.value })}
           />
 
-          {/* 🏐 Edición de Sets */}
           <div className="mt-6">
             <h3 className="text-[var(--text-secondary)] font-semibold mb-3">Sets del Partido</h3>
             <div className="flex flex-col gap-2">
@@ -290,15 +284,15 @@ export default function EditMatchPage() {
                   <input
                     type="number"
                     min={0}
-                    className="w-16 text-center rounded-lg p-1 bg-white/5 text-white border border-white/10 focus:outline-none focus:ring-1 focus:ring-[var(--accent)] [color-scheme:dark]"
+                    className="w-16 text-center rounded-lg p-1 bg-[var(--color-bg-card)] text-[var(--text-primary)] border border-[var(--glass-border)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
                     value={set.team_score}
                     onChange={(e) => handleSetChange(i, "team_score", Number(e.target.value))}
                   />
-                  <span className="text-white">-</span>
+                  <span className="text-[var(--text-primary)]">-</span>
                   <input
                     type="number"
                     min={0}
-                    className="w-16 text-center rounded-lg p-1 bg-white/5 text-white border border-white/10 focus:outline-none focus:ring-1 focus:ring-[var(--accent)] [color-scheme:dark]"
+                    className="w-16 text-center rounded-lg p-1 bg-[var(--color-bg-card)] text-[var(--text-primary)] border border-[var(--glass-border)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
                     value={set.opponent_score}
                     onChange={(e) => handleSetChange(i, "opponent_score", Number(e.target.value))}
                   />

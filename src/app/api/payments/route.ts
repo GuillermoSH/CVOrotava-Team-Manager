@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
+import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -10,6 +11,9 @@ export async function GET(req: Request) {
   const gender = url.searchParams.get("gender");
 
   const supabase = await supabaseServer();
+  const auth = await requireAllowedUser(supabase);
+  if ("response" in auth) return auth.response;
+
   const {
     data: { user },
     error: authError,
@@ -69,7 +73,26 @@ export async function GET(req: Request) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    return NextResponse.json({ data: payments, isAdmin: true });
+    const paymentRows = payments ?? [];
+    const uniqueUserIds = [...new Set(paymentRows.map((p: { user_id: string }) => p.user_id))];
+    const authLastSignInAtByUserId: Record<string, string | null> = {};
+
+    await Promise.all(
+      uniqueUserIds.map(async (id) => {
+        const { data: authData, error: authErr } = await supabaseAdmin.auth.admin.getUserById(id);
+        if (authErr || !authData?.user) {
+          authLastSignInAtByUserId[id] = null;
+          return;
+        }
+        authLastSignInAtByUserId[id] = authData.user.last_sign_in_at ?? null;
+      })
+    );
+
+    return NextResponse.json({
+      data: paymentRows,
+      isAdmin: true,
+      authLastSignInAtByUserId,
+    });
   } else {
     // PLAYER VIEW: Obtener solo sus pagos (asegurado por RLS)
     let query = supabase
@@ -101,6 +124,9 @@ const paymentPostSchema = z.object({
 
 export async function POST(req: Request) {
   const supabase = await supabaseServer();
+  const auth = await requireAllowedUser(supabase);
+  if ("response" in auth) return auth.response;
+
   const {
     data: { user },
     error: authError,

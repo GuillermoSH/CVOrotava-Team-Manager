@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 
 const patchSchema = z.object({
   concept: z.string().optional(),
@@ -24,6 +25,15 @@ function getSupaAdmin() {
 // Revisa si el request viene de un administrador
 async function verifyAdmin() {
   const supabase = await supabaseServer();
+  const gate = await requireAllowedUser(supabase);
+  if ("response" in gate) {
+    const status = gate.response!.status;
+    return {
+      error: status === 401 ? "No autenticado" : "No autorizado",
+      status,
+    };
+  }
+
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) return { error: "No autenticado", status: 401 };

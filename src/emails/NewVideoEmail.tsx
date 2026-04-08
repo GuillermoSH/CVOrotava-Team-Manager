@@ -31,7 +31,7 @@ export default function NewVideoEmail({
         }}
       >
         <Heading as="h2" style={{ color: "#E71F12" }}>
-          ¡Nuevo video disponible! 🎥
+          Nuevo video disponible
         </Heading>
 
         <Text style={{ fontSize: "16px", marginBottom: "12px" }}>

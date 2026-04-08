@@ -134,21 +134,24 @@ export default function PaymentModal({
 
       if (!res.ok) throw new Error(responseJson.error || "Algo salió mal");
 
-      setMessage({ type: "success", text: `✅ ${responseJson.message || 'Pago guardado con éxito'}` });
+      setMessage({
+        type: "success",
+        text: responseJson.message || "Pago guardado con éxito",
+      });
       
       setTimeout(() => {
         onSuccess();
         onClose();
       }, 1000);
     } catch (err: unknown) {
-      setMessage({ type: "error", text: `❌ Error: ${(err as Error).message}` });
+      setMessage({ type: "error", text: `Error: ${(err as Error).message}` });
     }
   };
 
   const userOptions = fixedUserId 
     ? users.filter(u => u.id === fixedUserId).map((u) => ({ value: u.id, label: u.name }))
     : [
-        { value: "ALL", label: "🌍 A todos los jugadores (Masivo)" },
+        { value: "ALL", label: "A todos los jugadores (masivo)" },
         ...users.map((u) => ({ value: u.id, label: u.name })),
       ];
 
@@ -156,7 +159,7 @@ export default function PaymentModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
         {/* Overlay backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -171,16 +174,16 @@ export default function PaymentModal({
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="relative w-full max-w-2xl bg-[#111] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+          className="relative w-full max-w-2xl bg-[var(--color-bg-elevated)] border border-[var(--glass-border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         >
           {/* Header */}
-          <div className="flex justify-between items-center p-4 border-b border-white/10 bg-white/5">
-            <h2 className="text-xl font-bold text-white">
-              {initialData && !initialData.isDuplicate ? "✏️ Editar Pago" : "💳 Añadir Pago"}
+          <div className="flex justify-between items-center p-4 border-b border-[var(--glass-border)] bg-[var(--glass-surface)]">
+            <h2 className="text-xl font-bold text-[var(--text-primary)]">
+              {initialData && !initialData.isDuplicate ? "Editar pago" : "Añadir pago"}
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10"
+              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--glass-surface-hover)]"
             >
               <FontAwesomeIcon icon={faTimes} />
             </button>
@@ -282,14 +285,14 @@ export default function PaymentModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-5 py-2.5 text-sm font-semibold rounded-xl border border-white/20 hover:bg-white/5 transition"
+                  className="px-5 py-2.5 text-sm font-semibold rounded-xl border border-[color:var(--form-input-border)] text-[var(--text-primary)] hover:bg-[var(--surface-faint)] transition"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 text-sm font-semibold rounded-xl bg-[var(--accent)] hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-primary px-5 py-2.5 text-sm font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {isSubmitting ? "Guardando..." : "Guardar Pago"}
                 </button>

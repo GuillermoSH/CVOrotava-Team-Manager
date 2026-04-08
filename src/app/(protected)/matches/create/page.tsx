@@ -97,7 +97,7 @@ export default function MatchCreatePage() {
     ...(groupedVenues.home.length > 0
       ? [
           {
-            label: "🏠 Casa",
+            label: "Casa",
             options: groupedVenues.home.map((v) => ({
               value: v.id,
               label: v.venue_name,
@@ -108,7 +108,7 @@ export default function MatchCreatePage() {
     ...(groupedVenues.away.length > 0
       ? [
           {
-            label: "🚗 Fuera (misma isla)",
+            label: "Fuera (misma isla)",
             options: groupedVenues.away.map((v) => ({
               value: v.id,
               label: v.venue_name,
@@ -119,7 +119,7 @@ export default function MatchCreatePage() {
     ...(groupedVenues.trip.length > 0
       ? [
           {
-            label: "✈️ Viaje (fuera de la isla)",
+            label: "Viaje (fuera de la isla)",
             options: groupedVenues.trip.map((v) => ({
               value: v.id,
               label: v.venue_name,
@@ -136,9 +136,9 @@ export default function MatchCreatePage() {
       body: JSON.stringify(data),
     });
 
-    if (!res.ok) alert("❌ Error al crear el partido");
+    if (!res.ok) alert("Error al crear el partido");
     else {
-      alert("✅ Partido creado con éxito");
+      alert("Partido creado con éxito");
       reset();
     }
   };
@@ -147,13 +147,12 @@ export default function MatchCreatePage() {
     <main className="flex justify-center w-full px-2 py-4 md:px-4 md:py-10">
       <div className="w-full max-w-2xl">
         <FormLayout
-          title="🏐 Crear Partido"
+          title="Crear partido"
           description="Introduce los datos del encuentro."
           onSubmit={handleSubmit(onSubmit)}
           loading={isSubmitting}
           buttonText="Guardar Partido"
         >
-          {/* 📅 Fecha y hora */}
           <div className="grid grid-cols-2 gap-4">
             <FormDate
               label="Fecha *"
@@ -169,7 +168,6 @@ export default function MatchCreatePage() {
             />
           </div>
 
-          {/* ⚔️ Rival y Género */}
           <div className="grid grid-cols-2 gap-4">
             <FormInput
               label="Rival *"
@@ -189,9 +187,7 @@ export default function MatchCreatePage() {
             />
           </div>
 
-          {/* 🗓️ Temporada, Resultado, Vídeo */}
           <div className="grid grid-cols-2 gap-4">
-            {/* 🏟️ Pabellón */}
             <FormSelect
               label="Pabellón *"
               name="venue_id"

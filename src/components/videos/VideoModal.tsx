@@ -148,7 +148,7 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
           <motion.div
             variants={backdropVariants}
             initial="hidden"
@@ -163,16 +163,16 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-xl bg-[#121214] border border-white/10 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]"
+            className="relative w-full max-w-xl bg-[var(--color-bg-elevated)] border border-[var(--glass-border)] rounded-2xl shadow-2xl flex flex-col max-h-[90vh]"
           >
-            <div className="flex items-center justify-between p-5 border-b border-white/5">
-              <h2 className="text-xl font-bold text-white">
-                {initialData ? "✏️ Editar Vídeo" : "📹 Añadir Vídeo"}
+            <div className="flex items-center justify-between p-5 border-b border-[var(--glass-border)]">
+              <h2 className="text-xl font-bold text-[var(--text-primary)]">
+                {initialData ? "Editar vídeo" : "Añadir vídeo"}
               </h2>
               <button
                 type="button"
                 onClick={onClose}
-                className="text-[var(--text-muted)] hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--glass-surface)]"
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>
@@ -181,7 +181,6 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
             <div className="p-5 overflow-y-auto hidden-scrollbar">
               <form id="videoForm" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 
-                {/* 🎥 URL del video */}
                 <FormInput
                   label="URL de YouTube *"
                   name="url"
@@ -191,7 +190,6 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* 📂 Categoría */}
                   <FormSelect
                     label="Categoría *"
                     name="category"
@@ -203,7 +201,6 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
                     error={errors.category}
                   />
 
-                  {/* 🗓️ Temporada */}
                   <FormSelect 
                     label="Temporada *" 
                     name="season" 
@@ -248,7 +245,7 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
               </form>
             </div>
 
-            <div className="p-5 border-t border-white/5 flex flex-wrap-reverse sm:flex-nowrap gap-3 items-center justify-between bg-black/20 rounded-b-2xl">
+            <div className="p-5 border-t border-[var(--glass-border)] flex flex-wrap-reverse sm:flex-nowrap gap-3 items-center justify-between bg-[var(--surface-faint)] rounded-b-2xl">
               {initialData ? (
                 <button
                   type="button"
@@ -262,7 +259,7 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
               ) : <div className="hidden sm:block" />}
               
               <div className="flex gap-3 w-full sm:w-auto justify-end">
-                <button type="button" onClick={onClose} className="px-5 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-white hover:bg-white/5 rounded-lg transition-colors border border-transparent">
+                <button type="button" onClick={onClose} className="px-5 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-surface)] rounded-lg transition-colors border border-transparent">
                   Cancelar
                 </button>
                 <button type="submit" form="videoForm" disabled={isSubmitting || isDeleting} className="btn-primary min-w-[130px] flex justify-center items-center">

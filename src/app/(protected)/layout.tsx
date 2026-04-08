@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import Navbar from "@/components/layout/Navbar";
+import AmbientBackground from "@/components/layout/AmbientBackground";
 import { UserProvider } from "@/contexts/UserContext";
 import { SeasonProvider } from "@/contexts/SeasonContext";
 
@@ -81,18 +82,9 @@ export default async function ProtectedLayout({
       <SeasonProvider>
         <Navbar />
 
-        {/* Global Background */}
-        <div className="fixed inset-0 pointer-events-none z-[-1] bg-[#09090b] overflow-hidden">
-          {/* Orbs */}
-          <div className="absolute top-[-10%] left-[-10%] w-[45vw] h-[45vw] rounded-full bg-red-900/10 blur-[130px]" />
-          <div className="absolute bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-900/10 blur-[140px]" />
-          <div className="absolute top-[40%] left-[20%] w-[30vw] h-[30vw] rounded-full bg-blue-900/5 blur-[120px]" />
-          
-          {/* Subtle noise/grain overlay */}
-          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
-        </div>
+        <AmbientBackground />
 
-        <main className="relative z-0 min-h-screen pt-20 pb-8 px-4 md:px-6 flex justify-center">
+        <main className="relative min-h-screen pt-20 pb-8 px-4 md:px-6 flex justify-center">
           {children}
         </main>
       </SeasonProvider>

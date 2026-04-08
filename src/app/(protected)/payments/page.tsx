@@ -13,6 +13,7 @@ import {
   faUsers,
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
+import PageHeader from "@/components/ui/PageHeader";
 import PaymentModal from "@/components/payments/PaymentModal";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import { useSeasons } from "@/contexts/SeasonContext";
@@ -40,6 +41,7 @@ interface AdminOverviewRow {
   player: string;
   pendingAmount: number;
   status: "success" | "warning" | "danger";
+  lastSignInAt: string | null;
 }
 
 const fadeUp: Variants = {
@@ -66,6 +68,18 @@ function statusRank(s: AdminOverviewRow["status"]): number {
   if (s === "danger") return 2;
   if (s === "warning") return 1;
   return 0;
+}
+
+function formatLastSignInLabel(iso: string | null | undefined): string {
+  if (!iso) return "Sin último acceso";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "Sin último acceso";
+  const date = d.toLocaleDateString("es-ES", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  return `Últ. acceso ${date}`;
 }
 
 export default function PaymentsPage() {
@@ -117,6 +131,10 @@ export default function PaymentsPage() {
       
       const json = await res.json();
       const data = json.data as Payment[];
+      const authLastSignInAtByUserId = (json.authLastSignInAtByUserId ?? {}) as Record<
+        string,
+        string | null
+      >;
 
       if (json.isAdmin) {
         const playerMap = new Map<string, AdminOverviewRow>();
@@ -127,6 +145,7 @@ export default function PaymentsPage() {
               player: p.users?.user_name || "Desconocido",
               pendingAmount: 0,
               status: "success",
+              lastSignInAt: authLastSignInAtByUserId[p.user_id] ?? null,
             });
           }
           if (p.status === "pending") {
@@ -248,31 +267,33 @@ export default function PaymentsPage() {
 
   return (
     <motion.main
-      className="flex flex-col items-center w-full max-w-6xl py-4 text-white"
+      className="flex flex-col items-center w-full max-w-6xl py-4 text-[var(--text-primary)]"
       variants={stagger}
       initial="hidden"
       animate="visible"
     >
       {/* Header */}
-      <motion.div variants={fadeUp} className="w-full mb-6 flex flex-wrap gap-4 items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-bold mb-1">
-            <FontAwesomeIcon icon={faMoneyBillWave} className="mr-2 text-[var(--accent)]" />
-            Control de Pagos
-          </h1>
-          <p className="text-sm text-[var(--text-muted)]">
-            {user?.isAdmin ? "Vista global de cuotas del club (Admin)" : "Estado de tus cuotas y pagos"}
-          </p>
-        </div>
-        {user?.isAdmin && (
-          <button 
-            type="button" 
-            className="btn-primary flex items-center gap-2"
-            onClick={() => setIsModalOpen(true)}
-          >
-            <FontAwesomeIcon icon={faPlus} /> Añadir Pago
-          </button>
-        )}
+      <motion.div variants={fadeUp} className="mb-6 w-full">
+        <PageHeader
+          icon={faMoneyBillWave}
+          title="Control de pagos"
+          subtitle={
+            user?.isAdmin
+              ? "Vista global de cuotas del club (admin)"
+              : "Estado de tus cuotas y pagos"
+          }
+          actions={
+            user?.isAdmin ? (
+              <button
+                type="button"
+                className="btn-primary flex items-center gap-2"
+                onClick={() => setIsModalOpen(true)}
+              >
+                <FontAwesomeIcon icon={faPlus} /> Añadir Pago
+              </button>
+            ) : null
+          }
+        />
       </motion.div>
 
       {/* Filters */}
@@ -313,7 +334,7 @@ export default function PaymentsPage() {
                       <select
                         value={adminSort}
                         onChange={(e) => setAdminSort(e.target.value as AdminSortKey)}
-                        className="w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2.5 text-sm font-medium text-white shadow-inner outline-none transition hover:border-white/15 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/25 sm:w-auto sm:min-w-[14rem]"
+                        className="w-full rounded-xl border border-[var(--glass-border)] bg-[var(--color-bg-card)] px-3 py-2.5 text-sm font-medium text-[var(--text-primary)] shadow-inner outline-none transition hover:border-[var(--glass-border-hover)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/25 sm:w-auto sm:min-w-[14rem]"
                       >
                         <option value="name_asc">Nombre (A → Z)</option>
                         <option value="name_desc">Nombre (Z → A)</option>
@@ -341,17 +362,17 @@ export default function PaymentsPage() {
                         {sortedAdminOverview.map((item) => {
                           const avatarTone =
                             item.status === "danger"
-                              ? "border-red-500/35 bg-red-500/10 text-red-100"
+                              ? "player-avatar-tint--danger"
                               : item.status === "warning"
-                                ? "border-amber-500/35 bg-amber-500/10 text-amber-100"
-                                : "border-emerald-500/35 bg-emerald-500/10 text-emerald-100";
+                                ? "player-avatar-tint--warning"
+                                : "player-avatar-tint--success";
 
                           return (
                             <li key={item.user_id}>
                               <button
                                 type="button"
                                 onClick={() => router.push(`/payments/admin/${item.user_id}`)}
-                                className="group flex w-full flex-col gap-3 rounded-xl border border-white/[0.07] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-4 text-left shadow-sm transition-all duration-200 hover:border-white/15 hover:from-white/[0.06] hover:to-white/[0.03] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/45 sm:flex-row sm:items-center sm:gap-4 sm:p-4"
+                                className="group admin-row-surface flex w-full flex-col gap-3 rounded-xl border border-white/[0.07] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-4 text-left shadow-sm transition-all duration-200 hover:border-white/15 hover:from-white/[0.06] hover:to-white/[0.03] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/45 sm:flex-row sm:items-center sm:gap-4 sm:p-4"
                               >
                                 <div className="flex min-w-0 flex-1 items-center gap-3">
                                   <div
@@ -360,26 +381,28 @@ export default function PaymentsPage() {
                                     {playerInitials(item.player)}
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <p className="truncate font-semibold text-white group-hover:text-white">
+                                    <p className="truncate font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)]">
                                       {item.player}
                                     </p>
-                                    <p className="mt-0.5 text-xs text-[var(--text-muted)] sm:hidden">
-                                      {item.pendingAmount > 0 ? "Pendiente de cuota" : "Sin cuotas pendientes"}
+                                    <p className="mt-0.5 text-[11px] leading-snug text-[var(--text-muted)]">
+                                      {formatLastSignInLabel(item.lastSignInAt)}
                                     </p>
                                   </div>
                                 </div>
 
-                                <div className="flex flex-1 items-center justify-between gap-6 border-t border-white/[0.06] pt-3 sm:flex-initial sm:gap-8 sm:border-0 sm:pt-0">
-                                  <div className="min-w-[5rem] text-left sm:w-28 sm:flex sm:justify-center">
+                                <div className="flex flex-1 items-center justify-between gap-6 border-t border-white/[0.06] pt-3 sm:flex-initial sm:justify-end sm:gap-8 sm:border-0 sm:pt-0">
+                                  <div className="min-w-[5rem] text-left sm:w-28 sm:text-right">
                                     {item.pendingAmount > 0 ? (
-                                      <span className="text-lg font-bold tabular-nums text-red-400">
+                                      <span className="text-lg font-bold tabular-nums text-[var(--accent)]">
                                         {item.pendingAmount}€
                                       </span>
                                     ) : (
-                                      <span className="text-sm font-semibold text-green-400">Al día</span>
+                                      <span className="payment-label-ok text-sm font-semibold">
+                                        Al día
+                                      </span>
                                     )}
                                   </div>
-                                  <div className="flex shrink-0 justify-end pr-1 sm:min-w-[6.5rem] sm:justify-center sm:pr-0">
+                                  <div className="flex shrink-0 justify-end pr-1 sm:min-w-[6.5rem] sm:justify-end sm:pr-0">
                                     {item.pendingAmount > 0 ? (
                                       <span
                                         className={`badge ${item.status === "danger" ? "badge-danger" : "badge-warning"}`}
@@ -409,7 +432,7 @@ export default function PaymentsPage() {
               <motion.div variants={fadeUp} className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="card-glass p-5 flex flex-col justify-center">
                   <p className="text-sm font-medium text-[var(--text-secondary)] mb-1">Total Pagado</p>
-                  <p className="text-3xl font-bold text-green-400 tabular-nums">{totalPaid}€</p>
+                  <p className="text-3xl font-bold tabular-nums payment-amount--paid">{totalPaid}€</p>
                 </div>
                 
                 <div className="card-glass p-5 flex flex-col justify-center relative overflow-hidden">
@@ -417,7 +440,7 @@ export default function PaymentsPage() {
                     <FontAwesomeIcon icon={faCircleExclamation} className="text-6xl text-red-500" />
                   </div>
                   <p className="text-sm font-medium text-[var(--text-secondary)] mb-1">Pendiente</p>
-                  <p className="text-3xl font-bold text-red-400 tabular-nums">{totalPending}€</p>
+                  <p className="text-3xl font-bold tabular-nums payment-amount--pending">{totalPending}€</p>
                 </div>
               </motion.div>
 
@@ -428,7 +451,7 @@ export default function PaymentsPage() {
                 {payments.length === 0 ? (
                   <div className="py-10 flex flex-col items-center justify-center text-center bg-white/[0.02] rounded-xl border border-white/5">
                     <FontAwesomeIcon icon={faCheckCircle} className="text-4xl text-green-500/50 mb-3" />
-                    <p className="font-semibold text-white">¡Estás al día!</p>
+                    <p className="font-semibold text-[var(--text-primary)]">¡Estás al día!</p>
                     <p className="text-sm text-[var(--text-muted)] mt-1">
                       Actualmente no tienes ningún pago o cuota asignada a tu perfil.
                     </p>
@@ -438,21 +461,26 @@ export default function PaymentsPage() {
                     {payments.map((payment) => (
                       <div 
                         key={payment.id} 
-                        className={`flex items-center justify-between p-4 rounded-xl border backdrop-blur-sm transition-all duration-200 hover:bg-white/[0.04] ${
-                          payment.status === 'paid' ? 'bg-green-500/5 border-green-500/10' :
-                          'bg-red-500/5 border-red-500/20'
+                        className={`payment-card flex items-center justify-between rounded-xl p-4 backdrop-blur-sm transition-all duration-200 hover:brightness-[1.02] ${
+                          payment.status === "paid" ? "payment-card--paid" : "payment-card--pending"
                         }`}
                       >
                         <div className="flex flex-col gap-1">
-                          <p className="font-semibold text-white">{payment.concept}</p>
-                          <p className="text-xs text-[var(--text-muted)]">Fecha de cobro: <span className="text-white/80">{formatDate(payment.due_date)}</span></p>
+                          <p className="font-semibold text-[var(--text-primary)]">{payment.concept}</p>
+                          <p className="text-xs text-[var(--text-muted)]">Fecha de cobro: <span className="text-[var(--text-secondary)]">{formatDate(payment.due_date)}</span></p>
                           {payment.notes && (
                             <p className="text-xs text-[var(--text-muted)] italic mt-1">&quot;{payment.notes}&quot;</p>
                           )}
                         </div>
                         
                         <div className="flex items-center gap-4 text-right">
-                          <span className="text-lg font-bold tabular-nums">
+                          <span
+                            className={`text-lg font-bold tabular-nums ${
+                              payment.status === "paid"
+                                ? "payment-amount--paid"
+                                : "payment-amount--pending"
+                            }`}
+                          >
                             {payment.amount}€
                           </span>
                           <div className="w-32 flex justify-end">

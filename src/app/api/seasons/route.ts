@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { supabaseServer } from "@/lib/supabase/server";
+import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 
 export async function GET() {
+  const supabaseAuth = await supabaseServer();
+  const auth = await requireAllowedUser(supabaseAuth);
+  if ("response" in auth) return auth.response;
+
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!

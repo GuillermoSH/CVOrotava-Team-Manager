@@ -73,7 +73,7 @@ export default function MatchDetailsView({
       : "text-[var(--text-muted)]";
 
   let accentColor = "var(--glass-border)";
-  let cardBorderClass = "border-white/[0.06]";
+  let cardBorderClass = "border-[var(--glass-border)]";
   if (isPast && !match.result) {
     accentColor = "var(--color-warning)";
     cardBorderClass = "border-yellow-500/20";
@@ -89,7 +89,7 @@ export default function MatchDetailsView({
         ? "border-green-500/15"
         : teamScore < opponentScore
           ? "border-red-500/15"
-          : "border-white/[0.06]";
+          : "border-[var(--glass-border)]";
   }
 
   const startUTC = matchDate.toISOString().replace(/-|:|\.\d+/g, "");
@@ -169,9 +169,9 @@ export default function MatchDetailsView({
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <Link
             href="/matches"
-            className="group inline-flex items-center gap-3 text-sm text-[var(--text-muted)] transition-colors hover:text-white"
+            className="group inline-flex items-center gap-3 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] text-[var(--text-secondary)] transition-colors group-hover:border-red-500/35 group-hover:bg-red-500/10 group-hover:text-red-300">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--glass-border)] bg-[var(--surface-faint)] text-[var(--text-secondary)] transition-colors group-hover:border-red-500/35 group-hover:bg-red-500/10 group-hover:text-red-300">
               <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
             </span>
             Volver al calendario
@@ -215,7 +215,7 @@ export default function MatchDetailsView({
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-red-500/12 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-28 -left-20 h-64 w-64 rounded-full bg-violet-600/10 blur-3xl" />
 
-          <div className="relative border-b border-white/[0.06] bg-gradient-to-br from-red-950/25 via-[var(--glass-surface)] to-transparent px-5 py-8 pl-6 sm:px-10 sm:py-10 sm:pl-11">
+          <div className="relative border-b border-[var(--glass-border)] bg-gradient-to-br from-[var(--accent-muted)] via-[var(--glass-surface)] to-transparent px-5 py-8 pl-6 sm:px-10 sm:py-10 sm:pl-11">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex flex-wrap items-center gap-2">
                 <LocationTag />
@@ -223,7 +223,7 @@ export default function MatchDetailsView({
                   <span className="badge badge-warning">Pte. resultado</span>
                 )}
               </div>
-              <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              <span className="rounded-full border border-[var(--glass-border)] bg-[var(--glass-surface)] px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                 Temporada {match.season}
               </span>
             </div>
@@ -231,11 +231,11 @@ export default function MatchDetailsView({
             <p className="mt-6 text-[0.65rem] font-bold uppercase tracking-[0.22em] text-red-400/85">
               {genderLabel}
             </p>
-            <p className="mt-2 inline-flex items-center rounded-full bg-white/[0.06] px-3 py-1 text-xs font-medium text-[var(--text-secondary)] ring-1 ring-white/[0.06]">
+            <p className="mt-2 inline-flex items-center rounded-full bg-[var(--progress-track)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)] ring-1 ring-[var(--glass-border)]">
               {statusLabel}
             </p>
 
-            <h1 className="mt-5 max-w-3xl text-3xl font-bold leading-[1.12] tracking-tight text-white sm:text-4xl lg:text-[2.75rem]">
+            <h1 className="mt-5 max-w-3xl text-3xl font-bold leading-[1.12] tracking-tight text-[var(--text-primary)] sm:text-4xl lg:text-[2.75rem]">
               <span className="block text-lg font-semibold text-[var(--text-muted)] sm:text-xl">
                 vs
               </span>
@@ -243,7 +243,7 @@ export default function MatchDetailsView({
             </h1>
           </div>
 
-          <div className="relative grid gap-px bg-white/[0.06] sm:grid-cols-3">
+          <div className="relative grid gap-px bg-[var(--progress-track)] sm:grid-cols-3">
             <div className="bg-[var(--glass-surface)] p-5 sm:p-6 sm:pb-8">
               <div className="flex gap-4">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/12 text-red-400 ring-1 ring-red-500/20">
@@ -253,7 +253,7 @@ export default function MatchDetailsView({
                   <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-red-400/90">
                     Día
                   </p>
-                  <p className="mt-1.5 text-sm font-medium leading-snug text-white">
+                  <p className="mt-1.5 text-sm font-medium leading-snug text-[var(--text-primary)]">
                     {dateDisplay.weekday}
                   </p>
                   <p className="mt-0.5 text-sm leading-relaxed text-[var(--text-secondary)]">
@@ -271,7 +271,7 @@ export default function MatchDetailsView({
                   <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-red-400/90">
                     Hora
                   </p>
-                  <p className="mt-1.5 text-2xl font-bold tabular-nums tracking-tight text-white sm:text-3xl">
+                  <p className="mt-1.5 text-2xl font-bold tabular-nums tracking-tight text-[var(--text-primary)] sm:text-3xl">
                     {match.time?.slice(0, 5) || "—"}
                   </p>
                   {match.time?.slice(0, 5) ? (
@@ -300,7 +300,7 @@ export default function MatchDetailsView({
                       href={match.venues.location_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-1.5 block text-sm font-medium leading-snug text-[var(--text-secondary)] underline decoration-white/15 underline-offset-2 transition-colors hover:text-white hover:decoration-red-400/50"
+                      className="mt-1.5 block text-sm font-medium leading-snug text-[var(--text-secondary)] underline decoration-[var(--glass-border)] underline-offset-2 transition-colors hover:text-[var(--text-primary)] hover:decoration-red-400/50"
                     >
                       {match.venues.venue_name}
                     </a>
@@ -314,7 +314,7 @@ export default function MatchDetailsView({
             </div>
           </div>
 
-          <div className="relative border-t border-white/[0.06] bg-black/15 px-5 py-6 sm:px-10 sm:py-8">
+          <div className="relative border-t border-[var(--glass-border)] bg-[var(--color-bg-card)] px-5 py-6 sm:px-10 sm:py-8">
             {match.result ? (
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
                 <div>
@@ -353,9 +353,9 @@ export default function MatchDetailsView({
 
         {/* Sets */}
         {sortedSets.length > 0 && (
-          <section className="mb-8 overflow-hidden rounded-[1.25rem] border border-white/[0.08] bg-[var(--glass-surface)] shadow-lg backdrop-blur-sm">
-            <div className="border-b border-white/[0.06] bg-gradient-to-r from-red-950/20 to-transparent px-5 py-4 sm:px-6">
-              <h3 className="flex items-center gap-2.5 text-base font-semibold text-white">
+          <section className="mb-8 overflow-hidden rounded-[1.25rem] border border-[var(--glass-border)] bg-[var(--glass-surface)] shadow-lg backdrop-blur-sm">
+            <div className="border-b border-[var(--glass-border)] bg-gradient-to-r from-[var(--accent-muted)] to-transparent px-5 py-4 sm:px-6">
+              <h3 className="flex items-center gap-2.5 text-base font-semibold text-[var(--text-primary)]">
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/12 text-red-400">
                   <FontAwesomeIcon icon={faTrophy} />
                 </span>
@@ -365,7 +365,7 @@ export default function MatchDetailsView({
                 Desglose por set del partido
               </p>
             </div>
-            <ul className="divide-y divide-white/[0.06] p-2 sm:p-3">
+            <ul className="divide-y divide-[var(--glass-border)] p-2 sm:p-3">
               {sortedSets.map((s) => {
                 const won = s.team_score > s.opponent_score;
                 const lost = s.team_score < s.opponent_score;
@@ -397,9 +397,9 @@ export default function MatchDetailsView({
 
         {/* Video */}
         {match.video_url && (
-          <section className="mb-8 overflow-hidden rounded-[1.25rem] border border-white/[0.08] bg-[var(--glass-surface)] shadow-lg backdrop-blur-sm">
-            <div className="border-b border-white/[0.06] bg-gradient-to-r from-red-950/20 to-transparent px-5 py-4 sm:px-6">
-              <h3 className="flex items-center gap-2.5 text-base font-semibold text-white">
+          <section className="mb-8 overflow-hidden rounded-[1.25rem] border border-[var(--glass-border)] bg-[var(--glass-surface)] shadow-lg backdrop-blur-sm">
+            <div className="border-b border-[var(--glass-border)] bg-gradient-to-r from-[var(--accent-muted)] to-transparent px-5 py-4 sm:px-6">
+              <h3 className="flex items-center gap-2.5 text-base font-semibold text-[var(--text-primary)]">
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/12 text-red-400">
                   <FontAwesomeIcon icon={faVideo} />
                 </span>
@@ -414,7 +414,7 @@ export default function MatchDetailsView({
                 href={match.video_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group block relative aspect-video w-full overflow-hidden border-t border-white/[0.06]"
+                className="group block relative aspect-video w-full overflow-hidden border-t border-[var(--glass-border)]"
               >
                 <Image
                   src={thumbUrl}
@@ -424,10 +424,10 @@ export default function MatchDetailsView({
                   sizes="(max-width: 1280px) 100vw, 1024px"
                 />
                 <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/50 transition-colors">
-                  <div className="w-14 h-14 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shadow-lg group-hover:scale-105 transition-transform">
+                  <div className="w-14 h-14 rounded-full bg-[var(--glass-surface)] backdrop-blur-sm flex items-center justify-center border border-[var(--glass-border)] shadow-lg group-hover:scale-105 transition-transform">
                     <FontAwesomeIcon
                       icon={faPlay}
-                      className="text-white text-lg ml-1"
+                      className="text-white text-lg ml-1 drop-shadow-md"
                     />
                   </div>
                 </div>
@@ -450,9 +450,9 @@ export default function MatchDetailsView({
 
         {/* Notes */}
         {match.notes && (
-          <section className="overflow-hidden rounded-[1.25rem] border border-white/[0.08] bg-[var(--glass-surface)] shadow-lg backdrop-blur-sm">
-            <div className="border-b border-white/[0.06] bg-gradient-to-r from-red-950/20 to-transparent px-5 py-4 sm:px-6">
-              <h3 className="flex items-center gap-2.5 text-base font-semibold text-white">
+          <section className="overflow-hidden rounded-[1.25rem] border border-[var(--glass-border)] bg-[var(--glass-surface)] shadow-lg backdrop-blur-sm">
+            <div className="border-b border-[var(--glass-border)] bg-gradient-to-r from-[var(--accent-muted)] to-transparent px-5 py-4 sm:px-6">
+              <h3 className="flex items-center gap-2.5 text-base font-semibold text-[var(--text-primary)]">
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/12 text-red-400">
                   <FontAwesomeIcon icon={faNoteSticky} />
                 </span>

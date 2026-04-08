@@ -10,7 +10,8 @@ import { getCurrentSeason } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
 import { useSeasons } from "@/contexts/SeasonContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faCalendarDays } from "@fortawesome/free-solid-svg-icons";
+import PageHeader from "@/components/ui/PageHeader";
 
 type Filters = {
   season?: string;
@@ -95,23 +96,26 @@ export default function CalendarPage() {
 
   return (
     <main className="w-full max-w-6xl py-4">
-      <div className="mb-6 flex flex-wrap justify-between items-end gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white mb-1">📅 Calendario</h1>
-          <p className="text-sm text-[var(--text-muted)]">Partidos de la temporada</p>
-        </div>
-        {user?.isAdmin && (
-          <button 
-            type="button" 
-            className="btn-primary flex items-center gap-2"
-            onClick={() => {
-              setEditingMatch(undefined);
-              setIsModalOpen(true);
-            }}
-          >
-            <FontAwesomeIcon icon={faPlus} /> Añadir Partido
-          </button>
-        )}
+      <div className="mb-6">
+        <PageHeader
+          icon={faCalendarDays}
+          title="Calendario"
+          subtitle="Partidos de la temporada"
+          actions={
+            user?.isAdmin ? (
+              <button
+                type="button"
+                className="btn-primary flex items-center gap-2"
+                onClick={() => {
+                  setEditingMatch(undefined);
+                  setIsModalOpen(true);
+                }}
+              >
+                <FontAwesomeIcon icon={faPlus} /> Añadir Partido
+              </button>
+            ) : null
+          }
+        />
       </div>
 
       <div className="mb-6">

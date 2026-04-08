@@ -54,7 +54,7 @@ export default function MatchForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6 text-white">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 text-[var(--text-primary)]">
       {/* Fecha y hora */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -67,7 +67,7 @@ export default function MatchForm() {
             value={form.date}
             onChange={handleChange}
             required
-            className="w-full mt-1 p-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] [color-scheme:dark]"
+            className="w-full mt-1 p-3 border border-[var(--glass-border)] rounded-xl bg-[var(--color-bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
           />
         </div>
         <div>
@@ -80,7 +80,7 @@ export default function MatchForm() {
             value={form.time}
             onChange={handleChange}
             required
-            className="w-full mt-1 p-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] [color-scheme:dark]"
+            className="w-full mt-1 p-3 border border-[var(--glass-border)] rounded-xl bg-[var(--color-bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
           />
         </div>
       </div>
@@ -97,7 +97,7 @@ export default function MatchForm() {
           onChange={handleChange}
           required
           placeholder="Ej: Club Deportivo Alcázar"
-          className="w-full mt-1 p-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] [color-scheme:dark]"
+          className="w-full mt-1 p-3 border border-[var(--glass-border)] rounded-xl bg-[var(--color-bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
         />
       </div>
 
@@ -113,7 +113,7 @@ export default function MatchForm() {
           onChange={handleChange}
           required
           placeholder="Ej: Campo Municipal Los Pinos"
-          className="w-full mt-1 p-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] [color-scheme:dark]"
+          className="w-full mt-1 p-3 border border-[var(--glass-border)] rounded-xl bg-[var(--color-bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
         />
       </div>
 
@@ -129,7 +129,7 @@ export default function MatchForm() {
           onChange={handleChange}
           required
           placeholder="Ej: 2025/2026"
-          className="w-full mt-1 p-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] [color-scheme:dark]"
+          className="w-full mt-1 p-3 border border-[var(--glass-border)] rounded-xl bg-[var(--color-bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
         />
       </div>
 
@@ -144,7 +144,7 @@ export default function MatchForm() {
           value={form.location_url}
           onChange={handleChange}
           placeholder="https://maps.google.com/..."
-          className="w-full mt-1 p-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] [color-scheme:dark]"
+          className="w-full mt-1 p-3 border border-[var(--glass-border)] rounded-xl bg-[var(--color-bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
         />
       </div>
 
@@ -160,7 +160,7 @@ export default function MatchForm() {
             value={form.result}
             onChange={handleChange}
             placeholder="Ej: 2-1"
-            className="w-full mt-1 p-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+            className="w-full mt-1 p-3 border border-[var(--glass-border)] rounded-xl bg-[var(--color-bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
           />
         </div>
 
@@ -174,7 +174,7 @@ export default function MatchForm() {
             value={form.video_url}
             onChange={handleChange}
             placeholder="https://youtube.com/watch?v=..."
-            className="w-full mt-1 p-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+            className="w-full mt-1 p-3 border border-[var(--glass-border)] rounded-xl bg-[var(--color-bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
           />
         </div>
       </div>
@@ -189,7 +189,7 @@ export default function MatchForm() {
           value={form.notes}
           onChange={handleChange}
           placeholder="Instrucciones o comentarios para los jugadores..."
-          className="w-full mt-1 p-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] min-h-[100px]"
+          className="w-full mt-1 p-3 border border-[var(--glass-border)] rounded-xl bg-[var(--color-bg-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] min-h-[100px]"
         />
       </div>
 

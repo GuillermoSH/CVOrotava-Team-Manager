@@ -33,7 +33,7 @@ export default function FilterDropdown({ label, options, value, onChange }: Read
         type="button"
         className={`font-medium py-2 px-3.5 rounded-lg flex items-center gap-2 transition-all duration-200 border ${
           value
-            ? "bg-[var(--accent-muted)] text-red-400 border-red-500/25 hover:bg-red-500/25"
+            ? "bg-[var(--accent-muted)] text-[var(--accent)] border-[color-mix(in_srgb,var(--accent)_32%,transparent)] hover:bg-[color-mix(in_srgb,var(--accent)_18%,transparent)]"
             : "bg-[var(--glass-surface)] text-[var(--text-secondary)] border-[var(--glass-border)] hover:bg-[var(--glass-surface-hover)] hover:text-[var(--text-primary)]"
         }`}
         onClick={() => setIsOpen(!isOpen)}
@@ -55,7 +55,7 @@ export default function FilterDropdown({ label, options, value, onChange }: Read
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute z-10 mt-1.5 min-w-max w-full bg-[var(--color-bg-elevated)] rounded-lg shadow-xl shadow-black/40 border border-white/8 max-h-60 overflow-y-auto text-xs"
+            className="absolute z-[var(--z-dropdown)] mt-1.5 min-w-max w-full bg-[var(--color-bg-elevated)] rounded-lg shadow-xl shadow-black/25 border border-[var(--glass-border)] max-h-60 overflow-y-auto text-xs"
           >
             {options.map((option) => (
               <button
@@ -66,8 +66,8 @@ export default function FilterDropdown({ label, options, value, onChange }: Read
                 }}
                 className={`block w-full text-left px-3.5 py-2.5 transition-all duration-150 first:rounded-t-lg ${
                   option === value
-                    ? "bg-[var(--accent-muted)] text-red-400"
-                    : "text-[var(--text-secondary)] hover:bg-white/[0.04] hover:text-[var(--text-primary)]"
+                    ? "bg-[var(--accent-muted)] text-[var(--accent)] font-semibold"
+                    : "text-[var(--text-secondary)] hover:bg-[var(--surface-faint)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 {option}

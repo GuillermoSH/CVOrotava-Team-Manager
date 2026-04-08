@@ -28,7 +28,7 @@ export function FormLayout({
       className="flex flex-col w-full gap-4 md:gap-6 card-glass p-6 sm:p-8"
     >
       <div>
-        <h1 className="text-xl font-bold text-white mb-1">{title}</h1>
+        <h1 className="text-xl font-bold text-[var(--text-primary)] mb-1">{title}</h1>
         {description && (
           <p className="text-sm text-[var(--text-muted)]">{description}</p>
         )}
