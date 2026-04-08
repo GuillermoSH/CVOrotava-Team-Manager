@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 
@@ -8,10 +8,14 @@ export async function GET() {
   const auth = await requireAllowedUser(supabaseAuth);
   if ("response" in auth) return auth.response;
 
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc(
+    "list_distinct_video_seasons"
   );
+
+  if (!rpcError && Array.isArray(rpcData)) {
+    const seasons = (rpcData as { season: string }[]).map((r) => r.season);
+    return NextResponse.json(seasons);
+  }
 
   const { data, error } = await supabaseAdmin
     .from("videos")
@@ -22,6 +26,6 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const uniqueSeasons = [...new Set(data.map((d) => d.season))];
+  const uniqueSeasons = [...new Set((data ?? []).map((d) => d.season))];
   return NextResponse.json(uniqueSeasons);
 }

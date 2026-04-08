@@ -11,7 +11,9 @@ export async function GET(req: Request) {
   const season = searchParams.get("season");
   const gender = searchParams.get("gender");
 
-  let query = supabase.from("matches").select("*, venues(*)");
+  let query = supabase.from("matches").select(
+    "id, season, gender, result, opponent, venues(location_type)"
+  );
 
   if (season) query = query.eq("season", season);
   if (gender) query = query.eq("gender", gender);

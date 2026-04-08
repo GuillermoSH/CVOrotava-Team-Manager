@@ -3,6 +3,9 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 
+const VIDEO_LIST_COLUMNS =
+  "id, url, created_at, category, season, competition_type, gender";
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }>}
@@ -25,7 +28,7 @@ export async function PUT(
         gender: body.gender,
       })
       .eq("id", id)
-      .select()
+      .select(VIDEO_LIST_COLUMNS)
       .single();
 
     if (error)
@@ -56,7 +59,7 @@ export async function DELETE(
       .from("videos")
       .delete()
       .eq("id", id)
-      .select()
+      .select("id")
       .single();
 
     if (error)

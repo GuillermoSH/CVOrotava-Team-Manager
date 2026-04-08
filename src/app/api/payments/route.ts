@@ -1,8 +1,66 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
+
+/** Último acceso vía Auth Admin: paginar listUsers en vez de N× getUserById. */
+async function authLastSignInByUserIds(userIds: string[]) {
+  const needed = new Set(userIds.filter(Boolean));
+  const out: Record<string, string | null> = {};
+  if (needed.size === 0) return out;
+
+  let page = 1;
+  const perPage = 1000;
+
+  while (true) {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers({
+      page,
+      perPage,
+    });
+    if (error || !data?.users?.length) break;
+
+    for (const u of data.users) {
+      if (needed.has(u.id)) {
+        out[u.id] = u.last_sign_in_at ?? null;
+        needed.delete(u.id);
+      }
+    }
+
+    if (needed.size === 0) break;
+    if (data.users.length < perPage) break;
+    page += 1;
+  }
+
+  for (const id of needed) out[id] = null;
+  return out;
+}
+
+/** Columnas que consume la UI (listas, modales, dashboard); evita `select('*')`. */
+const PAYMENT_SELECT_PLAYER = `
+  id,
+  user_id,
+  concept,
+  amount,
+  status,
+  due_date,
+  paid_date,
+  notes,
+  season,
+  created_at,
+  updated_at
+`;
+
+const PAYMENT_SELECT_ADMIN = `
+  ${PAYMENT_SELECT_PLAYER.trim()},
+  users ( user_name, gender )
+`;
+
+const PAYMENT_SELECT_ADMIN_GENDER = `
+  ${PAYMENT_SELECT_PLAYER.trim()},
+  users!inner ( user_name, gender )
+`;
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -33,19 +91,10 @@ export async function GET(req: Request) {
   const isAdmin = profile?.role === "admin";
 
   if (isAdmin) {
-    // ADMIN VIEW: Obtener todos los pagos y relacionarlos con los nombres de usuario
-    // Como isAdmin => RLS policy: Admins have full access to payments
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
+    // ADMIN VIEW: service role + join users (RLS de pagos para admin)
     let query = supabaseAdmin
       .from("payments")
-      .select(`
-        *,
-        users ( user_name, gender )
-      `)
+      .select(PAYMENT_SELECT_ADMIN)
       .order("due_date", { ascending: true, nullsFirst: false });
 
     if (targetUserId) {
@@ -58,10 +107,7 @@ export async function GET(req: Request) {
     if (gender) {
       query = supabaseAdmin
         .from("payments")
-        .select(`
-          *,
-          users!inner ( user_name, gender )
-        `)
+        .select(PAYMENT_SELECT_ADMIN_GENDER)
         .order("due_date", { ascending: true, nullsFirst: false });
       
       if (targetUserId) query = query.eq("user_id", targetUserId);
@@ -73,20 +119,9 @@ export async function GET(req: Request) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    const paymentRows = payments ?? [];
-    const uniqueUserIds = [...new Set(paymentRows.map((p: { user_id: string }) => p.user_id))];
-    const authLastSignInAtByUserId: Record<string, string | null> = {};
-
-    await Promise.all(
-      uniqueUserIds.map(async (id) => {
-        const { data: authData, error: authErr } = await supabaseAdmin.auth.admin.getUserById(id);
-        if (authErr || !authData?.user) {
-          authLastSignInAtByUserId[id] = null;
-          return;
-        }
-        authLastSignInAtByUserId[id] = authData.user.last_sign_in_at ?? null;
-      })
-    );
+    const paymentRows = (payments ?? []) as unknown as { user_id: string }[];
+    const uniqueUserIds = [...new Set(paymentRows.map((p) => p.user_id))];
+    const authLastSignInAtByUserId = await authLastSignInByUserIds(uniqueUserIds);
 
     return NextResponse.json({
       data: paymentRows,
@@ -97,7 +132,7 @@ export async function GET(req: Request) {
     // PLAYER VIEW: Obtener solo sus pagos (asegurado por RLS)
     let query = supabase
       .from("payments")
-      .select("*")
+      .select(PAYMENT_SELECT_PLAYER)
       .order("due_date", { ascending: true, nullsFirst: false });
 
     if (season) query = query.eq("season", season);

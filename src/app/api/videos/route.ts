@@ -3,6 +3,10 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { assertEmailAllowed, requireAllowedUser } from "@/lib/auth/require-allowed-user";
 
+/** Lo que usa `VideoCard` / grid; evita traer filas anchas innecesarias. */
+const VIDEO_LIST_COLUMNS =
+  "id, url, created_at, category, season, competition_type, gender";
+
 export async function GET(req: Request) {
   const supabase = await supabaseServer();
   const auth = await requireAllowedUser(supabase);
@@ -17,9 +21,7 @@ export async function GET(req: Request) {
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "12", 10);
 
-  let query = supabaseAdmin
-    .from("videos")
-    .select("*");
+  let query = supabaseAdmin.from("videos").select(VIDEO_LIST_COLUMNS);
 
   if (season) query = query.eq("season", season);
   if (competition_type) query = query.eq("competition_type", competition_type);
@@ -78,9 +80,9 @@ export async function POST(req: Request) {
       .from("videos")
       .upsert(
         [{ url, category, season, competition_type, gender }],
-        {onConflict: 'url'}
+        { onConflict: "url" }
       )
-      .select();
+      .select(VIDEO_LIST_COLUMNS);
 
     if (error) {
       console.error("Error inserting video:", error);

@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import MatchDetailsView, {
   type MatchDetail,
@@ -19,8 +20,13 @@ export default async function MatchDetailsPage(props: {
 }) {
   const { id } = await props.params;
 
+  // El fetch en RSC no envía cookies por defecto; el API valida sesión con cookies.
+  const headerList = await headers();
+  const cookie = headerList.get("cookie");
+
   const res = await fetch(`${serverBaseUrl()}/api/matches/${id}`, {
-    next: { revalidate: 0 },
+    cache: "no-store",
+    headers: cookie ? { cookie } : {},
   });
 
   if (res.status === 404) notFound();

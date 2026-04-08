@@ -33,6 +33,7 @@ export async function GET(req: Request) {
 
   const limit = Number(searchParams.get("limit")) || null;
   const gender = searchParams.get("gender");
+  const season = searchParams.get("season");
   const orderParam = searchParams.get("order") || "desc";
   const hasResult = searchParams.get("hasResult") === "true";
   const ascending = orderParam === "asc";
@@ -46,6 +47,7 @@ export async function GET(req: Request) {
       .order("date", { ascending })
       .order("time", { ascending });
 
+    if (season) query = query.eq("season", season);
     if (gender) query = query.eq("gender", gender);
     if (limit) query = query.limit(limit);
     if (hasResult) query = query.not("result", "is", null).neq("result", "");
