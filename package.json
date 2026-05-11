@@ -27,6 +27,7 @@
     "react-hook-form": "^7.65.0",
     "recharts": "^3.3.0",
     "resend": "^6.1.2",
+    "xlsx": "^0.18.5",
     "zod": "^4.1.12"
   },
   "devDependencies": {

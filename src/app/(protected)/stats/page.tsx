@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import PageHeader from "@/components/ui/PageHeader";
+import OpponentTierSection from "@/components/standings/OpponentTierSection";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
 import { useSeasons } from "@/contexts/SeasonContext";
@@ -312,6 +313,14 @@ export default function StatsPage() {
                 Sin resultados suficientes para mostrar el gráfico
               </p>
             )}
+          </motion.div>
+
+          <motion.div variants={fadeUp} className="md:col-span-2">
+            <OpponentTierSection
+              season={filters.season}
+              gender={filters.gender}
+              isAdmin={Boolean(user?.isAdmin)}
+            />
           </motion.div>
 
           <motion.div
