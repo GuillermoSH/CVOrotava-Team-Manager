@@ -55,12 +55,6 @@ export default function CalendarPage() {
   }, []);
 
   useEffect(() => {
-    if (!filters.gender && user?.gender) {
-      setFilters((prev) => ({ ...prev, gender: user.gender! }));
-    }
-  }, [user, filters.gender]);
-
-  useEffect(() => {
     let filtered = [...matches];
     if (filters.season)
       filtered = filtered.filter((m) => m.season === filters.season);

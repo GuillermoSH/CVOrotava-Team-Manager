@@ -103,13 +103,6 @@ export default function PaymentsPage() {
   const [allUsers, setAllUsers] = useState<{ id: string; name: string }[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
 
-  // Sync user gender once it loads if not an admin (admins can see all or explicitly filter)
-  useEffect(() => {
-    if (user && !user.isAdmin && user.gender && !filters.gender) {
-      setFilters((prev) => ({ ...prev, gender: user.gender as string }));
-    }
-  }, [user, filters.gender]);
-
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
 

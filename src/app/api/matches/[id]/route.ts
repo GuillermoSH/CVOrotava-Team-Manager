@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
+import { ensureVideoFromMatchUrl } from "@/lib/ensureVideoFromMatchUrl";
 
 type MatchSetInput = { team_score: number; opponent_score: number };
 
@@ -115,6 +116,12 @@ export async function PUT(
         }
       }
     }
+
+    await ensureVideoFromMatchUrl({
+      videoUrl: updatedMatch.video_url,
+      season: updatedMatch.season,
+      gender: updatedMatch.gender,
+    });
 
     return NextResponse.json(updatedMatch, { status: 200 });
   } catch (err) {

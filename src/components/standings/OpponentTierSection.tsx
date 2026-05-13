@@ -12,9 +12,13 @@ import {
   faChevronUp,
   faUpload,
   faStarOfLife,
-  faSkullCrossbones,
   faTableList,
+  faBolt,
+  faSeedling,
+  faTriangleExclamation,
+  faSkullCrossbones,
 } from "@fortawesome/free-solid-svg-icons";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import AliasResolver, {
   type StandingOption,
   type UnmatchedRow,
@@ -38,6 +42,7 @@ type PerOpponent = {
   opponent_raw: string;
   resolved_via: "direct" | "alias" | null;
   team_name: string | null;
+  normalized_name?: string | null;
   position: number | null;
   tier: Tier | null;
   our_sets: number;
@@ -45,14 +50,30 @@ type PerOpponent = {
   league_points_earned: number;
 };
 
+type NextSeasonRival = {
+  team_name: string;
+  position: number;
+  tier: Tier;
+  our_wins: number;
+  our_losses: number;
+  summary: string;
+  worst_loss_sets: string | null;
+};
+
 type ApiResponse = {
   has_standings: boolean;
   season: string;
   gender: string;
   total_teams: number;
+  our_position: number | null;
   tiers: Record<Tier, TierStats> | null;
   per_opponent: PerOpponent[];
   unmatched_opponents: UnmatchedRow[];
+  next_season?: {
+    tough: NextSeasonRival[];
+    easy: NextSeasonRival[];
+    upset_losses: NextSeasonRival[];
+  };
   highlights: {
     best_surprise: PerOpponent | null;
     worst_upset: PerOpponent | null;
@@ -91,7 +112,12 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
   const [showDetail, setShowDetail] = useState(false);
 
   const fetchData = useCallback(async () => {
-    if (!season || !gender) return;
+    if (!season || !gender) {
+      setData(null);
+      setCandidates([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const [tierRes, stRes] = await Promise.all([
@@ -120,12 +146,63 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
     fetchData();
   }, [fetchData]);
 
-  if (!season || !gender) return null;
+  if (!season) return null;
+
+  if (!gender) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="card-glass flex flex-col items-start gap-3 p-5 sm:p-6"
+      >
+        <h2 className="section-header">Rendimiento contra rivales por clasificación</h2>
+        <p className="text-sm text-[var(--text-muted)]">
+          Selecciona un género en el filtro superior para ver esta sección. La clasificación importada
+          se consulta por temporada y género, y no se puede combinar ambos equipos a la vez.
+        </p>
+      </motion.div>
+    );
+  }
 
   if (loading && !data) {
     return (
-      <motion.div className="card-glass flex items-center justify-center p-8 text-sm text-[var(--text-muted)] md:col-span-2">
-        Cargando rendimiento por rivales…
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="card-glass w-full p-5 sm:p-6"
+      >
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div className="space-y-2">
+            <div className="h-6 w-64 max-w-full rounded-md bg-[var(--surface-faint)] animate-pulse" />
+            <div className="h-3 w-48 max-w-full rounded-md bg-[var(--surface-faint)] animate-pulse" />
+          </div>
+          <div className="h-8 w-24 shrink-0 rounded-lg bg-[var(--surface-faint)] animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="flex flex-col gap-2 rounded-2xl border border-[var(--glass-border)] bg-[var(--surface-faint)]/80 p-4"
+            >
+              <div className="flex items-center justify-between">
+                <div className="h-3 w-28 rounded bg-[var(--color-bg-card)] animate-pulse" />
+                <div className="h-4 w-4 shrink-0 rounded bg-[var(--color-bg-card)] animate-pulse" />
+              </div>
+              <div className="h-8 w-16 rounded bg-[var(--color-bg-card)] animate-pulse" />
+              <div className="h-3 w-36 max-w-full rounded bg-[var(--color-bg-card)] animate-pulse" />
+              <div className="mt-2 space-y-2 border-t border-[var(--glass-border)] pt-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="h-3 w-14 rounded bg-[var(--color-bg-card)] animate-pulse" />
+                  <div className="h-3 w-24 rounded bg-[var(--color-bg-card)] animate-pulse" />
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="h-3 w-10 rounded bg-[var(--color-bg-card)] animate-pulse" />
+                  <div className="h-3 w-20 rounded bg-[var(--color-bg-card)] animate-pulse" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </motion.div>
     );
   }
@@ -165,6 +242,13 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
     (s, t) => s + t.max_possible_points,
     0
   );
+
+  const nextSeason = data.next_season ?? {
+    tough: [] as NextSeasonRival[],
+    easy: [] as NextSeasonRival[],
+    upset_losses: [] as NextSeasonRival[],
+  };
+  const ourPosition = data.our_position ?? null;
 
   return (
     <motion.div
@@ -239,7 +323,79 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
         })}
       </div>
 
-      {data.highlights && (data.highlights.best_surprise || data.highlights.worst_upset) && (
+      <div className="mt-6 border-t border-[var(--glass-border)] pt-5">
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">
+          De cara a la próxima temporada
+        </h3>
+        <p className="mt-1 text-xs text-[var(--text-muted)]">
+          Vista rápida según la clasificación final importada (tercios de tabla y posición relativa al
+          nuestro). Sirve aunque cambien de categoría algunos equipos.
+        </p>
+        {ourPosition === null && (
+          <p className="mt-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/95">
+            Marca exactamente un equipo como «nuestro» en la clasificación para calcular derrotas
+            evitables según la posición final.
+            {isAdmin && (
+              <>
+                {" "}
+                <Link href="/league-standings/upload" className="font-semibold underline hover:text-amber-100">
+                  Revisar importación
+                </Link>
+              </>
+            )}
+          </p>
+        )}
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <NextSeasonColumn
+            title="Rivales complicados"
+            subtitle="Top tabla · al menos una derrota"
+            icon={faBolt}
+            borderTone="border-amber-500/25 bg-amber-500/[0.07]"
+            iconClass="text-amber-400"
+            empty="Ningún rival del top te ganó esta temporada."
+            rivals={nextSeason.tough}
+            footnote={(r) => `Pos. ${r.position} · ${r.summary}`}
+          />
+          <NextSeasonColumn
+            title="Rivales accesibles"
+            subtitle="Cola tabla · al menos una victoria"
+            icon={faSeedling}
+            borderTone="border-emerald-500/25 bg-emerald-500/[0.07]"
+            iconClass="text-emerald-400"
+            empty="No hay victorias contra equipos de la cola."
+            rivals={nextSeason.easy}
+            footnote={(r) => `Pos. ${r.position} · ${r.summary}`}
+          />
+          <NextSeasonColumn
+            title="Derrotas evitables"
+            subtitle={
+              ourPosition !== null
+                ? `Perdiste frente a quien quedó por debajo (nosotros pos. ${ourPosition})`
+                : "Perdiste frente a quien quedó por debajo en la tabla"
+            }
+            icon={faTriangleExclamation}
+            borderTone="border-red-500/25 bg-red-500/[0.07]"
+            iconClass="text-red-400"
+            empty={
+              ourPosition === null
+                ? "Sin posición propia no se puede calcular esta lista."
+                : "No hay derrotas contra equipos que acabaron por debajo."
+            }
+            rivals={nextSeason.upset_losses}
+            footnote={(r) =>
+              [
+                `Pos. ${r.position}`,
+                r.worst_loss_sets ? `peor partido ${r.worst_loss_sets}` : null,
+                r.summary,
+              ]
+                .filter(Boolean)
+                .join(" · ")
+            }
+          />
+        </div>
+      </div>
+
+      {data.highlights && (
         <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <HighlightCard
             icon={faStarOfLife}
@@ -341,6 +497,55 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
         </div>
       )}
     </motion.div>
+  );
+}
+
+function NextSeasonColumn({
+  title,
+  subtitle,
+  icon,
+  borderTone,
+  iconClass,
+  empty,
+  rivals,
+  footnote,
+}: {
+  title: string;
+  subtitle: string;
+  icon: IconDefinition;
+  borderTone: string;
+  iconClass: string;
+  empty: string;
+  rivals: NextSeasonRival[];
+  footnote: (r: NextSeasonRival) => string;
+}) {
+  return (
+    <div className={`flex min-h-[7rem] flex-col rounded-2xl border ${borderTone} p-4`}>
+      <div className="mb-2 flex items-start gap-2">
+        <FontAwesomeIcon icon={icon} className={`mt-0.5 shrink-0 text-sm ${iconClass}`} />
+        <div className="min-w-0">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+            {title}
+          </h4>
+          <p className="mt-0.5 text-[11px] leading-snug text-[var(--text-muted)]">{subtitle}</p>
+        </div>
+      </div>
+      {rivals.length === 0 ? (
+        <p className="mt-auto text-xs leading-snug text-[var(--text-muted)]">{empty}</p>
+      ) : (
+        <ul className="mt-1 flex max-h-52 flex-col gap-1.5 overflow-y-auto pr-0.5">
+          {rivals.map((r) => (
+            <li
+              key={`${r.team_name}-${r.position}`}
+              className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-surface)]/80 px-2.5 py-1.5"
+            >
+              <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{r.team_name}</p>
+              <p className="text-[11px] text-[var(--text-muted)]">{footnote(r)}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

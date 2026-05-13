@@ -127,38 +127,6 @@ export default function EditMatchPage() {
       alert("Error guardando los cambios");
     } finally {
       setLoading(false);
-
-      try {
-        const url = match?.video_url?.trim();
-        const token = (await (await import("@/lib/supabase/client")).supabase.auth.getSession())
-        .data.session?.access_token;
-        if (url) {
-          const body = {
-            url,
-            category: "match",
-            season: match.season,
-            competition_type: "league",
-            gender: match.gender,
-          };
-
-          console.log("Enviando video:", body);
-
-          const videoRes = await fetch("/api/videos", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify(body),
-          });
-
-          if (!videoRes.ok) {
-            const text = await videoRes.text();
-            console.error("Error posting video:", text);
-          } else {
-            console.log("Video registrado correctamente");
-          }
-        }
-      } catch (videoErr) {
-        console.error("Error enviando video:", videoErr);
-      }
     }
   };
 

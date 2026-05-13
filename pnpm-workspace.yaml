@@ -1,0 +1,5 @@
+# pnpm 11+: project settings live here (root-only workspace if packages omitted).
+allowBuilds:
+  sharp: true
+  "@tailwindcss/oxide": true
+  unrs-resolver: true

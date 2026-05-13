@@ -116,10 +116,10 @@ cd cvorotava-team-manager
 
 ### 2️⃣ Instalar dependencias
 
+Requiere [pnpm](https://pnpm.io/installation) (recomendado vía Corepack: `corepack enable`).
+
 ```bash
-npm install
-# o
-yarn install
+pnpm install
 ```
 
 ### 3️⃣ Variables de entorno
@@ -141,7 +141,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ## ▶️ Ejecución en desarrollo
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 La aplicación estará disponible en:

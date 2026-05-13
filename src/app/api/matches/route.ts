@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
+import { ensureVideoFromMatchUrl } from "@/lib/ensureVideoFromMatchUrl";
 import { z } from "zod";
 
 const matchSchema = z.object({
@@ -120,6 +121,12 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: "El partido se creó, pero falló la carga de sus sets." }, { status: 500 });
             }
         }
+
+        await ensureVideoFromMatchUrl({
+            videoUrl: data.video_url,
+            season: data.season,
+            gender: data.gender,
+        });
 
         return NextResponse.json(
             { message: "Partido creado con éxito", data },

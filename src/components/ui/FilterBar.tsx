@@ -44,8 +44,12 @@ export default function FilterBar({ filters, setFilters, configs }: Readonly<Fil
             options={config.options.map((opt) => opt.label)}
             value={selectedLabel}
             onChange={(label) => {
+              if (!label.trim()) {
+                setFilters((prev) => ({ ...prev, [config.key]: undefined }));
+                return;
+              }
               const selected = config.options.find((opt) => opt.label === label);
-              toggleFilter(config.key, selected?.value || "");
+              if (selected) toggleFilter(config.key, selected.value);
             }}
           />
         );

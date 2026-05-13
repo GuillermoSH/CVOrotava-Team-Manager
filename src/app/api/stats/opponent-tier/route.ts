@@ -38,11 +38,34 @@ type PerOpponent = {
   opponent_raw: string;
   resolved_via: "direct" | "alias" | null;
   team_name: string | null;
+  /** Clave canónica en `league_standings` cuando el rival está resuelto. */
+  normalized_name: string | null;
   position: number | null;
   tier: Tier | null;
   our_sets: number;
   their_sets: number;
   league_points_earned: number;
+};
+
+type RivalAgg = {
+  team_name: string;
+  normalized_name: string;
+  position: number;
+  tier: Tier;
+  our_wins: number;
+  our_losses: number;
+  /** Derrota más contundente (mayor diferencia a favor del rival); desempate por fecha. */
+  worst_loss: { our_sets: number; their_sets: number; date: string } | null;
+};
+
+type NextSeasonBucket = {
+  team_name: string;
+  position: number;
+  tier: Tier;
+  our_wins: number;
+  our_losses: number;
+  summary: string;
+  worst_loss_sets: string | null;
 };
 
 export async function GET(req: Request) {
@@ -71,6 +94,8 @@ export async function GET(req: Request) {
 
   if (stErr) return NextResponse.json({ error: stErr.message }, { status: 500 });
 
+  const emptyNextSeason = { tough: [] as NextSeasonBucket[], easy: [] as NextSeasonBucket[], upset_losses: [] as NextSeasonBucket[] };
+
   if (!standings || standings.length === 0) {
     return NextResponse.json({
       has_standings: false,
@@ -80,8 +105,15 @@ export async function GET(req: Request) {
       per_opponent: [],
       unmatched_opponents: [],
       total_teams: 0,
+      our_position: null,
+      next_season: emptyNextSeason,
+      highlights: null,
     });
   }
+
+  const ourTeamRows = standings.filter((s) => s.is_our_team);
+  const ourPosition =
+    ourTeamRows.length === 1 ? ourTeamRows[0].position : null;
 
   // Filtrar nuestra propia fila para construir el lookup (no resolvemos contra nosotros).
   const standingsByNorm = new Map<string, StandingLite>();
@@ -168,6 +200,7 @@ export async function GET(req: Request) {
         opponent_raw: m.opponent,
         resolved_via: null,
         team_name: null,
+        normalized_name: null,
         position: null,
         tier: null,
         our_sets: ourSetsWon,
@@ -195,6 +228,7 @@ export async function GET(req: Request) {
       opponent_raw: m.opponent,
       resolved_via: resolved.via,
       team_name: resolved.row.team_name,
+      normalized_name: resolved.row.normalized_name,
       position: resolved.row.position,
       tier,
       our_sets: ourSetsWon,
@@ -220,7 +254,7 @@ export async function GET(req: Request) {
     };
   });
 
-  // Highlights
+  // Highlights: mejor victoria vs tabla + peor derrota vs tabla (una fila cada una)
   const ourSeasonResults = perOpponent.filter((p) => p.position !== null);
   const wins = ourSeasonResults.filter((p) => p.our_sets > p.their_sets);
   const losses = ourSeasonResults.filter((p) => p.our_sets < p.their_sets);
@@ -232,6 +266,9 @@ export async function GET(req: Request) {
     ? losses.reduce((a, b) => (a.position! > b.position! ? a : b))
     : null;
 
+  const rivalAggs = aggregateByRival(perOpponent);
+  const nextSeason = buildNextSeasonBuckets(rivalAggs, ourPosition);
+
   void normalizeTeamName; // reservado para futuras métricas
 
   return NextResponse.json({
@@ -239,14 +276,97 @@ export async function GET(req: Request) {
     season,
     gender,
     total_teams: totalTeams,
+    our_position: ourPosition,
     tiers,
     per_opponent: perOpponent.sort((a, b) => (a.date < b.date ? -1 : 1)),
     unmatched_opponents: unmatchedOpponents,
+    next_season: nextSeason,
     highlights: {
       best_surprise: bestSurprise,
       worst_upset: worstUpset,
     },
   });
+}
+
+function aggregateByRival(rows: PerOpponent[]): Map<string, RivalAgg> {
+  const map = new Map<string, RivalAgg>();
+  for (const p of rows) {
+    if (p.normalized_name === null || p.position === null || p.tier === null || !p.team_name) {
+      continue;
+    }
+    const won = p.our_sets > p.their_sets;
+    const lost = p.our_sets < p.their_sets;
+    let agg = map.get(p.normalized_name);
+    if (!agg) {
+      agg = {
+        team_name: p.team_name,
+        normalized_name: p.normalized_name,
+        position: p.position,
+        tier: p.tier,
+        our_wins: 0,
+        our_losses: 0,
+        worst_loss: null,
+      };
+      map.set(p.normalized_name, agg);
+    }
+    if (won) agg.our_wins++;
+    if (lost) {
+      agg.our_losses++;
+      const margin = p.their_sets - p.our_sets;
+      const prev = agg.worst_loss;
+      const prevMargin = prev ? prev.their_sets - prev.our_sets : -1;
+      if (!prev || margin > prevMargin || (margin === prevMargin && p.date > prev.date)) {
+        agg.worst_loss = {
+          our_sets: p.our_sets,
+          their_sets: p.their_sets,
+          date: p.date,
+        };
+      }
+    }
+  }
+  return map;
+}
+
+function buildNextSeasonBuckets(
+  byRival: Map<string, RivalAgg>,
+  ourPosition: number | null
+): { tough: NextSeasonBucket[]; easy: NextSeasonBucket[]; upset_losses: NextSeasonBucket[] } {
+  const toBucket = (a: RivalAgg): NextSeasonBucket => ({
+    team_name: a.team_name,
+    position: a.position,
+    tier: a.tier,
+    our_wins: a.our_wins,
+    our_losses: a.our_losses,
+    summary: `${a.our_wins}V–${a.our_losses}D`,
+    worst_loss_sets: a.worst_loss ? `${a.worst_loss.our_sets}–${a.worst_loss.their_sets}` : null,
+  });
+
+  const all = Array.from(byRival.values());
+
+  const tough = all
+    .filter((a) => a.tier === "top" && a.our_losses > 0)
+    .sort((a, b) => a.position - b.position)
+    .map(toBucket);
+
+  const easy = all
+    .filter((a) => a.tier === "bottom" && a.our_wins > 0)
+    .sort((a, b) => b.position - a.position)
+    .map(toBucket);
+
+  const upset_losses =
+    ourPosition === null
+      ? []
+      : all
+          .filter((a) => a.our_losses > 0 && a.position > ourPosition)
+          .sort((a, b) => {
+            const gapA = a.position - ourPosition;
+            const gapB = b.position - ourPosition;
+            if (gapB !== gapA) return gapB - gapA;
+            return b.position - a.position;
+          })
+          .map(toBucket);
+
+  return { tough, easy, upset_losses };
 }
 
 function emptyAgg(): TierAgg {

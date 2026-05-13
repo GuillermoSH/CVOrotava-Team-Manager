@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import VideosGrid from "@/components/videos/VideosGrid";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import useViewportHeight from "@/hooks/useViewportHeight";
@@ -31,12 +31,6 @@ export default function PartidosPage() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   useViewportHeight();
-
-  useEffect(() => {
-    if (!filters.gender && user?.gender) {
-      setFilters((prev) => ({ ...prev, gender: user.gender! }));
-    }
-  }, [user, filters.gender]);
 
   const filterConfigs: FilterConfig[] = [
     {
