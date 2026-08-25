@@ -1,5 +1,10 @@
-import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { NextResponse } from "next/server";
+import {
+  isEmailAllowlisted,
+  normalizeEmail,
+} from "@/lib/auth/allowlist";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 /**
  * Valida sesión Supabase (cookies) y que el email siga en allowed_emails.
@@ -17,11 +22,10 @@ export async function requireAllowedUser(supabase: SupabaseClient) {
     } as const;
   }
 
-  const { data: allowed } = await supabase
-    .from("allowed_emails")
-    .select("email")
-    .eq("email", user.email)
-    .maybeSingle();
+  const allowed = await isEmailAllowlisted(
+    supabaseAdmin,
+    normalizeEmail(user.email)
+  );
 
   if (!allowed) {
     return {
@@ -29,22 +33,19 @@ export async function requireAllowedUser(supabase: SupabaseClient) {
     } as const;
   }
 
-  return { user: { id: user.id, email: user.email } } as const;
+  return {
+    user: { id: user.id, email: normalizeEmail(user.email) },
+  } as const;
 }
 
 /**
  * Comprueba allowlist por email (p. ej. tras validar JWT con admin.auth.getUser).
  */
 export async function assertEmailAllowed(
-  supabase: SupabaseClient,
+  _supabase: SupabaseClient,
   email: string
 ): Promise<NextResponse | null> {
-  const { data: allowed } = await supabase
-    .from("allowed_emails")
-    .select("email")
-    .eq("email", email)
-    .maybeSingle();
-
+  const allowed = await isEmailAllowlisted(supabaseAdmin, normalizeEmail(email));
   if (!allowed) {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }

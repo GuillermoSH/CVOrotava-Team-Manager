@@ -42,3 +42,9 @@ next-env.d.ts
 
 # cursor
 .cursor
+
+# local pnpm store (never commit)
+.pnpm-store/
+
+# supabase CLI / local migrations (managed outside git)
+/supabase/

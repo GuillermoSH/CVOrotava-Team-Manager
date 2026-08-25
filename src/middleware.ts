@@ -1,12 +1,17 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  clearSupabaseAuthCookies,
+  isEmailAllowlisted,
+  normalizeEmail,
+} from "@/lib/auth/allowlist";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  // Crear cliente de Supabase con la API moderna getAll/setAll
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -30,17 +35,12 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // IMPORTANTE: No ejecutar código entre createServerClient y getUser()
-  // ya que podría invalidar la sesión.
-  // Usar getUser() en lugar de getSession() para verificar contra el servidor.
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
 
-  // Las rutas de API (excepto /api/auth) gestionan su propia autenticación.
-  // No las bloqueamos aquí para evitar interferir con los fetches del cliente.
   const isApiRoute =
     pathname.startsWith("/api/") && !pathname.startsWith("/api/auth");
 
@@ -48,26 +48,67 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Rutas públicas de página que no requieren autenticación
   const isPublicPath =
     pathname.startsWith("/login") ||
     pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/auth/") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/assets");
 
-  // Si no hay sesión y la ruta no es pública → redirigir al login
   if (!user && !isPublicPath) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     return NextResponse.redirect(loginUrl);
   }
 
-  // Si hay sesión y el usuario intenta acceder al login → ir al dashboard,
-  // salvo cuando venimos de un fallo de auth (p. ej. email no permitido): debe ver el mensaje.
+  // Session present: enforce allowlist before any protected page.
+  if (user?.email && !isPublicPath) {
+    const allowed = await isEmailAllowlisted(
+      supabaseAdmin,
+      normalizeEmail(user.email)
+    );
+
+    if (!allowed) {
+      try {
+        await supabaseAdmin.auth.admin.signOut(user.id, "global");
+      } catch {
+        /* best-effort */
+      }
+      await supabase.auth.signOut();
+
+      const denied = NextResponse.redirect(
+        new URL("/login?error=unauthorized", request.url)
+      );
+      // Preserve any cookie mutations from signOut, then force-clear.
+      supabaseResponse.cookies.getAll().forEach(({ name, value }) => {
+        denied.cookies.set(name, value);
+      });
+      clearSupabaseAuthCookies(denied, request.url);
+      return denied;
+    }
+  }
+
   if (user && pathname === "/login") {
     const err = request.nextUrl.searchParams.get("error");
     if (err === "unauthorized" || err === "auth" || err === "no-email") {
+      // If they still have a session on an error screen, wipe it.
+      if (err === "unauthorized" || err === "no-email") {
+        try {
+          if (user.id) {
+            await supabaseAdmin.auth.admin.signOut(user.id, "global");
+          }
+        } catch {
+          /* best-effort */
+        }
+        await supabase.auth.signOut();
+        const cleaned = NextResponse.next({ request });
+        supabaseResponse.cookies.getAll().forEach(({ name, value }) => {
+          cleaned.cookies.set(name, value);
+        });
+        clearSupabaseAuthCookies(cleaned, request.url);
+        return cleaned;
+      }
       return supabaseResponse;
     }
     const homeUrl = request.nextUrl.clone();
@@ -80,7 +121,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Excluir archivos estáticos de Next.js y metadatos
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

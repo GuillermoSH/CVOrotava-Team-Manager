@@ -1,47 +1,94 @@
-import { NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabase/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import {
+  clearSupabaseAuthCookies,
+  isEmailAllowlisted,
+  normalizeEmail,
+} from "@/lib/auth/allowlist";
 
-export async function GET(request: Request) {
+type PendingCookie = {
+  name: string;
+  value: string;
+  options: Record<string, unknown>;
+};
+
+/**
+ * Google OAuth PKCE callback.
+ *
+ * Next 15 does not reliably merge `cookies().set(...)` into a later
+ * `NextResponse.redirect(...)`. We buffer every cookie write and apply them
+ * onto the final redirect response.
+ */
+export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
+  const origin = url.origin;
 
-  // 🔒 Si no viene el código de OAuth, redirigimos
   if (!code) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/login", origin));
   }
 
-  const supabase = await supabaseServer();
+  const pending = new Map<string, PendingCookie>();
 
-  // 1️⃣ Intercambiar el código por una sesión segura en el servidor
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error) {
-    console.error("❌ Error intercambiando código:", error);
-    return NextResponse.redirect(new URL("/login?error=auth", request.url));
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            pending.set(name, { name, value, options });
+          });
+        },
+      },
+    }
+  );
+
+  const finish = (path: string, clearAuth = false) => {
+    const response = NextResponse.redirect(new URL(path, origin));
+    pending.forEach(({ name, value, options }) => {
+      response.cookies.set(name, value, options);
+    });
+    if (clearAuth) {
+      clearSupabaseAuthCookies(response, request.url);
+    }
+    return response;
+  };
+
+  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+  if (exchangeError) {
+    console.error("OAuth code exchange failed:", exchangeError.message);
+    return finish("/login?error=auth", true);
   }
 
-  // 2️⃣ Obtener el usuario autenticado
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user?.email) {
-    console.error("❌ Usuario sin email");
-    return NextResponse.redirect(new URL("/login?error=no-email", request.url));
+    await supabase.auth.signOut();
+    return finish("/login?error=no-email", true);
   }
 
-  // 3️⃣ Verificar si el email está permitido
-  const { data: allowed } = await supabase
-    .from("allowed_emails")
-    .select("email")
-    .eq("email", user.email)
-    .maybeSingle();
+  const email = normalizeEmail(user.email);
+  const allowed = await isEmailAllowlisted(supabaseAdmin, email);
 
   if (!allowed) {
+    // Kill refresh tokens server-side even if a cookie leaks through.
+    try {
+      await supabaseAdmin.auth.admin.signOut(user.id, "global");
+    } catch (err) {
+      console.error("Failed to globally revoke session for denied user:", err);
+    }
+
     await supabase.auth.signOut();
-    console.warn(`🚫 Acceso denegado para ${user.email}`);
-    return NextResponse.redirect(new URL("/login?error=unauthorized", request.url));
+    console.warn(`Access denied for ${email} (${user.id})`);
+    return finish("/login?error=unauthorized", true);
   }
 
-  // 4️⃣ Redirigir al dashboard o raíz protegida
-  return NextResponse.redirect(new URL("/", request.url));
+  return finish("/");
 }
