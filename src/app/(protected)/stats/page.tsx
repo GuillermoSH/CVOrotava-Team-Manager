@@ -18,7 +18,6 @@ import { useUser } from "@/contexts/UserContext";
 import { useSeasons } from "@/contexts/SeasonContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faChartSimple,
   faCalendarCheck,
   faTrophy,
   faTimesCircle,
@@ -291,22 +290,17 @@ export default function StatsPage() {
         : "text-[var(--text-secondary)]";
 
   return (
-    <motion.main
-      className="flex w-full max-w-6xl flex-col items-center py-4 text-[var(--text-primary)]"
+    <motion.div
+      className="flex w-full flex-col text-[var(--text-primary)]"
       variants={stagger}
       initial="hidden"
       animate="visible"
     >
-      <motion.div variants={fadeUp} className="relative mb-6 w-full overflow-hidden rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-surface)] p-5 sm:p-6">
-        <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-red-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-12 h-48 w-48 rounded-full bg-violet-500/8 blur-3xl" />
-        <div className="relative">
-          <PageHeader
-            icon={faChartSimple}
-            title="Estadísticas"
-            subtitle="Rendimiento del equipo por temporada y contexto"
-          />
-        </div>
+      <motion.div variants={fadeUp}>
+        <PageHeader
+          title="Estadísticas"
+          subtitle="Rendimiento del equipo por temporada y contexto"
+        />
       </motion.div>
 
       <motion.div variants={fadeUp} className="w-full">
@@ -552,6 +546,6 @@ export default function StatsPage() {
           </motion.div>
         </motion.div>
       )}
-    </motion.main>
+    </motion.div>
   );
 }

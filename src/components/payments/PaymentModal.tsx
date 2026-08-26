@@ -183,7 +183,7 @@ export default function PaymentModal({
             </h2>
             <button
               onClick={onClose}
-              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--glass-surface-hover)]"
+              className="cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)] transition w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--glass-surface-hover)]"
             >
               <FontAwesomeIcon icon={faTimes} />
             </button>
@@ -285,7 +285,7 @@ export default function PaymentModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-5 py-2.5 text-sm font-semibold rounded-xl border border-[color:var(--form-input-border)] text-[var(--text-primary)] hover:bg-[var(--surface-faint)] transition"
+                  className="cursor-pointer px-5 py-2.5 text-sm font-semibold rounded-xl border border-[color:var(--form-input-border)] text-[var(--text-primary)] hover:bg-[var(--surface-faint)] transition"
                 >
                   Cancelar
                 </button>

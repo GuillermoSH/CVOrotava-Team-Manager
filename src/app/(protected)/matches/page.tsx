@@ -20,6 +20,8 @@ import {
   faChevronLeft,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
+import PageHeader from "@/components/ui/PageHeader";
+import { readPref, writePref } from "@/lib/prefs";
 
 type Filters = {
   season?: string;
@@ -28,6 +30,8 @@ type Filters = {
 };
 
 type ViewMode = "list" | "month";
+
+const VIEW_PREF_KEY = "cvorotava-calendar-view";
 
 const PAGE_UPCOMING = 5;
 const PAGE_PLAYED = 6;
@@ -79,7 +83,7 @@ function Pagination({
           type="button"
           disabled={page <= 1}
           onClick={() => onChange(page - 1)}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--glass-border)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-[var(--glass-border)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={`${label}: página anterior`}
         >
           <FontAwesomeIcon icon={faChevronLeft} className="text-[0.65rem]" />
@@ -88,7 +92,7 @@ function Pagination({
           type="button"
           disabled={page >= pageCount}
           onClick={() => onChange(page + 1)}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--glass-border)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-[var(--glass-border)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={`${label}: página siguiente`}
         >
           <FontAwesomeIcon icon={faChevronRight} className="text-[0.65rem]" />
@@ -109,9 +113,21 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
-  const [view, setView] = useState<ViewMode>("list");
+  const [view, setViewState] = useState<ViewMode>("list");
   const [upcomingPage, setUpcomingPage] = useState(1);
   const [playedPage, setPlayedPage] = useState(1);
+
+  useEffect(() => {
+    const stored = readPref(VIEW_PREF_KEY);
+    if (stored === "list" || stored === "month") {
+      setViewState(stored);
+    }
+  }, []);
+
+  const setView = (next: ViewMode) => {
+    setViewState(next);
+    writePref(VIEW_PREF_KEY, next);
+  };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMatch, setEditingMatch] = useState<
@@ -247,12 +263,10 @@ export default function CalendarPage() {
 
   return (
     <div className="w-full text-[var(--text-primary)]">
-      <header className="mb-5 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-[1.65rem] font-semibold tracking-tight sm:text-3xl">
-            Calendario
-          </h1>
-          <p className="mt-1.5 text-sm text-[var(--text-muted)]">
+      <PageHeader
+        title="Calendario"
+        subtitle={
+          <>
             Partidos de la temporada
             {filteredMatches.length > 0 && (
               <span className="tabular-nums">
@@ -261,54 +275,56 @@ export default function CalendarPage() {
                 {filteredMatches.length === 1 ? "" : "s"}
               </span>
             )}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div
-            className="inline-flex rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface)] p-0.5"
-            role="group"
-            aria-label="Vista del calendario"
-          >
-            <button
-              type="button"
-              onClick={() => setView("list")}
-              className={`inline-flex h-9 items-center gap-1.5 rounded-[0.65rem] px-3 text-xs font-medium transition-colors ${
-                view === "list"
-                  ? "bg-[var(--color-bg-elevated)] text-[var(--text-primary)] shadow-sm"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-              }`}
+          </>
+        }
+        actions={
+          <>
+            <div
+              className="inline-flex rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface)] p-0.5"
+              role="group"
+              aria-label="Vista del calendario"
             >
-              <FontAwesomeIcon icon={faList} />
-              Lista
-            </button>
-            <button
-              type="button"
-              onClick={() => setView("month")}
-              className={`inline-flex h-9 items-center gap-1.5 rounded-[0.65rem] px-3 text-xs font-medium transition-colors ${
-                view === "month"
-                  ? "bg-[var(--color-bg-elevated)] text-[var(--text-primary)] shadow-sm"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-              }`}
-            >
-              <FontAwesomeIcon icon={faCalendarDays} />
-              Mes
-            </button>
-          </div>
-          {user?.isAdmin && (
-            <button
-              type="button"
-              className="btn-primary flex items-center gap-2"
-              onClick={() => {
-                setEditingMatch(undefined);
-                setIsModalOpen(true);
-              }}
-            >
-              <FontAwesomeIcon icon={faPlus} />
-              Añadir partido
-            </button>
-          )}
-        </div>
-      </header>
+              <button
+                type="button"
+                onClick={() => setView("list")}
+                className={`inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-[0.65rem] px-3 text-xs font-medium transition-colors ${
+                  view === "list"
+                    ? "bg-[var(--color-bg-elevated)] text-[var(--text-primary)] shadow-sm"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                }`}
+              >
+                <FontAwesomeIcon icon={faList} />
+                Lista
+              </button>
+              <button
+                type="button"
+                onClick={() => setView("month")}
+                className={`inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-[0.65rem] px-3 text-xs font-medium transition-colors ${
+                  view === "month"
+                    ? "bg-[var(--color-bg-elevated)] text-[var(--text-primary)] shadow-sm"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                }`}
+              >
+                <FontAwesomeIcon icon={faCalendarDays} />
+                Mes
+              </button>
+            </div>
+            {user?.isAdmin ? (
+              <button
+                type="button"
+                className="btn-primary flex items-center gap-2"
+                onClick={() => {
+                  setEditingMatch(undefined);
+                  setIsModalOpen(true);
+                }}
+              >
+                <FontAwesomeIcon icon={faPlus} />
+                Añadir partido
+              </button>
+            ) : null}
+          </>
+        }
+      />
 
       <div className="mb-4">
         <label className="relative block">

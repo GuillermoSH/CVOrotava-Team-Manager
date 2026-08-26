@@ -417,7 +417,7 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
       <button
         type="button"
         onClick={() => setShowDetail((v) => !v)}
-        className="mt-5 inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--accent)]"
+        className="mt-5 inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--accent)]"
       >
         <FontAwesomeIcon icon={showDetail ? faChevronUp : faChevronDown} />
         {showDetail ? "Ocultar" : "Ver"} detalle por rival ({data.per_opponent.length})

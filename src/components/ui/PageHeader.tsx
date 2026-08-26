@@ -1,50 +1,41 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 type PageHeaderProps = {
-  icon: IconDefinition;
   title: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
   actions?: ReactNode;
   className?: string;
 };
 
+/**
+ * Shared page chrome — same pattern as Calendario:
+ * title + optional subtitle + optional actions. No icon badge.
+ */
 export default function PageHeader({
-  icon,
   title,
   subtitle,
   actions,
   className,
 }: Readonly<PageHeaderProps>) {
   return (
-    <div
-      className={`flex flex-wrap items-end justify-between gap-4 ${className ?? ""}`}
+    <header
+      className={`mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between ${className ?? ""}`}
     >
-      <div className="flex min-w-0 items-start gap-3">
-        <span
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--accent)_28%,transparent)] bg-[var(--accent-muted)]"
-          aria-hidden
-        >
-          <FontAwesomeIcon
-            icon={icon}
-            className="text-lg text-[var(--accent)]"
-          />
-        </span>
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold leading-tight text-[var(--text-primary)]">
-            {title}
-          </h1>
-          {subtitle ? (
-            <p className="mt-1 text-sm text-[var(--text-muted)]">{subtitle}</p>
-          ) : null}
-        </div>
+      <div className="min-w-0">
+        <h1 className="text-[1.65rem] font-semibold tracking-tight text-[var(--text-primary)] sm:text-3xl">
+          {title}
+        </h1>
+        {subtitle ? (
+          <div className="mt-1.5 text-sm text-[var(--text-muted)]">{subtitle}</div>
+        ) : null}
       </div>
       {actions ? (
-        <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
+        <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+          {actions}
+        </div>
       ) : null}
-    </div>
+    </header>
   );
 }

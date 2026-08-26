@@ -244,7 +244,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
               <button
                 type="button"
                 onClick={onClose}
-                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--glass-surface)]"
+                className="cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--glass-surface)]"
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>
@@ -302,7 +302,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                       <button
                         type="button"
                         onClick={() => append({ team_score: 0, opponent_score: 0 })}
-                        className="text-xs font-semibold bg-[var(--glass-surface)] hover:bg-[var(--glass-surface-hover)] text-[var(--text-primary)] border border-[var(--glass-border)] px-3 py-1.5 rounded-lg transition"
+                        className="cursor-pointer text-xs font-semibold bg-[var(--glass-surface)] hover:bg-[var(--glass-surface-hover)] text-[var(--text-primary)] border border-[var(--glass-border)] px-3 py-1.5 rounded-lg transition"
                       >
                         <FontAwesomeIcon icon={faPlus} className="mr-1.5" />
                         Añadir Set
@@ -338,7 +338,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                         <button
                           type="button"
                           onClick={() => remove(index)}
-                          className="h-[38px] px-3 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition self-end"
+                          className="cursor-pointer h-[38px] px-3 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition self-end"
                         >
                           <FontAwesomeIcon icon={faMinus} />
                         </button>
@@ -366,7 +366,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                   type="button"
                   onClick={handleDelete}
                   disabled={isDeleting || isSubmitting}
-                  className="px-4 py-2 text-sm font-medium text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-2 border border-transparent hover:border-red-500/20 w-full sm:w-auto justify-center"
+                  className="cursor-pointer px-4 py-2 text-sm font-medium text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-2 border border-transparent hover:border-red-500/20 w-full sm:w-auto justify-center"
                 >
                   <FontAwesomeIcon icon={isDeleting ? faSpinner : faTrash} spin={isDeleting} />
                   Eliminar
@@ -374,7 +374,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
               ) : <div className="hidden sm:block" />}
 
               <div className="flex gap-3 w-full sm:w-auto justify-end">
-                <button type="button" onClick={onClose} className="px-5 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-surface)] rounded-lg transition-colors border border-transparent">
+                <button type="button" onClick={onClose} className="cursor-pointer px-5 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-surface)] rounded-lg transition-colors border border-transparent">
                   Cancelar
                 </button>
                 <button type="submit" form="matchForm" disabled={isSubmitting || loadingVenues || isDeleting} className="btn-primary min-w-[130px] flex justify-center items-center">

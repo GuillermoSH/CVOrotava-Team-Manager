@@ -18,7 +18,7 @@ export default function ThemeToggle({
   const isLight = theme === "light";
 
   const base =
-    "inline-flex items-center justify-center rounded-xl border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]";
+    "inline-flex cursor-pointer items-center justify-center rounded-xl border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]";
 
   const sizing =
     variant === "compact"

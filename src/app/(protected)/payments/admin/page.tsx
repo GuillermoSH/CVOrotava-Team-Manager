@@ -121,7 +121,7 @@ export default function AdminPaymentsPage() {
       <div className="w-full max-w-2xl">
         <button 
           onClick={() => router.push('/payments')}
-          className="mb-4 text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition flex items-center gap-2 w-fit"
+          className="mb-4 cursor-pointer text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition flex items-center gap-2 w-fit"
         >
           <FontAwesomeIcon icon={faArrowLeft} /> Volver a Pagos
         </button>

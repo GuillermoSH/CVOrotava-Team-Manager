@@ -17,6 +17,7 @@ import {
 import PaymentModal, {
   type PaymentModalInitialData,
 } from "@/components/payments/PaymentModal";
+import PageHeader from "@/components/ui/PageHeader";
 
 // Reutilizamos la interfaz
 interface Payment {
@@ -152,51 +153,54 @@ export default function AdminPlayerPaymentsDetail() {
   const totalPending = payments.filter((p) => p.status === "pending").reduce((acc, p) => acc + Number(p.amount), 0);
 
   return (
-    <motion.main
-      className="flex flex-col items-center w-full max-w-4xl py-4 pt-10 px-4 text-[var(--text-primary)] mx-auto"
+    <motion.div
+      className="flex w-full flex-col text-[var(--text-primary)]"
       variants={stagger}
       initial="hidden"
       animate="visible"
     >
-      <div className="w-full flex justify-between items-center mb-6">
-        <button 
-          onClick={() => router.push('/payments')}
-          className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition flex items-center gap-2"
-        >
-          <FontAwesomeIcon icon={faArrowLeft} /> Volver a Panel
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => router.push("/payments")}
+        className="mb-4 flex w-fit cursor-pointer items-center gap-2 text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+      >
+        <FontAwesomeIcon icon={faArrowLeft} /> Volver a Panel
+      </button>
 
-      <motion.div variants={fadeUp} className="w-full mb-8">
-        <h1 className="text-3xl font-bold">Cuotas: <span className="text-[var(--accent)]">{loading ? "..." : playerName}</span></h1>
-        <p className="text-sm text-[var(--text-muted)] mt-1">Gestión detallada de pagos para este jugador concreto.</p>
+      <motion.div variants={fadeUp}>
+        <PageHeader
+          title={loading ? "Cuotas" : `Cuotas: ${playerName}`}
+          subtitle="Gestión detallada de pagos para este jugador concreto."
+          actions={
+            <button
+              type="button"
+              className="btn-primary flex items-center gap-2"
+              onClick={openAddModal}
+            >
+              <FontAwesomeIcon icon={faPlus} /> Añadir Pago
+            </button>
+          }
+        />
       </motion.div>
 
       {/* Metrics summary */}
-      <motion.div variants={fadeUp} className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        <div className="card-glass p-5 flex flex-col justify-center border-l-4 border-l-[color:var(--payment-amount-paid)]">
-          <p className="text-sm font-medium text-[var(--text-secondary)] mb-1">Total Pagado</p>
+      <motion.div variants={fadeUp} className="mb-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="card-glass flex flex-col justify-center border-l-4 border-l-[color:var(--payment-amount-paid)] p-5">
+          <p className="mb-1 text-sm font-medium text-[var(--text-secondary)]">Total Pagado</p>
           <p className="text-4xl font-bold tabular-nums payment-amount--paid">{totalPaid}€</p>
         </div>
         
-        <div className="card-glass p-5 flex flex-col justify-center border-l-4 border-l-red-500 relative overflow-hidden">
+        <div className="card-glass relative flex flex-col justify-center overflow-hidden border-l-4 border-l-red-500 p-5">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <FontAwesomeIcon icon={faCircleExclamation} className="text-6xl text-red-500" />
           </div>
-          <p className="text-sm font-medium text-[var(--text-secondary)] mb-1">Deuda Pendiente</p>
+          <p className="mb-1 text-sm font-medium text-[var(--text-secondary)]">Deuda Pendiente</p>
           <p className="text-4xl font-bold tabular-nums payment-amount--pending">{totalPending}€</p>
         </div>
       </motion.div>
 
-      {/* Payment records */}
-      <motion.div variants={fadeUp} className="w-full flex flex-col sm:flex-row justify-between items-center mb-4 mt-6 gap-3">
-         <h2 className="text-lg font-semibold border-b border-[var(--glass-border)] pb-2 w-full sm:w-auto flex-grow">Historial de Cuotas</h2>
-         <button 
-           onClick={openAddModal}
-           className="btn-primary py-2 px-4 whitespace-nowrap self-stretch sm:self-auto flex items-center justify-center gap-2"
-         >
-           <FontAwesomeIcon icon={faPlus} /> Añadir Pago
-         </button>
+      <motion.div variants={fadeUp} className="mb-4 mt-2 w-full">
+        <h2 className="section-header">Historial de Cuotas</h2>
       </motion.div>
 
       <div className="w-full flex flex-col gap-3">
@@ -309,6 +313,6 @@ export default function AdminPlayerPaymentsDetail() {
         fixedUserId={targetUserId}
         users={payments.length > 0 ? [{ id: targetUserId, name: playerName }] : []} // No precisamos cargar los demás porque está fixed
       />
-    </motion.main>
+    </motion.div>
   );
 }

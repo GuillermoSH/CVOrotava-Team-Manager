@@ -1,17 +1,34 @@
 "use client";
 
-export default function Loading() {
+type LoadingProps = {
+  /** Optional label for screen readers / quiet hint. Default: none on screen. */
+  label?: string;
+};
+
+/**
+ * Viewport-centered subtle spinner for full-page waits.
+ * Uses min-height against the shell chrome so it doesn't stick to the top.
+ */
+export default function Loading({ label = "Cargando" }: LoadingProps) {
   return (
-    <main className="flex-1 flex justify-center items-center">
-      <div className="flex flex-col items-center gap-4">
-        {/* Animated spinner */}
-        <div className="relative w-12 h-12">
-          <div className="absolute inset-0 rounded-full border-2 border-white/5" />
-          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[var(--accent)] animate-spin" />
-          <div className="absolute inset-2 rounded-full border-2 border-transparent border-t-red-400/50 animate-spin" style={{ animationDirection: "reverse", animationDuration: "0.8s" }} />
-        </div>
-        <p className="text-xs text-[var(--text-muted)] animate-pulse">Cargando...</p>
+    <div
+      role="status"
+      aria-live="polite"
+      aria-label={label}
+      className="flex w-full min-h-[calc(100svh-var(--mobile-top-height)-var(--bottom-nav-height)-4rem)] items-center justify-center md:min-h-[calc(100svh-6rem)]"
+    >
+      <div className="relative h-8 w-8">
+        <div
+          className="absolute inset-0 rounded-full border border-[var(--glass-border)]"
+          aria-hidden
+        />
+        <div
+          className="absolute inset-0 rounded-full border border-transparent border-t-[var(--accent)] opacity-80 animate-spin"
+          aria-hidden
+          style={{ animationDuration: "0.85s" }}
+        />
       </div>
-    </main>
+      <span className="sr-only">{label}</span>
+    </div>
   );
 }

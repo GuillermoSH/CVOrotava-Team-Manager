@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
   faCloudArrowUp,
-  faTableList,
   faCircleCheck,
   faCircleExclamation,
 } from "@fortawesome/free-solid-svg-icons";
@@ -158,30 +157,22 @@ export default function LeagueStandingsUploadPage() {
   };
 
   return (
-    <motion.main
-      className="flex w-full max-w-4xl flex-col gap-5 py-4"
+    <motion.div
+      className="flex w-full flex-col gap-5 text-[var(--text-primary)]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
       <button
         onClick={() => router.push("/stats")}
-        className="flex w-fit items-center gap-2 text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+        className="flex w-fit cursor-pointer items-center gap-2 text-sm text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
       >
         <FontAwesomeIcon icon={faArrowLeft} /> Volver a estadísticas
       </button>
 
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-surface)] p-5 sm:p-6"
-      >
-        <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-red-500/10 blur-3xl" />
-        <PageHeader
-          icon={faTableList}
-          title="Importar clasificación de liga"
-          subtitle="Sube el .xls/.xlsx final y asigna temporada y género"
-        />
-      </motion.div>
+      <PageHeader
+        title="Importar clasificación de liga"
+        subtitle="Sube el .xls/.xlsx final y asigna temporada y género"
+      />
 
       <form
         onSubmit={handleSubmit}
@@ -316,6 +307,6 @@ export default function LeagueStandingsUploadPage() {
           onResolved={() => refreshUnmatched(season, gender)}
         />
       )}
-    </motion.main>
+    </motion.div>
   );
 }

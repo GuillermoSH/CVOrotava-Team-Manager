@@ -104,7 +104,7 @@ export default function AppShell() {
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface)] px-3 py-2.5 text-sm font-medium text-[var(--text-muted)] transition-colors hover:border-transparent hover:bg-[var(--accent)] hover:text-white"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface)] px-3 py-2.5 text-sm font-medium text-[var(--text-muted)] transition-colors hover:border-transparent hover:bg-[var(--accent)] hover:text-white"
           >
             <FontAwesomeIcon icon={faRightFromBracket} className="text-xs" />
             Cerrar sesión
@@ -129,7 +129,7 @@ export default function AppShell() {
             onClick={handleLogout}
             title="Cerrar sesión"
             aria-label="Cerrar sesión"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface)] text-[var(--text-muted)] transition-colors hover:bg-[var(--accent)] hover:text-white"
+            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface)] text-[var(--text-muted)] transition-colors hover:bg-[var(--accent)] hover:text-white"
           >
             <FontAwesomeIcon icon={faRightFromBracket} className="text-xs" />
           </button>

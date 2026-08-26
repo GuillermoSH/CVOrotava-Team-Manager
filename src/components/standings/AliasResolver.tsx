@@ -184,7 +184,7 @@ function AliasSelect({
         type="button"
         onClick={() => onSubmit(value)}
         disabled={disabled || !value}
-        className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--glass-surface)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--accent-muted)] hover:text-[var(--accent)] disabled:opacity-50"
+        className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--glass-surface)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--accent-muted)] hover:text-[var(--accent)] disabled:opacity-50"
       >
         <FontAwesomeIcon icon={linked ? faCheck : faLink} className="text-xs" />
         {linked ? "Vinculado" : "Vincular"}

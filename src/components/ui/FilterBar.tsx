@@ -32,7 +32,7 @@ export default function FilterBar({ filters, setFilters, configs }: Readonly<Fil
   const activeCount = Object.values(filters).filter(Boolean).length;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 mb-6">
+    <div className="mb-5 flex flex-wrap items-center gap-2">
       {configs.map((config) => {
         const currentValue = filters[config.key];
         const selectedLabel = config.options.find((opt) => opt.value === currentValue)?.label;
@@ -57,13 +57,14 @@ export default function FilterBar({ filters, setFilters, configs }: Readonly<Fil
 
       {activeCount > 0 && (
         <button
+          type="button"
           onClick={() => {
             const cleared = Object.fromEntries(
               Object.keys(filters).map((k) => [k, undefined])
             );
             setFilters(cleared);
           }}
-          className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-faint)] hover:text-[var(--accent)]"
+          className="inline-flex min-h-9 cursor-pointer touch-manipulation items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-faint)] hover:text-[var(--accent)]"
         >
           <FontAwesomeIcon icon={faXmark} className="text-[10px] opacity-80" />
           Limpiar todo

@@ -14,6 +14,7 @@ import {
 import { useUser } from "@/contexts/UserContext";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
 import Loading from "@/components/common/Loading";
+import PageHeader from "@/components/ui/PageHeader";
 
 type Match = {
   id: string;
@@ -130,14 +131,10 @@ export default function ProtectedHome() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, ease: EASE }}
     >
-      <header className="mb-6 lg:mb-8">
-        <h1 className="text-[1.65rem] font-semibold tracking-tight sm:text-3xl">
-          {greeting}, {user?.user_name}
-        </h1>
-        <p className="mt-1.5 text-sm text-[var(--text-muted)] sm:text-[0.95rem]">
-          Resumen de la temporada en curso.
-        </p>
-      </header>
+      <PageHeader
+        title={`${greeting}, ${user?.user_name}`}
+        subtitle="Resumen de la temporada en curso."
+      />
 
       <div className="grid gap-8 lg:grid-cols-12 lg:gap-x-10 lg:gap-y-8">
         {/* ── Left column: next match + season ── */}

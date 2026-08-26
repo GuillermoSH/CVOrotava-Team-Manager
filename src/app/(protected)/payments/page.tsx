@@ -7,7 +7,6 @@ import { useUser } from "@/contexts/UserContext";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faMoneyBillWave,
   faCheckCircle,
   faCircleExclamation,
   faUsers,
@@ -259,16 +258,14 @@ export default function PaymentsPage() {
   ];
 
   return (
-    <motion.main
-      className="flex flex-col items-center w-full max-w-6xl py-4 text-[var(--text-primary)]"
+    <motion.div
+      className="flex w-full flex-col text-[var(--text-primary)]"
       variants={stagger}
       initial="hidden"
       animate="visible"
     >
-      {/* Header */}
-      <motion.div variants={fadeUp} className="mb-6 w-full">
+      <motion.div variants={fadeUp}>
         <PageHeader
-          icon={faMoneyBillWave}
           title="Control de pagos"
           subtitle={
             user?.isAdmin
@@ -365,7 +362,7 @@ export default function PaymentsPage() {
                               <button
                                 type="button"
                                 onClick={() => router.push(`/payments/admin/${item.user_id}`)}
-                                className="group admin-row-surface flex w-full flex-col gap-3 rounded-xl border border-white/[0.07] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-4 text-left shadow-sm transition-all duration-200 hover:border-white/15 hover:from-white/[0.06] hover:to-white/[0.03] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/45 sm:flex-row sm:items-center sm:gap-4 sm:p-4"
+                                className="group admin-row-surface flex w-full cursor-pointer flex-col gap-3 rounded-xl border border-white/[0.07] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-4 text-left shadow-sm transition-all duration-200 hover:border-white/15 hover:from-white/[0.06] hover:to-white/[0.03] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/45 sm:flex-row sm:items-center sm:gap-4 sm:p-4"
                               >
                                 <div className="flex min-w-0 flex-1 items-center gap-3">
                                   <div
@@ -500,6 +497,6 @@ export default function PaymentsPage() {
           isUsersLoading={usersLoading}
         />
       )}
-    </motion.main>
+    </motion.div>
   );
 }

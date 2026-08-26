@@ -2,11 +2,71 @@
 
 import { useMemo, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCarSide,
+  faChevronLeft,
+  faChevronRight,
+  faHouse,
+  faPlaneDeparture,
+} from "@fortawesome/free-solid-svg-icons";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import MatchCard from "./MatchCard";
 import type { Match } from "./MatchCard.types";
 
 const WEEKDAYS = ["L", "M", "X", "J", "V", "S", "D"];
+
+type LocationType = Match["venues"]["location_type"];
+
+const LOCATION_PRIORITY: LocationType[] = [
+  "outside_island",
+  "away",
+  "home",
+];
+
+const LOCATION_UI: Record<
+  LocationType,
+  {
+    icon: IconDefinition;
+    label: string;
+    iconClass: string;
+    wash: string;
+    washHover: string;
+  }
+> = {
+  home: {
+    icon: faHouse,
+    label: "Casa",
+    iconClass: "text-[var(--color-success)]",
+    wash: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
+    washHover:
+      "hover:bg-[color-mix(in_srgb,var(--color-success)_18%,transparent)]",
+  },
+  away: {
+    icon: faCarSide,
+    label: "Fuera",
+    iconClass: "text-[var(--color-warning)]",
+    wash: "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
+    washHover:
+      "hover:bg-[color-mix(in_srgb,var(--color-warning)_18%,transparent)]",
+  },
+  outside_island: {
+    icon: faPlaneDeparture,
+    label: "Viaje",
+    iconClass: "text-[var(--color-info)]",
+    wash: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
+    washHover:
+      "hover:bg-[color-mix(in_srgb,var(--color-info)_18%,transparent)]",
+  },
+};
+
+/** Prefer viaje > fuera > casa when a day has several matches. */
+function primaryLocation(matches: Match[]): LocationType | null {
+  if (matches.length === 0) return null;
+  for (const type of LOCATION_PRIORITY) {
+    if (matches.some((m) => m.venues?.location_type === type)) return type;
+  }
+  return matches[0]?.venues?.location_type ?? null;
+}
 
 function dateKey(d: Date): string {
   const y = d.getFullYear();
@@ -120,7 +180,7 @@ export default function MatchMonthView({
               setCursor((c) => addMonths(c, -1));
               setSelectedDay(null);
             }}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--glass-border)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)]"
+            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-[var(--glass-border)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)]"
             aria-label="Mes anterior"
           >
             <FontAwesomeIcon icon={faChevronLeft} className="text-xs" />
@@ -132,7 +192,7 @@ export default function MatchMonthView({
               setCursor((c) => addMonths(c, 1));
               setSelectedDay(null);
             }}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--glass-border)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)]"
+            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-[var(--glass-border)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)]"
             aria-label="Mes siguiente"
           >
             <FontAwesomeIcon icon={faChevronRight} className="text-xs" />
@@ -169,6 +229,8 @@ export default function MatchMonthView({
             const isToday = cell.key === todayKey;
             const isSelected = selectedDay === cell.key;
             const tones = dayMatches.map(matchTone);
+            const location = primaryLocation(dayMatches);
+            const locationUi = location ? LOCATION_UI[location] : null;
 
             return (
               <button
@@ -177,16 +239,31 @@ export default function MatchMonthView({
                 role="gridcell"
                 disabled={!has}
                 onClick={() => has && setSelectedDay(cell.key)}
-                className={`relative flex h-12 w-full min-w-0 flex-col items-center justify-center rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] sm:h-[3.25rem] sm:rounded-xl lg:h-14 ${
+                aria-label={
+                  has
+                    ? `${cell.date.getDate()}${locationUi ? `, ${locationUi.label}` : ""}`
+                    : undefined
+                }
+                className={`relative flex h-12 w-full min-w-0 flex-col items-center justify-center rounded-lg text-sm transition-[background-color,box-shadow,ring-color] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] sm:h-[3.25rem] sm:rounded-xl lg:h-14 ${
                   isSelected
-                    ? "bg-[var(--accent-muted)] text-[var(--text-primary)] ring-1 ring-[var(--accent)]"
+                    ? "cursor-pointer bg-[var(--accent-muted)] text-[var(--text-primary)] ring-1 ring-[var(--accent)] hover:bg-[color-mix(in_srgb,var(--accent)_22%,transparent)]"
                     : has
-                      ? "bg-[var(--color-bg-elevated)] text-[var(--text-primary)] hover:bg-[var(--glass-surface-hover)] lg:bg-[var(--surface-faint)]"
-                      : "text-[var(--text-muted)]"
-                } ${isToday && !isSelected ? "ring-1 ring-[var(--glass-border)]" : ""} ${
-                  !has ? "cursor-default opacity-50" : ""
-                }`}
+                      ? `cursor-pointer ${locationUi?.wash ?? "bg-[var(--color-bg-elevated)] lg:bg-[var(--surface-faint)]"} ${locationUi?.washHover ?? "hover:bg-[var(--color-bg-card-hover)]"} text-[var(--text-primary)] hover:ring-1 hover:ring-[var(--glass-border-hover)] hover:shadow-[0_1px_2px_rgba(0,0,0,0.06)]`
+                      : "cursor-default text-[var(--text-muted)] opacity-50"
+                } ${isToday && !isSelected ? "ring-1 ring-[var(--glass-border)]" : ""}`}
               >
+                {locationUi && (
+                  <span
+                    className={`pointer-events-none absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center sm:top-1.5 sm:right-1.5 ${locationUi.iconClass}`}
+                    title={locationUi.label}
+                    aria-hidden
+                  >
+                    <FontAwesomeIcon
+                      icon={locationUi.icon}
+                      className="text-[0.55rem] sm:text-[0.6rem]"
+                    />
+                  </span>
+                )}
                 <span className="tabular-nums font-medium lg:text-base">
                   {cell.date.getDate()}
                 </span>
@@ -206,20 +283,45 @@ export default function MatchMonthView({
           })}
         </div>
 
-        <p className="mt-4 flex flex-wrap gap-3 text-xs text-[var(--text-muted)]">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
-            Próximo / victoria
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-danger)]" />
-            Derrota
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-warning)]" />
-            Sin resultado
-          </span>
-        </p>
+        <div className="mt-4 flex flex-col gap-2 text-xs text-[var(--text-muted)]">
+          <p className="flex flex-wrap gap-3">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
+              Próximo / victoria
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-danger)]" />
+              Derrota
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-warning)]" />
+              Sin resultado
+            </span>
+          </p>
+          <p className="flex flex-wrap gap-3">
+            <span className="inline-flex items-center gap-1.5">
+              <FontAwesomeIcon
+                icon={faHouse}
+                className="text-[0.65rem] text-[var(--color-success)]"
+              />
+              Casa
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <FontAwesomeIcon
+                icon={faCarSide}
+                className="text-[0.65rem] text-[var(--color-warning)]"
+              />
+              Fuera
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <FontAwesomeIcon
+                icon={faPlaneDeparture}
+                className="text-[0.65rem] text-[var(--color-info)]"
+              />
+              Viaje
+            </span>
+          </p>
+        </div>
       </section>
 
       {/* ── Agenda ── */}
@@ -240,7 +342,7 @@ export default function MatchMonthView({
               <button
                 type="button"
                 onClick={() => setSelectedDay(null)}
-                className="text-xs font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--accent)]"
+                className="cursor-pointer text-xs font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--accent)]"
               >
                 Ver mes completo
               </button>

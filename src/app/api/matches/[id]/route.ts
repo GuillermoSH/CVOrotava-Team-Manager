@@ -3,13 +3,13 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { ensureVideoFromMatchUrl } from "@/lib/ensureVideoFromMatchUrl";
+import { getMatchById } from "@/lib/matches/getMatchById";
 
 type MatchSetInput = { team_score: number; opponent_score: number };
 
-// TODO: params quitar el PROMISE (arreglo de bug temporal en vercel)
 export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }>}
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await supabaseServer();
@@ -17,42 +17,10 @@ export async function GET(
     if ("response" in auth) return auth.response;
 
     const { id } = await params;
-    const { data, error } = await supabaseAdmin
-      .from("matches")
-      .select(
-        `
-        id,
-        date,
-        time,
-        opponent,
-        season,
-        result,
-        video_url,
-        notes,
-        gender,
-        venue_id,
-        venues (
-          id,
-          venue_name,
-          location_url,
-          location_type
-        ),
-        match_sets (
-          id,
-          set_number,
-          team_score,
-          opponent_score
-        )
-      `
-      )
-      .eq("id", id)
-      .single();
+    const data = await getMatchById(id);
 
-    if (error) {
-      if (error.code === "PGRST116") {
-        return NextResponse.json({ error: "Partido no encontrado" }, { status: 404 });
-      }
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    if (!data) {
+      return NextResponse.json({ error: "Partido no encontrado" }, { status: 404 });
     }
 
     return NextResponse.json(data, { status: 200 });

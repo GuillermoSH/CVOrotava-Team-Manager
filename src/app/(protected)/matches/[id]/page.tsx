@@ -1,38 +1,32 @@
-import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import MatchDetailsView, {
   type MatchDetail,
 } from "@/components/calendar/MatchDetailsView";
-
-function serverBaseUrl() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
-  }
-  if (process.env.VERCEL_URL) {
-    const v = process.env.VERCEL_URL;
-    return v.startsWith("http") ? v : `https://${v}`;
-  }
-  return "http://localhost:3000";
-}
+import { getMatchById } from "@/lib/matches/getMatchById";
+import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
+import { supabaseServer } from "@/lib/supabase/server";
 
 export default async function MatchDetailsPage(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
 
-  // El fetch en RSC no envía cookies por defecto; el API valida sesión con cookies.
-  const headerList = await headers();
-  const cookie = headerList.get("cookie");
+  const supabase = await supabaseServer();
+  const auth = await requireAllowedUser(supabase);
+  if ("response" in auth) {
+    // RSC: no JSON — send the user to login instead of a dead 401 page.
+    redirect("/login");
+  }
 
-  const res = await fetch(`${serverBaseUrl()}/api/matches/${id}`, {
-    cache: "no-store",
-    headers: cookie ? { cookie } : {},
-  });
+  let match;
+  try {
+    match = await getMatchById(id);
+  } catch (err) {
+    console.error("Error cargando partido:", err);
+    throw new Error("No se pudo cargar el partido");
+  }
 
-  if (res.status === 404) notFound();
-  if (!res.ok) throw new Error("No se pudo cargar el partido");
+  if (!match) notFound();
 
-  const match = (await res.json()) as MatchDetail;
-
-  return <MatchDetailsView key={id} match={match} />;
+  return <MatchDetailsView key={id} match={match as MatchDetail} />;
 }

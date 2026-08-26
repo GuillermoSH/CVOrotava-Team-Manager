@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faSpinner, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FormInput, FormSelect } from "@/components/ui/forms";
@@ -38,12 +38,26 @@ type VideoModalProps = {
   initialData?: VideoFormValues;
 };
 
-export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: Readonly<VideoModalProps>) {
+export default function VideoModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  initialData,
+}: Readonly<VideoModalProps>) {
   const { user } = useUser();
+  const reduceMotion = useReducedMotion();
   const [isDeleting, setIsDeleting] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<VideoFormValues>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<VideoFormValues>({
     resolver: zodResolver(videoSchema),
     defaultValues: initialData || {
       url: "",
@@ -55,28 +69,37 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
   });
 
   useEffect(() => {
-    if (isOpen) {
-      if (initialData) {
-        reset(initialData);
-      } else {
-        reset({
-          url: "",
-          category: "match",
-          season: getCurrentSeason(),
-          competition_type: "league",
-          gender: user?.gender ?? "male",
-        });
-      }
-      setMessage(null);
+    if (!isOpen) return;
+    if (initialData) {
+      reset(initialData);
+    } else {
+      reset({
+        url: "",
+        category: "match",
+        season: getCurrentSeason(),
+        competition_type: "league",
+        gender: user?.gender ?? "male",
+      });
     }
+    setMessage(null);
   }, [isOpen, initialData, reset, user]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
 
   const onSubmit = async (data: VideoFormValues) => {
     setMessage(null);
 
     try {
-      const token = (await (await import("@/lib/supabase/client")).supabase.auth.getSession())
-        .data.session?.access_token;
+      const token = (
+        await (await import("@/lib/supabase/client")).supabase.auth.getSession()
+      ).data.session?.access_token;
 
       if (!token) throw new Error("No hay sesión activa");
 
@@ -95,10 +118,13 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
 
       const responseData = await res.json();
       if (!res.ok) {
-        throw new Error(responseData.error || "Error al guardar el video");
+        throw new Error(responseData.error || "Error al guardar el vídeo");
       }
 
-      setMessage({ type: "success", text: isEdit ? "Video actualizado con éxito" : "Video añadido con éxito" });
+      setMessage({
+        type: "success",
+        text: isEdit ? "Vídeo actualizado" : "Vídeo añadido",
+      });
       setTimeout(() => {
         onSuccess();
         onClose();
@@ -110,8 +136,14 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
 
   const handleDelete = async () => {
     if (!initialData?.id) return;
-    if (!confirm("¿Estás seguro de que deseas eliminar este vídeo? Esta acción no se puede deshacer.")) return;
-    
+    if (
+      !confirm(
+        "¿Eliminar este vídeo? Esta acción no se puede deshacer."
+      )
+    ) {
+      return;
+    }
+
     setIsDeleting(true);
     setMessage(null);
     try {
@@ -122,7 +154,7 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
         const errData = await res.json();
         throw new Error(errData.error || "Error al eliminar el vídeo");
       }
-      setMessage({ type: "success", text: "Vídeo eliminado correctamente" });
+      setMessage({ type: "success", text: "Vídeo eliminado" });
       setTimeout(() => {
         onSuccess();
         onClose();
@@ -134,53 +166,60 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
     }
   };
 
-  const backdropVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-  };
-
-  const modalVariants = {
-    hidden: { opacity: 0, scale: 0.95, y: 10 },
-    visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 25 } },
-    exit: { opacity: 0, scale: 0.95, y: 10, transition: { duration: 0.2 } },
-  };
-
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-[var(--z-modal)] flex items-end justify-center p-0 sm:items-center sm:p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="video-modal-title"
+        >
           <motion.div
-            variants={backdropVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={reduceMotion ? undefined : { opacity: 0 }}
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
+            aria-hidden
           />
 
           <motion.div
-            variants={modalVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="relative w-full max-w-xl bg-[var(--color-bg-elevated)] border border-[var(--glass-border)] rounded-2xl shadow-2xl flex flex-col max-h-[90vh]"
+            initial={
+              reduceMotion ? false : { opacity: 0, y: 24, scale: 0.98 }
+            }
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={
+              reduceMotion
+                ? undefined
+                : { opacity: 0, y: 16, scale: 0.98, transition: { duration: 0.18 } }
+            }
+            transition={{ type: "spring", stiffness: 360, damping: 28 }}
+            className="relative flex max-h-[min(92dvh,100%)] w-full max-w-xl flex-col rounded-t-2xl border border-[var(--glass-border)] bg-[var(--color-bg-elevated)] shadow-[var(--shadow-card-hover)] sm:max-h-[90vh] sm:rounded-2xl"
           >
-            <div className="flex items-center justify-between p-5 border-b border-[var(--glass-border)]">
-              <h2 className="text-xl font-bold text-[var(--text-primary)]">
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--glass-border)] px-4 py-4 sm:px-5">
+              <h2
+                id="video-modal-title"
+                className="text-lg font-semibold tracking-tight text-[var(--text-primary)] sm:text-xl"
+              >
                 {initialData ? "Editar vídeo" : "Añadir vídeo"}
               </h2>
               <button
                 type="button"
                 onClick={onClose}
-                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--glass-surface)]"
+                aria-label="Cerrar"
+                className="inline-flex h-10 w-10 cursor-pointer touch-manipulation items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>
             </div>
 
-            <div className="p-5 overflow-y-auto hidden-scrollbar">
-              <form id="videoForm" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+              <form
+                id="videoForm"
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-5"
+              >
                 <FormInput
                   label="URL de YouTube *"
                   name="url"
@@ -189,7 +228,7 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
                   placeholder="https://youtube.com/watch?v=..."
                 />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormSelect
                     label="Categoría *"
                     name="category"
@@ -201,20 +240,20 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
                     error={errors.category}
                   />
 
-                  <FormSelect 
-                    label="Temporada *" 
-                    name="season" 
-                    register={register("season")} 
+                  <FormSelect
+                    label="Temporada *"
+                    name="season"
+                    register={register("season")}
                     options={[
                       { value: "2023/24", label: "2023/24" },
                       { value: "2024/25", label: "2024/25" },
                       { value: "2025/26", label: "2025/26" },
-                    ]} 
-                    error={errors.season} 
+                    ]}
+                    error={errors.season}
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormSelect
                     label="Competición *"
                     name="competition_type"
@@ -238,32 +277,65 @@ export default function VideoModal({ isOpen, onClose, onSuccess, initialData }: 
                 </div>
 
                 {message && (
-                  <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${message.type === "success" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"}`}>
-                    <span>{message.text}</span>
+                  <div
+                    role="status"
+                    className={`rounded-[var(--radius-md)] border px-3 py-2.5 text-sm ${
+                      message.type === "success"
+                        ? "border-[var(--color-success)]/30 bg-[var(--color-success-muted)] text-[var(--color-success)]"
+                        : "border-[var(--color-danger)]/35 bg-[var(--color-danger-muted)] text-[var(--payment-badge-pending-text)]"
+                    }`}
+                  >
+                    {message.text}
                   </div>
                 )}
               </form>
             </div>
 
-            <div className="p-5 border-t border-[var(--glass-border)] flex flex-wrap-reverse sm:flex-nowrap gap-3 items-center justify-between bg-[var(--surface-faint)] rounded-b-2xl">
+            <div
+              className="flex shrink-0 flex-col gap-3 border-t border-[var(--glass-border)] bg-[var(--surface-faint)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+              style={{
+                paddingBottom:
+                  "max(1rem, env(safe-area-inset-bottom, 0px))",
+              }}
+            >
               {initialData ? (
                 <button
                   type="button"
                   onClick={handleDelete}
                   disabled={isDeleting || isSubmitting}
-                  className="px-4 py-2 text-sm font-medium text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-2 border border-transparent hover:border-red-500/20 w-full sm:w-auto justify-center"
+                  className="inline-flex min-h-11 w-full cursor-pointer touch-manipulation items-center justify-center gap-2 rounded-lg border border-transparent px-4 py-2.5 text-sm font-medium text-[var(--color-danger)] transition-colors hover:border-[var(--color-danger)]/25 hover:bg-[var(--color-danger-muted)] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                 >
-                  <FontAwesomeIcon icon={isDeleting ? faSpinner : faTrash} spin={isDeleting} />
+                  <FontAwesomeIcon
+                    icon={isDeleting ? faSpinner : faTrash}
+                    spin={isDeleting}
+                  />
                   Eliminar
                 </button>
-              ) : <div className="hidden sm:block" />}
-              
-              <div className="flex gap-3 w-full sm:w-auto justify-end">
-                <button type="button" onClick={onClose} className="px-5 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-surface)] rounded-lg transition-colors border border-transparent">
+              ) : (
+                <span className="hidden sm:block" />
+              )}
+
+              <div className="flex w-full gap-2 sm:w-auto sm:justify-end">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex min-h-11 flex-1 cursor-pointer touch-manipulation items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] sm:flex-none"
+                >
                   Cancelar
                 </button>
-                <button type="submit" form="videoForm" disabled={isSubmitting || isDeleting} className="btn-primary min-w-[130px] flex justify-center items-center">
-                  {isSubmitting ? <FontAwesomeIcon icon={faSpinner} spin /> : initialData ? "Guardar Cambios" : "Añadir Vídeo"}
+                <button
+                  type="submit"
+                  form="videoForm"
+                  disabled={isSubmitting || isDeleting}
+                  className="btn-primary min-h-11 min-w-[8.5rem] flex-1 touch-manipulation disabled:cursor-not-allowed sm:flex-none"
+                >
+                  {isSubmitting ? (
+                    <FontAwesomeIcon icon={faSpinner} spin />
+                  ) : initialData ? (
+                    "Guardar"
+                  ) : (
+                    "Añadir vídeo"
+                  )}
                 </button>
               </div>
             </div>

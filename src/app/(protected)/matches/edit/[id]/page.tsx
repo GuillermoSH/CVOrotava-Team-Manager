@@ -267,7 +267,7 @@ export default function EditMatchPage() {
                   <button
                     type="button"
                     onClick={() => removeSet(i)}
-                    className="text-red-400 text-xs hover:underline ml-2"
+                    className="cursor-pointer text-red-400 text-xs hover:underline ml-2"
                   >
                     Eliminar
                   </button>
@@ -278,7 +278,7 @@ export default function EditMatchPage() {
             <button
               type="button"
               onClick={addSet}
-              className="text-blue-400 text-sm mt-3 hover:underline"
+              className="cursor-pointer text-blue-400 text-sm mt-3 hover:underline"
             >
               + Añadir Set
             </button>

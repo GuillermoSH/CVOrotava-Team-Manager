@@ -31,7 +31,7 @@ export default function FilterDropdown({ label, options, value, onChange }: Read
       {/* Trigger button */}
       <button
         type="button"
-        className={`font-medium py-2 px-3.5 rounded-lg flex items-center gap-2 transition-all duration-200 border ${
+        className={`min-h-9 cursor-pointer touch-manipulation font-medium py-2 px-3.5 rounded-lg flex items-center gap-2 transition-all duration-200 border ${
           value
             ? "bg-[var(--accent-muted)] text-[var(--accent)] border-[color-mix(in_srgb,var(--accent)_32%,transparent)] hover:bg-[color-mix(in_srgb,var(--accent)_18%,transparent)]"
             : "bg-[var(--glass-surface)] text-[var(--text-secondary)] border-[var(--glass-border)] hover:bg-[var(--glass-surface-hover)] hover:text-[var(--text-primary)]"
@@ -64,7 +64,7 @@ export default function FilterDropdown({ label, options, value, onChange }: Read
                   onChange(option);
                   setIsOpen(false);
                 }}
-                className={`block w-full text-left px-3.5 py-2.5 transition-all duration-150 first:rounded-t-lg ${
+                className={`block w-full cursor-pointer text-left px-3.5 py-2.5 transition-all duration-150 first:rounded-t-lg ${
                   option === value
                     ? "bg-[var(--accent-muted)] text-[var(--accent)] font-semibold"
                     : "text-[var(--text-secondary)] hover:bg-[var(--surface-faint)] hover:text-[var(--text-primary)]"
@@ -80,7 +80,7 @@ export default function FilterDropdown({ label, options, value, onChange }: Read
                   onChange("");
                   setIsOpen(false);
                 }}
-                className="w-full text-left px-3.5 py-2.5 text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/5 transition-all rounded-b-lg border-t border-white/5"
+                className="w-full cursor-pointer text-left px-3.5 py-2.5 text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/5 transition-all rounded-b-lg border-t border-white/5"
               >
                 <FontAwesomeIcon icon={faTrash} className="mr-1.5" />
                 Limpiar

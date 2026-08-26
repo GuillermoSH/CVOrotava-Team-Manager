@@ -204,7 +204,7 @@ export default function MatchCard({
               <button
                 type="button"
                 onClick={() => onEdit(match)}
-                className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--accent)]"
+                className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--accent)]"
               >
                 <FontAwesomeIcon icon={faPenToSquare} />
                 Editar
