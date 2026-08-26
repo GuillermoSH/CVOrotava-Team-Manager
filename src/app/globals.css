@@ -30,8 +30,10 @@
   --form-placeholder: var(--text-muted);
 
   /* ── Semánticos ── */
-  --color-success: #22c55e;
-  --color-success-muted: rgba(34, 197, 94, 0.15);
+  /* Success: un solo verde para Casa, victorias, badges y dots */
+  --color-success: #6ee7b7;
+  --color-success-muted: rgba(110, 231, 183, 0.15);
+  --color-success-border: rgba(110, 231, 183, 0.28);
   --color-warning: #eab308;
   --color-warning-muted: rgba(234, 179, 8, 0.15);
   --color-danger: #ef4444;
@@ -64,6 +66,11 @@
   --progress-segment: rgba(255, 255, 255, 0.12);
   --surface-faint: rgba(255, 255, 255, 0.02);
   --border-dashed: rgba(255, 255, 255, 0.15);
+
+  /* Shell layout */
+  --sidebar-width: 15rem;
+  --bottom-nav-height: 4rem;
+  --mobile-top-height: 3.5rem;
 
   /* Jerarquía z-index: dropdowns < navbar < modales (el main no debe usar z-index para no atrapar overlays) */
   --z-dropdown: 40;
@@ -124,7 +131,9 @@ html[data-theme="light"] {
   --text-muted: #5a5a6e;
   --form-placeholder: #4b5563;
 
-  --color-success-muted: rgba(34, 197, 94, 0.12);
+  --color-success: #047857;
+  --color-success-muted: rgba(4, 120, 87, 0.12);
+  --color-success-border: rgba(4, 120, 87, 0.35);
   --color-warning-muted: rgba(234, 179, 8, 0.12);
   --color-danger-muted: rgba(239, 68, 68, 0.12);
   --color-info-muted: rgba(59, 130, 246, 0.12);
@@ -418,8 +427,8 @@ html[data-theme="light"] .payment-action-btn:hover {
 
 .badge-success {
   background: var(--color-success-muted);
-  border-color: rgba(34, 197, 94, 0.3);
-  color: #4ade80;
+  border-color: var(--color-success-border);
+  color: var(--color-success);
 }
 
 .badge-danger {
@@ -447,11 +456,6 @@ html[data-theme="light"] .payment-action-btn:hover {
 }
 
 /* Modo claro: texto más oscuro sobre fondos pastel (WCAG) */
-html[data-theme="light"] .badge-success {
-  border-color: rgba(21, 128, 61, 0.45);
-  color: #14532d;
-}
-
 html[data-theme="light"] .badge-danger {
   border-color: rgba(185, 28, 28, 0.45);
   color: #991b1b;
@@ -487,9 +491,9 @@ html[data-theme="light"] .badge-neutral {
 }
 
 .player-avatar-tint--success {
-  border-color: rgba(16, 185, 129, 0.35);
-  background: rgba(16, 185, 129, 0.12);
-  color: #bbf7d0;
+  border-color: var(--color-success-border);
+  background: var(--color-success-muted);
+  color: var(--color-success);
 }
 
 html[data-theme="light"] .player-avatar-tint--danger {
@@ -504,29 +508,17 @@ html[data-theme="light"] .player-avatar-tint--warning {
   color: #92400e;
 }
 
-html[data-theme="light"] .player-avatar-tint--success {
-  border-color: rgba(21, 128, 61, 0.4);
-  background: rgba(220, 252, 231, 0.95);
-  color: #14532d;
-}
-
-/* Marcadores de resultado en inicio (últimos partidos) */
+/* Marcadores: mismo verde/rojo semántico que Casa y badges */
 .match-result-score--win {
-  border: 1px solid rgba(16, 185, 129, 0.28);
-  background: rgba(16, 185, 129, 0.15);
-  color: #6ee7b7;
+  border: 1px solid var(--color-success-border);
+  background: var(--color-success-muted);
+  color: var(--color-success);
 }
 
 .match-result-score--loss {
   border: 1px solid rgba(239, 68, 68, 0.28);
   background: rgba(239, 68, 68, 0.15);
   color: #fca5a5;
-}
-
-html[data-theme="light"] .match-result-score--win {
-  border-color: rgba(4, 120, 87, 0.4);
-  background: rgba(16, 185, 129, 0.12);
-  color: #047857;
 }
 
 html[data-theme="light"] .match-result-score--loss {

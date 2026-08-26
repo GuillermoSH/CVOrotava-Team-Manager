@@ -4,20 +4,17 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
-  faCalendarDays,
   faCalendarPlus,
   faCarSide,
-  faClock,
   faHouse,
-  faMapLocationDot,
-  faNoteSticky,
+  faLocationDot,
   faPenToSquare,
   faPlaneDeparture,
   faPlay,
-  faTrophy,
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";
@@ -35,6 +32,17 @@ export type MatchDetail = Match & {
   }>;
 };
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+function resultTone(match: Match): "win" | "loss" | "neutral" {
+  if (!match.result) return "neutral";
+  const [ourScore, theirScore] = match.result.split("-").map(Number);
+  if (Number.isNaN(ourScore) || Number.isNaN(theirScore)) return "neutral";
+  if (ourScore > theirScore) return "win";
+  if (ourScore < theirScore) return "loss";
+  return "neutral";
+}
+
 export default function MatchDetailsView({
   match: initialMatch,
 }: {
@@ -42,9 +50,12 @@ export default function MatchDetailsView({
 }) {
   const { user } = useUser();
   const router = useRouter();
+  const reduceMotion = useReducedMotion();
   const [match, setMatch] = useState(initialMatch);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<MatchFormValues | undefined>(undefined);
+  const [editing, setEditing] = useState<MatchFormValues | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     setMatch(initialMatch);
@@ -54,43 +65,10 @@ export default function MatchDetailsView({
     () => new Date(`${match.date}T${match.time}`),
     [match.date, match.time]
   );
-  const now = new Date();
   const matchEnd = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000);
-  const isPast = now > matchEnd;
+  const isPast = Date.now() > matchEnd.getTime();
   const isUpcoming = !isPast;
-
-  const [teamScore, opponentScore] = match.result
-    ? match.result.split("-").map(Number)
-    : [null, null];
-
-  const resultColor =
-    teamScore !== null && opponentScore !== null
-      ? teamScore > opponentScore
-        ? "text-[var(--color-success)]"
-        : teamScore < opponentScore
-          ? "text-[var(--color-danger)]"
-          : "text-[var(--text-secondary)]"
-      : "text-[var(--text-muted)]";
-
-  let accentColor = "var(--glass-border)";
-  let cardBorderClass = "border-[var(--glass-border)]";
-  if (isPast && !match.result) {
-    accentColor = "var(--color-warning)";
-    cardBorderClass = "border-yellow-500/20";
-  } else if (match.result && teamScore !== null && opponentScore !== null) {
-    accentColor =
-      teamScore > opponentScore
-        ? "var(--color-success)"
-        : teamScore < opponentScore
-          ? "var(--color-danger)"
-          : "var(--glass-border)";
-    cardBorderClass =
-      teamScore > opponentScore
-        ? "border-green-500/15"
-        : teamScore < opponentScore
-          ? "border-red-500/15"
-          : "border-[var(--glass-border)]";
-  }
+  const tone = resultTone(match);
 
   const startUTC = matchDate.toISOString().replace(/-|:|\.\d+/g, "");
   const endUTC = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000)
@@ -115,44 +93,46 @@ export default function MatchDetailsView({
   const genderLabel =
     match.gender === "male" ? "Sénior Masculino" : "Sénior Femenino";
 
-  const dateDisplay = useMemo(() => {
-    const weekday = matchDate.toLocaleDateString("es-ES", { weekday: "long" });
-    const dayMonthYear = matchDate.toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-    return {
-      weekday: weekday.charAt(0).toUpperCase() + weekday.slice(1),
-      dayMonthYear,
-    };
-  }, [matchDate]);
+  const dateLine = matchDate.toLocaleDateString("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const dateDisplay = dateLine.charAt(0).toUpperCase() + dateLine.slice(1);
+  const formattedTime = match.time?.slice(0, 5) || null;
 
-  const statusLabel = (() => {
-    if (match.result) return "Partido disputado";
-    if (isPast) return "Resultado pendiente";
-    return "Próximo partido";
-  })();
+  const statusLabel = match.result
+    ? "Disputado"
+    : isPast
+      ? "Resultado pendiente"
+      : "Próximo";
 
-  const LocationTag = () => {
-    const tagMap = {
-      outside_island: {
-        icon: faPlaneDeparture,
-        text: "Viaje",
-        cls: "badge-info",
-      },
-      away: { icon: faCarSide, text: "Fuera", cls: "badge-warning" },
-      home: { icon: faHouse, text: "Casa", cls: "badge-success" },
-    } as const;
-    const tag = tagMap[match.venues.location_type];
-    if (!tag) return null;
-    return (
-      <span className={`badge ${tag.cls}`}>
-        <FontAwesomeIcon icon={tag.icon} />
-        {tag.text}
-      </span>
-    );
-  };
+  const tagMap = {
+    outside_island: {
+      icon: faPlaneDeparture,
+      text: "Viaje",
+      className: "text-[var(--color-info)]",
+    },
+    away: {
+      icon: faCarSide,
+      text: "Fuera",
+      className: "text-[var(--color-warning)]",
+    },
+    home: {
+      icon: faHouse,
+      text: "Casa",
+      className: "text-[var(--color-success)]",
+    },
+  } as const;
+  const tag = tagMap[match.venues.location_type];
+
+  const scoreClass =
+    tone === "win"
+      ? "match-result-score--win"
+      : tone === "loss"
+        ? "match-result-score--loss"
+        : "text-[var(--text-muted)]";
 
   const refreshMatch = async () => {
     const res = await fetch(`/api/matches/${match.id}`, { cache: "no-store" });
@@ -163,17 +143,26 @@ export default function MatchDetailsView({
     router.refresh();
   };
 
+  const hasExtras =
+    sortedSets.length > 0 || Boolean(match.notes) || Boolean(match.video_url);
+
   return (
     <>
-      <main className="w-full max-w-4xl mx-auto py-6 px-4 sm:px-6 pb-16">
+      <motion.div
+        className="flex w-full flex-col text-[var(--text-primary)]"
+        initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: EASE }}
+      >
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <Link
             href="/matches"
-            className="group inline-flex items-center gap-3 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
+            className="group inline-flex items-center gap-2.5 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--glass-border)] bg-[var(--surface-faint)] text-[var(--text-secondary)] transition-colors group-hover:border-red-500/35 group-hover:bg-red-500/10 group-hover:text-red-300">
-              <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-            </span>
+            <FontAwesomeIcon
+              icon={faArrowLeft}
+              className="text-xs transition-transform group-hover:-translate-x-0.5"
+            />
             Volver al calendario
           </Link>
           <div className="flex flex-wrap items-center gap-2">
@@ -182,7 +171,7 @@ export default function MatchDetailsView({
                 href={gcalLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-secondary flex items-center gap-2 text-sm"
+                className="btn-secondary inline-flex items-center gap-2 text-sm"
               >
                 <FontAwesomeIcon icon={faCalendarPlus} />
                 Añadir al calendario
@@ -191,7 +180,7 @@ export default function MatchDetailsView({
             {user?.isAdmin && (
               <button
                 type="button"
-                className="btn-primary flex items-center gap-2 text-sm"
+                className="btn-primary inline-flex items-center gap-2 text-sm"
                 onClick={() => {
                   setEditing(matchToModalInitialValues(match));
                   setModalOpen(true);
@@ -204,269 +193,198 @@ export default function MatchDetailsView({
           </div>
         </div>
 
-        {/* Match overview */}
-        <section
-          className={`relative mb-10 overflow-hidden rounded-[1.75rem] border backdrop-blur-md ${cardBorderClass} bg-[var(--glass-surface)] shadow-[0_32px_64px_-24px_rgba(0,0,0,0.55)]`}
-        >
-          <div
-            className="absolute left-0 top-0 z-10 h-full w-1 rounded-l-[1.75rem]"
-            style={{ background: accentColor }}
-          />
-          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-red-500/12 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-28 -left-20 h-64 w-64 rounded-full bg-violet-600/10 blur-3xl" />
-
-          <div className="relative border-b border-[var(--glass-border)] bg-gradient-to-br from-[var(--accent-muted)] via-[var(--glass-surface)] to-transparent px-5 py-8 pl-6 sm:px-10 sm:py-10 sm:pl-11">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <LocationTag />
-                {isPast && !match.result && (
-                  <span className="badge badge-warning">Pte. resultado</span>
+        <header className="mb-10 border-b border-[var(--glass-border)] pb-8 lg:mb-12 lg:pb-10">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
+            <div className="min-w-0">
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-[2.5rem]">
+                {match.opponent}
+              </h1>
+              <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[var(--text-muted)]">
+                {tag && (
+                  <span
+                    className={`inline-flex items-center gap-1.5 font-medium ${tag.className}`}
+                  >
+                    <FontAwesomeIcon
+                      icon={tag.icon}
+                      className="text-[0.7rem]"
+                    />
+                    {tag.text}
+                  </span>
                 )}
-              </div>
-              <span className="rounded-full border border-[var(--glass-border)] bg-[var(--glass-surface)] px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                Temporada {match.season}
-              </span>
-            </div>
-
-            <p className="mt-6 text-[0.65rem] font-bold uppercase tracking-[0.22em] text-red-400/85">
-              {genderLabel}
-            </p>
-            <p className="mt-2 inline-flex items-center rounded-full bg-[var(--progress-track)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)] ring-1 ring-[var(--glass-border)]">
-              {statusLabel}
-            </p>
-
-            <h1 className="mt-5 max-w-3xl text-3xl font-bold leading-[1.12] tracking-tight text-[var(--text-primary)] sm:text-4xl lg:text-[2.75rem]">
-              <span className="block text-lg font-semibold text-[var(--text-muted)] sm:text-xl">
-                vs
-              </span>
-              <span className="mt-1 block">{match.opponent}</span>
-            </h1>
-          </div>
-
-          <div className="relative grid gap-px bg-[var(--progress-track)] sm:grid-cols-3">
-            <div className="bg-[var(--glass-surface)] p-5 sm:p-6 sm:pb-8">
-              <div className="flex gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/12 text-red-400 ring-1 ring-red-500/20">
-                  <FontAwesomeIcon icon={faCalendarDays} className="text-lg" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-red-400/90">
-                    Día
-                  </p>
-                  <p className="mt-1.5 text-sm font-medium leading-snug text-[var(--text-primary)]">
-                    {dateDisplay.weekday}
-                  </p>
-                  <p className="mt-0.5 text-sm leading-relaxed text-[var(--text-secondary)]">
-                    {dateDisplay.dayMonthYear}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-[var(--glass-surface)] p-5 sm:p-6 sm:pb-8">
-              <div className="flex gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/12 text-red-400 ring-1 ring-red-500/20">
-                  <FontAwesomeIcon icon={faClock} className="text-lg" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-red-400/90">
-                    Hora
-                  </p>
-                  <p className="mt-1.5 text-2xl font-bold tabular-nums tracking-tight text-[var(--text-primary)] sm:text-3xl">
-                    {match.time?.slice(0, 5) || "—"}
-                  </p>
-                  {match.time?.slice(0, 5) ? (
-                    <p className="mt-1 text-xs text-[var(--text-muted)]">
-                      Hora local
-                    </p>
-                  ) : (
-                    <p className="mt-1 text-xs text-amber-400/90">
-                      Sin hora definida
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="bg-[var(--glass-surface)] p-5 sm:p-6 sm:pb-8">
-              <div className="flex gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/12 text-red-400 ring-1 ring-red-500/20">
-                  <FontAwesomeIcon icon={faMapLocationDot} className="text-lg" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-red-400/90">
-                    Pabellón
-                  </p>
-                  {match.venues.location_url ? (
-                    <a
-                      href={match.venues.location_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-1.5 block text-sm font-medium leading-snug text-[var(--text-secondary)] underline decoration-[var(--glass-border)] underline-offset-2 transition-colors hover:text-[var(--text-primary)] hover:decoration-red-400/50"
-                    >
-                      {match.venues.venue_name}
-                    </a>
-                  ) : (
-                    <p className="mt-1.5 text-sm font-medium leading-snug text-[var(--text-secondary)]">
-                      {match.venues.venue_name || "Sin pabellón asignado"}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative border-t border-[var(--glass-border)] bg-[var(--color-bg-card)] px-5 py-6 sm:px-10 sm:py-8">
-            {match.result ? (
-              <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
-                <div>
-                  <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                    Marcador
-                  </p>
-                  <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                    Resultado del encuentro
-                  </p>
-                </div>
+                <span aria-hidden>·</span>
                 <span
-                  className={`text-5xl font-black tabular-nums tracking-tight sm:text-6xl ${resultColor}`}
+                  className={
+                    isPast && !match.result
+                      ? "font-medium text-[var(--color-warning)]"
+                      : !isPast && !match.result
+                        ? "font-medium text-[var(--color-success)]"
+                        : "text-[var(--text-secondary)]"
+                  }
+                >
+                  {statusLabel}
+                </span>
+                <span aria-hidden>·</span>
+                <span>{genderLabel}</span>
+                <span aria-hidden>·</span>
+                <span>{match.season}</span>
+              </div>
+              <p className="mt-4 text-sm text-[var(--text-secondary)] sm:text-[0.95rem]">
+                {dateDisplay}
+                {formattedTime ? (
+                  <span className="tabular-nums text-[var(--text-primary)]">
+                    {" "}
+                    · {formattedTime}
+                  </span>
+                ) : (
+                  <span className="text-[var(--color-warning)]"> · Sin hora</span>
+                )}
+              </p>
+              <p className="mt-2 flex min-w-0 items-center gap-1.5 text-sm text-[var(--text-muted)]">
+                <FontAwesomeIcon
+                  icon={faLocationDot}
+                  className="shrink-0 text-[0.7rem] text-[var(--accent)]"
+                />
+                {match.venues.location_url ? (
+                  <a
+                    href={match.venues.location_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="truncate transition-colors hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                  >
+                    {match.venues.venue_name}
+                  </a>
+                ) : (
+                  <span className="truncate">
+                    {match.venues.venue_name || "Sin pabellón asignado"}
+                  </span>
+                )}
+              </p>
+            </div>
+
+            <div className="shrink-0 sm:text-right">
+              {match.result ? (
+                <p
+                  className={`inline-flex rounded-xl px-3 py-1.5 text-4xl font-bold tabular-nums tracking-tight sm:text-5xl ${scoreClass}`}
                 >
                   {match.result}
-                </span>
+                </p>
+              ) : (
+                <p className="text-sm text-[var(--text-muted)]">
+                  {isPast
+                    ? "Resultado aún sin registrar"
+                    : "Marcador pendiente"}
+                </p>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {!hasExtras ? (
+          <p className="text-sm text-[var(--text-muted)]">
+            Sin sets, vídeo ni notas para este partido.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-10 lg:gap-12">
+            {(match.video_url || sortedSets.length > 0) && (
+              <div
+                className={`grid gap-8 lg:gap-10 ${
+                  match.video_url && sortedSets.length > 0
+                    ? "lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:items-start"
+                    : ""
+                }`}
+              >
+                {match.video_url && (
+                  <section className="min-w-0">
+                    <h2 className="mb-4 text-lg font-semibold tracking-tight">
+                      Vídeo
+                    </h2>
+                    {thumbUrl ? (
+                      <a
+                        href={match.video_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative block aspect-video w-full overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                      >
+                        <Image
+                          src={thumbUrl}
+                          alt={`Vídeo del partido contra ${match.opponent}`}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                          sizes="(max-width: 1024px) 100vw, 55vw"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/25 transition-colors group-hover:bg-black/35">
+                          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm">
+                            <FontAwesomeIcon
+                              icon={faPlay}
+                              className="ml-0.5 text-sm"
+                            />
+                          </span>
+                        </div>
+                      </a>
+                    ) : (
+                      <a
+                        href={match.video_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]"
+                      >
+                        <FontAwesomeIcon icon={faVideo} />
+                        Ver vídeo
+                      </a>
+                    )}
+                  </section>
+                )}
+
+                {sortedSets.length > 0 && (
+                  <section className="min-w-0">
+                    <h2 className="mb-4 text-lg font-semibold tracking-tight">
+                      Sets
+                    </h2>
+                    <ul className="divide-y divide-[var(--glass-border)]">
+                      {sortedSets.map((s) => {
+                        const won = s.team_score > s.opponent_score;
+                        const lost = s.team_score < s.opponent_score;
+                        return (
+                          <li
+                            key={s.id}
+                            className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
+                          >
+                            <span className="text-sm text-[var(--text-muted)]">
+                              Set {s.set_number}
+                            </span>
+                            <span
+                              className={`rounded-lg px-2 py-0.5 text-base font-bold tabular-nums sm:text-lg ${
+                                won
+                                  ? "match-result-score--win"
+                                  : lost
+                                    ? "match-result-score--loss"
+                                    : "text-[var(--text-secondary)]"
+                              }`}
+                            >
+                              {s.team_score} — {s.opponent_score}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </section>
+                )}
               </div>
-            ) : (
-              <div className="flex flex-col gap-2 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
-                <div>
-                  <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                    Resultado
-                  </p>
-                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                    {isPast
-                      ? "Aún no se ha registrado el marcador de este partido."
-                      : "El marcador se publicará cuando se dispute el encuentro."}
-                  </p>
-                </div>
-                <span className="text-lg font-medium italic text-[var(--text-muted)] sm:shrink-0">
-                  Pendiente
-                </span>
-              </div>
+            )}
+
+            {match.notes && (
+              <section>
+                <h2 className="mb-3 text-lg font-semibold tracking-tight">
+                  Notas
+                </h2>
+                <p className="max-w-prose whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--text-secondary)]">
+                  {match.notes}
+                </p>
+              </section>
             )}
           </div>
-        </section>
-
-        {/* Sets */}
-        {sortedSets.length > 0 && (
-          <section className="mb-8 overflow-hidden rounded-[1.25rem] border border-[var(--glass-border)] bg-[var(--glass-surface)] shadow-lg backdrop-blur-sm">
-            <div className="border-b border-[var(--glass-border)] bg-gradient-to-r from-[var(--accent-muted)] to-transparent px-5 py-4 sm:px-6">
-              <h3 className="flex items-center gap-2.5 text-base font-semibold text-[var(--text-primary)]">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/12 text-red-400">
-                  <FontAwesomeIcon icon={faTrophy} />
-                </span>
-                Sets
-              </h3>
-              <p className="mt-1 pl-11 text-xs text-[var(--text-muted)]">
-                Desglose por set del partido
-              </p>
-            </div>
-            <ul className="divide-y divide-[var(--glass-border)] p-2 sm:p-3">
-              {sortedSets.map((s) => {
-                const won = s.team_score > s.opponent_score;
-                const lost = s.team_score < s.opponent_score;
-                return (
-                  <li
-                    key={s.id}
-                    className="flex items-center justify-between gap-4 rounded-xl px-3 py-3.5 sm:px-4"
-                  >
-                    <span className="text-sm font-medium text-[var(--text-muted)]">
-                      Set {s.set_number}
-                    </span>
-                    <span
-                      className={`text-lg font-bold tabular-nums ${
-                        won
-                          ? "text-[var(--color-success)]"
-                          : lost
-                            ? "text-[var(--color-danger)]"
-                            : "text-[var(--text-secondary)]"
-                      }`}
-                    >
-                      {s.team_score} — {s.opponent_score}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
         )}
-
-        {/* Video */}
-        {match.video_url && (
-          <section className="mb-8 overflow-hidden rounded-[1.25rem] border border-[var(--glass-border)] bg-[var(--glass-surface)] shadow-lg backdrop-blur-sm">
-            <div className="border-b border-[var(--glass-border)] bg-gradient-to-r from-[var(--accent-muted)] to-transparent px-5 py-4 sm:px-6">
-              <h3 className="flex items-center gap-2.5 text-base font-semibold text-[var(--text-primary)]">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/12 text-red-400">
-                  <FontAwesomeIcon icon={faVideo} />
-                </span>
-                Vídeo del partido
-              </h3>
-              <p className="mt-1 pl-11 text-xs text-[var(--text-muted)]">
-                Abre el vídeo en una nueva pestaña
-              </p>
-            </div>
-            {thumbUrl ? (
-              <a
-                href={match.video_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group block relative aspect-video w-full overflow-hidden border-t border-[var(--glass-border)]"
-              >
-                <Image
-                  src={thumbUrl}
-                  alt="Vista previa del vídeo"
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                  sizes="(max-width: 1280px) 100vw, 1024px"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/50 transition-colors">
-                  <div className="w-14 h-14 rounded-full bg-[var(--glass-surface)] backdrop-blur-sm flex items-center justify-center border border-[var(--glass-border)] shadow-lg group-hover:scale-105 transition-transform">
-                    <FontAwesomeIcon
-                      icon={faPlay}
-                      className="text-white text-lg ml-1 drop-shadow-md"
-                    />
-                  </div>
-                </div>
-              </a>
-            ) : (
-              <div className="px-5 sm:px-6 pb-5 sm:pb-6">
-                <a
-                  href={match.video_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary inline-flex items-center gap-2"
-                >
-                  <FontAwesomeIcon icon={faVideo} />
-                  Ver vídeo
-                </a>
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Notes */}
-        {match.notes && (
-          <section className="overflow-hidden rounded-[1.25rem] border border-[var(--glass-border)] bg-[var(--glass-surface)] shadow-lg backdrop-blur-sm">
-            <div className="border-b border-[var(--glass-border)] bg-gradient-to-r from-[var(--accent-muted)] to-transparent px-5 py-4 sm:px-6">
-              <h3 className="flex items-center gap-2.5 text-base font-semibold text-[var(--text-primary)]">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/12 text-red-400">
-                  <FontAwesomeIcon icon={faNoteSticky} />
-                </span>
-                Notas
-              </h3>
-            </div>
-            <div className="p-5 sm:p-6">
-              <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--text-secondary)]">
-                {match.notes}
-              </p>
-            </div>
-          </section>
-        )}
-      </main>
+      </motion.div>
 
       {user?.isAdmin && (
         <MatchModal

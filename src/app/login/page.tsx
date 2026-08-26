@@ -117,7 +117,7 @@ export default function LoginPage() {
           </div>
 
           <p className="mb-8 text-center text-sm leading-relaxed text-[var(--text-muted)]">
-            Acceso privado para el staff y jugadores del club.
+            El portal donde encontrarás toda la información de la temporada
           </p>
 
           {authError && (
@@ -134,7 +134,7 @@ export default function LoginPage() {
           </div>
 
           <p className="mt-10 text-center text-xs text-[var(--text-muted)]">
-            Puerto de la Cruz · Tenerife
+            Acceso privado · La Orotava, Tenerife
           </p>
         </div>
 

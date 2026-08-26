@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
-import Navbar from "@/components/layout/Navbar";
+import AppShell from "@/components/layout/AppShell";
 import AmbientBackground from "@/components/layout/AmbientBackground";
 import { UserProvider } from "@/contexts/UserContext";
 import { SeasonProvider } from "@/contexts/SeasonContext";
@@ -87,9 +87,9 @@ export default async function ProtectedLayout({
   return (
     <UserProvider initialUser={appUser}>
       <SeasonProvider>
-        <Navbar />
+        <AppShell />
         <AmbientBackground />
-        <main className="relative min-h-screen pt-20 pb-8 px-4 md:px-6 flex justify-center">
+        <main className="relative min-h-screen w-full px-4 pb-[calc(var(--bottom-nav-height)+1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(var(--mobile-top-height)+1rem)] md:ml-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))] md:px-8 md:pb-12 md:pt-8 lg:px-10">
           {children}
         </main>
       </SeasonProvider>
