@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PLAYER } from "@/test/security/fixtures";
-import { createQueryChain, jsonOf } from "@/test/security/queryChain";
+import { createQueryChain } from "@/test/security/queryChain";
 
 const requireAllowedUser = vi.hoisted(() => vi.fn());
 

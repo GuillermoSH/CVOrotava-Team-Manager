@@ -143,6 +143,15 @@ export default function AdminPlayerPaymentsDetail() {
     return `${day}/${month}/${year}`;
   };
 
+  const sortedPayments = useMemo(() => {
+    const byDue = (a: Payment, b: Payment) =>
+      (a.due_date ?? "").localeCompare(b.due_date ?? "");
+    return [
+      ...payments.filter((p) => p.status === "pending").sort(byDue),
+      ...payments.filter((p) => p.status === "paid").sort(byDue),
+    ];
+  }, [payments]);
+
   if (!user?.isAdmin) {
     return (
       <main className="flex min-h-screen items-center justify-center font-semibold text-[var(--color-danger)]">
@@ -157,15 +166,6 @@ export default function AdminPlayerPaymentsDetail() {
   const totalPending = payments
     .filter((p) => p.status === "pending")
     .reduce((acc, p) => acc + Number(p.amount), 0);
-
-  const sortedPayments = useMemo(() => {
-    const byDue = (a: Payment, b: Payment) =>
-      (a.due_date ?? "").localeCompare(b.due_date ?? "");
-    return [
-      ...payments.filter((p) => p.status === "pending").sort(byDue),
-      ...payments.filter((p) => p.status === "paid").sort(byDue),
-    ];
-  }, [payments]);
 
   return (
     <motion.div
