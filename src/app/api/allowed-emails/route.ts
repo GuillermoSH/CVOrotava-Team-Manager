@@ -36,18 +36,27 @@ export async function GET() {
   const authIds = [...authByEmail.values()].map((u) => u.id);
   const profilesById = new Map<
     string,
-    { user_name: string | null; role: AllowedEmailRow["role"] }
+    {
+      user_name: string | null;
+      role: AllowedEmailRow["role"];
+      gender: AllowedEmailRow["gender"];
+      is_active: boolean | null;
+    }
   >();
 
   if (authIds.length > 0) {
     const { data: profiles } = await supabaseAdmin
       .from("users")
-      .select("id, user_name, role")
+      .select("id, user_name, role, gender, is_active")
       .in("id", authIds);
     for (const p of profiles ?? []) {
+      const gender =
+        p.gender === "male" || p.gender === "female" ? p.gender : null;
       profilesById.set(p.id, {
         user_name: p.user_name ?? null,
         role: (p.role as AllowedEmailRow["role"]) ?? null,
+        gender,
+        is_active: typeof p.is_active === "boolean" ? p.is_active : null,
       });
     }
   }
@@ -62,6 +71,8 @@ export async function GET() {
       user_id: authUser?.id ?? null,
       user_name: profile?.user_name ?? null,
       role: profile?.role ?? null,
+      gender: profile?.gender ?? null,
+      is_active: profile?.is_active ?? null,
       last_sign_in_at: authUser?.last_sign_in_at ?? null,
     };
   });

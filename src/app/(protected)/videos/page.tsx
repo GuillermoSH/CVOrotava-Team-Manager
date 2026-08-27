@@ -141,10 +141,8 @@ export default function VideosPage() {
       />
 
       <div className="mb-5 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium text-[var(--text-muted)]">
-          Agrupar
-        </span>
         <SegmentedControl
+          label="Agrupar"
           aria-label="Agrupar vídeos"
           value={groupBy}
           onChange={setGroupBy}

@@ -11,6 +11,8 @@ export type AppUser = {
   gender: "male" | "female" | null;
   role: UserRole;
   isAdmin: boolean;
+  /** false = left the club; payments-only access. */
+  isActive: boolean;
 } | null;
 
 type UserContextType = {
@@ -35,14 +37,17 @@ export function UserProvider({
   const [user, setUser] = useState<AppUser | null>(initialUser);
   const [loading, setLoading] = useState(!initialUser);
 
-  // solo refresca si no se pasó user inicial
   useEffect(() => {
     if (!initialUser) {
       (async () => {
         const res = await fetch("/api/user", { cache: "no-store" });
         if (res.ok) {
           const profile = await res.json();
-          setUser(profile);
+          setUser({
+            ...profile,
+            isActive: profile.isActive !== false,
+            isAdmin: Boolean(profile.isAdmin),
+          });
         }
         setLoading(false);
       })();
@@ -55,7 +60,11 @@ export function UserProvider({
     setLoading(true);
     const res = await fetch("/api/user", { cache: "no-store" });
     const profile = await res.json();
-    setUser(profile);
+    setUser({
+      ...profile,
+      isActive: profile.isActive !== false,
+      isAdmin: Boolean(profile.isAdmin),
+    });
     setLoading(false);
   };
 

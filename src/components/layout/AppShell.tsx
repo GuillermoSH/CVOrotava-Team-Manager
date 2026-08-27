@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightFromBracket, faUserLock } from "@fortawesome/free-solid-svg-icons";
+import { faRightFromBracket, faUsers } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import Tooltip from "@/components/ui/Tooltip";
@@ -24,9 +24,13 @@ export default function AppShell() {
     }
   };
 
-  const navItems = APP_NAV_ITEMS.filter(
-    (item) => !item.adminOnly || user?.isAdmin
-  );
+  const navItems = APP_NAV_ITEMS.filter((item) => {
+    if (item.adminOnly && !user?.isAdmin) return false;
+    if (user && user.isActive === false) {
+      return item.href === "/payments";
+    }
+    return true;
+  });
   const mainNavItems = navItems.filter((item) => !item.adminOnly);
 
   const initials = user?.user_name
@@ -102,7 +106,11 @@ export default function AppShell() {
                 {user?.user_name ?? "Usuario"}
               </p>
               <p className="truncate text-xs text-[var(--text-muted)]">
-                {user?.isAdmin ? "Admin" : "Miembro"}
+                {user?.isAdmin
+                  ? "Admin"
+                  : user?.isActive === false
+                    ? "Inactivo · solo pagos"
+                    : "Miembro"}
               </p>
             </div>
             <ThemeToggle />
@@ -130,17 +138,17 @@ export default function AppShell() {
         </Link>
         <div className="flex items-center gap-1.5">
           {user?.isAdmin ? (
-            <Tooltip label="Accesos">
+            <Tooltip label="Usuarios">
               <Link
                 href="/access"
-                aria-label="Accesos"
+                aria-label="Usuarios"
                 className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors ${
                   isNavActive(pathname, "/access")
                     ? "border-[var(--glass-border)] bg-[var(--glass-surface)] text-[var(--accent)]"
                     : "border-[var(--glass-border)] bg-[var(--glass-surface)] text-[var(--text-muted)] hover:text-[var(--accent)]"
                 }`}
               >
-                <FontAwesomeIcon icon={faUserLock} className="text-xs" />
+                <FontAwesomeIcon icon={faUsers} className="text-xs" />
               </Link>
             </Tooltip>
           ) : null}

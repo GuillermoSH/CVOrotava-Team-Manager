@@ -19,9 +19,15 @@ type FilterBarProps = {
   filters: Record<string, string | undefined>;
   setFilters: React.Dispatch<React.SetStateAction<Record<string, string | undefined>>>;
   configs: FilterConfig[];
+  className?: string;
 };
 
-export default function FilterBar({ filters, setFilters, configs }: Readonly<FilterBarProps>) {
+export default function FilterBar({
+  filters,
+  setFilters,
+  configs,
+  className,
+}: Readonly<FilterBarProps>) {
   const toggleFilter = (key: string, value: string) => {
     setFilters((prev) => ({
       ...prev,
@@ -32,8 +38,9 @@ export default function FilterBar({ filters, setFilters, configs }: Readonly<Fil
   const activeCount = Object.values(filters).filter(Boolean).length;
 
   return (
-    <div className="mb-5 flex flex-wrap items-center gap-2">
-      {configs.map((config) => {
+    <div
+      className={`flex flex-wrap items-center gap-2 ${className ?? "mb-5"}`}
+    >      {configs.map((config) => {
         const currentValue = filters[config.key];
         const selectedLabel = config.options.find((opt) => opt.value === currentValue)?.label;
 

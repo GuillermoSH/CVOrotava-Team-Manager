@@ -253,7 +253,11 @@ export default function PaymentsPage() {
       <PageHeader
         title="Control de pagos"
         subtitle={
-          user?.isAdmin ? "Vista global de cuotas del club" : undefined
+          user?.isAdmin
+            ? "Vista global de cuotas del club"
+            : user?.isActive === false
+              ? "Cuenta inactiva · puedes consultar lo que debes"
+              : undefined
         }
         actions={
           user?.isAdmin ? (
@@ -267,6 +271,16 @@ export default function PaymentsPage() {
           ) : null
         }
       />
+
+      {user && user.isActive === false && !user.isAdmin ? (
+        <p
+          role="status"
+          className="mb-4 rounded-xl border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 py-2.5 text-sm text-[var(--text-secondary)]"
+        >
+          Tu cuenta está marcada como inactiva (fuera del equipo activo). Puedes
+          seguir viendo tus cuotas; si vuelves al club, un admin te reactivará.
+        </p>
+      ) : null}
 
       <FilterBar
         filters={filters}

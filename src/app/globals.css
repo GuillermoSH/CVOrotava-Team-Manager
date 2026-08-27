@@ -48,6 +48,14 @@
   --radius-xl: 20px;
   --radius-full: 9999px;
 
+  /* Sileo: contraste invertido (toast claro sobre UI oscura) */
+  --sileo-toast-fill: #f2f2f5;
+  --sileo-toast-title: #12121a;
+  --sileo-toast-description: #5c5c6e;
+  --sileo-toast-badge: rgba(0, 0, 0, 0.06);
+  --sileo-toast-shadow: drop-shadow(0 0 0 1px rgba(0, 0, 0, 0.06))
+    drop-shadow(0 12px 28px rgba(0, 0, 0, 0.45));
+
   --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
   --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.3);
   --shadow-glow: 0 0 20px var(--accent-glow);
@@ -122,6 +130,13 @@ html[data-theme="light"] {
   --text-muted: #5a5a6e;
   --form-placeholder: #4b5563;
 
+  --sileo-toast-fill: #1a1a1f;
+  --sileo-toast-title: #f0f0f5;
+  --sileo-toast-description: #a8a8b8;
+  --sileo-toast-badge: rgba(255, 255, 255, 0.1);
+  --sileo-toast-shadow: drop-shadow(0 0 0 1px rgba(0, 0, 0, 0.2))
+    drop-shadow(0 12px 28px rgba(18, 18, 26, 0.22));
+
   --color-success: #047857;
   --color-success-muted: rgba(4, 120, 87, 0.12);
   --color-success-border: rgba(4, 120, 87, 0.35);
@@ -190,6 +205,61 @@ html[data-theme="light"] input[type="time"] {
 html[data-theme="dark"] input[type="date"],
 html[data-theme="dark"] input[type="time"] {
   color-scheme: dark;
+}
+
+/* Sileo: contraste invertido; texto del toast (no el de la página) */
+[data-sileo-toast] {
+  filter: var(--sileo-toast-shadow);
+  color: var(--sileo-toast-title);
+}
+[data-sileo-pill],
+[data-sileo-body] {
+  fill: var(--sileo-toast-fill) !important;
+}
+[data-sileo-title],
+[data-sileo-header],
+[data-sileo-header-inner],
+[data-sileo-header-stack] {
+  color: var(--sileo-toast-title) !important;
+  --sileo-tone: var(--sileo-toast-title);
+}
+[data-sileo-description] {
+  color: var(--sileo-toast-description) !important;
+}
+[data-sileo-badge] {
+  background: var(--sileo-toast-badge) !important;
+}
+/* Badge keeps state color; don’t inherit page/toast title tone for the icon chip fill */
+[data-sileo-badge][data-state] {
+  --sileo-tone: var(--_c);
+}
+
+html[data-theme="light"] [data-sileo-title],
+html[data-theme="light"] [data-sileo-header],
+html[data-theme="light"] [data-sileo-header-inner],
+html[data-theme="light"] [data-sileo-header-stack] {
+  color: #f0f0f5 !important;
+  --sileo-tone: #f0f0f5;
+}
+html[data-theme="light"] [data-sileo-description] {
+  color: #c4c4d0 !important;
+}
+html[data-theme="light"] [data-sileo-badge][data-state] {
+  --sileo-tone: var(--_c);
+}
+
+html[data-theme="dark"] [data-sileo-title],
+html[data-theme="dark"] [data-sileo-header],
+html[data-theme="dark"] [data-sileo-header-inner],
+html[data-theme="dark"] [data-sileo-header-stack] {
+  color: #12121a !important;
+  --sileo-tone: #12121a;
+}
+html[data-theme="dark"] [data-sileo-description] {
+  color: #5c5c6e !important;
+}
+html[data-theme="dark"] [data-sileo-badge][data-state] {
+  --sileo-tone: var(--_c);
 }
 
 @theme inline {

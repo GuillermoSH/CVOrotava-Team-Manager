@@ -65,15 +65,17 @@ export default async function ProtectedLayout({
     } catch {
       /* best-effort */
     }
-    // Cookie clear may not stick in RSC; middleware also enforces + clears.
     redirect("/login?error=unauthorized");
   }
 
   const { data: profile } = await supabase
     .from("users")
-    .select("gender, role, user_name")
+    .select("gender, role, user_name, is_active")
     .eq("id", user.id)
     .single();
+
+  const isAdmin = profile?.role === "admin";
+  const isActive = isAdmin ? true : profile?.is_active !== false;
 
   const appUser = {
     id: user.id,
@@ -81,7 +83,8 @@ export default async function ProtectedLayout({
     user_name: profile?.user_name ?? email,
     gender: profile?.gender ?? null,
     role: profile?.role ?? null,
-    isAdmin: profile?.role === "admin",
+    isAdmin,
+    isActive,
   };
 
   return (

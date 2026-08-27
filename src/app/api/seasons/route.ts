@@ -9,7 +9,7 @@ import {
 
 export async function GET() {
   const supabaseAuth = await supabaseServer();
-  const auth = await requireAllowedUser(supabaseAuth);
+  const auth = await requireAllowedUser(supabaseAuth, { allowInactive: true });
   if ("response" in auth) return auth.response;
 
   const current = getCurrentSeason();

@@ -5,12 +5,25 @@ import {
   normalizeEmail,
 } from "@/lib/auth/allowlist";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getUserActivity } from "@/lib/auth/userActivity";
+
+export type RequireAllowedOptions = {
+  /**
+   * When true, inactive club members may call this route
+   * (e.g. GET payments, seasons for payment filters).
+   * Admins are always allowed regardless.
+   */
+  allowInactive?: boolean;
+};
 
 /**
  * Valida sesión Supabase (cookies) y que el email siga en allowed_emails.
- * Usar en Route Handlers antes de operar con service role.
+ * Por defecto bloquea usuarios con is_active = false (salvo admin).
  */
-export async function requireAllowedUser(supabase: SupabaseClient) {
+export async function requireAllowedUser(
+  supabase: SupabaseClient,
+  options: RequireAllowedOptions = {}
+) {
   const {
     data: { user },
     error,
@@ -33,8 +46,27 @@ export async function requireAllowedUser(supabase: SupabaseClient) {
     } as const;
   }
 
+  const activity = await getUserActivity(user.id);
+  if (!activity.is_active && !options.allowInactive) {
+    return {
+      response: NextResponse.json(
+        {
+          error:
+            "Cuenta inactiva. Solo puedes consultar tus pagos; pide reactivación a un admin si vuelves al club.",
+          code: "inactive",
+        },
+        { status: 403 }
+      ),
+    } as const;
+  }
+
   return {
-    user: { id: user.id, email: normalizeEmail(user.email) },
+    user: {
+      id: user.id,
+      email: normalizeEmail(user.email),
+      isActive: activity.is_active,
+      isAdmin: activity.isAdmin,
+    },
   } as const;
 }
 

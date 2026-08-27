@@ -12,6 +12,8 @@ type SegmentedControlProps<T extends string> = {
   options: SegmentedOption<T>[];
   onChange: (value: T) => void;
   "aria-label": string;
+  /** Visible caption before the control (e.g. Agrupar, Ordenar). */
+  label?: string;
   className?: string;
 };
 
@@ -20,11 +22,12 @@ export default function SegmentedControl<T extends string>({
   options,
   onChange,
   "aria-label": ariaLabel,
+  label,
   className = "",
 }: SegmentedControlProps<T>) {
-  return (
+  const control = (
     <div
-      className={`inline-flex max-w-full overflow-x-auto rounded-xl border border-[var(--glass-border)] bg-[var(--surface-faint)] p-1 ${className}`}
+      className={`inline-flex max-w-full overflow-x-auto rounded-xl border border-[var(--glass-border)] bg-[var(--surface-faint)] p-1 ${label ? "" : className}`}
       role="group"
       aria-label={ariaLabel}
     >
@@ -46,6 +49,15 @@ export default function SegmentedControl<T extends string>({
           </button>
         );
       })}
+    </div>
+  );
+
+  if (!label) return control;
+
+  return (
+    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
+      <span className="text-xs font-medium text-[var(--text-muted)]">{label}</span>
+      {control}
     </div>
   );
 }

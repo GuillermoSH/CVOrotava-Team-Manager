@@ -6,6 +6,10 @@ import {
   normalizeEmail,
 } from "@/lib/auth/allowlist";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import {
+  getUserActivity,
+  isInactiveAllowedPath,
+} from "@/lib/auth/userActivity";
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -80,19 +84,26 @@ export async function middleware(request: NextRequest) {
       const denied = NextResponse.redirect(
         new URL("/login?error=unauthorized", request.url)
       );
-      // Preserve any cookie mutations from signOut, then force-clear.
       supabaseResponse.cookies.getAll().forEach(({ name, value }) => {
         denied.cookies.set(name, value);
       });
       clearSupabaseAuthCookies(denied, request.url);
       return denied;
     }
+
+    // Inactive members: payments only (admins never gated).
+    const activity = await getUserActivity(user.id);
+    if (!activity.is_active && !isInactiveAllowedPath(pathname)) {
+      const paymentsUrl = request.nextUrl.clone();
+      paymentsUrl.pathname = "/payments";
+      paymentsUrl.search = "";
+      return NextResponse.redirect(paymentsUrl);
+    }
   }
 
   if (user && pathname === "/login") {
     const err = request.nextUrl.searchParams.get("error");
     if (err === "unauthorized" || err === "auth" || err === "no-email") {
-      // If they still have a session on an error screen, wipe it.
       if (err === "unauthorized" || err === "no-email") {
         try {
           if (user.id) {
@@ -111,8 +122,10 @@ export async function middleware(request: NextRequest) {
       }
       return supabaseResponse;
     }
+
+    const activity = await getUserActivity(user.id);
     const homeUrl = request.nextUrl.clone();
-    homeUrl.pathname = "/";
+    homeUrl.pathname = activity.is_active ? "/" : "/payments";
     return NextResponse.redirect(homeUrl);
   }
 

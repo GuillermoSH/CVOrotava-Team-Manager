@@ -69,7 +69,7 @@ export async function GET(req: Request) {
   const gender = url.searchParams.get("gender");
 
   const supabase = await supabaseServer();
-  const auth = await requireAllowedUser(supabase);
+  const auth = await requireAllowedUser(supabase, { allowInactive: true });
   if ("response" in auth) return auth.response;
 
   const {
