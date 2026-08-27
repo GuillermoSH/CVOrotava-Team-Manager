@@ -39,6 +39,7 @@ export default function AdminPaymentsPage() {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
@@ -137,10 +138,10 @@ export default function AdminPaymentsPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className={`w-full mb-4 p-3 rounded-lg flex items-center gap-3 border ${
-                message.type === "success" 
-                  ? "bg-green-600/20 text-green-300 border-green-500/20" 
-                  : "bg-red-600/20 text-red-300 border-red-500/20"
+              className={`mb-4 flex w-full items-center gap-3 rounded-lg border p-3 ${
+                message.type === "success"
+                  ? "border-[var(--color-success-border)] bg-[var(--color-success-muted)] text-[var(--color-success)]"
+                  : "border-[color-mix(in_srgb,var(--color-danger)_35%,transparent)] bg-[var(--color-danger-muted)] text-[var(--color-danger)]"
               }`}
             >
               <FontAwesomeIcon icon={faCircleExclamation} />
@@ -153,7 +154,7 @@ export default function AdminPaymentsPage() {
             <FormSelect
               label="Jugador *"
               name="user_id"
-              register={register("user_id")}
+              control={control}
               options={isUsersLoading ? [{ value: "", label: "Cargando..." }] : userOptions}
               error={errors.user_id as FieldError}
             />
@@ -182,7 +183,7 @@ export default function AdminPaymentsPage() {
             <FormSelect
               label="Estado *"
               name="status"
-              register={register("status")}
+              control={control}
               options={[
                 { value: "pending", label: "Pendiente" },
                 { value: "paid", label: "Pagado" },

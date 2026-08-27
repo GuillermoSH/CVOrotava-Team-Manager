@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   BarChart,
   Bar,
@@ -27,6 +27,7 @@ import {
   faUsers,
   faLayerGroup,
   faArrowsLeftRight,
+  faPercent,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
@@ -44,8 +45,12 @@ type Filters = {
   gender?: string;
 };
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
 /** Parse marcador tipo "3-1"; devuelve null si no es válido. */
-function parseSetScore(result: string | null | undefined): [number, number] | null {
+function parseSetScore(
+  result: string | null | undefined
+): [number, number] | null {
   if (!result || typeof result !== "string") return null;
   const idx = result.indexOf("-");
   if (idx <= 0 || idx >= result.length - 1) return null;
@@ -55,19 +60,11 @@ function parseSetScore(result: string | null | undefined): [number, number] | nu
   return [us, them];
 }
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: "easeOut" as const },
-  },
-};
-
-const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
-};
+function rateTone(wr: number): string {
+  if (wr >= 50) return "text-[var(--color-success)]";
+  if (wr > 0) return "text-[var(--color-danger)]";
+  return "text-[var(--text-muted)]";
+}
 
 const CustomTooltip = ({
   active,
@@ -90,66 +87,45 @@ const CustomTooltip = ({
 };
 
 function StatsSummarySkeleton() {
-  const StatCell = () => (
-    <div className="flex flex-row items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] p-2.5">
-      <div className="h-8 w-8 shrink-0 rounded-lg bg-[var(--color-bg-card)] animate-pulse" />
-      <div className="min-w-0 flex-1 space-y-2">
-        <div className="h-2 w-14 rounded bg-[var(--color-bg-card)] animate-pulse" />
-        <div className="h-5 w-8 rounded bg-[var(--color-bg-card)] animate-pulse" />
-      </div>
-    </div>
-  );
-
   return (
-    <motion.div variants={stagger} className="flex w-full flex-col gap-4">
-      <motion.div variants={fadeUp} className="card-glass p-4 sm:p-5">
-        <div className="mb-3 h-5 w-44 rounded-md bg-[var(--surface-faint)] animate-pulse" />
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <div className="flex w-full flex-col gap-10">
+      <div>
+        <div className="mb-4 h-6 w-40 rounded-md bg-[var(--surface-faint)] animate-pulse" />
+        <div className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <StatCell key={i} />
+            <div key={i} className="space-y-2">
+              <div className="h-3 w-16 rounded bg-[var(--surface-faint)] animate-pulse" />
+              <div className="h-7 w-10 rounded bg-[var(--surface-faint)] animate-pulse" />
+            </div>
           ))}
         </div>
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
-          <div className="min-w-0">
-            <div className="mb-2 h-4 w-48 max-w-full rounded bg-[var(--surface-faint)] animate-pulse" />
-            <div className="h-[190px] w-full rounded-lg bg-[var(--surface-faint)]/80 animate-pulse" />
-          </div>
-          <div className="min-w-0">
-            <div className="mb-2 h-4 w-44 max-w-full rounded bg-[var(--surface-faint)] animate-pulse" />
-            <div className="grid grid-cols-1 gap-2">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="h-14 rounded-xl border border-[var(--glass-border)] bg-[var(--surface-faint)] animate-pulse"
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </motion.div>
-      <motion.div variants={fadeUp} className="card-glass w-full p-5 sm:p-6">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <div className="space-y-2">
-            <div className="h-6 w-64 max-w-full rounded-md bg-[var(--surface-faint)] animate-pulse" />
-            <div className="h-3 w-48 max-w-full rounded-md bg-[var(--surface-faint)] animate-pulse" />
-          </div>
-          <div className="h-8 w-24 shrink-0 rounded-lg bg-[var(--surface-faint)] animate-pulse" />
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      </div>
+      <div className="grid gap-8 md:grid-cols-2">
+        <div className="h-[190px] rounded-xl bg-[var(--surface-faint)] animate-pulse" />
+        <div className="space-y-3">
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="h-32 rounded-2xl border border-[var(--glass-border)] bg-[var(--surface-faint)]/80 animate-pulse"
+              className="h-12 rounded-lg bg-[var(--surface-faint)] animate-pulse"
             />
           ))}
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className="h-28 rounded-xl bg-[var(--surface-faint)] animate-pulse"
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
 export default function StatsPage() {
   const { user } = useUser();
+  const reduceMotion = useReducedMotion();
   const [filters, setFilters] = useState<Filters>({
     season: getCurrentSeason(),
     gender: user?.gender ?? undefined,
@@ -223,19 +199,16 @@ export default function StatsPage() {
     };
   }, [validMatches]);
 
-  const resultDist = useMemo(() => {
+  const resultDistSorted = useMemo(() => {
     const acc: Record<string, number> = {};
     for (const m of validMatches) {
       if (!m.result) continue;
       acc[m.result] = (acc[m.result] || 0) + 1;
     }
-    return Object.entries(acc).map(([result, count]) => ({ result, count }));
+    return Object.entries(acc)
+      .map(([result, count]) => ({ result, count }))
+      .sort((a, b) => b.count - a.count);
   }, [validMatches]);
-
-  const resultDistSorted = useMemo(
-    () => [...resultDist].sort((a, b) => b.count - a.count),
-    [resultDist]
-  );
 
   const topResultLabel = useMemo(() => {
     if (resultDistSorted.length === 0) return null;
@@ -276,275 +249,212 @@ export default function StatsPage() {
     return { location: label, icon, winRate: locWinRate, total: stats.total };
   });
 
-  const ringR = 17;
-  const ringCx = 22;
-  const ringVb = 44;
-  const ringCirc = 2 * Math.PI * ringR;
-  const ringDash = (winRate / 100) * ringCirc;
-
   const diffTone =
     derivedExtras.setDiff > 0
-      ? "text-emerald-400"
+      ? "text-[var(--color-success)]"
       : derivedExtras.setDiff < 0
-        ? "text-red-400"
+        ? "text-[var(--color-danger)]"
         : "text-[var(--text-secondary)]";
+
+  const summaryMetrics: {
+    key: string;
+    label: string;
+    value: ReactNode;
+    tone: string;
+    icon: IconDefinition;
+  }[] = [
+    {
+      key: "played",
+      label: "Jugados",
+      value: total,
+      tone: "text-[var(--accent)]",
+      icon: faCalendarCheck,
+    },
+    {
+      key: "wins",
+      label: "Ganados",
+      value: wins,
+      tone: "text-[var(--color-success)]",
+      icon: faTrophy,
+    },
+    {
+      key: "losses",
+      label: "Perdidos",
+      value: losses,
+      tone: "text-[var(--color-danger)]",
+      icon: faTimesCircle,
+    },
+    {
+      key: "rate",
+      label: "Tasa victoria",
+      value: `${winRate}%`,
+      tone: "text-[var(--text-primary)]",
+      icon: faPercent,
+    },
+    {
+      key: "sets",
+      label: "Sets F–C",
+      value: `${derivedExtras.setsFor}–${derivedExtras.setsAgainst}`,
+      tone: "text-[var(--text-primary)]",
+      icon: faLayerGroup,
+    },
+    {
+      key: "diff",
+      label: "Dif. sets",
+      value: `${derivedExtras.setDiff > 0 ? "+" : ""}${derivedExtras.setDiff}`,
+      tone: diffTone,
+      icon: faArrowsLeftRight,
+    },
+    {
+      key: "rivals",
+      label: "Rivales",
+      value: derivedExtras.uniqueOpponents,
+      tone: "text-[var(--text-primary)]",
+      icon: faUsers,
+    },
+    {
+      key: "top",
+      label: "Marcador frecuente",
+      value: topResultLabel ?? "—",
+      tone: "text-[var(--text-primary)]",
+      icon: faLayerGroup,
+    },
+  ];
 
   return (
     <motion.div
       className="flex w-full flex-col text-[var(--text-primary)]"
-      variants={stagger}
-      initial="hidden"
-      animate="visible"
+      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, ease: EASE }}
     >
-      <motion.div variants={fadeUp}>
-        <PageHeader
-          title="Estadísticas"
-          subtitle="Rendimiento del equipo por temporada y contexto"
-        />
-      </motion.div>
+      <PageHeader
+        title="Estadísticas"
+        subtitle="Rendimiento del equipo por temporada y contexto"
+      />
 
-      <motion.div variants={fadeUp} className="w-full">
-        <FilterBar
-          filters={filters}
-          setFilters={setFilters}
-          configs={filterConfigs}
-        />
-      </motion.div>
+      <FilterBar
+        filters={filters}
+        setFilters={setFilters}
+        configs={filterConfigs}
+      />
 
       {loading ? (
         <StatsSummarySkeleton />
       ) : (
-        <motion.div variants={stagger} className="flex w-full flex-col gap-4">
-          <motion.div variants={fadeUp} className="card-glass p-4 sm:p-5">
-            <h2 className="section-header !mb-3">Resumen y marcadores</h2>
-
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <div className="flex flex-row items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] p-2.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-faint)] text-[var(--accent)]">
-                  <FontAwesomeIcon icon={faCalendarCheck} className="text-xs" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                    Jugados
-                  </p>
-                  <p className="text-lg font-bold tabular-nums text-[var(--text-primary)]">{total}</p>
-                </div>
-              </div>
-              <div className="flex flex-row items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] p-2.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
-                  <FontAwesomeIcon icon={faTrophy} className="text-xs" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                    Ganados
-                  </p>
-                  <p className="text-lg font-bold tabular-nums text-green-400">{wins}</p>
-                </div>
-              </div>
-              <div className="flex flex-row items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] p-2.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-400">
-                  <FontAwesomeIcon icon={faTimesCircle} className="text-xs" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                    Perdidos
-                  </p>
-                  <p className="text-lg font-bold tabular-nums text-red-400">{losses}</p>
-                </div>
-              </div>
-              <div className="flex flex-row items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] p-2.5">
-                <div className="relative h-14 w-14 shrink-0">
-                  <svg
-                    viewBox={`0 0 ${ringVb} ${ringVb}`}
-                    className="h-full w-full -rotate-90"
-                    aria-hidden
+        <div className="flex w-full flex-col gap-10 lg:gap-12">
+          <section>
+            <h2 className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">
+              Resumen
+            </h2>
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-5 border-b border-[var(--glass-border)] pb-8 sm:grid-cols-4">
+              {summaryMetrics.map((m) => (
+                <div key={m.key}>
+                  <dt
+                    className={`flex items-center gap-1.5 text-[0.65rem] font-semibold uppercase tracking-wider ${m.tone}`}
                   >
-                    <circle
-                      cx={ringCx}
-                      cy={ringCx}
-                      r={ringR}
-                      fill="none"
-                      stroke="var(--chart-track)"
-                      strokeWidth="3.5"
+                    <FontAwesomeIcon
+                      icon={m.icon}
+                      className="text-[0.7rem]"
+                      aria-hidden
                     />
-                    <circle
-                      cx={ringCx}
-                      cy={ringCx}
-                      r={ringR}
-                      fill="none"
-                      stroke="var(--accent)"
-                      strokeWidth="3.5"
-                      strokeDasharray={`${ringDash} ${ringCirc}`}
-                      strokeLinecap="round"
-                      className="transition-all duration-700 ease-out"
+                    {m.label}
+                  </dt>
+                  <dd
+                    className={`mt-1 text-xl font-bold tabular-nums tracking-tight sm:text-2xl ${m.tone}`}
+                  >
+                    {m.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <div className="grid gap-10 md:grid-cols-2 md:gap-x-10">
+            <section>
+              <h2 className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">
+                Distribución de resultados
+              </h2>
+              {resultDistSorted.length > 0 ? (
+                <div className="h-[200px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={resultDistSorted}
+                      margin={{ top: 6, right: 2, left: -10, bottom: 0 }}
+                    >
+                      <XAxis
+                        dataKey="result"
+                        tick={{ fill: "var(--text-muted)", fontSize: 10 }}
+                        axisLine={{ stroke: "var(--chart-axis)" }}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        tick={{ fill: "var(--text-muted)", fontSize: 10 }}
+                        axisLine={false}
+                        tickLine={false}
+                        allowDecimals={false}
+                        width={28}
+                      />
+                      <Tooltip
+                        content={<CustomTooltip />}
+                        cursor={{ fill: "var(--chart-cursor)" }}
+                      />
+                      <Bar
+                        dataKey="count"
+                        fill="var(--accent)"
+                        radius={[5, 5, 0, 0]}
+                        maxBarSize={40}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <p className="py-6 text-sm text-[var(--text-muted)]">
+                  Sin resultados suficientes para mostrar el gráfico
+                </p>
+              )}
+            </section>
+
+            <section>
+              <h2 className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">
+                Rendimiento por lugar
+              </h2>
+              <ul className="divide-y divide-[var(--glass-border)]">
+                {locationStats.map((loc) => (
+                  <li
+                    key={loc.location}
+                    className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+                  >
+                    <FontAwesomeIcon
+                      icon={loc.icon}
+                      className="w-4 shrink-0 text-sm text-[var(--accent)]"
+                      aria-hidden
                     />
-                  </svg>
-                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-xs font-bold tabular-nums leading-none text-[var(--text-primary)]">
-                    {winRate}%
-                  </span>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                    Tasa victoria
-                  </p>
-                  <p className="text-xs text-[var(--text-muted)]">
-                    {wins}/{total} part.
-                  </p>
-                </div>
-              </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                        {loc.location}
+                      </p>
+                      <p className="text-xs text-[var(--text-muted)]">
+                        {loc.total} partido{loc.total === 1 ? "" : "s"}
+                      </p>
+                    </div>
+                    <p
+                      className={`shrink-0 text-lg font-bold tabular-nums sm:text-xl ${rateTone(loc.winRate)}`}
+                    >
+                      {loc.winRate}%
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
 
-              <div className="flex flex-row items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] p-2.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-faint)] text-[var(--accent)]">
-                  <FontAwesomeIcon icon={faLayerGroup} className="text-xs" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                    Sets F–C
-                  </p>
-                  <p className="text-lg font-bold tabular-nums text-[var(--text-primary)]">
-                    {derivedExtras.setsFor}–{derivedExtras.setsAgainst}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] p-2.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-faint)] text-[var(--accent)]">
-                  <FontAwesomeIcon icon={faArrowsLeftRight} className="text-xs" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                    Dif. sets
-                  </p>
-                  <p className={`text-lg font-bold tabular-nums ${diffTone}`}>
-                    {derivedExtras.setDiff > 0 ? "+" : ""}
-                    {derivedExtras.setDiff}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] p-2.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-faint)] text-[var(--accent)]">
-                  <FontAwesomeIcon icon={faUsers} className="text-xs" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                    Rivales
-                  </p>
-                  <p className="text-lg font-bold tabular-nums text-[var(--text-primary)]">
-                    {derivedExtras.uniqueOpponents}
-                  </p>
-                </div>
-              </div>
-              <div className="flex min-h-[3.25rem] flex-col justify-center rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-2.5 py-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                  Marcador frecuente
-                </p>
-                <p className="truncate text-sm font-semibold tabular-nums text-[var(--text-primary)]">
-                  {topResultLabel ?? "—"}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
-              <div className="min-w-0">
-                <h3 className="mb-2 text-sm font-semibold text-[var(--text-primary)]">
-                  Distribución de resultados
-                </h3>
-                {resultDistSorted.length > 0 ? (
-                  <div className="h-[190px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={resultDistSorted}
-                        margin={{ top: 6, right: 2, left: -10, bottom: 0 }}
-                      >
-                        <XAxis
-                          dataKey="result"
-                          tick={{ fill: "var(--text-muted)", fontSize: 10 }}
-                          axisLine={{ stroke: "var(--chart-axis)" }}
-                          tickLine={false}
-                        />
-                        <YAxis
-                          tick={{ fill: "var(--text-muted)", fontSize: 10 }}
-                          axisLine={false}
-                          tickLine={false}
-                          allowDecimals={false}
-                          width={28}
-                        />
-                        <Tooltip
-                          content={<CustomTooltip />}
-                          cursor={{ fill: "var(--chart-cursor)" }}
-                        />
-                        <Bar
-                          dataKey="count"
-                          fill="var(--accent)"
-                          radius={[5, 5, 0, 0]}
-                          maxBarSize={40}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <p className="py-6 text-center text-xs text-[var(--text-muted)]">
-                    Sin resultados suficientes para mostrar el gráfico
-                  </p>
-                )}
-              </div>
-
-              <div className="min-w-0">
-                <h3 className="mb-2 text-sm font-semibold text-[var(--text-primary)]">
-                  Rendimiento por lugar
-                </h3>
-                <div className="grid grid-cols-1 gap-2">
-                  {locationStats.map((loc) => {
-                    const wr = loc.winRate;
-                    const r1 = 239,
-                      g1 = 68,
-                      b1 = 68;
-                    const r2 = 34,
-                      g2 = 197,
-                      b2 = 94;
-                    const t = Math.min(wr / 100, 1);
-                    const r = Math.round(r1 + (r2 - r1) * t);
-                    const g = Math.round(g1 + (g2 - g1) * t);
-                    const b = Math.round(b1 + (b2 - b1) * t);
-                    const color = `rgb(${r}, ${g}, ${b})`;
-
-                    return (
-                      <div
-                        key={loc.location}
-                        className="flex flex-row items-center gap-2.5 rounded-xl border border-[var(--glass-border)] bg-[var(--surface-faint)] p-2.5 transition-all duration-200 hover:border-[var(--glass-border-hover)] hover:bg-[var(--color-bg-card)] sm:gap-3 sm:p-3"
-                      >
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--glass-border)] bg-[var(--color-bg-card)] text-[var(--accent)]">
-                          <FontAwesomeIcon icon={loc.icon} className="text-xs" />
-                        </span>
-                        <div className="min-w-0 flex-1 text-left">
-                          <p className="text-xs font-medium text-[var(--text-secondary)]">
-                            {loc.location}
-                          </p>
-                          <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
-                            {loc.total} partido{loc.total === 1 ? "" : "s"}
-                          </p>
-                        </div>
-                        <p
-                          className="shrink-0 text-right text-lg font-bold tabular-nums transition-colors duration-300 sm:text-xl"
-                          style={{ color }}
-                        >
-                          {wr}%
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div variants={fadeUp}>
-            <OpponentTierSection
-              season={filters.season}
-              gender={filters.gender}
-              isAdmin={Boolean(user?.isAdmin)}
-            />
-          </motion.div>
-        </motion.div>
+          <OpponentTierSection
+            season={filters.season}
+            gender={filters.gender}
+            isAdmin={Boolean(user?.isAdmin)}
+          />
+        </div>
       )}
     </motion.div>
   );

@@ -4,9 +4,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { faRightFromBracket, faUserLock } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import Tooltip from "@/components/ui/Tooltip";
 import { APP_NAV_ITEMS, isNavActive } from "@/components/layout/navItems";
 
 export default function AppShell() {
@@ -22,6 +23,11 @@ export default function AppShell() {
       console.error("Error al cerrar sesión:", err);
     }
   };
+
+  const navItems = APP_NAV_ITEMS.filter(
+    (item) => !item.adminOnly || user?.isAdmin
+  );
+  const mainNavItems = navItems.filter((item) => !item.adminOnly);
 
   const initials = user?.user_name
     ? user.user_name
@@ -53,7 +59,7 @@ export default function AppShell() {
         </div>
 
         <nav className="flex flex-1 flex-col gap-0.5 px-3 py-2">
-          {APP_NAV_ITEMS.map((item) => {
+          {navItems.map((item) => {
             const active = isNavActive(pathname, item.href);
             return (
               <Link
@@ -123,6 +129,21 @@ export default function AppShell() {
           </span>
         </Link>
         <div className="flex items-center gap-1.5">
+          {user?.isAdmin ? (
+            <Tooltip label="Accesos">
+              <Link
+                href="/access"
+                aria-label="Accesos"
+                className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors ${
+                  isNavActive(pathname, "/access")
+                    ? "border-[var(--glass-border)] bg-[var(--glass-surface)] text-[var(--accent)]"
+                    : "border-[var(--glass-border)] bg-[var(--glass-surface)] text-[var(--text-muted)] hover:text-[var(--accent)]"
+                }`}
+              >
+                <FontAwesomeIcon icon={faUserLock} className="text-xs" />
+              </Link>
+            </Tooltip>
+          ) : null}
           <ThemeToggle />
           <button
             type="button"
@@ -143,7 +164,7 @@ export default function AppShell() {
         aria-label="Navegación principal"
       >
         <div className="flex h-[var(--bottom-nav-height)] items-stretch justify-around px-1">
-          {APP_NAV_ITEMS.map((item) => {
+          {mainNavItems.map((item) => {
             const active = isNavActive(pathname, item.href);
             return (
               <Link

@@ -4,6 +4,7 @@ import {
   faVideo,
   faChartSimple,
   faMoneyBill,
+  faUserLock,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
@@ -13,6 +14,8 @@ export type AppNavItem = {
   icon: IconDefinition;
   /** Short label for bottom bar (optional). */
   shortName?: string;
+  /** Only shown to club admins. */
+  adminOnly?: boolean;
 };
 
 export const APP_NAV_ITEMS: AppNavItem[] = [
@@ -21,6 +24,12 @@ export const APP_NAV_ITEMS: AppNavItem[] = [
   { name: "Videos", href: "/videos", icon: faVideo },
   { name: "Estadísticas", href: "/stats", icon: faChartSimple, shortName: "Stats" },
   { name: "Pagos", href: "/payments", icon: faMoneyBill },
+  {
+    name: "Accesos",
+    href: "/access",
+    icon: faUserLock,
+    adminOnly: true,
+  },
 ];
 
 export function isNavActive(pathname: string, href: string): boolean {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import VideosGrid from "@/components/videos/VideosGrid";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import useViewportHeight from "@/hooks/useViewportHeight";
@@ -11,6 +11,7 @@ import VideoModal, { VideoFormValues } from "@/components/videos/VideoModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import PageHeader from "@/components/ui/PageHeader";
+import SegmentedControl from "@/components/ui/SegmentedControl";
 import { readPref, writePref } from "@/lib/prefs";
 import {
   VIDEO_GROUP_OPTIONS,
@@ -61,6 +62,24 @@ export default function VideosPage() {
     writePref(GROUP_PREF_KEY, next);
   };
 
+  const groupOptions = useMemo(
+    () =>
+      VIDEO_GROUP_OPTIONS.filter((opt) => {
+        if (opt.value === "category" && filters.category) return false;
+        if (opt.value === "competition" && filters.competition_type)
+          return false;
+        return true;
+      }),
+    [filters.category, filters.competition_type]
+  );
+
+  useEffect(() => {
+    if (!groupOptions.some((opt) => opt.value === groupBy)) {
+      setGroupByState("none");
+      writePref(GROUP_PREF_KEY, "none");
+    }
+  }, [groupOptions, groupBy]);
+
   const filterConfigs: FilterConfig[] = [
     {
       key: "season",
@@ -69,7 +88,7 @@ export default function VideosPage() {
     },
     {
       key: "category",
-      label: "Categoría",
+      label: "Tipo",
       options: [
         { label: "Partido", value: "match" },
         { label: "Entrenamiento", value: "training" },
@@ -125,26 +144,15 @@ export default function VideosPage() {
         <span className="text-xs font-medium text-[var(--text-muted)]">
           Agrupar
         </span>
-        <div
-          className="inline-flex max-w-full overflow-x-auto rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface)] p-0.5"
-          role="group"
+        <SegmentedControl
           aria-label="Agrupar vídeos"
-        >
-          {VIDEO_GROUP_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setGroupBy(opt.value)}
-              className={`inline-flex h-9 shrink-0 cursor-pointer items-center rounded-[0.65rem] px-2.5 text-xs font-medium transition-colors sm:px-3 ${
-                groupBy === opt.value
-                  ? "bg-[var(--color-bg-elevated)] text-[var(--text-primary)] shadow-sm"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
+          value={groupBy}
+          onChange={setGroupBy}
+          options={groupOptions.map((opt) => ({
+            value: opt.value,
+            label: opt.label,
+          }))}
+        />
       </div>
 
       <VideosGrid

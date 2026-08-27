@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLink, faCheck, faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
+import Select from "@/components/ui/Select";
 
 export type UnmatchedRow = {
   raw: string;
@@ -84,10 +85,10 @@ export default function AliasResolver({ unmatched, candidates, onResolved }: Pro
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="card-glass border-amber-500/30 bg-amber-500/5 p-5 sm:p-6"
+      className="rounded-2xl border border-[color-mix(in_srgb,var(--color-warning)_35%,transparent)] bg-[var(--color-warning-muted)] p-5 sm:p-6"
     >
       <div className="mb-4 flex items-start gap-3">
-        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400">
+        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--color-warning-muted)] text-[var(--color-warning)]">
           <FontAwesomeIcon icon={faTriangleExclamation} />
         </span>
         <div>
@@ -167,19 +168,18 @@ function AliasSelect({
 
   return (
     <div className="flex shrink-0 items-center gap-2 sm:w-[420px]">
-      <select
+      <Select
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={setValue}
         disabled={disabled}
-        className="min-w-0 flex-1 rounded-lg border border-[var(--glass-border)] bg-[var(--form-input-bg)] p-2 text-sm text-[var(--text-primary)] disabled:opacity-50"
-      >
-        <option value="">Selecciona equipo…</option>
-        {options.map((o) => (
-          <option key={o.normalized_name} value={o.normalized_name}>
-            {o.team_name}
-          </option>
-        ))}
-      </select>
+        size="compact"
+        placeholder="Selecciona equipo…"
+        className="min-w-0 flex-1"
+        options={options.map((o) => ({
+          value: o.normalized_name,
+          label: o.team_name,
+        }))}
+      />
       <button
         type="button"
         onClick={() => onSubmit(value)}

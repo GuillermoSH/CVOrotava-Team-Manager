@@ -1,71 +1,78 @@
-import React from "react";
-import { FieldError, UseFormRegisterReturn } from "react-hook-form";
+"use client";
 
-interface BaseOption {
-  value: string;
-  label: string;
-}
+import {
+  Controller,
+  type Control,
+  type FieldError,
+} from "react-hook-form";
+import Select, { type SelectOptions } from "@/components/ui/Select";
 
-interface GroupedOption {
-  label: string;
-  options: BaseOption[];
-}
-
-interface FormSelectProps
-  extends React.SelectHTMLAttributes<HTMLSelectElement> {
+interface FormSelectProps {
   label: string;
   name: string;
-  options: (BaseOption | GroupedOption)[];
-  register?: UseFormRegisterReturn;
+  options: SelectOptions;
   error?: FieldError;
+  // RHF Control is invariant; forms pass their own values type.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  control?: Control<any>;
+  value?: string;
+  onChange?: (e: { target: { name: string; value: string } }) => void;
+  disabled?: boolean;
+  placeholder?: string;
 }
 
 export function FormSelect({
   label,
   name,
   options,
-  register,
   error,
-  ...props
+  control,
+  value,
+  onChange,
+  disabled,
+  placeholder = "Selecciona una opción",
 }: FormSelectProps) {
-  return (
+  const field = (
+    current: string,
+    setValue: (next: string) => void,
+    onBlur?: () => void
+  ) => (
     <div className="flex flex-col gap-1">
-      <label htmlFor={name} className="text-sm font-semibold text-[var(--text-secondary)]">
+      <label
+        htmlFor={name}
+        className="text-sm font-semibold text-[var(--text-secondary)]"
+      >
         {label}
       </label>
-      <select
+      <Select
         id={name}
-        name={name}
-        {...register}
-        {...props}
-        className={`w-full mt-1 p-3 border rounded-xl bg-[var(--form-input-bg)] border-[color:var(--form-input-border)] text-[var(--text-primary)] focus:outline-none focus:ring-2 transition-colors ${
-          error
-            ? "border-red-500 focus:ring-red-500"
-            : "focus:ring-[var(--accent)] focus:border-[var(--accent)]"
-        }`}
-      >
-        <option value="" className="bg-[var(--color-bg-elevated)] text-[var(--text-muted)]">
-          Selecciona una opción
-        </option>
-
-        {options.map((opt) =>
-          "options" in opt ? (
-            <optgroup key={opt.label} label={opt.label} className="bg-[var(--color-bg-elevated)]">
-              {opt.options.map((sub) => (
-                <option key={sub.value} value={sub.value} className="bg-[var(--color-bg-elevated)] text-[var(--text-primary)]">
-                  {sub.label}
-                </option>
-              ))}
-            </optgroup>
-          ) : (
-            <option key={opt.value} value={opt.value} className="bg-[var(--color-bg-elevated)] text-[var(--text-primary)]">
-              {opt.label}
-            </option>
-          )
-        )}
-      </select>
-
-      {error && <p className="text-xs text-red-400 mt-1">{error.message}</p>}
+        value={current}
+        onChange={setValue}
+        onBlur={onBlur}
+        options={options}
+        placeholder={placeholder}
+        disabled={disabled}
+        error={Boolean(error)}
+      />
+      {error ? (
+        <p className="mt-1 text-xs text-red-400">{error.message}</p>
+      ) : null}
     </div>
   );
+
+  if (control) {
+    return (
+      <Controller
+        control={control}
+        name={name}
+        render={({ field: f }) =>
+          field(String(f.value ?? ""), f.onChange, f.onBlur)
+        }
+      />
+    );
+  }
+
+  return field(value ?? "", (next) => {
+    onChange?.({ target: { name, value: next } });
+  });
 }

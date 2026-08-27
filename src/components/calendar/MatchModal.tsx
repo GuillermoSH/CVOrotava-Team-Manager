@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faSpinner, faTrash, faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
 import { FormInput, FormDate, FormTime, FormSelect } from "@/components/ui/forms";
-import { getCurrentSeason } from "@/utils/getCurrentSeason";
+import { getCurrentSeason, getSeasonSelectOptions } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
 
 const matchSchema = z.object({
@@ -265,7 +265,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                          </div>
                       </div>
                     ) : (
-                      <FormSelect label="Pabellón *" name="venue_id" register={register("venue_id")} options={venueOptions} error={errors.venue_id} />
+                      <FormSelect label="Pabellón *" name="venue_id" control={control} options={venueOptions} error={errors.venue_id} />
                     )}
                   </div>
                 </div>
@@ -278,12 +278,8 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--accent)] mb-3">Clasificación</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormSelect label="Temporada *" name="season" register={register("season")} options={[
-                      { value: "2023/24", label: "2023/24" },
-                      { value: "2024/25", label: "2024/25" },
-                      { value: "2025/26", label: "2025/26" },
-                    ]} error={errors.season} />
-                    <FormSelect label="Género *" name="gender" register={register("gender")} options={[
+                    <FormSelect label="Temporada *" name="season" control={control} options={getSeasonSelectOptions()} error={errors.season} />
+                    <FormSelect label="Género *" name="gender" control={control} options={[
                       { value: "male", label: "Masculino" },
                       { value: "female", label: "Femenino" },
                     ]} error={errors.gender} />

@@ -72,10 +72,11 @@
   --bottom-nav-height: 4rem;
   --mobile-top-height: 3.5rem;
 
-  /* Jerarquía z-index: dropdowns < navbar < modales (el main no debe usar z-index para no atrapar overlays) */
+  /* Jerarquía z-index: dropdowns < navbar < modales < popovers portaled (selects dentro de un modal) */
   --z-dropdown: 40;
   --z-navbar: 50;
   --z-modal: 100;
+  --z-popover: 110;
 
   /* Campos de formulario (contraste sobre superficies elevadas) */
   --form-input-bg: rgba(255, 255, 255, 0.05);
@@ -83,30 +84,20 @@
   --text-on-paid-card: var(--text-secondary);
 
   /* Tarjetas de cuotas: tonos suaves + jerarquía (título > importe > badge/fechas) */
-  --payment-card-paid-bg: rgba(16, 185, 129, 0.055);
-  --payment-card-paid-border: rgba(52, 211, 153, 0.16);
-  --payment-card-pending-bg: rgba(239, 68, 68, 0.055);
-  --payment-card-pending-border: rgba(248, 113, 113, 0.18);
-  --payment-badge-paid-bg: rgba(52, 211, 153, 0.1);
-  --payment-badge-paid-text: #7dd3b8;
-  --payment-badge-paid-border: rgba(52, 211, 153, 0.22);
-  --payment-badge-pending-bg: rgba(248, 113, 113, 0.1);
+  --payment-card-paid-bg: var(--color-success-muted);
+  --payment-card-paid-border: var(--color-success-border);
+  --payment-card-pending-bg: var(--color-danger-muted);
+  --payment-card-pending-border: color-mix(in srgb, var(--color-danger) 28%, transparent);
+  --payment-card-overdue-bg: var(--color-warning-muted);
+  --payment-card-overdue-border: color-mix(in srgb, var(--color-warning) 40%, transparent);
+  --payment-badge-paid-bg: var(--color-success-muted);
+  --payment-badge-paid-text: var(--color-success);
+  --payment-badge-paid-border: var(--color-success-border);
+  --payment-badge-pending-bg: var(--color-danger-muted);
   --payment-badge-pending-text: #e7a8a8;
-  --payment-badge-pending-border: rgba(248, 113, 113, 0.22);
-  --payment-amount-paid: #9dd4bf;
+  --payment-badge-pending-border: color-mix(in srgb, var(--color-danger) 28%, transparent);
+  --payment-amount-paid: var(--color-success);
   --payment-amount-pending: #e8a8a8;
-  --payment-action-edit-bg: rgba(37, 99, 235, 0.2);
-  --payment-action-edit-fg: #93c5fd;
-  --payment-action-edit-border: rgba(59, 130, 246, 0.32);
-  --payment-action-copy-bg: rgba(91, 33, 182, 0.2);
-  --payment-action-copy-fg: #c4b5fd;
-  --payment-action-copy-border: rgba(139, 92, 246, 0.32);
-  --payment-action-ok-bg: rgba(16, 185, 129, 0.18);
-  --payment-action-ok-fg: #86efac;
-  --payment-action-ok-border: rgba(52, 211, 153, 0.32);
-  --payment-action-del-bg: rgba(127, 29, 29, 0.28);
-  --payment-action-del-fg: #fecaca;
-  --payment-action-del-border: rgba(248, 113, 113, 0.35);
 }
 
 /* ── Modo claro (misma línea visual: rojo, cristal, profundidad suave) ── */
@@ -159,30 +150,20 @@ html[data-theme="light"] {
   --form-input-border: rgba(0, 0, 0, 0.16);
   --text-on-paid-card: var(--text-secondary);
 
-  --payment-card-paid-bg: #f4faf7;
-  --payment-card-paid-border: rgba(16, 185, 129, 0.22);
-  --payment-card-pending-bg: #fdf8f8;
-  --payment-card-pending-border: rgba(239, 68, 68, 0.22);
-  --payment-badge-paid-bg: rgba(16, 185, 129, 0.1);
-  --payment-badge-paid-text: #0f766e;
-  --payment-badge-paid-border: rgba(20, 184, 166, 0.35);
-  --payment-badge-pending-bg: rgba(220, 38, 38, 0.08);
+  --payment-card-paid-bg: var(--color-success-muted);
+  --payment-card-paid-border: var(--color-success-border);
+  --payment-card-pending-bg: var(--color-danger-muted);
+  --payment-card-pending-border: color-mix(in srgb, var(--color-danger) 28%, transparent);
+  --payment-card-overdue-bg: var(--color-warning-muted);
+  --payment-card-overdue-border: color-mix(in srgb, var(--color-warning) 45%, transparent);
+  --payment-badge-paid-bg: var(--color-success-muted);
+  --payment-badge-paid-text: var(--color-success);
+  --payment-badge-paid-border: var(--color-success-border);
+  --payment-badge-pending-bg: var(--color-danger-muted);
   --payment-badge-pending-text: #b91c1c;
-  --payment-badge-pending-border: rgba(220, 38, 38, 0.28);
-  --payment-amount-paid: #0d9488;
+  --payment-badge-pending-border: color-mix(in srgb, var(--color-danger) 28%, transparent);
+  --payment-amount-paid: var(--color-success);
   --payment-amount-pending: #b91c1c;
-  --payment-action-edit-bg: #e8f0fe;
-  --payment-action-edit-fg: #1d4ed8;
-  --payment-action-edit-border: rgba(37, 99, 235, 0.35);
-  --payment-action-copy-bg: #f3e8ff;
-  --payment-action-copy-fg: #6d28d9;
-  --payment-action-copy-border: rgba(124, 58, 237, 0.3);
-  --payment-action-ok-bg: #ecfdf5;
-  --payment-action-ok-fg: #047857;
-  --payment-action-ok-border: rgba(16, 185, 129, 0.35);
-  --payment-action-del-bg: #fef2f2;
-  --payment-action-del-fg: #b91c1c;
-  --payment-action-del-border: rgba(220, 38, 38, 0.35);
 }
 
 html[data-theme="light"] body {
@@ -262,6 +243,11 @@ body {
   border-color: var(--payment-card-pending-border);
 }
 
+.payment-card--overdue {
+  background: var(--payment-card-overdue-bg);
+  border-color: var(--payment-card-overdue-border);
+}
+
 .payment-badge {
   display: inline-flex;
   align-items: center;
@@ -287,6 +273,12 @@ body {
   border-color: var(--payment-badge-pending-border);
 }
 
+.payment-badge--overdue {
+  background: var(--payment-card-overdue-bg);
+  color: var(--color-warning);
+  border-color: var(--payment-card-overdue-border);
+}
+
 .payment-amount--paid {
   color: var(--payment-amount-paid);
 }
@@ -303,46 +295,30 @@ body {
   min-height: 2.5rem;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   cursor: pointer;
   transition:
     background 0.15s ease,
     color 0.15s ease,
-    border-color 0.15s ease,
-    filter 0.15s ease;
+    border-color 0.15s ease;
 }
 
 .payment-action-btn:hover {
-  filter: brightness(1.08);
+  background: var(--glass-surface);
+  color: var(--accent);
 }
 
-html[data-theme="light"] .payment-action-btn:hover {
-  filter: brightness(0.97);
+.payment-action-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--accent);
 }
 
-.payment-action-btn--edit {
-  background: var(--payment-action-edit-bg);
-  color: var(--payment-action-edit-fg);
-  border-color: var(--payment-action-edit-border);
-}
-
-.payment-action-btn--copy {
-  background: var(--payment-action-copy-bg);
-  color: var(--payment-action-copy-fg);
-  border-color: var(--payment-action-copy-border);
-}
-
-.payment-action-btn--ok {
-  background: var(--payment-action-ok-bg);
-  color: var(--payment-action-ok-fg);
-  border-color: var(--payment-action-ok-border);
-}
-
-.payment-action-btn--delete {
-  background: var(--payment-action-del-bg);
-  color: var(--payment-action-del-fg);
-  border-color: var(--payment-action-del-border);
+.payment-action-btn--delete:hover {
+  background: var(--color-danger-muted);
+  color: var(--color-danger);
 }
 
 /* ── Section Header ── */
@@ -547,19 +523,11 @@ html[data-theme="light"] .status-chip-all-clear {
 }
 
 .payment-blurb-ok {
-  color: #34d399;
-}
-
-html[data-theme="light"] .payment-blurb-ok {
-  color: #047857;
+  color: var(--color-success);
 }
 
 .payment-label-ok {
-  color: #4ade80;
-}
-
-html[data-theme="light"] .payment-label-ok {
-  color: #047857;
+  color: var(--color-success);
 }
 
 .match-result-row--win {

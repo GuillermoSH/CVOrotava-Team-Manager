@@ -14,6 +14,7 @@ import { useUser } from "@/contexts/UserContext";
 import { useSeasons } from "@/contexts/SeasonContext";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
 import PageHeader from "@/components/ui/PageHeader";
+import { FormSelect } from "@/components/ui/forms";
 import AliasResolver, {
   type StandingOption,
   type UnmatchedRow,
@@ -179,36 +180,23 @@ export default function LeagueStandingsUploadPage() {
         className="card-glass flex flex-col gap-4 p-5 sm:p-6"
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-semibold text-[var(--text-secondary)]">
-              Temporada
-            </label>
-            <select
-              value={season}
-              onChange={(e) => setSeason(e.target.value)}
-              className="mt-1 rounded-xl border border-[color:var(--form-input-border)] bg-[var(--form-input-bg)] p-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-            >
-              {seasonOptions.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-semibold text-[var(--text-secondary)]">
-              Género
-            </label>
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value as "male" | "female")}
-              className="mt-1 rounded-xl border border-[color:var(--form-input-border)] bg-[var(--form-input-bg)] p-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-            >
-              <option value="male">Masculino</option>
-              <option value="female">Femenino</option>
-            </select>
-          </div>
+          <FormSelect
+            label="Temporada"
+            name="season"
+            value={season}
+            onChange={(e) => setSeason(e.target.value)}
+            options={seasonOptions.map((s) => ({ value: s, label: s }))}
+          />
+          <FormSelect
+            label="Género"
+            name="gender"
+            value={gender}
+            onChange={(e) => setGender(e.target.value as "male" | "female")}
+            options={[
+              { value: "male", label: "Masculino" },
+              { value: "female", label: "Femenino" },
+            ]}
+          />
         </div>
 
         <div className="flex flex-col gap-1">

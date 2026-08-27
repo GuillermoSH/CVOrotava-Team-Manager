@@ -56,6 +56,7 @@ export default function MatchCreatePage() {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
@@ -178,7 +179,7 @@ export default function MatchCreatePage() {
             <FormSelect
               label="Género *"
               name="gender"
-              register={register("gender")}
+              control={control}
               options={[
                 { value: "male", label: "Masculino" },
                 { value: "female", label: "Femenino" },
@@ -191,7 +192,7 @@ export default function MatchCreatePage() {
             <FormSelect
               label="Pabellón *"
               name="venue_id"
-              register={register("venue_id")}
+              control={control}
               options={venueOptions}
               error={errors.venue_id}
             />

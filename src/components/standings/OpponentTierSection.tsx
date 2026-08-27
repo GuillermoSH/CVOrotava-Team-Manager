@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faRankingStar,
@@ -126,8 +125,11 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
       ]);
       const tierJson = (await tierRes.json()) as ApiResponse;
       const stJson = await stRes.json();
-      const rows: { normalized_name: string; team_name: string; is_our_team: boolean }[] =
-        stJson.data ?? [];
+      const rows: {
+        normalized_name: string;
+        team_name: string;
+        is_our_team: boolean;
+      }[] = stJson.data ?? [];
       setCandidates(
         rows
           .filter((r) => !r.is_our_team)
@@ -150,73 +152,44 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
 
   if (!gender) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="card-glass flex flex-col items-start gap-3 p-5 sm:p-6"
-      >
-        <h2 className="section-header">Rendimiento contra rivales por clasificación</h2>
+      <section>
+        <h2 className="mb-2 text-lg font-semibold tracking-tight sm:text-xl">
+          Rendimiento contra rivales
+        </h2>
         <p className="text-sm text-[var(--text-muted)]">
-          Selecciona un género en el filtro superior para ver esta sección. La clasificación importada
-          se consulta por temporada y género, y no se puede combinar ambos equipos a la vez.
+          Selecciona un género en el filtro superior para ver esta sección. La
+          clasificación importada se consulta por temporada y género.
         </p>
-      </motion.div>
+      </section>
     );
   }
 
   if (loading && !data) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="card-glass w-full p-5 sm:p-6"
-      >
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <div className="space-y-2">
-            <div className="h-6 w-64 max-w-full rounded-md bg-[var(--surface-faint)] animate-pulse" />
-            <div className="h-3 w-48 max-w-full rounded-md bg-[var(--surface-faint)] animate-pulse" />
-          </div>
-          <div className="h-8 w-24 shrink-0 rounded-lg bg-[var(--surface-faint)] animate-pulse" />
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <section>
+        <div className="mb-4 h-6 w-56 max-w-full rounded-md bg-[var(--surface-faint)] animate-pulse" />
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="flex flex-col gap-2 rounded-2xl border border-[var(--glass-border)] bg-[var(--surface-faint)]/80 p-4"
-            >
-              <div className="flex items-center justify-between">
-                <div className="h-3 w-28 rounded bg-[var(--color-bg-card)] animate-pulse" />
-                <div className="h-4 w-4 shrink-0 rounded bg-[var(--color-bg-card)] animate-pulse" />
-              </div>
-              <div className="h-8 w-16 rounded bg-[var(--color-bg-card)] animate-pulse" />
-              <div className="h-3 w-36 max-w-full rounded bg-[var(--color-bg-card)] animate-pulse" />
-              <div className="mt-2 space-y-2 border-t border-[var(--glass-border)] pt-2">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="h-3 w-14 rounded bg-[var(--color-bg-card)] animate-pulse" />
-                  <div className="h-3 w-24 rounded bg-[var(--color-bg-card)] animate-pulse" />
-                </div>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="h-3 w-10 rounded bg-[var(--color-bg-card)] animate-pulse" />
-                  <div className="h-3 w-20 rounded bg-[var(--color-bg-card)] animate-pulse" />
-                </div>
-              </div>
+            <div key={i} className="space-y-3">
+              <div className="h-3 w-28 rounded bg-[var(--surface-faint)] animate-pulse" />
+              <div className="h-8 w-16 rounded bg-[var(--surface-faint)] animate-pulse" />
+              <div className="h-3 w-36 rounded bg-[var(--surface-faint)] animate-pulse" />
             </div>
           ))}
         </div>
-      </motion.div>
+      </section>
     );
   }
 
   if (!data?.has_standings) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="card-glass flex flex-col items-start gap-3 p-5 sm:p-6 md:col-span-2"
-      >
-        <h2 className="section-header">Rendimiento contra rivales por clasificación</h2>
+      <section>
+        <h2 className="mb-2 text-lg font-semibold tracking-tight sm:text-xl">
+          Rendimiento contra rivales
+        </h2>
         <p className="text-sm text-[var(--text-muted)]">
-          No hay clasificación importada para {season} ({gender === "male" ? "M" : "F"}).
+          No hay clasificación importada para {season} (
+          {gender === "male" ? "M" : "F"}).
           {isAdmin
             ? " Sube el archivo .xls de la liga para activar esta sección."
             : " Pide al admin que suba la clasificación final."}
@@ -224,12 +197,12 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
         {isAdmin && (
           <Link
             href="/league-standings/upload"
-            className="btn-primary inline-flex items-center gap-2 px-4 py-2 text-sm"
+            className="btn-primary mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm"
           >
             <FontAwesomeIcon icon={faUpload} /> Subir clasificación
           </Link>
         )}
-      </motion.div>
+      </section>
     );
   }
 
@@ -251,30 +224,28 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
   const ourPosition = data.our_position ?? null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="card-glass p-5 sm:p-6 md:col-span-2"
-    >
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+    <section>
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="section-header">Rendimiento contra rivales por clasificación</h2>
-          <p className="mt-1 text-xs text-[var(--text-muted)]">
-            {data.total_teams} equipos en la liga · {totalLeaguePoints}/{maxLeaguePoints} pts
-            LIGA conseguidos
+          <h2 className="text-lg font-semibold tracking-tight sm:text-xl">
+            Rendimiento contra rivales
+          </h2>
+          <p className="mt-1 text-sm text-[var(--text-muted)]">
+            {data.total_teams} equipos · {totalLeaguePoints}/{maxLeaguePoints}{" "}
+            pts LIGA
           </p>
         </div>
         {isAdmin && (
           <Link
             href="/league-standings/upload"
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--glass-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] transition hover:text-[var(--accent)]"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
           >
             <FontAwesomeIcon icon={faTableList} /> Re-subir
           </Link>
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 border-b border-[var(--glass-border)] pb-8 sm:grid-cols-3 sm:gap-8">
         {TIER_META.map(({ key, label, icon }) => {
           const t = tiers[key];
           const winRate = t.played ? Math.round((t.won / t.played) * 100) : 0;
@@ -283,75 +254,60 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
             : 0;
 
           return (
-            <div
-              key={key}
-              className="flex flex-col gap-2 rounded-2xl border border-[var(--glass-border)] bg-[var(--surface-faint)] p-4"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                  {label}
-                </span>
+            <div key={key}>
+              <p className="flex items-center gap-1.5 text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                 <FontAwesomeIcon
                   icon={icon}
-                  className="text-sm text-[var(--accent)]"
+                  className="text-[0.7rem] text-[var(--accent)]"
                 />
-              </div>
-
-              <p className="text-3xl font-bold tabular-nums text-[var(--text-primary)]">
+                {label}
+              </p>
+              <p className="mt-1 text-3xl font-bold tabular-nums tracking-tight text-[var(--text-primary)]">
                 {winRate}%
               </p>
-              <p className="text-xs text-[var(--text-muted)]">
-                {t.won}V – {t.lost}D ({t.played} partido{t.played === 1 ? "" : "s"})
+              <p className="mt-1 text-xs text-[var(--text-muted)]">
+                {t.won}V – {t.lost}D · {t.played} partido
+                {t.played === 1 ? "" : "s"}
               </p>
-
-              <div className="mt-2 border-t border-[var(--glass-border)] pt-2 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-[var(--text-muted)]">Pts LIGA</span>
-                  <span className="font-semibold text-[var(--text-primary)]">
-                    {t.league_points}/{t.max_possible_points} · {pointsPct}%
-                  </span>
-                </div>
-                <div className="mt-1 flex items-center justify-between">
-                  <span className="text-[var(--text-muted)]">Sets</span>
-                  <span className="font-semibold text-[var(--text-primary)]">
-                    {t.sets_for}–{t.sets_against}
-                  </span>
-                </div>
-              </div>
+              <p className="mt-2 text-xs text-[var(--text-secondary)]">
+                Pts {t.league_points}/{t.max_possible_points} · {pointsPct}% ·
+                Sets {t.sets_for}–{t.sets_against}
+              </p>
             </div>
           );
         })}
       </div>
 
-      <div className="mt-6 border-t border-[var(--glass-border)] pt-5">
-        <h3 className="text-sm font-semibold text-[var(--text-primary)]">
+      <div className="mt-8">
+        <h3 className="text-base font-semibold tracking-tight text-[var(--text-primary)]">
           De cara a la próxima temporada
         </h3>
-        <p className="mt-1 text-xs text-[var(--text-muted)]">
-          Vista rápida según la clasificación final importada (tercios de tabla y posición relativa al
-          nuestro). Sirve aunque cambien de categoría algunos equipos.
+        <p className="mt-1 text-sm text-[var(--text-muted)]">
+          Según la clasificación final (tercios de tabla y posición relativa).
         </p>
         {ourPosition === null && (
-          <p className="mt-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/95">
-            Marca exactamente un equipo como «nuestro» en la clasificación para calcular derrotas
-            evitables según la posición final.
+          <p className="mt-3 text-sm text-[var(--color-warning)]">
+            Marca un equipo como «nuestro» en la clasificación para calcular
+            derrotas evitables.
             {isAdmin && (
               <>
                 {" "}
-                <Link href="/league-standings/upload" className="font-semibold underline hover:text-amber-100">
+                <Link
+                  href="/league-standings/upload"
+                  className="font-semibold underline hover:text-[var(--accent)]"
+                >
                   Revisar importación
                 </Link>
               </>
             )}
           </p>
         )}
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="mt-5 grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-6">
           <NextSeasonColumn
             title="Rivales complicados"
             subtitle="Top tabla · al menos una derrota"
             icon={faBolt}
-            borderTone="border-amber-500/25 bg-amber-500/[0.07]"
-            iconClass="text-amber-400"
+            iconClass="text-[var(--color-warning)]"
             empty="Ningún rival del top te ganó esta temporada."
             rivals={nextSeason.tough}
             footnote={(r) => `Pos. ${r.position} · ${r.summary}`}
@@ -360,8 +316,7 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
             title="Rivales accesibles"
             subtitle="Cola tabla · al menos una victoria"
             icon={faSeedling}
-            borderTone="border-emerald-500/25 bg-emerald-500/[0.07]"
-            iconClass="text-emerald-400"
+            iconClass="text-[var(--color-success)]"
             empty="No hay victorias contra equipos de la cola."
             rivals={nextSeason.easy}
             footnote={(r) => `Pos. ${r.position} · ${r.summary}`}
@@ -370,12 +325,11 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
             title="Derrotas evitables"
             subtitle={
               ourPosition !== null
-                ? `Perdiste frente a quien quedó por debajo (nosotros pos. ${ourPosition})`
+                ? `Perdiste frente a quien quedó por debajo (pos. ${ourPosition})`
                 : "Perdiste frente a quien quedó por debajo en la tabla"
             }
             icon={faTriangleExclamation}
-            borderTone="border-red-500/25 bg-red-500/[0.07]"
-            iconClass="text-red-400"
+            iconClass="text-[var(--color-danger)]"
             empty={
               ourPosition === null
                 ? "Sin posición propia no se puede calcular esta lista."
@@ -396,15 +350,15 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
       </div>
 
       {data.highlights && (
-        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <HighlightCard
+        <div className="mt-8 grid grid-cols-1 gap-6 border-t border-[var(--glass-border)] pt-8 sm:grid-cols-2 sm:gap-10">
+          <HighlightBlock
             icon={faStarOfLife}
             tone="positive"
             title="Mejor sorpresa"
             empty="Sin victorias registradas"
             row={data.highlights.best_surprise}
           />
-          <HighlightCard
+          <HighlightBlock
             icon={faSkullCrossbones}
             tone="negative"
             title="Peor revés"
@@ -417,10 +371,11 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
       <button
         type="button"
         onClick={() => setShowDetail((v) => !v)}
-        className="mt-5 inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--accent)]"
+        className="mt-8 inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
       >
         <FontAwesomeIcon icon={showDetail ? faChevronUp : faChevronDown} />
-        {showDetail ? "Ocultar" : "Ver"} detalle por rival ({data.per_opponent.length})
+        {showDetail ? "Ocultar" : "Ver"} detalle por rival (
+        {data.per_opponent.length})
       </button>
 
       {showDetail && (
@@ -451,12 +406,12 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
                       <div className="flex items-center gap-2">
                         <span>{p.team_name ?? p.opponent_raw}</span>
                         {p.resolved_via === "alias" && (
-                          <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
+                          <span className="text-[10px] font-semibold text-[var(--color-warning)]">
                             alias
                           </span>
                         )}
                         {p.resolved_via === null && (
-                          <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-red-300">
+                          <span className="text-[10px] font-semibold text-[var(--color-danger)]">
                             sin clasificar
                           </span>
                         )}
@@ -466,12 +421,12 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
                       {p.position ?? "–"}
                     </td>
                     <td
-                      className={`px-2 py-1.5 text-right tabular-nums font-semibold ${
+                      className={`px-2 py-1.5 text-right font-semibold tabular-nums ${
                         win
-                          ? "text-emerald-400"
+                          ? "text-[var(--color-success)]"
                           : lost
-                          ? "text-red-400"
-                          : "text-[var(--text-muted)]"
+                            ? "text-[var(--color-danger)]"
+                            : "text-[var(--text-muted)]"
                       }`}
                     >
                       {p.our_sets}–{p.their_sets}
@@ -488,7 +443,7 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
       )}
 
       {isAdmin && data.unmatched_opponents.length > 0 && (
-        <div className="mt-5">
+        <div className="mt-6">
           <AliasResolver
             unmatched={data.unmatched_opponents}
             candidates={candidates}
@@ -496,7 +451,7 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
           />
         </div>
       )}
-    </motion.div>
+    </section>
   );
 }
 
@@ -504,7 +459,6 @@ function NextSeasonColumn({
   title,
   subtitle,
   icon,
-  borderTone,
   iconClass,
   empty,
   rivals,
@@ -513,34 +467,39 @@ function NextSeasonColumn({
   title: string;
   subtitle: string;
   icon: IconDefinition;
-  borderTone: string;
   iconClass: string;
   empty: string;
   rivals: NextSeasonRival[];
   footnote: (r: NextSeasonRival) => string;
 }) {
   return (
-    <div className={`flex min-h-[7rem] flex-col rounded-2xl border ${borderTone} p-4`}>
-      <div className="mb-2 flex items-start gap-2">
-        <FontAwesomeIcon icon={icon} className={`mt-0.5 shrink-0 text-sm ${iconClass}`} />
+    <div>
+      <div className="mb-3 flex items-start gap-2">
+        <FontAwesomeIcon
+          icon={icon}
+          className={`mt-0.5 shrink-0 text-sm ${iconClass}`}
+        />
         <div className="min-w-0">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
             {title}
           </h4>
-          <p className="mt-0.5 text-[11px] leading-snug text-[var(--text-muted)]">{subtitle}</p>
+          <p className="mt-0.5 text-[11px] leading-snug text-[var(--text-muted)]">
+            {subtitle}
+          </p>
         </div>
       </div>
       {rivals.length === 0 ? (
-        <p className="mt-auto text-xs leading-snug text-[var(--text-muted)]">{empty}</p>
+        <p className="text-xs leading-snug text-[var(--text-muted)]">{empty}</p>
       ) : (
-        <ul className="mt-1 flex max-h-52 flex-col gap-1.5 overflow-y-auto pr-0.5">
+        <ul className="flex flex-col divide-y divide-[var(--glass-border)]">
           {rivals.map((r) => (
-            <li
-              key={`${r.team_name}-${r.position}`}
-              className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-surface)]/80 px-2.5 py-1.5"
-            >
-              <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{r.team_name}</p>
-              <p className="text-[11px] text-[var(--text-muted)]">{footnote(r)}</p>
+            <li key={`${r.team_name}-${r.position}`} className="py-2 first:pt-0 last:pb-0">
+              <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
+                {r.team_name}
+              </p>
+              <p className="text-[11px] text-[var(--text-muted)]">
+                {footnote(r)}
+              </p>
             </li>
           ))}
         </ul>
@@ -549,7 +508,7 @@ function NextSeasonColumn({
   );
 }
 
-function HighlightCard({
+function HighlightBlock({
   icon,
   tone,
   title,
@@ -562,35 +521,33 @@ function HighlightCard({
   empty: string;
   row: PerOpponent | null;
 }) {
-  const toneClasses =
-    tone === "positive"
-      ? "border-emerald-500/30 bg-emerald-500/10"
-      : "border-red-500/30 bg-red-500/10";
   const iconColor =
-    tone === "positive" ? "text-emerald-400" : "text-red-400";
+    tone === "positive"
+      ? "text-[var(--color-success)]"
+      : "text-[var(--color-danger)]";
 
   return (
-    <div
-      className={`flex flex-col gap-1 rounded-2xl border ${toneClasses} p-4`}
-    >
-      <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-[var(--text-muted)]">
-        <FontAwesomeIcon icon={icon} className={iconColor} />
+    <div>
+      <p
+        className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-wide ${iconColor}`}
+      >
+        <FontAwesomeIcon icon={icon} />
         {title}
-      </div>
+      </p>
       {row ? (
         <>
-          <p className="text-base font-semibold text-[var(--text-primary)]">
+          <p className="mt-1.5 text-base font-semibold text-[var(--text-primary)]">
             {row.team_name ?? row.opponent_raw}{" "}
             <span className="text-xs font-normal text-[var(--text-muted)]">
               · pos #{row.position}
             </span>
           </p>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="mt-0.5 text-xs text-[var(--text-muted)]">
             {row.our_sets}–{row.their_sets} · {row.league_points_earned} pts LIGA
           </p>
         </>
       ) : (
-        <p className="text-xs text-[var(--text-muted)]">{empty}</p>
+        <p className="mt-1.5 text-xs text-[var(--text-muted)]">{empty}</p>
       )}
     </div>
   );

@@ -8,7 +8,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faSpinner, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FormInput, FormSelect } from "@/components/ui/forms";
-import { getCurrentSeason } from "@/utils/getCurrentSeason";
+import { getCurrentSeason, getSeasonSelectOptions } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
 
 const videoSchema = z.object({
@@ -54,6 +54,7 @@ export default function VideoModal({
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
@@ -232,7 +233,7 @@ export default function VideoModal({
                   <FormSelect
                     label="Categoría *"
                     name="category"
-                    register={register("category")}
+                    control={control}
                     options={[
                       { value: "match", label: "Partido" },
                       { value: "training", label: "Entrenamiento" },
@@ -243,12 +244,8 @@ export default function VideoModal({
                   <FormSelect
                     label="Temporada *"
                     name="season"
-                    register={register("season")}
-                    options={[
-                      { value: "2023/24", label: "2023/24" },
-                      { value: "2024/25", label: "2024/25" },
-                      { value: "2025/26", label: "2025/26" },
-                    ]}
+                    control={control}
+                    options={getSeasonSelectOptions()}
                     error={errors.season}
                   />
                 </div>
@@ -257,7 +254,7 @@ export default function VideoModal({
                   <FormSelect
                     label="Competición *"
                     name="competition_type"
-                    register={register("competition_type")}
+                    control={control}
                     options={[
                       { value: "league", label: "Liga" },
                       { value: "friendly", label: "Amistoso" },
@@ -267,7 +264,7 @@ export default function VideoModal({
                   <FormSelect
                     label="Género *"
                     name="gender"
-                    register={register("gender")}
+                    control={control}
                     options={[
                       { value: "male", label: "Masculino" },
                       { value: "female", label: "Femenino" },

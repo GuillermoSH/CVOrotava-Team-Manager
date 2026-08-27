@@ -21,6 +21,7 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import PageHeader from "@/components/ui/PageHeader";
+import SegmentedControl from "@/components/ui/SegmentedControl";
 import { readPref, writePref } from "@/lib/prefs";
 
 type Filters = {
@@ -279,36 +280,31 @@ export default function CalendarPage() {
         }
         actions={
           <>
-            <div
-              className="inline-flex rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface)] p-0.5"
-              role="group"
+            <SegmentedControl
               aria-label="Vista del calendario"
-            >
-              <button
-                type="button"
-                onClick={() => setView("list")}
-                className={`inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-[0.65rem] px-3 text-xs font-medium transition-colors ${
-                  view === "list"
-                    ? "bg-[var(--color-bg-elevated)] text-[var(--text-primary)] shadow-sm"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                }`}
-              >
-                <FontAwesomeIcon icon={faList} />
-                Lista
-              </button>
-              <button
-                type="button"
-                onClick={() => setView("month")}
-                className={`inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-[0.65rem] px-3 text-xs font-medium transition-colors ${
-                  view === "month"
-                    ? "bg-[var(--color-bg-elevated)] text-[var(--text-primary)] shadow-sm"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                }`}
-              >
-                <FontAwesomeIcon icon={faCalendarDays} />
-                Mes
-              </button>
-            </div>
+              value={view}
+              onChange={setView}
+              options={[
+                {
+                  value: "list",
+                  label: (
+                    <>
+                      <FontAwesomeIcon icon={faList} />
+                      Lista
+                    </>
+                  ),
+                },
+                {
+                  value: "month",
+                  label: (
+                    <>
+                      <FontAwesomeIcon icon={faCalendarDays} />
+                      Mes
+                    </>
+                  ),
+                },
+              ]}
+            />
             {user?.isAdmin ? (
               <button
                 type="button"
