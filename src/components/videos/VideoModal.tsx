@@ -98,22 +98,13 @@ export default function VideoModal({
     setMessage(null);
 
     try {
-      const token = (
-        await (await import("@/lib/supabase/client")).supabase.auth.getSession()
-      ).data.session?.access_token;
-
-      if (!token) throw new Error("No hay sesión activa");
-
       const isEdit = !!data.id;
       const url = isEdit ? `/api/videos/${data.id}` : "/api/videos";
       const method = isEdit ? "PUT" : "POST";
 
       const res = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 

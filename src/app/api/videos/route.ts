@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
-import { assertEmailAllowed, requireAllowedUser } from "@/lib/auth/require-allowed-user";
+import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 /** Lo que usa `VideoCard` / grid; evita traer filas anchas innecesarias. */
 const VIDEO_LIST_COLUMNS =
@@ -33,7 +34,6 @@ export async function GET(req: Request) {
   query = query.range(from, to).order("created_at", { ascending: false });
   if (!limit && !season && !gender) query = query.limit(20);
 
-
   const { data, error } = await query;
 
   if (error) {
@@ -44,30 +44,12 @@ export async function GET(req: Request) {
   return NextResponse.json(data || []);
 }
 
-
 export async function POST(req: Request) {
   try {
-    // 1️⃣ Validar autenticación
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader) {
-      return NextResponse.json({ error: "No token provided" }, { status: 401 });
-    }
+    const supabase = await supabaseServer();
+    const auth = await requireAdmin(supabase);
+    if ("response" in auth) return auth.response;
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
-
-    if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    if (!user.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const forbidden = await assertEmailAllowed(supabaseAdmin, user.email);
-    if (forbidden) return forbidden;
-
-    // 2️⃣ Validar body
     const body = await req.json();
     const { url, category, season, competition_type, gender } = body;
 
@@ -75,7 +57,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    // 3️⃣ Insertar video
     const { data, error } = await supabaseAdmin
       .from("videos")
       .upsert(
@@ -92,11 +73,9 @@ export async function POST(req: Request) {
     const newVideo = data[0];
 
     return NextResponse.json({ success: true, data: newVideo }, { status: 201 });
-
   } catch (err) {
     console.error("POST /api/videos error:", err);
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
-

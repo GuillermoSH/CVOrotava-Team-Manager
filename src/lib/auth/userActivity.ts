@@ -36,8 +36,6 @@ export async function getUserActivity(
 
 /** Paths an inactive member may still open (pages). */
 export function isInactiveAllowedPath(pathname: string): boolean {
-  if (pathname === "/payments" || pathname.startsWith("/payments/")) {
-    return true;
-  }
-  return false;
+  const path = pathname.replace(/\/+$/, "") || "/";
+  return path === "/payments";
 }

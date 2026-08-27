@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { z } from "zod";
-import { createClient } from "@supabase/supabase-js";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 /** Último acceso vía Auth Admin: paginar listUsers en vez de N× getUserById. */
 async function authLastSignInByUserIds(userIds: string[]) {
@@ -72,23 +72,7 @@ export async function GET(req: Request) {
   const auth = await requireAllowedUser(supabase, { allowInactive: true });
   if ("response" in auth) return auth.response;
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  }
-
-  // Obtener el rol del usuario conectado
-  const { data: profile } = await supabase
-    .from("users")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  const isAdmin = profile?.role === "admin";
+  const isAdmin = auth.user.isAdmin;
 
   if (isAdmin) {
     // ADMIN VIEW: service role + join users (RLS de pagos para admin)
@@ -129,10 +113,14 @@ export async function GET(req: Request) {
       authLastSignInAtByUserId,
     });
   } else {
-    // PLAYER VIEW: Obtener solo sus pagos (asegurado por RLS)
-    let query = supabase
+    if (targetUserId && targetUserId !== auth.user.id) {
+      return NextResponse.json({ error: "Acceso denegado." }, { status: 403 });
+    }
+
+    let query = supabaseAdmin
       .from("payments")
       .select(PAYMENT_SELECT_PLAYER)
+      .eq("user_id", auth.user.id)
       .order("due_date", { ascending: true, nullsFirst: false });
 
     if (season) query = query.eq("season", season);
@@ -141,7 +129,11 @@ export async function GET(req: Request) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    return NextResponse.json({ data: payments, isAdmin: false });
+    const own = ((payments ?? []) as { user_id: string }[]).filter(
+      (p) => p.user_id === auth.user.id
+    );
+
+    return NextResponse.json({ data: own, isAdmin: false });
   }
 }
 
@@ -159,28 +151,8 @@ const paymentPostSchema = z.object({
 
 export async function POST(req: Request) {
   const supabase = await supabaseServer();
-  const auth = await requireAllowedUser(supabase);
+  const auth = await requireAdmin(supabase);
   if ("response" in auth) return auth.response;
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  }
-
-  // Verificar admin
-  const { data: profile } = await supabase
-    .from("users")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role !== "admin") {
-    return NextResponse.json({ error: "Acceso denegado. Solo administradores." }, { status: 403 });
-  }
 
   try {
     const body = await req.json();
@@ -198,12 +170,6 @@ export async function POST(req: Request) {
     };
 
     if (user_id === "ALL") {
-      // Crear cliente Admin para saltar el RLS al leer usuarios y hacer inserts masivos
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
-
       // BULK INSERT: Cargar a todos los usuarios
       const { data: allUsers } = await supabaseAdmin.from("users").select("id").neq("role", "admin");
       
@@ -221,11 +187,6 @@ export async function POST(req: Request) {
 
       return NextResponse.json({ message: `Asignado a ${bulkPayments.length} jugadores correctamente` });
     } else {
-      // INDIVIDUAL INSERT
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
       const { error: insertError } = await supabaseAdmin.from("payments").insert({
         user_id,
         ...cleanData

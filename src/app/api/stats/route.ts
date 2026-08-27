@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 
 export async function GET(req: Request) {
@@ -11,7 +12,7 @@ export async function GET(req: Request) {
   const season = searchParams.get("season");
   const gender = searchParams.get("gender");
 
-  let query = supabase.from("matches").select(
+  let query = supabaseAdmin.from("matches").select(
     "id, season, gender, result, opponent, venues(location_type)"
   );
 

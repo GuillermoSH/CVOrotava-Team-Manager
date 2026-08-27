@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
+import { requireAdmin } from "@/lib/auth/require-admin";
 import { ensureVideoFromMatchUrl } from "@/lib/ensureVideoFromMatchUrl";
 import { z } from "zod";
 
@@ -74,7 +75,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const supabase = await supabaseServer();
-        const auth = await requireAllowedUser(supabase);
+        const auth = await requireAdmin(supabase);
         if ("response" in auth) return auth.response;
 
         const body = await req.json();

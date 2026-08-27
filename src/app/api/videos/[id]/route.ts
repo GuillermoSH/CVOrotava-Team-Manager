@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
-import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 const VIDEO_LIST_COLUMNS =
   "id, url, created_at, category, season, competition_type, gender";
@@ -12,7 +12,7 @@ export async function PUT(
 ) {
   try {
     const supabase = await supabaseServer();
-    const auth = await requireAllowedUser(supabase);
+    const auth = await requireAdmin(supabase);
     if ("response" in auth) return auth.response;
 
     const { id } = await params;
@@ -50,7 +50,7 @@ export async function DELETE(
 ) {
   try {
     const supabase = await supabaseServer();
-    const auth = await requireAllowedUser(supabase);
+    const auth = await requireAdmin(supabase);
     if ("response" in auth) return auth.response;
 
     const { id } = await params;

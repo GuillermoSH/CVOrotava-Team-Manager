@@ -3,19 +3,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAllowedUser } from "./require-allowed-user";
 
 /**
- * Combina allowlist + role admin. Devuelve { user } o { response } con 401/403.
+ * Allowlist + club admin. Role is read via service role inside
+ * requireAllowedUser / getUserActivity (not the caller's RLS-scoped client).
  */
 export async function requireAdmin(supabase: SupabaseClient) {
   const auth = await requireAllowedUser(supabase);
   if ("response" in auth) return auth;
 
-  const { data: profile, error } = await supabase
-    .from("users")
-    .select("role")
-    .eq("id", auth.user.id)
-    .single();
-
-  if (error || profile?.role !== "admin") {
+  if (!auth.user.isAdmin) {
     return {
       response: NextResponse.json(
         { error: "Acceso denegado. Solo administradores." },

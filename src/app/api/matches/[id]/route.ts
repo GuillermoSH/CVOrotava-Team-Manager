@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
+import { requireAdmin } from "@/lib/auth/require-admin";
 import { ensureVideoFromMatchUrl } from "@/lib/ensureVideoFromMatchUrl";
 import { getMatchById } from "@/lib/matches/getMatchById";
 
@@ -40,7 +41,7 @@ export async function PUT(
 ) {
   try {
     const supabase = await supabaseServer();
-    const auth = await requireAllowedUser(supabase);
+    const auth = await requireAdmin(supabase);
     if ("response" in auth) return auth.response;
 
     const { id } = await params;
@@ -107,7 +108,7 @@ export async function DELETE(
 ) {
   try {
     const supabase = await supabaseServer();
-    const auth = await requireAllowedUser(supabase);
+    const auth = await requireAdmin(supabase);
     if ("response" in auth) return auth.response;
 
     const { id } = await params;
