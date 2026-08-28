@@ -4,63 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { z } from "zod";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { requireAdmin } from "@/lib/auth/require-admin";
-
-/** Último acceso vía Auth Admin: paginar listUsers en vez de N× getUserById. */
-async function authLastSignInByUserIds(userIds: string[]) {
-  const needed = new Set(userIds.filter(Boolean));
-  const out: Record<string, string | null> = {};
-  if (needed.size === 0) return out;
-
-  let page = 1;
-  const perPage = 1000;
-
-  while (true) {
-    const { data, error } = await supabaseAdmin.auth.admin.listUsers({
-      page,
-      perPage,
-    });
-    if (error || !data?.users?.length) break;
-
-    for (const u of data.users) {
-      if (needed.has(u.id)) {
-        out[u.id] = u.last_sign_in_at ?? null;
-        needed.delete(u.id);
-      }
-    }
-
-    if (needed.size === 0) break;
-    if (data.users.length < perPage) break;
-    page += 1;
-  }
-
-  for (const id of needed) out[id] = null;
-  return out;
-}
-
-/** Columnas que consume la UI (listas, modales, dashboard); evita `select('*')`. */
-const PAYMENT_SELECT_PLAYER = `
-  id,
-  user_id,
-  concept,
-  amount,
-  status,
-  due_date,
-  paid_date,
-  notes,
-  season,
-  created_at,
-  updated_at
-`;
-
-const PAYMENT_SELECT_ADMIN = `
-  ${PAYMENT_SELECT_PLAYER.trim()},
-  users ( user_name, gender )
-`;
-
-const PAYMENT_SELECT_ADMIN_GENDER = `
-  ${PAYMENT_SELECT_PLAYER.trim()},
-  users!inner ( user_name, gender )
-`;
+import { getPaymentsSnapshot } from "@/lib/payments/getPaymentsSnapshot";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -72,69 +16,20 @@ export async function GET(req: Request) {
   const auth = await requireAllowedUser(supabase, { allowInactive: true });
   if ("response" in auth) return auth.response;
 
-  const isAdmin = auth.user.isAdmin;
+  const result = await getPaymentsSnapshot({
+    actor: auth.user,
+    targetUserId,
+    season,
+    gender,
+  });
 
-  if (isAdmin) {
-    // ADMIN VIEW: service role + join users (RLS de pagos para admin)
-    let query = supabaseAdmin
-      .from("payments")
-      .select(PAYMENT_SELECT_ADMIN)
-      .order("due_date", { ascending: true, nullsFirst: false });
-
-    if (targetUserId) {
-      query = query.eq("user_id", targetUserId);
-    }
-    if (season) query = query.eq("season", season);
-    
-    // For manual gender filtering with LEFT JOIN, we can't reliably do .eq("users.gender", gender) in Supabase 
-    // unless we use inner join. So if gender is provided, we MUST use inner join.
-    if (gender) {
-      query = supabaseAdmin
-        .from("payments")
-        .select(PAYMENT_SELECT_ADMIN_GENDER)
-        .order("due_date", { ascending: true, nullsFirst: false });
-      
-      if (targetUserId) query = query.eq("user_id", targetUserId);
-      if (season) query = query.eq("season", season);
-      query = query.eq("users.gender", gender);
-    }
-
-    const { data: payments, error } = await query;
-
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-    const paymentRows = (payments ?? []) as unknown as { user_id: string }[];
-    const uniqueUserIds = [...new Set(paymentRows.map((p) => p.user_id))];
-    const authLastSignInAtByUserId = await authLastSignInByUserIds(uniqueUserIds);
-
-    return NextResponse.json({
-      data: paymentRows,
-      isAdmin: true,
-      authLastSignInAtByUserId,
-    });
-  } else {
-    if (targetUserId && targetUserId !== auth.user.id) {
-      return NextResponse.json({ error: "Acceso denegado." }, { status: 403 });
-    }
-
-    let query = supabaseAdmin
-      .from("payments")
-      .select(PAYMENT_SELECT_PLAYER)
-      .eq("user_id", auth.user.id)
-      .order("due_date", { ascending: true, nullsFirst: false });
-
-    if (season) query = query.eq("season", season);
-
-    const { data: payments, error } = await query;
-
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-    const own = ((payments ?? []) as { user_id: string }[]).filter(
-      (p) => p.user_id === auth.user.id
-    );
-
-    return NextResponse.json({ data: own, isAdmin: false });
+  if (result.status === "denied") {
+    return NextResponse.json({ error: "Acceso denegado." }, { status: 403 });
   }
+  if (result.status === "error") {
+    return NextResponse.json({ error: result.message }, { status: 500 });
+  }
+  return NextResponse.json(result.body);
 }
 
 // Validación Payload POST

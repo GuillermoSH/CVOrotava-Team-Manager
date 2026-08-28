@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
+import { listStatsMatches } from "@/lib/stats/listStatsMatches";
 
 export async function GET(req: Request) {
   const supabase = await supabaseServer();
@@ -12,17 +12,13 @@ export async function GET(req: Request) {
   const season = searchParams.get("season");
   const gender = searchParams.get("gender");
 
-  let query = supabaseAdmin.from("matches").select(
-    "id, season, gender, result, opponent, venues(location_type)"
-  );
-
-  if (season) query = query.eq("season", season);
-  if (gender) query = query.eq("gender", gender);
-  query = query.not("result", "is", null).neq("result", "");
-
-  const { data: matches, error } = await query;
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-  return NextResponse.json({ matches });
+  try {
+    const matches = await listStatsMatches({ season, gender });
+    return NextResponse.json({ matches });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
+  }
 }

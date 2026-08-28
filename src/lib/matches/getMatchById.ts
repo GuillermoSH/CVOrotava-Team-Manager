@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 const MATCH_DETAIL_SELECT = `
@@ -51,17 +52,19 @@ export type MatchDetailRow = {
 };
 
 /** Load a match by id (service role). Returns null when missing. */
-export async function getMatchById(id: string): Promise<MatchDetailRow | null> {
-  const { data, error } = await supabaseAdmin
-    .from("matches")
-    .select(MATCH_DETAIL_SELECT)
-    .eq("id", id)
-    .maybeSingle();
+export const getMatchById = cache(
+  async (id: string): Promise<MatchDetailRow | null> => {
+    const { data, error } = await supabaseAdmin
+      .from("matches")
+      .select(MATCH_DETAIL_SELECT)
+      .eq("id", id)
+      .maybeSingle();
 
-  if (error) {
-    if (error.code === "PGRST116") return null;
-    throw new Error(error.message);
+    if (error) {
+      if (error.code === "PGRST116") return null;
+      throw new Error(error.message);
+    }
+
+    return (data as MatchDetailRow | null) ?? null;
   }
-
-  return (data as MatchDetailRow | null) ?? null;
-}
+);

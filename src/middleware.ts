@@ -10,8 +10,35 @@ import {
   getUserActivity,
   isInactiveAllowedPath,
 } from "@/lib/auth/userActivity";
+import {
+  GATE_COOKIE,
+  GATE_HEADER,
+  GATE_TTL_SEC,
+  claimsMatchUser,
+  gateCookieOptions,
+  signGate,
+  verifyGate,
+  type GateClaims,
+} from "@/lib/auth/gate";
+
+function copyCookies(from: NextResponse, to: NextResponse) {
+  from.cookies.getAll().forEach(({ name, value }) => {
+    to.cookies.set(name, value);
+  });
+}
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  const isApiRoute =
+    pathname.startsWith("/api/") && !pathname.startsWith("/api/auth");
+
+  // APIs authenticate in the handler (requireAllowedUser). Skip getUser here
+  // so each fetch isn't a second round-trip to Supabase Auth.
+  if (isApiRoute) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -43,15 +70,6 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname } = request.nextUrl;
-
-  const isApiRoute =
-    pathname.startsWith("/api/") && !pathname.startsWith("/api/auth");
-
-  if (isApiRoute) {
-    return supabaseResponse;
-  }
-
   const isPublicPath =
     pathname.startsWith("/login") ||
     pathname.startsWith("/api/auth") ||
@@ -66,39 +84,56 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  let gateToken: string | null = null;
+
   // Session present: enforce allowlist before any protected page.
   if (user?.email && !isPublicPath) {
-    const allowed = await isEmailAllowlisted(
-      supabaseAdmin,
-      normalizeEmail(user.email)
-    );
+    const email = normalizeEmail(user.email);
+    const existing = await verifyGate(request.cookies.get(GATE_COOKIE)?.value);
+    let claims: GateClaims | null =
+      existing && claimsMatchUser(existing, user.id, email) ? existing : null;
 
-    if (!allowed) {
-      try {
-        await supabaseAdmin.auth.admin.signOut(user.id, "global");
-      } catch {
-        /* best-effort */
+    if (!claims) {
+      const allowed = await isEmailAllowlisted(supabaseAdmin, email);
+
+      if (!allowed) {
+        try {
+          await supabaseAdmin.auth.admin.signOut(user.id, "global");
+        } catch {
+          /* best-effort */
+        }
+        await supabase.auth.signOut();
+
+        const denied = NextResponse.redirect(
+          new URL("/login?error=unauthorized", request.url)
+        );
+        copyCookies(supabaseResponse, denied);
+        clearSupabaseAuthCookies(denied, request.url);
+        denied.cookies.set(GATE_COOKIE, "", gateCookieOptions(0));
+        return denied;
       }
-      await supabase.auth.signOut();
 
-      const denied = NextResponse.redirect(
-        new URL("/login?error=unauthorized", request.url)
-      );
-      supabaseResponse.cookies.getAll().forEach(({ name, value }) => {
-        denied.cookies.set(name, value);
-      });
-      clearSupabaseAuthCookies(denied, request.url);
-      return denied;
+      const activity = await getUserActivity(user.id);
+      claims = {
+        sub: user.id,
+        email,
+        is_active: activity.is_active,
+        isAdmin: activity.isAdmin,
+        role: activity.role,
+        user_name: activity.user_name ?? email,
+        gender: activity.gender,
+        exp: Math.floor(Date.now() / 1000) + GATE_TTL_SEC,
+      };
     }
 
-    // Inactive members: payments only (admins never gated).
-    const activity = await getUserActivity(user.id);
-    if (!activity.is_active && !isInactiveAllowedPath(pathname)) {
+    if (!claims.is_active && !isInactiveAllowedPath(pathname)) {
       const paymentsUrl = request.nextUrl.clone();
       paymentsUrl.pathname = "/payments";
       paymentsUrl.search = "";
       return NextResponse.redirect(paymentsUrl);
     }
+
+    gateToken = await signGate(claims);
   }
 
   if (user && pathname === "/login") {
@@ -114,22 +149,33 @@ export async function middleware(request: NextRequest) {
         }
         await supabase.auth.signOut();
         const cleaned = NextResponse.next({ request });
-        supabaseResponse.cookies.getAll().forEach(({ name, value }) => {
-          cleaned.cookies.set(name, value);
-        });
+        copyCookies(supabaseResponse, cleaned);
         clearSupabaseAuthCookies(cleaned, request.url);
+        cleaned.cookies.set(GATE_COOKIE, "", gateCookieOptions(0));
         return cleaned;
       }
       return supabaseResponse;
     }
 
-    const activity = await getUserActivity(user.id);
+    const existing = await verifyGate(request.cookies.get(GATE_COOKIE)?.value);
+    const email = user.email ? normalizeEmail(user.email) : "";
+    const cached =
+      existing && email && claimsMatchUser(existing, user.id, email)
+        ? existing
+        : null;
+    const activity = cached ?? (await getUserActivity(user.id));
     const homeUrl = request.nextUrl.clone();
     homeUrl.pathname = activity.is_active ? "/" : "/payments";
     return NextResponse.redirect(homeUrl);
   }
 
-  return supabaseResponse;
+  if (!gateToken) return supabaseResponse;
+
+  request.headers.set(GATE_HEADER, gateToken);
+  const forwarded = NextResponse.next({ request });
+  copyCookies(supabaseResponse, forwarded);
+  forwarded.cookies.set(GATE_COOKIE, gateToken, gateCookieOptions());
+  return forwarded;
 }
 
 export const config = {

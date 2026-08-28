@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import MatchCard, { Match } from "@/components/calendar/MatchCard";
 import MatchMonthView from "@/components/calendar/MatchMonthView";
-import MatchModal, { MatchFormValues } from "@/components/calendar/MatchModal";
+import type { MatchFormValues } from "@/components/calendar/MatchModal";
 import { matchToModalInitialValues } from "@/lib/matchFormValues";
-import Loading from "@/components/common/Loading";
+import MatchesSkeleton from "@/components/skeletons/MatchesSkeleton";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
 import { fuzzyFilter } from "@/utils/fuzzy";
@@ -22,6 +23,10 @@ import PageHeader from "@/components/ui/PageHeader";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import Pagination from "@/components/ui/Pagination";
 import { readPref, writePref } from "@/lib/prefs";
+
+const MatchModal = dynamic(() => import("@/components/calendar/MatchModal"), {
+  ssr: false,
+});
 
 type Filters = {
   season?: string;
@@ -57,15 +62,19 @@ function monthLabel(key: string): string {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-export default function CalendarPage() {
+export default function CalendarView({
+  initialMatches,
+}: {
+  initialMatches: Match[];
+}) {
   const { user, loading: userLoading } = useUser();
-  const [matches, setMatches] = useState<Match[]>([]);
+  const [matches, setMatches] = useState<Match[]>(initialMatches);
   const [filters, setFilters] = useState<Filters>({
     season: getCurrentSeason(),
     gender: user?.gender ?? undefined,
   });
   const { seasons } = useSeasons();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [view, setViewState] = useState<ViewMode>("list");
@@ -102,10 +111,6 @@ export default function CalendarPage() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchMatches();
-  }, []);
 
   useEffect(() => {
     if (!user?.gender) return;
@@ -186,7 +191,7 @@ export default function CalendarPage() {
     return new Date(`${next.date}T12:00:00`);
   }, [upcoming, played]);
 
-  if (loading || userLoading) return <Loading />;
+  if (loading || userLoading) return <MatchesSkeleton />;
 
   if (error)
     return (

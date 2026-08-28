@@ -321,7 +321,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                             min={0}
                           />
                         </div>
-                        <div className="text-[var(--text-muted)] font-black self-center pt-2">-</div>
+                        <div className="text-[var(--text-muted)] font-bold self-center pt-2">-</div>
                         <div className="flex-1">
                           <label className="block text-[10px] text-[var(--text-muted)] uppercase tracking-wider mb-1">Rival</label>
                           <input

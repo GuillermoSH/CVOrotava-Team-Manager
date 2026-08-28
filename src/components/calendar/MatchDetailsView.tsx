@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { motion, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -18,10 +19,14 @@ import {
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";
-import MatchModal, { MatchFormValues } from "@/components/calendar/MatchModal";
+import type { MatchFormValues } from "@/components/calendar/MatchModal";
 import type { Match } from "@/components/calendar/MatchCard";
 import { matchToModalInitialValues } from "@/lib/matchFormValues";
 import { getThumbnailUrl, getYouTubeId } from "@/lib/youtube";
+
+const MatchModal = dynamic(() => import("@/components/calendar/MatchModal"), {
+  ssr: false,
+});
 
 export type MatchDetail = Match & {
   match_sets?: Array<{

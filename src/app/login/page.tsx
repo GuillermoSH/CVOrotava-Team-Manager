@@ -1,14 +1,18 @@
 "use client";
 
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import GoogleBtn from "@/components/ui/GoogleBtn";
 import ThemeToggle from "@/components/ui/ThemeToggle";
-import LoginParticles from "@/components/ui/LoginParticles";
 import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const FLIGHT_MS = 0.9;
+
+const LoginParticles = dynamic(() => import("@/components/ui/LoginParticles"), {
+  ssr: false,
+});
 
 type Phase = "cover" | "reveal" | "done";
 

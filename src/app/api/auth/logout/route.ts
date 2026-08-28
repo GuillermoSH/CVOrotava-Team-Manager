@@ -25,6 +25,7 @@ export async function POST() {
 
   // 🚪 Cerrar sesión (Supabase limpia sus propias cookies automáticamente)
   await supabase.auth.signOut();
+  cookieStore.set("cvorotava_gate", "", { path: "/", maxAge: 0 });
 
   // 🔁 Redirigir al login
   return NextResponse.redirect(

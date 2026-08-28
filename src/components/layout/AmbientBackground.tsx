@@ -28,7 +28,7 @@ export default function AmbientBackground() {
         }`}
       />
       <div
-        className={`absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay transition-opacity duration-500 ${
+        className={`absolute inset-0 bg-[url('/assets/svgs/noise.svg')] mix-blend-overlay transition-opacity duration-500 ${
           light ? "opacity-[0.04]" : "opacity-[0.03]"
         }`}
       />

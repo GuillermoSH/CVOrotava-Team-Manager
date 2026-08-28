@@ -4,6 +4,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { ensureVideoFromMatchUrl } from "@/lib/ensureVideoFromMatchUrl";
+import { listMatches } from "@/lib/matches/listMatches";
 import { z } from "zod";
 
 const matchSchema = z.object({
@@ -38,25 +39,15 @@ export async function GET(req: Request) {
   const season = searchParams.get("season");
   const orderParam = searchParams.get("order") || "desc";
   const hasResult = searchParams.get("hasResult") === "true";
-  const ascending = orderParam === "asc";
 
   try {
-    let query = supabaseAdmin
-      .from("matches")
-      .select(
-        "*, venues(id, venue_name, location_type, location_url), match_sets(id, set_number, team_score, opponent_score)"
-      )
-      .order("date", { ascending })
-      .order("time", { ascending });
-
-    if (season) query = query.eq("season", season);
-    if (gender) query = query.eq("gender", gender);
-    if (limit) query = query.limit(limit);
-    if (hasResult) query = query.not("result", "is", null).neq("result", "");
-
-    const { data, error } = await query;
-
-    if (error) throw error;
+    const data = await listMatches({
+      gender,
+      season,
+      order: orderParam === "asc" ? "asc" : "desc",
+      limit,
+      hasResult,
+    });
 
     return NextResponse.json(data);
   } catch (err) {

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { motion, useReducedMotion } from "framer-motion";
-import Loading from "@/components/common/Loading";
+import { PaymentsListSkeleton } from "@/components/skeletons/PaymentsSkeleton";
 import { useUser } from "@/contexts/UserContext";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,12 +15,15 @@ import {
   faArrowUpWideShort,
 } from "@fortawesome/free-solid-svg-icons";
 import PageHeader from "@/components/ui/PageHeader";
-import PaymentModal from "@/components/payments/PaymentModal";
 import QuotaSeasonLayout from "@/components/payments/QuotaSeasonLayout";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import { useSeasons } from "@/contexts/SeasonContext";
-import { getCurrentSeason } from "@/utils/getCurrentSeason";
+
+const PaymentModal = dynamic(
+  () => import("@/components/payments/PaymentModal"),
+  { ssr: false }
+);
 
 type PaymentStatus = "pending" | "paid";
 
@@ -94,21 +98,68 @@ function formatLastSignInLabel(iso: string | null | undefined): string {
   return `Últ. acceso ${date}`;
 }
 
-export default function PaymentsPage() {
+function applyPaymentsSnapshot(
+  json: {
+    data: Payment[];
+    isAdmin: boolean;
+    authLastSignInAtByUserId?: Record<string, string | null>;
+  }
+): { payments: Payment[]; adminOverview: AdminOverviewRow[] } {
+  const data = json.data;
+  const authLastSignInAtByUserId = json.authLastSignInAtByUserId ?? {};
+
+  if (json.isAdmin) {
+    const playerMap = new Map<string, AdminOverviewRow>();
+    data.forEach((p) => {
+      if (!playerMap.has(p.user_id)) {
+        playerMap.set(p.user_id, {
+          user_id: p.user_id,
+          player: p.users?.user_name || "Desconocido",
+          pendingAmount: 0,
+          status: "success",
+          lastSignInAt: authLastSignInAtByUserId[p.user_id] ?? null,
+        });
+      }
+      if (p.status === "pending") {
+        const row = playerMap.get(p.user_id)!;
+        row.pendingAmount += Number(p.amount);
+        row.status = row.pendingAmount >= 100 ? "danger" : "warning";
+      }
+    });
+    return { payments: [], adminOverview: Array.from(playerMap.values()) };
+  }
+
+  return { payments: data, adminOverview: [] };
+}
+
+export default function PaymentsView({
+  initialSnapshot,
+  initialFilters,
+}: {
+  initialSnapshot: {
+    data: Payment[];
+    isAdmin: boolean;
+    authLastSignInAtByUserId?: Record<string, string | null>;
+  };
+  initialFilters: { season?: string; gender?: string };
+}) {
   const { user } = useUser();
   const router = useRouter();
   const reduceMotion = useReducedMotion();
 
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [adminOverview, setAdminOverview] = useState<AdminOverviewRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initial = applyPaymentsSnapshot(initialSnapshot);
+  const [payments, setPayments] = useState<Payment[]>(initial.payments);
+  const [adminOverview, setAdminOverview] = useState<AdminOverviewRow[]>(
+    initial.adminOverview
+  );
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { seasons } = useSeasons();
 
   const [filters, setFilters] = useState<Record<string, string | undefined>>({
-    season: getCurrentSeason(),
-    gender: user?.gender ?? undefined,
+    season: initialFilters.season,
+    gender: initialFilters.gender,
   });
 
   const [allUsers, setAllUsers] = useState<{ id: string; name: string }[]>([]);
@@ -133,32 +184,13 @@ export default function PaymentsPage() {
       if (!res.ok) throw new Error("Error cargando los pagos");
 
       const json = await res.json();
-      const data = json.data as Payment[];
-      const authLastSignInAtByUserId = (json.authLastSignInAtByUserId ??
-        {}) as Record<string, string | null>;
-
-      if (json.isAdmin) {
-        const playerMap = new Map<string, AdminOverviewRow>();
-        data.forEach((p) => {
-          if (!playerMap.has(p.user_id)) {
-            playerMap.set(p.user_id, {
-              user_id: p.user_id,
-              player: p.users?.user_name || "Desconocido",
-              pendingAmount: 0,
-              status: "success",
-              lastSignInAt: authLastSignInAtByUserId[p.user_id] ?? null,
-            });
-          }
-          if (p.status === "pending") {
-            const row = playerMap.get(p.user_id)!;
-            row.pendingAmount += Number(p.amount);
-            row.status = row.pendingAmount >= 100 ? "danger" : "warning";
-          }
-        });
-        setAdminOverview(Array.from(playerMap.values()));
-      } else {
-        setPayments(data);
-      }
+      const parsed = applyPaymentsSnapshot({
+        data: json.data as Payment[],
+        isAdmin: json.isAdmin,
+        authLastSignInAtByUserId: json.authLastSignInAtByUserId,
+      });
+      setAdminOverview(parsed.adminOverview);
+      setPayments(parsed.payments);
     } catch (err: unknown) {
       setError((err as Error).message);
     } finally {
@@ -167,6 +199,9 @@ export default function PaymentsPage() {
   };
 
   useEffect(() => {
+    const sameSeason = (filters.season ?? "") === (initialFilters.season ?? "");
+    const sameGender = (filters.gender ?? "") === (initialFilters.gender ?? "");
+    if (sameSeason && sameGender) return;
     if (user) fetchPayments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, filters]);
@@ -288,7 +323,7 @@ export default function PaymentsPage() {
         configs={filterConfigs}
       />
 
-      {loading && <Loading />}
+      {loading && <PaymentsListSkeleton />}
 
       {error && !loading && (
         <div className="mb-4 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_35%,transparent)] bg-[var(--color-danger-muted)] p-4">

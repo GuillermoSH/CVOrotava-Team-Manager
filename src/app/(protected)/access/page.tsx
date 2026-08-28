@@ -16,7 +16,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";
 import PageHeader from "@/components/ui/PageHeader";
-import Loading from "@/components/common/Loading";
+import { AccessListSkeleton } from "@/components/skeletons/AccessSkeleton";
 import FilterBar, { type FilterConfig } from "@/components/ui/FilterBar";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import Pagination from "@/components/ui/Pagination";
@@ -503,7 +503,7 @@ export default function AccessPage() {
       </div>
 
       {loading ? (
-        <Loading />
+        <AccessListSkeleton />
       ) : filtered.length === 0 ? (
         <div className="flex min-h-[28vh] flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--glass-border)] bg-[var(--surface-faint)] px-6 py-12 text-center">
           <p className="text-sm font-medium text-[var(--text-primary)]">

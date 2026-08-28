@@ -14,9 +14,15 @@ const SeasonContext = createContext<SeasonContextType>({
   refreshSeasons: async () => {},
 });
 
-export function SeasonProvider({ children }: { children: React.ReactNode }) {
-  const [seasons, setSeasons] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+export function SeasonProvider({
+  children,
+  initialSeasons,
+}: {
+  children: React.ReactNode;
+  initialSeasons?: string[];
+}) {
+  const [seasons, setSeasons] = useState<string[]>(initialSeasons ?? []);
+  const [loading, setLoading] = useState(!initialSeasons);
 
   const fetchSeasons = async () => {
     try {
@@ -31,7 +37,10 @@ export function SeasonProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    if (initialSeasons) return;
     fetchSeasons();
+    // Initial list comes from the protected layout RSC.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

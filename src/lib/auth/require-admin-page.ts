@@ -1,10 +1,8 @@
 import { redirect } from "next/navigation";
-import { supabaseServer } from "@/lib/supabase/server";
-import { requireAdmin } from "./require-admin";
+import { loadAppUser } from "./loadAppUser";
 
-/** Server layouts/pages: bounce non-admins home. */
+/** Server layouts/pages: bounce non-admins home. Shares loadAppUser with the shell. */
 export async function requireAdminPage() {
-  const supabase = await supabaseServer();
-  const auth = await requireAdmin(supabase);
-  if ("response" in auth) redirect("/");
+  const result = await loadAppUser();
+  if (!result.ok || !result.user.isAdmin) redirect("/");
 }

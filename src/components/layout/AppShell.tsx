@@ -1,18 +1,88 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRightFromBracket, faUsers } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";
+import { useNavPending } from "@/contexts/NavPendingContext";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import Tooltip from "@/components/ui/Tooltip";
-import { APP_NAV_ITEMS, isNavActive } from "@/components/layout/navItems";
+import { APP_NAV_ITEMS, type AppNavItem } from "@/components/layout/navItems";
+
+function SidebarNavLink({
+  item,
+  active,
+  onNavigate,
+}: {
+  item: AppNavItem;
+  active: boolean;
+  onNavigate: (href: string) => void;
+}) {
+  return (
+    <Link
+      href={item.href}
+      onClick={() => onNavigate(item.href)}
+      aria-current={active ? "page" : undefined}
+      className={`relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
+        active
+          ? "text-[var(--text-primary)]"
+          : "text-[var(--text-muted)] hover:bg-[var(--glass-surface)] hover:text-[var(--text-secondary)]"
+      }`}
+    >
+      {active && (
+        <motion.span
+          layoutId="sidebar-active"
+          className="absolute inset-0 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface)]"
+          transition={{ type: "spring", stiffness: 400, damping: 32 }}
+        />
+      )}
+      <span className="relative z-10 flex items-center gap-3">
+        <FontAwesomeIcon
+          icon={item.icon}
+          className={`w-4 text-sm ${active ? "text-[var(--accent)]" : ""}`}
+        />
+        {item.name}
+      </span>
+    </Link>
+  );
+}
+
+function BottomNavLink({
+  item,
+  active,
+  onNavigate,
+}: {
+  item: AppNavItem;
+  active: boolean;
+  onNavigate: (href: string) => void;
+}) {
+  return (
+    <Link
+      href={item.href}
+      onClick={() => onNavigate(item.href)}
+      aria-current={active ? "page" : undefined}
+      className={`relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 text-[0.65rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--accent)] ${
+        active ? "text-[var(--accent)]" : "text-[var(--text-muted)]"
+      }`}
+    >
+      {active && (
+        <motion.span
+          layoutId="bottom-active"
+          className="absolute inset-x-2 top-1 h-0.5 rounded-full bg-[var(--accent)]"
+          transition={{ type: "spring", stiffness: 400, damping: 32 }}
+        />
+      )}
+      <FontAwesomeIcon icon={item.icon} className="text-base" aria-hidden />
+      <span className="truncate">{item.shortName ?? item.name}</span>
+    </Link>
+  );
+}
 
 export default function AppShell() {
   const router = useRouter();
-  const pathname = usePathname();
+  const { markPending, isActive } = useNavPending();
   const { user } = useUser();
 
   const handleLogout = async () => {
@@ -50,7 +120,11 @@ export default function AppShell() {
         aria-label="Navegación principal"
       >
         <div className="flex h-16 shrink-0 items-center gap-2.5 px-5">
-          <Link href="/" className="group flex items-center gap-2.5">
+          <Link
+            href="/"
+            onClick={() => markPending("/")}
+            className="group flex items-center gap-2.5"
+          >
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--accent)] shadow-lg shadow-red-600/20 transition-shadow group-hover:shadow-red-600/40">
               <span className="text-sm font-bold tracking-tight text-white">
                 CV
@@ -63,35 +137,14 @@ export default function AppShell() {
         </div>
 
         <nav className="flex flex-1 flex-col gap-0.5 px-3 py-2">
-          {navItems.map((item) => {
-            const active = isNavActive(pathname, item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
-                  active
-                    ? "text-[var(--text-primary)]"
-                    : "text-[var(--text-muted)] hover:bg-[var(--glass-surface)] hover:text-[var(--text-secondary)]"
-                }`}
-              >
-                {active && (
-                  <motion.span
-                    layoutId="sidebar-active"
-                    className="absolute inset-0 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface)]"
-                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                  />
-                )}
-                <span className="relative z-10 flex items-center gap-3">
-                  <FontAwesomeIcon
-                    icon={item.icon}
-                    className={`w-4 text-sm ${active ? "text-[var(--accent)]" : ""}`}
-                  />
-                  {item.name}
-                </span>
-              </Link>
-            );
-          })}
+          {navItems.map((item) => (
+            <SidebarNavLink
+              key={item.href}
+              item={item}
+              active={isActive(item.href)}
+              onNavigate={markPending}
+            />
+          ))}
         </nav>
 
         <div className="mt-auto space-y-3 border-t border-[var(--glass-border)] p-4">
@@ -128,7 +181,11 @@ export default function AppShell() {
 
       {/* ── Mobile top bar (brand + account) ── */}
       <header className="fixed inset-x-0 top-0 z-[var(--z-navbar)] flex h-14 items-center justify-between border-b border-[var(--glass-border)] bg-[color-mix(in_srgb,var(--color-bg)_94%,transparent)] px-4 backdrop-blur-xl md:hidden">
-        <Link href="/" className="flex items-center gap-2">
+        <Link
+          href="/"
+          onClick={() => markPending("/")}
+          className="flex items-center gap-2"
+        >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent)]">
             <span className="text-xs font-bold text-white">CV</span>
           </div>
@@ -141,9 +198,11 @@ export default function AppShell() {
             <Tooltip label="Usuarios">
               <Link
                 href="/access"
+                onClick={() => markPending("/access")}
                 aria-label="Usuarios"
+                aria-current={isActive("/access") ? "page" : undefined}
                 className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors ${
-                  isNavActive(pathname, "/access")
+                  isActive("/access")
                     ? "border-[var(--glass-border)] bg-[var(--glass-surface)] text-[var(--accent)]"
                     : "border-[var(--glass-border)] bg-[var(--glass-surface)] text-[var(--text-muted)] hover:text-[var(--accent)]"
                 }`}
@@ -172,36 +231,14 @@ export default function AppShell() {
         aria-label="Navegación principal"
       >
         <div className="flex h-[var(--bottom-nav-height)] items-stretch justify-around px-1">
-          {mainNavItems.map((item) => {
-            const active = isNavActive(pathname, item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 text-[0.65rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--accent)] ${
-                  active
-                    ? "text-[var(--accent)]"
-                    : "text-[var(--text-muted)]"
-                }`}
-              >
-                {active && (
-                  <motion.span
-                    layoutId="bottom-active"
-                    className="absolute inset-x-2 top-1 h-0.5 rounded-full bg-[var(--accent)]"
-                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                  />
-                )}
-                <FontAwesomeIcon
-                  icon={item.icon}
-                  className="text-base"
-                  aria-hidden
-                />
-                <span className="truncate">
-                  {item.shortName ?? item.name}
-                </span>
-              </Link>
-            );
-          })}
+          {mainNavItems.map((item) => (
+            <BottomNavLink
+              key={item.href}
+              item={item}
+              active={isActive(item.href)}
+              onNavigate={markPending}
+            />
+          ))}
         </div>
       </nav>
     </>

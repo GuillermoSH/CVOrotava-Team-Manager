@@ -37,6 +37,7 @@ export function clearSupabaseAuthCookies(response: NextResponse, requestUrl: str
     )?.[1] ?? null;
 
   const names = new Set<string>([
+    "cvorotava_gate",
     "sb-access-token",
     "sb-refresh-token",
     ...(projectRef

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,11 +12,10 @@ import {
   faVolleyball,
 } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";
-import { getCurrentSeason } from "@/utils/getCurrentSeason";
-import Loading from "@/components/common/Loading";
+import HomeSkeleton from "@/components/skeletons/HomeSkeleton";
 import PageHeader from "@/components/ui/PageHeader";
 
-type Match = {
+export type HomeMatch = {
   id: string;
   date: string;
   opponent: string;
@@ -26,47 +25,24 @@ type Match = {
   venues?: { venue_name: string } | null;
 };
 
+type Match = HomeMatch;
+
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-export default function ProtectedHome() {
-  const { user, loading } = useUser();
-  const reduceMotion = useReducedMotion();
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [paymentsData, setPaymentsData] = useState<{
+export default function HomeView({
+  initialMatches,
+  initialPayments,
+}: {
+  initialMatches: HomeMatch[];
+  initialPayments: {
     data: { user_id: string; amount: string | number; status: string }[];
     isAdmin: boolean;
-  } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user) return;
-
-    const loadData = async () => {
-      try {
-        const currentSeason = getCurrentSeason();
-        const [matchesRes, paymentsRes] = await Promise.all([
-          fetch(
-            `/api/matches?gender=${user.gender}&season=${currentSeason}&order=asc`
-          ),
-          fetch("/api/payments"),
-        ]);
-
-        const data = await matchesRes.json();
-        setMatches(data || []);
-
-        if (paymentsRes.ok) {
-          const pData = await paymentsRes.json();
-          setPaymentsData(pData);
-        }
-      } catch (err) {
-        console.error("Error cargando datos:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, [user]);
+  } | null;
+}) {
+  const { user, loading } = useUser();
+  const reduceMotion = useReducedMotion();
+  const [matches] = useState<HomeMatch[]>(initialMatches);
+  const [paymentsData] = useState(initialPayments);
 
   const now = new Date();
 
@@ -112,7 +88,7 @@ export default function ProtectedHome() {
     [playedMatches]
   );
 
-  if (isLoading || loading) return <Loading />;
+  if (loading) return <HomeSkeleton />;
 
   const pendingPayments =
     paymentsData?.data?.filter((p) => p.status === "pending") || [];

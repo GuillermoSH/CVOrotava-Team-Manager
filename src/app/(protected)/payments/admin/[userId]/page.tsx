@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useUser } from "@/contexts/UserContext";
 import { motion, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,13 +14,16 @@ import {
   faEdit,
   faCopy,
 } from "@fortawesome/free-solid-svg-icons";
-import PaymentModal, {
-  type PaymentModalInitialData,
-} from "@/components/payments/PaymentModal";
+import type { PaymentModalInitialData } from "@/components/payments/PaymentModal";
 import PageHeader from "@/components/ui/PageHeader";
 import QuotaSeasonLayout from "@/components/payments/QuotaSeasonLayout";
 import { isQuotaOverdue } from "@/components/payments/quotaDates";
 import Tooltip, { TooltipGroup } from "@/components/ui/Tooltip";
+
+const PaymentModal = dynamic(
+  () => import("@/components/payments/PaymentModal"),
+  { ssr: false }
+);
 
 interface Payment {
   id: string;

@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import VideosGrid from "@/components/videos/VideosGrid";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import useViewportHeight from "@/hooks/useViewportHeight";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
 import { useSeasons } from "@/contexts/SeasonContext";
-import VideoModal, { VideoFormValues } from "@/components/videos/VideoModal";
+import type { VideoFormValues } from "@/components/videos/VideoModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import PageHeader from "@/components/ui/PageHeader";
@@ -17,6 +18,10 @@ import {
   VIDEO_GROUP_OPTIONS,
   type VideoGroupBy,
 } from "@/lib/videos/groupVideos";
+
+const VideoModal = dynamic(() => import("@/components/videos/VideoModal"), {
+  ssr: false,
+});
 
 type Filters = {
   season?: string;

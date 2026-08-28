@@ -91,13 +91,20 @@ describe("admin pages are gated on the server, not only in the client", () => {
 });
 
 describe("player payments GET must pin user_id and strip leaked rows", () => {
-  it("contains both the IDOR 403 and a post-query own-row filter", () => {
+  it("GET delegates to getPaymentsSnapshot after allowInactive auth", () => {
     const get = handlerBody(src("src/app/api/payments/route.ts"), "GET");
-    const playerBranch = get.slice(get.lastIndexOf("} else {"));
-    expect(playerBranch).toMatch(/targetUserId !== auth\.user\.id/);
-    expect(playerBranch).toMatch(/\.eq\(\s*["']user_id["']\s*,\s*auth\.user\.id\s*\)/);
-    expect(playerBranch).toMatch(/p\.user_id === auth\.user\.id/);
-    expect(playerBranch).not.toMatch(/authLastSignInAtByUserId/);
-    expect(playerBranch).toContain("isAdmin: false");
+    expect(get).toContain("allowInactive: true");
+    expect(get).toContain("getPaymentsSnapshot");
+  });
+
+  it("contains both the IDOR 403 and a post-query own-row filter", () => {
+    const lib = src("src/lib/payments/getPaymentsSnapshot.ts");
+    expect(lib).toMatch(/targetUserId !== actor\.id/);
+    expect(lib).toMatch(/\.eq\(\s*["']user_id["']\s*,\s*actor\.id\s*\)/);
+    expect(lib).toMatch(/p\.user_id === actor\.id/);
+    expect(lib).toContain("isAdmin: false");
+
+    const playerReturn = lib.slice(lib.lastIndexOf("if (targetUserId"));
+    expect(playerReturn).not.toMatch(/authLastSignInAtByUserId/);
   });
 });

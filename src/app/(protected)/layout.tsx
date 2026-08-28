@@ -1,100 +1,70 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createServerClient } from "@supabase/ssr";
 import AppShell from "@/components/layout/AppShell";
 import AmbientBackground from "@/components/layout/AmbientBackground";
-import { UserProvider } from "@/contexts/UserContext";
+import { UserProvider, type AppUser } from "@/contexts/UserContext";
 import { SeasonProvider } from "@/contexts/SeasonContext";
 import {
-  isEmailAllowlisted,
-  normalizeEmail,
-} from "@/lib/auth/allowlist";
+  NavPendingProvider,
+  PendingMain,
+} from "@/contexts/NavPendingContext";
+import { loadAppUser } from "@/lib/auth/loadAppUser";
+import { listSeasons } from "@/lib/seasons/listSeasons";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getCurrentSeason } from "@/utils/getCurrentSeason";
+
+function toUserRole(
+  role: string | null
+): NonNullable<AppUser>["role"] {
+  if (role === "admin" || role === "coach" || role === "player") return role;
+  return null;
+}
 
 export default async function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
+  const result = await loadAppUser();
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // Server Components cannot always mutate cookies; middleware owns refresh.
-          }
-        },
-      },
-    }
-  );
-
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-
-  if (error || !user) redirect("/login");
-
-  // Fail closed: no email ⇒ no access (do not skip allowlist).
-  if (!user.email) {
+  if (!result.ok) {
+    if (result.reason === "unauthenticated") redirect("/login");
     try {
-      await supabaseAdmin.auth.admin.signOut(user.id, "global");
+      await supabaseAdmin.auth.admin.signOut(result.userId, "global");
     } catch {
       /* best-effort */
     }
-    redirect("/login?error=no-email");
-  }
-
-  const email = normalizeEmail(user.email);
-  const allowed = await isEmailAllowlisted(supabaseAdmin, email);
-
-  if (!allowed) {
-    try {
-      await supabaseAdmin.auth.admin.signOut(user.id, "global");
-    } catch {
-      /* best-effort */
-    }
+    if (result.reason === "no-email") redirect("/login?error=no-email");
     redirect("/login?error=unauthorized");
   }
 
-  const { data: profile } = await supabase
-    .from("users")
-    .select("gender, role, user_name, is_active")
-    .eq("id", user.id)
-    .single();
-
-  const isAdmin = profile?.role === "admin";
-  const isActive = isAdmin ? true : profile?.is_active !== false;
-
-  const appUser = {
+  const { user } = result;
+  const appUser: NonNullable<AppUser> = {
     id: user.id,
-    email,
-    user_name: profile?.user_name ?? email,
-    gender: profile?.gender ?? null,
-    role: profile?.role ?? null,
-    isAdmin,
-    isActive,
+    email: user.email,
+    user_name: user.user_name,
+    gender: user.gender,
+    role: toUserRole(user.role),
+    isAdmin: user.isAdmin,
+    isActive: user.isActive,
   };
+
+  let seasons: string[] = [getCurrentSeason()];
+  try {
+    seasons = await listSeasons();
+  } catch (err) {
+    console.error("listSeasons failed:", err);
+  }
 
   return (
     <UserProvider initialUser={appUser}>
-      <SeasonProvider>
-        <AppShell />
-        <AmbientBackground />
-        <main className="relative min-h-screen w-full px-4 pb-[calc(var(--bottom-nav-height)+1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(var(--mobile-top-height)+1rem)] md:ml-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))] md:px-8 md:pb-12 md:pt-8 lg:px-10">
-          {children}
-        </main>
+      <SeasonProvider initialSeasons={seasons}>
+        <NavPendingProvider>
+          <AppShell />
+          <AmbientBackground />
+          <main className="relative min-h-screen w-full px-4 pb-[calc(var(--bottom-nav-height)+1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(var(--mobile-top-height)+1rem)] md:ml-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))] md:px-8 md:pb-12 md:pt-8 lg:px-10">
+            <PendingMain>{children}</PendingMain>
+          </main>
+        </NavPendingProvider>
       </SeasonProvider>
     </UserProvider>
   );

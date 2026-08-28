@@ -1,11 +1,4 @@
-function Bone({ className = "" }: { className?: string }) {
-  return (
-    <div
-      className={`animate-pulse rounded-md bg-[var(--surface-faint)] ${className}`}
-      aria-hidden
-    />
-  );
-}
+import Bone from "@/components/common/Bone";
 
 /** Layout-faithful placeholder for match details while the RSC loads. */
 export default function MatchDetailsLoading() {
