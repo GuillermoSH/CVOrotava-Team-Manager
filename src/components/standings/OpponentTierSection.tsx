@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -16,12 +18,19 @@ import {
   faSeedling,
   faTriangleExclamation,
   faSkullCrossbones,
+  faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import AliasResolver, {
   type StandingOption,
   type UnmatchedRow,
 } from "./AliasResolver";
+import type { LeagueStandingRow } from "./LeagueStandingsModal";
+
+const LeagueStandingsModal = dynamic(
+  () => import("./LeagueStandingsModal"),
+  { ssr: false }
+);
 
 type Tier = "top" | "mid" | "bottom";
 
@@ -105,15 +114,19 @@ function formatDate(raw: string | null | undefined): string {
 }
 
 export default function OpponentTierSection({ season, gender, isAdmin }: Props) {
+  const router = useRouter();
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [candidates, setCandidates] = useState<StandingOption[]>([]);
+  const [standingsRows, setStandingsRows] = useState<LeagueStandingRow[]>([]);
   const [showDetail, setShowDetail] = useState(false);
+  const [standingsOpen, setStandingsOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!season || !gender) {
       setData(null);
       setCandidates([]);
+      setStandingsRows([]);
       setLoading(false);
       return;
     }
@@ -125,11 +138,8 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
       ]);
       const tierJson = (await tierRes.json()) as ApiResponse;
       const stJson = await stRes.json();
-      const rows: {
-        normalized_name: string;
-        team_name: string;
-        is_our_team: boolean;
-      }[] = stJson.data ?? [];
+      const rows: LeagueStandingRow[] = stJson.data ?? [];
+      setStandingsRows(rows);
       setCandidates(
         rows
           .filter((r) => !r.is_our_team)
@@ -235,14 +245,23 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
             pts LIGA
           </p>
         </div>
-        {isAdmin && (
-          <Link
-            href="/league-standings/upload"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setStandingsOpen(true)}
+            className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
           >
-            <FontAwesomeIcon icon={faTableList} /> Re-subir
-          </Link>
-        )}
+            <FontAwesomeIcon icon={faTableList} /> Ver clasificación
+          </button>
+          {isAdmin && (
+            <Link
+              href="/league-standings/upload"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
+            >
+              <FontAwesomeIcon icon={faUpload} /> Re-subir
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 border-b border-[var(--glass-border)] pb-8 sm:grid-cols-3 sm:gap-8">
@@ -394,17 +413,30 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
               {data.per_opponent.map((p) => {
                 const win = p.our_sets > p.their_sets;
                 const lost = p.our_sets < p.their_sets;
+                const opponentName = p.team_name ?? p.opponent_raw;
+                const matchHref = `/matches/${p.match_id}`;
+                const rowLabel = `Ver partido del ${formatDate(p.date)} vs ${opponentName}, resultado ${p.our_sets}–${p.their_sets}`;
                 return (
                   <tr
                     key={p.match_id}
-                    className="border-t border-[var(--glass-border)]"
+                    role="link"
+                    tabIndex={0}
+                    aria-label={rowLabel}
+                    onClick={() => router.push(matchHref)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        router.push(matchHref);
+                      }
+                    }}
+                    className="group cursor-pointer border-t border-[var(--glass-border)] transition-colors hover:bg-[var(--glass-surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--accent)]"
                   >
                     <td className="px-2 py-1.5 text-xs text-[var(--text-muted)]">
                       {formatDate(p.date)}
                     </td>
                     <td className="px-2 py-1.5">
-                      <div className="flex items-center gap-2">
-                        <span>{p.team_name ?? p.opponent_raw}</span>
+                      <div className="flex items-center gap-2 group-hover:text-[var(--accent)]">
+                        <span>{opponentName}</span>
                         {p.resolved_via === "alias" && (
                           <span className="text-[10px] font-semibold text-[var(--color-warning)]">
                             alias
@@ -415,6 +447,10 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
                             sin clasificar
                           </span>
                         )}
+                        <FontAwesomeIcon
+                          icon={faArrowRight}
+                          className="ml-auto shrink-0 text-[0.6rem] opacity-0 transition-opacity group-hover:opacity-100"
+                        />
                       </div>
                     </td>
                     <td className="px-2 py-1.5 text-right tabular-nums">
@@ -451,6 +487,15 @@ export default function OpponentTierSection({ season, gender, isAdmin }: Props) 
           />
         </div>
       )}
+
+      <LeagueStandingsModal
+        isOpen={standingsOpen}
+        onClose={() => setStandingsOpen(false)}
+        season={data.season}
+        gender={data.gender as "male" | "female"}
+        rows={standingsRows}
+        ourPosition={ourPosition}
+      />
     </section>
   );
 }
@@ -535,17 +580,25 @@ function HighlightBlock({
         {title}
       </p>
       {row ? (
-        <>
-          <p className="mt-1.5 text-base font-semibold text-[var(--text-primary)]">
+        <Link
+          href={`/matches/${row.match_id}`}
+          className="group mt-1.5 block rounded-lg transition-colors hover:bg-[var(--glass-surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] -mx-1 px-1 py-0.5"
+          aria-label={`Ver partido vs ${row.team_name ?? row.opponent_raw}, ${row.our_sets}–${row.their_sets}`}
+        >
+          <p className="text-base font-semibold text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent)]">
             {row.team_name ?? row.opponent_raw}{" "}
             <span className="text-xs font-normal text-[var(--text-muted)]">
               · pos #{row.position}
             </span>
+            <FontAwesomeIcon
+              icon={faArrowRight}
+              className="ml-1.5 text-[0.6rem] opacity-0 transition-opacity group-hover:opacity-100"
+            />
           </p>
           <p className="mt-0.5 text-xs text-[var(--text-muted)]">
             {row.our_sets}–{row.their_sets} · {row.league_points_earned} pts LIGA
           </p>
-        </>
+        </Link>
       ) : (
         <p className="mt-1.5 text-xs text-[var(--text-muted)]">{empty}</p>
       )}

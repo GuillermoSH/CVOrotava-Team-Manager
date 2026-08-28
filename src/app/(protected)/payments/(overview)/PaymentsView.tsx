@@ -163,7 +163,7 @@ export default function PaymentsView({
   });
 
   const [allUsers, setAllUsers] = useState<{ id: string; name: string }[]>([]);
-  const [usersLoading, setUsersLoading] = useState(true);
+  const [usersLoading, setUsersLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [adminSortField, setAdminSortField] =
     useState<AdminSortField>("name");
@@ -208,7 +208,8 @@ export default function PaymentsView({
 
   useEffect(() => {
     async function fetchAllUsers() {
-      if (!user?.isAdmin) return;
+      if (!isModalOpen || !user?.isAdmin || allUsers.length > 0) return;
+      setUsersLoading(true);
       try {
         const res = await fetch("/api/users");
         if (res.ok) {
@@ -227,7 +228,7 @@ export default function PaymentsView({
       }
     }
     fetchAllUsers();
-  }, [user]);
+  }, [isModalOpen, user?.isAdmin, allUsers.length]);
 
   const totalPaid = payments
     .filter((p) => p.status === "paid")

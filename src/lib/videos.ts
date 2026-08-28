@@ -1,15 +1,16 @@
+import type { VideoType } from "@/lib/videos/constants";
+
 export async function fetchVideos(
-  category: "match" | "training",
-  filters: { season?: string; competition_type?: string; gender?: string } = {},
+  video_type: VideoType,
+  filters: { season?: string; gender?: string } = {},
   page = 1,
   limit = 12
 ) {
   const params = new URLSearchParams({
-    category,
+    video_type,
     page: page.toString(),
     limit: limit.toString(),
     ...(filters.season ? { season: filters.season } : {}),
-    ...(filters.competition_type ? { competition_type: filters.competition_type } : {}),
     ...(filters.gender ? { gender: filters.gender } : {}),
   });
 

@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { z } from "zod";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import {
+  listVideos,
+  VIDEO_LIST_COLUMNS,
+} from "@/lib/videos/listVideos";
+import { VIDEO_LIST_WITH_MATCH, VIDEO_TYPES } from "@/lib/videos/constants";
+import { linkVideoToMatch } from "@/lib/videos/syncVideoForMatch";
 
-/** Lo que usa `VideoCard` / grid; evita traer filas anchas innecesarias. */
-const VIDEO_LIST_COLUMNS =
-  "id, url, created_at, category, season, competition_type, gender";
+const videoBodySchema = z.object({
+  url: z.string().url(),
+  video_type: z.enum(VIDEO_TYPES),
+  season: z.string().min(4),
+  gender: z.enum(["male", "female"]),
+  match_id: z.string().uuid().nullable().optional(),
+});
 
 export async function GET(req: Request) {
   const supabase = await supabaseServer();
@@ -15,33 +26,35 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
 
-  const category = searchParams.get("category") as "match" | "training";
+  const video_type = searchParams.get("video_type");
   const season = searchParams.get("season");
-  const competition_type = searchParams.get("competition_type");
   const gender = searchParams.get("gender");
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "12", 10);
+  const withoutMatch = searchParams.get("withoutMatch") === "true";
+  const forMatchId = searchParams.get("forMatchId");
+  const matchVideosOnly = searchParams.get("matchVideosOnly") === "true";
 
-  let query = supabaseAdmin.from("videos").select(VIDEO_LIST_COLUMNS);
-
-  if (season) query = query.eq("season", season);
-  if (competition_type) query = query.eq("competition_type", competition_type);
-  if (gender) query = query.eq("gender", gender);
-  if (category) query = query.eq("category", category);
-
-  const from = (page - 1) * limit;
-  const to = from + limit - 1;
-  query = query.range(from, to).order("created_at", { ascending: false });
-  if (!limit && !season && !gender) query = query.limit(20);
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error("Error fetching videos:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    const data = await listVideos({
+      season,
+      video_type:
+        video_type && VIDEO_TYPES.includes(video_type as (typeof VIDEO_TYPES)[number])
+          ? (video_type as (typeof VIDEO_TYPES)[number])
+          : null,
+      gender,
+      page,
+      limit: withoutMatch || matchVideosOnly ? 200 : limit,
+      withoutMatch,
+      forMatchId,
+      matchVideosOnly,
+    });
+    return NextResponse.json(data);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error fetching videos:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  return NextResponse.json(data || []);
 }
 
 export async function POST(req: Request) {
@@ -51,28 +64,49 @@ export async function POST(req: Request) {
     if ("response" in auth) return auth.response;
 
     const body = await req.json();
-    const { url, category, season, competition_type, gender } = body;
+    const parsed = videoBodySchema.safeParse(body);
 
-    if (!url || !category) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
+
+    const { match_id, ...videoData } = parsed.data;
 
     const { data, error } = await supabaseAdmin
       .from("videos")
-      .upsert(
-        [{ url, category, season, competition_type, gender }],
-        { onConflict: "url" }
-      )
-      .select(VIDEO_LIST_COLUMNS);
+      .upsert([{ ...videoData, match_id: null }], { onConflict: "url" })
+      .select(VIDEO_LIST_COLUMNS)
+      .single();
 
     if (error) {
       console.error("Error inserting video:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const newVideo = data[0];
+    if (match_id) {
+      const linkResult = await linkVideoToMatch({
+        videoId: data.id,
+        matchId: match_id,
+      });
+      if (linkResult.error) {
+        return NextResponse.json({ error: linkResult.error }, { status: 400 });
+      }
+    }
 
-    return NextResponse.json({ success: true, data: newVideo }, { status: 201 });
+    const { data: saved, error: fetchError } = await supabaseAdmin
+      .from("videos")
+      .select(VIDEO_LIST_WITH_MATCH)
+      .eq("id", data.id)
+      .single();
+
+    if (fetchError || !saved) {
+      return NextResponse.json({ success: true, data }, { status: 201 });
+    }
+
+    return NextResponse.json({ success: true, data: saved }, { status: 201 });
   } catch (err) {
     console.error("POST /api/videos error:", err);
     const errorMessage = err instanceof Error ? err.message : "Unknown error";

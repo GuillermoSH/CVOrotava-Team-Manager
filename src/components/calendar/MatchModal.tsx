@@ -8,6 +8,7 @@ import { faTimes, faSpinner, faTrash, faPlus, faMinus } from "@fortawesome/free-
 import { FormInput, FormDate, FormTime, FormSelect } from "@/components/ui/forms";
 import { getCurrentSeason, getSeasonSelectOptions } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
+import VideoPicker from "@/components/matches/VideoPicker";
 
 const matchSchema = z.object({
   id: z.string().optional(),
@@ -51,9 +52,10 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
   const [venues, setVenues] = useState<VenueOption[]>([]);
   const [loadingVenues, setLoadingVenues] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedVideoId, setSelectedVideoId] = useState("");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const { register, control, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<MatchFormValues>({
+  const { register, control, handleSubmit, watch, setValue, formState: { errors, isSubmitting }, reset } = useForm<MatchFormValues>({
     resolver: zodResolver(matchSchema),
     defaultValues: initialData || {
       date: "",
@@ -68,6 +70,9 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
       match_sets: [],
     },
   });
+
+  const season = watch("season");
+  const gender = watch("gender");
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -114,6 +119,31 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
     }
     fetchVenues();
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !initialData?.id || !season || !gender) {
+      setSelectedVideoId("");
+      return;
+    }
+
+    const params = new URLSearchParams({
+      season,
+      gender,
+      matchVideosOnly: "true",
+      withoutMatch: "true",
+      forMatchId: initialData.id,
+    });
+
+    fetch(`/api/videos?${params}`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((videos: Array<{ id: string; match_id: string | null; url: string }>) => {
+        const linked =
+          videos.find((v) => v.match_id === initialData.id) ??
+          videos.find((v) => v.url === initialData.video_url);
+        setSelectedVideoId(linked?.id ?? "");
+      })
+      .catch(() => setSelectedVideoId(""));
+  }, [isOpen, initialData, season, gender]);
 
   const onSubmit = async (data: MatchFormValues) => {
     setMessage(null);
@@ -286,9 +316,19 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormInput label="URL del Video" name="video_url" register={register("video_url")} error={errors.video_url} placeholder="https://youtube.com/..." />
-                  <FormInput label="Notas Externas" name="notes" register={register("notes")} error={errors.notes} placeholder="Alguna lesión, retraso..." />
+                <div className="space-y-4">
+                  <VideoPicker
+                    season={season}
+                    gender={gender}
+                    value={selectedVideoId}
+                    forMatchId={initialData?.id}
+                    onChange={(videoId, url) => {
+                      setSelectedVideoId(videoId);
+                      setValue("video_url", url, { shouldDirty: true });
+                    }}
+                  />
+                  <FormInput label="URL del vídeo" name="video_url" register={register("video_url")} error={errors.video_url} placeholder="https://youtube.com/... o elige arriba" />
+                  <FormInput label="Notas externas" name="notes" register={register("notes")} error={errors.notes} placeholder="Alguna lesión, retraso..." />
                 </div>
 
                 <div className="mt-6 border-t border-[var(--glass-border)] pt-4">

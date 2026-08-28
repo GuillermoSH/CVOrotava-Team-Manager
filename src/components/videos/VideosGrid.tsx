@@ -10,18 +10,21 @@ import {
   groupVideos,
   type VideoGroupBy,
 } from "@/lib/videos/groupVideos";
+import type { VideoType } from "@/lib/videos/constants";
 
 type Filters = {
   season?: string;
-  competition_type?: string;
+  video_type?: VideoType;
   gender?: string;
-  category?: "match" | "training";
 };
 
 type VideoGridProps = {
   filters?: Filters;
   groupBy?: VideoGroupBy;
   isAdmin?: boolean;
+  initialVideos?: Video[];
+  initialFilters?: Filters;
+  initialLimit?: number;
   onEdit?: (video: Video) => void;
 };
 
@@ -86,9 +89,16 @@ export default function VideosGrid({
   filters,
   groupBy = "none",
   isAdmin,
+  initialVideos,
+  initialFilters,
+  initialLimit,
   onEdit,
 }: Readonly<VideoGridProps>) {
-  const { videos, loaderRef, loading, hasMore } = useInfiniteVideos(filters);
+  const { videos, loaderRef, loading, hasMore } = useInfiniteVideos(filters, {
+    initialVideos,
+    initialFilters,
+    initialLimit,
+  });
   const reduceMotion = useReducedMotion();
 
   const groups = useMemo(
@@ -138,7 +148,7 @@ export default function VideosGrid({
           No hay vídeos con estos filtros
         </p>
         <p className="mt-1 max-w-xs text-xs text-[var(--text-muted)]">
-          Prueba a cambiar temporada, categoría o género.
+          Prueba a cambiar temporada, tipo o género.
         </p>
       </div>
     );

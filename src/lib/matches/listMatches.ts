@@ -7,6 +7,9 @@ export type ListMatchesOpts = {
   order?: "asc" | "desc";
   limit?: number | null;
   hasResult?: boolean;
+  withoutVideo?: boolean;
+  forMatchId?: string | null;
+  opponent?: string | null;
 };
 
 const MATCH_LIST_SELECT =
@@ -18,7 +21,10 @@ const listMatchesCached = cache(
     season: string,
     order: string,
     limit: number,
-    hasResult: string
+    hasResult: string,
+    withoutVideo: string,
+    forMatchId: string,
+    opponent: string
   ) => {
     const ascending = order === "asc";
 
@@ -34,6 +40,18 @@ const listMatchesCached = cache(
     if (hasResult === "1")
       query = query.not("result", "is", null).neq("result", "");
 
+    if (withoutVideo === "1") {
+      if (forMatchId) {
+        query = query.or(`video_url.is.null,id.eq.${forMatchId}`);
+      } else {
+        query = query.is("video_url", null);
+      }
+    }
+
+    if (opponent) {
+      query = query.ilike("opponent", `%${opponent}%`);
+    }
+
     const { data, error } = await query;
     if (error) throw new Error(error.message);
     return data ?? [];
@@ -46,6 +64,9 @@ export async function listMatches(opts: ListMatchesOpts = {}) {
     opts.season ?? "",
     opts.order ?? "desc",
     opts.limit ?? 0,
-    opts.hasResult ? "1" : "0"
+    opts.hasResult ? "1" : "0",
+    opts.withoutVideo ? "1" : "0",
+    opts.forMatchId ?? "",
+    opts.opponent ?? ""
   );
 }

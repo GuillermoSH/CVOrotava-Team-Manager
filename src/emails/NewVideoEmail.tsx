@@ -3,20 +3,26 @@ import { Text } from "@react-email/text";
 import { Button } from "@react-email/button";
 import { Container } from "@react-email/container";
 import { Heading } from "@react-email/heading";
+import {
+  VIDEO_TYPE_LABELS,
+  type VideoType,
+} from "@/lib/videos/constants";
 
 type NewVideoEmailProps = {
-  category: string;
+  video_type: VideoType;
   url: string;
   gender: string;
   season?: string;
 };
 
 export default function NewVideoEmail({
-  category,
+  video_type,
   url,
   gender,
   season,
 }: Readonly<NewVideoEmailProps>) {
+  const typeLabel = VIDEO_TYPE_LABELS[video_type].toLowerCase();
+
   return (
     <Html>
       <Container
@@ -36,7 +42,7 @@ export default function NewVideoEmail({
 
         <Text style={{ fontSize: "16px", marginBottom: "12px" }}>
           Se ha subido un nuevo video de{" "}
-          <strong>{category === "match" ? "partido" : "entrenamiento"}</strong>{" "}
+          <strong>{typeLabel}</strong>{" "}
           para el Senior <strong>{gender === "male" ? "Masculino" : "Femenino"}</strong>
           {season ? ` (${season})` : ""}.
         </Text>

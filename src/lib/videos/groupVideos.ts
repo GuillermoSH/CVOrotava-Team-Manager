@@ -1,33 +1,25 @@
 import type { Video } from "@/components/videos/VideoCard";
+import {
+  VIDEO_TYPES,
+  VIDEO_TYPE_GROUP_LABELS,
+  type VideoType,
+} from "@/lib/videos/constants";
 
-export type VideoGroupBy = "none" | "category" | "month" | "competition";
+export type VideoGroupBy = "none" | "type" | "month";
 
 export const VIDEO_GROUP_OPTIONS: {
   value: VideoGroupBy;
   label: string;
 }[] = [
   { value: "none", label: "Sin grupo" },
-  { value: "category", label: "Tipo" },
+  { value: "type", label: "Tipo" },
   { value: "month", label: "Mes" },
-  { value: "competition", label: "Competición" },
 ];
 
 export type VideoGroup = {
   key: string;
   label: string;
   videos: Video[];
-};
-
-const CATEGORY_ORDER = ["match", "training"] as const;
-const CATEGORY_LABEL: Record<(typeof CATEGORY_ORDER)[number], string> = {
-  match: "Partidos",
-  training: "Entrenamientos",
-};
-
-const COMP_ORDER = ["league", "friendly"] as const;
-const COMP_LABEL: Record<(typeof COMP_ORDER)[number], string> = {
-  league: "Liga",
-  friendly: "Amistosos",
 };
 
 function monthKey(iso: string): string {
@@ -53,23 +45,14 @@ export function groupVideos(
     return [{ key: "all", label: "", videos }];
   }
 
-  if (groupBy === "category") {
-    return CATEGORY_ORDER.map((cat) => ({
-      key: cat,
-      label: CATEGORY_LABEL[cat],
-      videos: videos.filter((v) => v.category === cat),
+  if (groupBy === "type") {
+    return VIDEO_TYPES.map((type) => ({
+      key: type,
+      label: VIDEO_TYPE_GROUP_LABELS[type],
+      videos: videos.filter((v) => v.video_type === type),
     })).filter((g) => g.videos.length > 0);
   }
 
-  if (groupBy === "competition") {
-    return COMP_ORDER.map((comp) => ({
-      key: comp,
-      label: COMP_LABEL[comp],
-      videos: videos.filter((v) => v.competition_type === comp),
-    })).filter((g) => g.videos.length > 0);
-  }
-
-  // month
   const buckets = new Map<string, Video[]>();
   for (const v of videos) {
     const key = monthKey(v.created_at);
@@ -85,4 +68,13 @@ export function groupVideos(
       label: monthLabel(key),
       videos: vids,
     }));
+}
+
+/** Migrate stored group prefs from the old category/competition keys. */
+export function normalizeVideoGroupPref(value: string | null): VideoGroupBy {
+  if (value === "type" || value === "category" || value === "competition") {
+    return "type";
+  }
+  if (value === "month") return "month";
+  return "none";
 }

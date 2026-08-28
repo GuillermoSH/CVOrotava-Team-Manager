@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { ensureVideoFromMatchUrl } from "@/lib/ensureVideoFromMatchUrl";
+import { syncVideoForMatch } from "@/lib/videos/syncVideoForMatch";
 import { getMatchById } from "@/lib/matches/getMatchById";
 
 type MatchSetInput = { team_score: number; opponent_score: number };
@@ -86,7 +86,8 @@ export async function PUT(
       }
     }
 
-    await ensureVideoFromMatchUrl({
+    await syncVideoForMatch({
+      matchId: id,
       videoUrl: updatedMatch.video_url,
       season: updatedMatch.season,
       gender: updatedMatch.gender,

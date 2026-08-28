@@ -3,47 +3,85 @@
 import { useState, useEffect, useRef } from "react";
 
 import { Video } from "@/components/videos/VideoCard";
+import { DEFAULT_VIDEO_PAGE_SIZE } from "@/lib/videos/constants";
+import type { VideoType } from "@/lib/videos/constants";
 
 type Filters = {
   season?: string;
-  competition_type?: string;
+  video_type?: VideoType;
   gender?: string;
-  category?: "match" | "training";
 };
 
-export function useInfiniteVideos(filters?: Filters) {
-  const [videos, setVideos] = useState<Video[]>([]);
+type UseInfiniteVideosOpts = {
+  initialVideos?: Video[];
+  initialFilters?: Filters;
+  initialLimit?: number;
+};
+
+function calcPageLimit(): number {
+  if (typeof window === "undefined") return DEFAULT_VIDEO_PAGE_SIZE;
+  if (window.innerWidth < 640) return 4;
+  if (window.innerWidth < 1024) return 8;
+  return 12;
+}
+
+function filtersMatch(a?: Filters, b?: Filters): boolean {
+  return (
+    (a?.season ?? "") === (b?.season ?? "") &&
+    (a?.video_type ?? "") === (b?.video_type ?? "") &&
+    (a?.gender ?? "") === (b?.gender ?? "")
+  );
+}
+
+export function useInfiniteVideos(
+  filters?: Filters,
+  opts?: UseInfiniteVideosOpts
+) {
+  const serverLimit = opts?.initialLimit ?? DEFAULT_VIDEO_PAGE_SIZE;
+  const [limit, setLimit] = useState(calcPageLimit);
+
+  const canSeed =
+    Boolean(opts?.initialVideos?.length) &&
+    filtersMatch(filters, opts?.initialFilters) &&
+    limit === serverLimit;
+
+  const [videos, setVideos] = useState<Video[]>(
+    canSeed ? opts!.initialVideos! : []
+  );
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(
+    canSeed ? opts!.initialVideos!.length >= serverLimit : true
+  );
   const [loading, setLoading] = useState(false);
   const loaderRef = useRef<HTMLDivElement | null>(null);
+  const skipFirstFetchRef = useRef(canSeed);
+  const mountedRef = useRef(false);
 
-  const [limit, setLimit] = useState(12);
-
-  const { season, competition_type, gender, category } = filters || {};
+  const { season, video_type, gender } = filters || {};
 
   useEffect(() => {
-    const calcLimit = () => {
-      if (window.innerWidth < 640) return 4;
-      if (window.innerWidth < 1024) return 8;
-      return 12;
-    };
-
-    const handleResize = () => setLimit(calcLimit());
-
-    setLimit(calcLimit());
+    const handleResize = () => setLimit(calcPageLimit());
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
-    // Cuando cambian los filtros o el limit, reiniciamos la paginación
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
     setVideos([]);
     setPage(1);
     setHasMore(true);
-  }, [season, competition_type, gender, category, limit]);
+    skipFirstFetchRef.current = false;
+  }, [season, video_type, gender]);
 
   useEffect(() => {
+    if (skipFirstFetchRef.current && page === 1) {
+      skipFirstFetchRef.current = false;
+      return;
+    }
+
     const fetchVideos = async () => {
       if (!hasMore) return;
 
@@ -53,9 +91,8 @@ export function useInfiniteVideos(filters?: Filters) {
         page: page.toString(),
         limit: limit.toString(),
         ...(season && { season }),
-        ...(competition_type && { competition_type }),
+        ...(video_type && { video_type }),
         ...(gender && { gender }),
-        ...(category && { category }),
       });
 
       try {
@@ -63,14 +100,18 @@ export function useInfiniteVideos(filters?: Filters) {
         if (!res.ok) throw new Error("Error al obtener videos");
         const data: Video[] = await res.json();
 
-        // Evitar duplicados: si page === 1, reemplazamos; si no, agregamos
         setVideos((prev) =>
-          page === 1 ? data : [...prev.filter(v => !data.some(d => d.id === v.id)), ...data]
+          page === 1
+            ? data
+            : [
+                ...prev.filter((v) => !data.some((d) => d.id === v.id)),
+                ...data,
+              ]
         );
 
         if (data.length < limit) setHasMore(false);
       } catch (error) {
-        console.error("❌ Error cargando videos:", error);
+        console.error("Error cargando videos:", error);
         setHasMore(false);
       } finally {
         setLoading(false);
@@ -78,7 +119,7 @@ export function useInfiniteVideos(filters?: Filters) {
     };
 
     fetchVideos();
-  }, [page, limit, season, competition_type, gender, category, hasMore]);
+  }, [page, limit, season, video_type, gender, hasMore]);
 
   useEffect(() => {
     if (!hasMore || loading) return;
@@ -102,4 +143,3 @@ export function useInfiniteVideos(filters?: Filters) {
 
   return { videos, loaderRef, loading, hasMore };
 }
-

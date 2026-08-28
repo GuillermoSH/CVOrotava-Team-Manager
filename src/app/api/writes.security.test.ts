@@ -102,7 +102,7 @@ describe("club writes as a player must not touch supabaseAdmin", () => {
         },
         body: JSON.stringify({
           url: "https://youtube.com/watch?v=dQw4w9wgGcQ",
-          category: "match",
+          video_type: "league_match",
         }),
       })
     );

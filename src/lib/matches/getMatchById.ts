@@ -51,6 +51,21 @@ export type MatchDetailRow = {
   }> | null;
 };
 
+async function resolveVideoUrlFromLink(
+  matchId: string,
+  currentUrl: string | null
+): Promise<string | null> {
+  if (currentUrl) return currentUrl;
+
+  const { data: video } = await supabaseAdmin
+    .from("videos")
+    .select("url")
+    .eq("match_id", matchId)
+    .maybeSingle();
+
+  return video?.url ?? null;
+}
+
 /** Load a match by id (service role). Returns null when missing. */
 export const getMatchById = cache(
   async (id: string): Promise<MatchDetailRow | null> => {
@@ -65,6 +80,11 @@ export const getMatchById = cache(
       throw new Error(error.message);
     }
 
-    return (data as MatchDetailRow | null) ?? null;
+    if (!data) return null;
+
+    const row = data as MatchDetailRow;
+    const video_url = await resolveVideoUrlFromLink(row.id, row.video_url);
+
+    return { ...row, video_url };
   }
 );

@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { ensureVideoFromMatchUrl } from "@/lib/ensureVideoFromMatchUrl";
+import { syncVideoForMatch } from "@/lib/videos/syncVideoForMatch";
 import { listMatches } from "@/lib/matches/listMatches";
 import { z } from "zod";
 
@@ -39,6 +39,9 @@ export async function GET(req: Request) {
   const season = searchParams.get("season");
   const orderParam = searchParams.get("order") || "desc";
   const hasResult = searchParams.get("hasResult") === "true";
+  const withoutVideo = searchParams.get("withoutVideo") === "true";
+  const forMatchId = searchParams.get("forMatchId");
+  const opponent = searchParams.get("opponent");
 
   try {
     const data = await listMatches({
@@ -47,6 +50,9 @@ export async function GET(req: Request) {
       order: orderParam === "asc" ? "asc" : "desc",
       limit,
       hasResult,
+      withoutVideo,
+      forMatchId,
+      opponent,
     });
 
     return NextResponse.json(data);
@@ -114,7 +120,8 @@ export async function POST(req: Request) {
             }
         }
 
-        await ensureVideoFromMatchUrl({
+        await syncVideoForMatch({
+            matchId: data.id,
             videoUrl: data.video_url,
             season: data.season,
             gender: data.gender,

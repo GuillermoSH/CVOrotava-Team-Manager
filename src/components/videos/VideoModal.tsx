@@ -10,6 +10,8 @@ import { faTimes, faSpinner, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FormInput, FormSelect } from "@/components/ui/forms";
 import { getCurrentSeason, getSeasonSelectOptions } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
+import { VIDEO_TYPES, VIDEO_TYPE_OPTIONS, MATCH_VIDEO_TYPES } from "@/lib/videos/constants";
+import MatchPicker from "@/components/videos/MatchPicker";
 
 const videoSchema = z.object({
   id: z.string().optional(),
@@ -17,16 +19,14 @@ const videoSchema = z.object({
     .string()
     .url("Debe ser una URL válida")
     .min(1, "La URL es obligatoria"),
-  category: z.enum(["match", "training"], {
-    message: "Selecciona una categoría",
+  video_type: z.enum(VIDEO_TYPES, {
+    message: "Selecciona el tipo de vídeo",
   }),
   season: z.string().min(4, "Ejemplo: 2025/2026"),
-  competition_type: z.enum(["league", "friendly"], {
-    message: "Selecciona el tipo de competición",
-  }),
   gender: z.enum(["male", "female"], {
     message: "Selecciona el género",
   }),
+  match_id: z.string().optional(),
 });
 
 export type VideoFormValues = z.infer<typeof videoSchema>;
@@ -56,18 +56,32 @@ export default function VideoModal({
     register,
     control,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<VideoFormValues>({
     resolver: zodResolver(videoSchema),
     defaultValues: initialData || {
       url: "",
-      category: "match",
+      video_type: "league_match",
       season: getCurrentSeason(),
-      competition_type: "league",
       gender: user?.gender ?? "male",
+      match_id: "",
     },
   });
+
+  const videoType = watch("video_type");
+  const season = watch("season");
+  const gender = watch("gender");
+  const matchId = watch("match_id") ?? "";
+  const showMatchPicker = MATCH_VIDEO_TYPES.includes(videoType);
+
+  useEffect(() => {
+    if (!showMatchPicker) {
+      setValue("match_id", "");
+    }
+  }, [showMatchPicker, setValue]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -76,10 +90,10 @@ export default function VideoModal({
     } else {
       reset({
         url: "",
-        category: "match",
+        video_type: "league_match",
         season: getCurrentSeason(),
-        competition_type: "league",
         gender: user?.gender ?? "male",
+        match_id: "",
       });
     }
     setMessage(null);
@@ -105,7 +119,10 @@ export default function VideoModal({
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          match_id: data.match_id?.trim() ? data.match_id : null,
+        }),
       });
 
       const responseData = await res.json();
@@ -222,14 +239,11 @@ export default function VideoModal({
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormSelect
-                    label="Categoría *"
-                    name="category"
+                    label="Tipo *"
+                    name="video_type"
                     control={control}
-                    options={[
-                      { value: "match", label: "Partido" },
-                      { value: "training", label: "Entrenamiento" },
-                    ]}
-                    error={errors.category}
+                    options={VIDEO_TYPE_OPTIONS}
+                    error={errors.video_type}
                   />
 
                   <FormSelect
@@ -241,28 +255,28 @@ export default function VideoModal({
                   />
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <FormSelect
-                    label="Competición *"
-                    name="competition_type"
-                    control={control}
-                    options={[
-                      { value: "league", label: "Liga" },
-                      { value: "friendly", label: "Amistoso" },
-                    ]}
-                    error={errors.competition_type}
+                <FormSelect
+                  label="Género *"
+                  name="gender"
+                  control={control}
+                  options={[
+                    { value: "male", label: "Masculino" },
+                    { value: "female", label: "Femenino" },
+                  ]}
+                  error={errors.gender}
+                />
+
+                {showMatchPicker && (
+                  <MatchPicker
+                    season={season}
+                    gender={gender}
+                    value={matchId}
+                    forMatchId={initialData?.match_id}
+                    onChange={(id) =>
+                      setValue("match_id", id, { shouldValidate: true })
+                    }
                   />
-                  <FormSelect
-                    label="Género *"
-                    name="gender"
-                    control={control}
-                    options={[
-                      { value: "male", label: "Masculino" },
-                      { value: "female", label: "Femenino" },
-                    ]}
-                    error={errors.gender}
-                  />
-                </div>
+                )}
 
                 {message && (
                   <div
