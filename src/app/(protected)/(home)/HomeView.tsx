@@ -25,8 +25,6 @@ export type HomeMatch = {
   venues?: { venue_name: string } | null;
 };
 
-type Match = HomeMatch;
-
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 export default function HomeView({

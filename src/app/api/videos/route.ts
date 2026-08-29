@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
@@ -10,6 +10,7 @@ import {
 } from "@/lib/videos/listVideos";
 import { VIDEO_LIST_WITH_MATCH, VIDEO_TYPES } from "@/lib/videos/constants";
 import { linkVideoToMatch } from "@/lib/videos/syncVideoForMatch";
+import { notifyNewVideo } from "@/lib/videos/notifyNewVideo";
 
 const videoBodySchema = z.object({
   url: z.string().url(),
@@ -17,6 +18,7 @@ const videoBodySchema = z.object({
   season: z.string().min(4),
   gender: z.enum(["male", "female"]),
   match_id: z.string().uuid().nullable().optional(),
+  notify_team: z.boolean().optional().default(true),
 });
 
 export async function GET(req: Request) {
@@ -73,7 +75,14 @@ export async function POST(req: Request) {
       );
     }
 
-    const { match_id, ...videoData } = parsed.data;
+    const { match_id, notify_team, ...videoData } = parsed.data;
+
+    const { data: existing } = await supabaseAdmin
+      .from("videos")
+      .select("id")
+      .eq("url", videoData.url)
+      .maybeSingle();
+    const isNew = !existing;
 
     const { data, error } = await supabaseAdmin
       .from("videos")
@@ -94,6 +103,19 @@ export async function POST(req: Request) {
       if (linkResult.error) {
         return NextResponse.json({ error: linkResult.error }, { status: 400 });
       }
+    }
+
+    if (isNew && notify_team) {
+      after(() =>
+        notifyNewVideo({
+          video_type: videoData.video_type,
+          url: videoData.url,
+          gender: videoData.gender,
+          season: videoData.season,
+          matchId: match_id,
+          excludeEmail: auth.user.email,
+        })
+      );
     }
 
     const { data: saved, error: fetchError } = await supabaseAdmin

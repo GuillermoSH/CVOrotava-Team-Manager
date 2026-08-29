@@ -29,7 +29,7 @@ type Match = {
   season: string;
   gender: "male" | "female";
   result: string | null;
-  venues?: { location_type: string };
+  venues?: { location_type: string } | null;
   opponent: string;
 };
 

@@ -2,7 +2,6 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import {
   DEFAULT_VIDEO_PAGE_SIZE,
   MATCH_VIDEO_TYPES,
-  VIDEO_LIST_COLUMNS,
   VIDEO_LIST_WITH_MATCH,
   type ListVideosOpts,
   type VideoListItem,

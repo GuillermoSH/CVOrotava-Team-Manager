@@ -1,70 +1,230 @@
-import { Html } from "@react-email/html";
-import { Text } from "@react-email/text";
-import { Button } from "@react-email/button";
-import { Container } from "@react-email/container";
-import { Heading } from "@react-email/heading";
-import {
-  VIDEO_TYPE_LABELS,
-  type VideoType,
-} from "@/lib/videos/constants";
+import React from "react";
+import { Button, Link, Section, Text } from "@react-email/components";
+import BrandLayout from "@/emails/BrandLayout";
+import { emailBrand, emailFont } from "@/emails/brand";
+import type { NewVideoEmailCopy } from "@/lib/videos/videoEmailCopy";
 
 type NewVideoEmailProps = {
-  video_type: VideoType;
+  copy: NewVideoEmailCopy;
   url: string;
-  gender: string;
-  season?: string;
+  appUrl?: string;
+  matchUrl?: string;
+  logoSrc?: string;
+  footer?: string;
 };
 
 export default function NewVideoEmail({
-  video_type,
+  copy,
   url,
-  gender,
-  season,
+  appUrl,
+  matchUrl,
+  logoSrc,
+  footer,
 }: Readonly<NewVideoEmailProps>) {
-  const typeLabel = VIDEO_TYPE_LABELS[video_type].toLowerCase();
+  const recap = copy.recap;
+  const scoreColor =
+    recap?.outcome === "win"
+      ? emailBrand.accent
+      : recap?.outcome === "loss"
+        ? emailBrand.ink
+        : emailBrand.ink;
 
   return (
-    <Html>
-      <Container
+    <BrandLayout preview={copy.preview} logoSrc={logoSrc} footer={footer}>
+      <Text
         style={{
-          backgroundColor: "#f7f7f7",
-          padding: "32px",
-          borderRadius: "12px",
-          fontFamily: "Arial, sans-serif",
-          color: "#222",
-          maxWidth: "600px",
-          margin: "0 auto",
+          color: emailBrand.ink,
+          fontSize: "26px",
+          fontWeight: 700,
+          lineHeight: "1.2",
+          letterSpacing: "-0.02em",
+          margin: "0 0 8px",
+          fontFamily: emailFont,
         }}
       >
-        <Heading as="h2" style={{ color: "#E71F12" }}>
-          Nuevo video disponible
-        </Heading>
+        {copy.headline}
+      </Text>
+      <Text
+        style={{
+          color: emailBrand.ink,
+          fontSize: "15px",
+          fontWeight: 700,
+          lineHeight: "1.4",
+          margin: recap ? "0 0 16px" : "0 0 12px",
+          fontFamily: emailFont,
+        }}
+      >
+        {copy.kicker}
+      </Text>
 
-        <Text style={{ fontSize: "16px", marginBottom: "12px" }}>
-          Se ha subido un nuevo video de{" "}
-          <strong>{typeLabel}</strong>{" "}
-          para el Senior <strong>{gender === "male" ? "Masculino" : "Femenino"}</strong>
-          {season ? ` (${season})` : ""}.
-        </Text>
-
-        <Button
-          href={url}
+      {recap ? (
+        <Section
           style={{
-            backgroundColor: "#E71F12",
-            color: "white",
-            padding: "12px 24px",
-            borderRadius: "8px",
-            textDecoration: "none",
-            fontWeight: "bold",
+            backgroundColor: "#efece7",
+            borderRadius: "16px",
+            padding: "16px 18px",
+            margin: "0 0 16px",
           }}
         >
-          Ver video
-        </Button>
+          <Text
+            style={{
+              color: emailBrand.inkSoft,
+              fontSize: "12px",
+              fontWeight: 700,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              margin: "0 0 4px",
+              fontFamily: emailFont,
+            }}
+          >
+            vs
+          </Text>
+          <Text
+            style={{
+              color: emailBrand.ink,
+              fontSize: "20px",
+              fontWeight: 700,
+              lineHeight: "1.25",
+              margin: "0 0 8px",
+              fontFamily: emailFont,
+            }}
+          >
+            {recap.opponent}
+          </Text>
+          {recap.score ? (
+            <Text
+              style={{
+                color: scoreColor,
+                fontSize: "32px",
+                fontWeight: 700,
+                letterSpacing: "-0.04em",
+                lineHeight: "1",
+                margin: "0 0 6px",
+                fontFamily: emailFont,
+              }}
+            >
+              {recap.score}
+            </Text>
+          ) : null}
+          {recap.outcomeLabel ? (
+            <Text
+              style={{
+                color: emailBrand.ink,
+                fontSize: "14px",
+                fontWeight: 700,
+                margin: "0 0 4px",
+                fontFamily: emailFont,
+              }}
+            >
+              {recap.outcomeLabel}
+            </Text>
+          ) : null}
+          {recap.when ? (
+            <Text
+              style={{
+                color: emailBrand.inkSoft,
+                fontSize: "13px",
+                lineHeight: "1.4",
+                margin: recap.sets ? "0 0 4px" : "0",
+                fontFamily: emailFont,
+              }}
+            >
+              {recap.when}
+            </Text>
+          ) : null}
+          {recap.sets ? (
+            <Text
+              style={{
+                color: emailBrand.inkSoft,
+                fontSize: "13px",
+                lineHeight: "1.4",
+                margin: "0",
+                fontFamily: emailFont,
+              }}
+            >
+              {recap.sets}
+            </Text>
+          ) : null}
+        </Section>
+      ) : null}
 
-        <Text style={{ marginTop: "24px", fontSize: "12px", color: "#666" }}>
-          Este es un mensaje automático del club enviado el {new Date().toLocaleString('es-ES')}. Por favor, no respondas a este correo.
+      <Text
+        style={{
+          color: emailBrand.inkSoft,
+          fontSize: "15px",
+          lineHeight: "1.45",
+          margin: "0 0 8px",
+          fontFamily: emailFont,
+        }}
+      >
+        {copy.body}
+      </Text>
+
+      <Section style={{ textAlign: "center", margin: "20px 0 12px" }}>
+        <div
+          style={{
+            width: "40px",
+            height: "4px",
+            backgroundColor: emailBrand.accent,
+            borderRadius: "9999px",
+            margin: "0 auto",
+          }}
+        />
+      </Section>
+
+      <Button
+        href={url}
+        style={{
+          backgroundColor: emailBrand.night,
+          color: emailBrand.onNight,
+          display: "block",
+          textAlign: "center",
+          padding: "14px 20px",
+          textDecoration: "none",
+          fontWeight: 700,
+          fontSize: "15px",
+          fontFamily: emailFont,
+          borderRadius: emailBrand.radiusButton,
+        }}
+      >
+        Ver el vídeo
+      </Button>
+
+      {matchUrl ? (
+        <Text
+          style={{
+            fontSize: "14px",
+            margin: "14px 0 0",
+            fontFamily: emailFont,
+            textAlign: "center",
+          }}
+        >
+          <Link
+            href={matchUrl}
+            style={{ color: emailBrand.accent, fontWeight: 700 }}
+          >
+            Ficha del partido
+          </Link>
         </Text>
-      </Container>
-    </Html>
+      ) : null}
+
+      {appUrl ? (
+        <Text
+          style={{
+            fontSize: "14px",
+            margin: matchUrl ? "8px 0 0" : "16px 0 0",
+            fontFamily: emailFont,
+            textAlign: "center",
+          }}
+        >
+          <Link
+            href={appUrl}
+            style={{ color: emailBrand.accent, fontWeight: 700 }}
+          >
+            Abrir en Team Manager
+          </Link>
+        </Text>
+      ) : null}
+    </BrandLayout>
   );
 }

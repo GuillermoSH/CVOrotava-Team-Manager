@@ -9,6 +9,7 @@ import { useUser } from "@/contexts/UserContext";
 import { useNavPending } from "@/contexts/NavPendingContext";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import Tooltip from "@/components/ui/Tooltip";
+import ClubLogo from "@/components/brand/ClubLogo";
 import { APP_NAV_ITEMS, type AppNavItem } from "@/components/layout/navItems";
 
 function SidebarNavLink({
@@ -125,11 +126,7 @@ export default function AppShell() {
             onClick={() => markPending("/")}
             className="group flex items-center gap-2.5"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--accent)] shadow-lg shadow-red-600/20 transition-shadow group-hover:shadow-red-600/40">
-              <span className="text-sm font-bold tracking-tight text-white">
-                CV
-              </span>
-            </div>
+            <ClubLogo size="nav" />
             <span className="text-base font-semibold tracking-tight text-[var(--text-primary)]">
               CVOrotava
             </span>
@@ -186,9 +183,7 @@ export default function AppShell() {
           onClick={() => markPending("/")}
           className="flex items-center gap-2"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent)]">
-            <span className="text-xs font-bold text-white">CV</span>
-          </div>
+          <ClubLogo size="nav" />
           <span className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
             CVOrotava
           </span>

@@ -82,7 +82,7 @@ export const getMatchById = cache(
 
     if (!data) return null;
 
-    const row = data as MatchDetailRow;
+    const row = data as unknown as MatchDetailRow;
     const video_url = await resolveVideoUrlFromLink(row.id, row.video_url);
 
     return { ...row, video_url };

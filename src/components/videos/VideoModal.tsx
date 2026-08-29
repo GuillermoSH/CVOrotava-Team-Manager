@@ -27,6 +27,7 @@ const videoSchema = z.object({
     message: "Selecciona el género",
   }),
   match_id: z.string().optional(),
+  notify_team: z.boolean().optional(),
 });
 
 export type VideoFormValues = z.infer<typeof videoSchema>;
@@ -68,6 +69,7 @@ export default function VideoModal({
       season: getCurrentSeason(),
       gender: user?.gender ?? "male",
       match_id: "",
+      notify_team: true,
     },
   });
 
@@ -94,6 +96,7 @@ export default function VideoModal({
         season: getCurrentSeason(),
         gender: user?.gender ?? "male",
         match_id: "",
+        notify_team: true,
       });
     }
     setMessage(null);
@@ -120,8 +123,12 @@ export default function VideoModal({
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...data,
+          url: data.url,
+          video_type: data.video_type,
+          season: data.season,
+          gender: data.gender,
           match_id: data.match_id?.trim() ? data.match_id : null,
+          ...(isEdit ? {} : { notify_team: data.notify_team !== false }),
         }),
       });
 
@@ -132,7 +139,11 @@ export default function VideoModal({
 
       setMessage({
         type: "success",
-        text: isEdit ? "Vídeo actualizado" : "Vídeo añadido",
+        text: isEdit
+          ? "Vídeo actualizado"
+          : data.notify_team !== false
+            ? "Vídeo añadido. Se avisará al equipo por email."
+            : "Vídeo añadido",
       });
       setTimeout(() => {
         onSuccess();
@@ -276,6 +287,26 @@ export default function VideoModal({
                       setValue("match_id", id, { shouldValidate: true })
                     }
                   />
+                )}
+
+                {!initialData && (
+                  <label className="flex cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 py-3">
+                    <input
+                      type="checkbox"
+                      className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]"
+                      {...register("notify_team")}
+                    />
+                    <span>
+                      <span className="block text-sm font-medium text-[var(--text-primary)]">
+                        Avisar al equipo por email
+                      </span>
+                      <span className="mt-0.5 block text-xs text-[var(--text-muted)]">
+                        Solo jugadores y staff activos de este género. Si
+                        vinculas el partido de liga, el correo lleva rival y
+                        resultado.
+                      </span>
+                    </span>
+                  </label>
                 )}
 
                 {message && (

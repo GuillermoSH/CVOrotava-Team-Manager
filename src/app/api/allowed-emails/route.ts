@@ -4,10 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { normalizeEmail } from "@/lib/auth/allowlist";
-import {
-  listAuthUsersByEmail,
-  signOutAuthUserByEmail,
-} from "@/lib/auth/authUsers";
+import { signOutAuthUserByEmail } from "@/lib/auth/authUsers";
 import { listAllowedEmails } from "@/lib/access/listAllowedEmails";
 
 const emailSchema = z

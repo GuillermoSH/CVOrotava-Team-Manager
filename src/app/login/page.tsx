@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import dynamic from "next/dynamic";
 import GoogleBtn from "@/components/ui/GoogleBtn";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import ClubLogo from "@/components/brand/ClubLogo";
 import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 
@@ -28,26 +28,6 @@ const authErrorMessage = (code: string | null): string | null => {
       return null;
   }
 };
-
-function ClubLogo({ size }: { size: "splash" | "header" }) {
-  const dim = size === "splash" ? "h-36 w-36 sm:h-44 sm:w-44" : "h-16 w-16";
-  const img = size === "splash" ? 176 : 64;
-
-  return (
-    <div
-      className={`relative overflow-hidden rounded-2xl border border-[var(--glass-border)] bg-[var(--color-bg-elevated)] ${dim}`}
-    >
-      <Image
-        src="/assets/imgs/voleipuerto_256x256.webp"
-        alt="Escudo Voleipuerto"
-        width={img}
-        height={img}
-        className="h-full w-full object-contain p-2"
-        priority
-      />
-    </div>
-  );
-}
 
 export default function LoginPage() {
   const reduceMotion = useReducedMotion();
@@ -104,7 +84,7 @@ export default function LoginPage() {
                 layoutId="club-logo"
                 transition={{ layout: { duration: FLIGHT_MS, ease: EASE } }}
               >
-                <ClubLogo size="header" />
+                <ClubLogo size="header" priority />
               </motion.div>
             ) : (
               <div className="h-16 w-16" aria-hidden />
@@ -149,7 +129,7 @@ export default function LoginPage() {
               layoutId="club-logo"
               transition={{ layout: { duration: FLIGHT_MS, ease: EASE } }}
             >
-              <ClubLogo size="splash" />
+              <ClubLogo size="splash" priority />
             </motion.div>
           </div>
         )}

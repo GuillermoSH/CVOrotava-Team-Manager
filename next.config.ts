@@ -9,6 +9,9 @@ const nextConfig = {
       },
     ],
   },
+  outputFileTracingIncludes: {
+    "/api/**": ["./src/emails/assets/**"],
+  },
 };
 
 module.exports = nextConfig;

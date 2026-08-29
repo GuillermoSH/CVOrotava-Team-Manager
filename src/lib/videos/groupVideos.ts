@@ -2,7 +2,6 @@ import type { Video } from "@/components/videos/VideoCard";
 import {
   VIDEO_TYPES,
   VIDEO_TYPE_GROUP_LABELS,
-  type VideoType,
 } from "@/lib/videos/constants";
 
 export type VideoGroupBy = "none" | "type" | "month";

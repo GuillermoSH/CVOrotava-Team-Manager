@@ -26,6 +26,10 @@ vi.mock("@/lib/matches/getMatchById", () => ({
   getMatchById: vi.fn(),
 }));
 
+vi.mock("@/lib/videos/notifyNewVideo", () => ({
+  notifyNewVideo: vi.fn(async () => {}),
+}));
+
 import { POST } from "@/app/api/matches/route";
 import { PUT, DELETE } from "@/app/api/matches/[id]/route";
 import { POST as POST_SETS } from "@/app/api/match_sets/route";
