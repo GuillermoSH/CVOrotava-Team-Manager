@@ -1,5 +1,16 @@
 export const EMAIL_LOGO_CID = "cvorotava-logo";
 
+/** Shown in Gmail as the sender name. Quoted so the dots in C.V. parse as a name, not an address. */
+export const EMAIL_FROM_NAME = "C.V. Orotava - Puerto de la Cruz";
+
+/** `Name <addr>` even if the env var is only the address. */
+export function formatClubFrom(raw: string) {
+  const trimmed = raw.trim();
+  const angle = /<([^>]+)>/.exec(trimmed);
+  const address = (angle?.[1] ?? trimmed).replace(/^["']+|["']+$/g, "").trim();
+  return `"${EMAIL_FROM_NAME}" <${address}>`;
+}
+
 /** Club bulletin — volcanic ground, night masthead, paper body. */
 export const emailBrand = {
   accent: "#e62222",
