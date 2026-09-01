@@ -6,18 +6,19 @@ import Link from "next/link";
 import { getThumbnailUrl, getYoutubeTitle } from "@/lib/youtube";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlay, faPenToSquare } from "@fortawesome/free-solid-svg-icons";
-import { getDateByTimestampz } from "@/lib/videos";
 import {
   VIDEO_TYPE_LABELS,
   type VideoType,
   type VideoMatchSummary,
 } from "@/lib/videos/constants";
+import { videoRecordedDate } from "@/lib/videos/date";
 import { formatMatchDate } from "@/lib/matches/formatMatchLabel";
 
 export type Video = {
   id: string;
   url: string;
   created_at: string;
+  recorded_at?: string | null;
   video_type: VideoType;
   season: string;
   gender: "male" | "female";
@@ -62,9 +63,7 @@ export default function VideoCard({
     ? `vs ${linked.opponent}`
     : youtubeTitle || "Vídeo";
 
-  const subtitle = linked
-    ? formatMatchDate(linked.date)
-    : getDateByTimestampz(video.created_at);
+  const subtitle = formatMatchDate(videoRecordedDate(video));
 
   const meta = [
     VIDEO_TYPE_LABELS[video.video_type],

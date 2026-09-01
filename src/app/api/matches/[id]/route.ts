@@ -91,6 +91,7 @@ export async function PUT(
       videoUrl: updatedMatch.video_url,
       season: updatedMatch.season,
       gender: updatedMatch.gender,
+      recordedAt: updatedMatch.date,
     });
 
     return NextResponse.json(updatedMatch, { status: 200 });

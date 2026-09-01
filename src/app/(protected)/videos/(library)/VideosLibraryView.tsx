@@ -164,6 +164,7 @@ export default function VideosLibraryView({
             season: v.season,
             gender: v.gender,
             match_id: v.match_id ?? "",
+            recorded_at: v.recorded_at,
           });
           setIsModalOpen(true);
         }}

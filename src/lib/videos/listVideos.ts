@@ -52,6 +52,7 @@ export async function listVideos(
 
   const { data, error } = await query
     .range(from, to)
+    .order("recorded_at", { ascending: false })
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);

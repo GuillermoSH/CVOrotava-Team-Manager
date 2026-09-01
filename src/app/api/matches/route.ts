@@ -125,6 +125,7 @@ export async function POST(req: Request) {
             videoUrl: data.video_url,
             season: data.season,
             gender: data.gender,
+            recordedAt: data.date,
         });
 
         return NextResponse.json(

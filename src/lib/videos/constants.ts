@@ -1,10 +1,10 @@
 /** Columns used by VideoCard / grid (without join). */
 export const VIDEO_LIST_COLUMNS =
-  "id, url, created_at, video_type, season, gender, match_id";
+  "id, url, created_at, recorded_at, video_type, season, gender, match_id";
 
 /** Select with joined match summary for library grid. */
 export const VIDEO_LIST_WITH_MATCH =
-  "id, url, created_at, video_type, season, gender, match_id, matches(opponent, date, result)";
+  "id, url, created_at, recorded_at, video_type, season, gender, match_id, matches(opponent, date, result)";
 
 export const DEFAULT_VIDEO_PAGE_SIZE = 12;
 
@@ -45,6 +45,7 @@ export type VideoListItem = {
   id: string;
   url: string;
   created_at: string;
+  recorded_at: string;
   video_type: VideoType;
   season: string;
   gender: "male" | "female";

@@ -7,10 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faSpinner, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { FormInput, FormSelect } from "@/components/ui/forms";
+import { FormInput, FormSelect, FormDate } from "@/components/ui/forms";
 import { getCurrentSeason, getSeasonSelectOptions } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
 import { VIDEO_TYPES, VIDEO_TYPE_OPTIONS, MATCH_VIDEO_TYPES } from "@/lib/videos/constants";
+import { DATE_INPUT_RE, todayDateInput, toDateInput } from "@/lib/videos/date";
 import MatchPicker from "@/components/videos/MatchPicker";
 
 const videoSchema = z.object({
@@ -26,6 +27,9 @@ const videoSchema = z.object({
   gender: z.enum(["male", "female"], {
     message: "Selecciona el género",
   }),
+  recorded_at: z
+    .string()
+    .regex(DATE_INPUT_RE, "La fecha de grabación es obligatoria"),
   match_id: z.string().optional(),
   notify_team: z.boolean().optional(),
 });
@@ -68,6 +72,7 @@ export default function VideoModal({
       video_type: "league_match",
       season: getCurrentSeason(),
       gender: user?.gender ?? "male",
+      recorded_at: todayDateInput(),
       match_id: "",
       notify_team: true,
     },
@@ -88,13 +93,17 @@ export default function VideoModal({
   useEffect(() => {
     if (!isOpen) return;
     if (initialData) {
-      reset(initialData);
+      reset({
+        ...initialData,
+        recorded_at: toDateInput(initialData.recorded_at),
+      });
     } else {
       reset({
         url: "",
         video_type: "league_match",
         season: getCurrentSeason(),
         gender: user?.gender ?? "male",
+        recorded_at: todayDateInput(),
         match_id: "",
         notify_team: true,
       });
@@ -127,6 +136,7 @@ export default function VideoModal({
           video_type: data.video_type,
           season: data.season,
           gender: data.gender,
+          recorded_at: data.recorded_at,
           match_id: data.match_id?.trim() ? data.match_id : null,
           ...(isEdit ? {} : { notify_team: data.notify_team !== false }),
         }),
@@ -277,15 +287,27 @@ export default function VideoModal({
                   error={errors.gender}
                 />
 
+                <FormDate
+                  label="Fecha de grabación *"
+                  name="recorded_at"
+                  register={register("recorded_at")}
+                  error={errors.recorded_at}
+                />
+
                 {showMatchPicker && (
                   <MatchPicker
                     season={season}
                     gender={gender}
                     value={matchId}
                     forMatchId={initialData?.match_id}
-                    onChange={(id) =>
-                      setValue("match_id", id, { shouldValidate: true })
-                    }
+                    onChange={(id, match) => {
+                      setValue("match_id", id, { shouldValidate: true });
+                      if (match?.date) {
+                        setValue("recorded_at", toDateInput(match.date), {
+                          shouldValidate: true,
+                        });
+                      }
+                    }}
                   />
                 )}
 
