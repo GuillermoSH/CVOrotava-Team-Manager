@@ -33,8 +33,14 @@ export default function HomeView({
 }: {
   initialMatches: HomeMatch[];
   initialPayments: {
-    data: { user_id: string; amount: string | number; status: string }[];
+    data: {
+      user_id?: string | null;
+      player_id?: string | null;
+      amount: string | number;
+      status: string;
+    }[];
     isAdmin: boolean;
+    adminOverview?: { player_id: string; pendingAmount: number }[];
   } | null;
 }) {
   const { user, loading } = useUser();
@@ -94,7 +100,11 @@ export default function HomeView({
     (acc, p) => acc + Number(p.amount),
     0
   );
-  const usersInDebt = new Set(pendingPayments.map((p) => p.user_id)).size;
+  const usersInDebt = paymentsData?.adminOverview
+    ? paymentsData.adminOverview.filter((r) => r.pendingAmount > 0).length
+    : new Set(
+        pendingPayments.map((p) => p.player_id || p.user_id).filter(Boolean)
+      ).size;
   const greeting =
     user?.gender === "female" ? "Bienvenida" : "Bienvenido";
 

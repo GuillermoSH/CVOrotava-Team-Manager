@@ -90,7 +90,7 @@ describe("admin pages are gated on the server, not only in the client", () => {
   });
 });
 
-describe("player payments GET must pin user_id and strip leaked rows", () => {
+describe("player payments GET must pin player_id (or legacy user_id) and strip leaked rows", () => {
   it("GET delegates to getPaymentsSnapshot after allowInactive auth", () => {
     const get = handlerBody(src("src/app/api/payments/route.ts"), "GET");
     expect(get).toContain("allowInactive: true");
@@ -100,8 +100,8 @@ describe("player payments GET must pin user_id and strip leaked rows", () => {
   it("contains both the IDOR 403 and a post-query own-row filter", () => {
     const lib = src("src/lib/payments/getPaymentsSnapshot.ts");
     expect(lib).toMatch(/targetUserId !== actor\.id/);
-    expect(lib).toMatch(/\.eq\(\s*["']user_id["']\s*,\s*actor\.id\s*\)/);
-    expect(lib).toMatch(/p\.user_id === actor\.id/);
+    expect(lib).toMatch(/\.eq\(\s*["']player_id["']/);
+    expect(lib).toMatch(/p\.player_id === ownPlayerId/);
     expect(lib).toContain("isAdmin: false");
 
     const playerReturn = lib.slice(lib.lastIndexOf("if (targetUserId"));

@@ -16,16 +16,17 @@ import {
   FormDate,
   FormTextarea,
 } from "@/components/ui/forms";
+import { getCurrentSeason } from "@/utils/getCurrentSeason";
 
-// Schema validación
 const paymentSchema = z.object({
-  user_id: z.string().min(1, "El jugador es obligatorio"),
+  player_id: z.string().min(1, "El jugador es obligatorio"),
   concept: z.string().min(3, "El concepto debe tener al menos 3 caracteres"),
   amount: z.coerce.number().min(1, "El importe es obligatorio"),
   status: z.enum(["pending", "paid"], { message: "Selecciona un estado" }),
   due_date: z.string().min(1, "La fecha de vencimiento es obligatoria"),
   paid_date: z.string().optional(),
   notes: z.string().optional(),
+  season: z.string().min(4),
 });
 
 type PaymentFormValues = z.infer<typeof paymentSchema>;
@@ -33,8 +34,10 @@ type PaymentFormValues = z.infer<typeof paymentSchema>;
 export default function AdminPaymentsPage() {
   const router = useRouter();
   const { user } = useUser();
-  const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
-  const [isUsersLoading, setIsUsersLoading] = useState(true);
+  const [players, setPlayers] = useState<
+    { id: string; name: string; user_id: string | null }[]
+  >([]);
+  const [isPlayersLoading, setIsPlayersLoading] = useState(true);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const {
@@ -46,33 +49,43 @@ export default function AdminPaymentsPage() {
   } = useForm({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
-      user_id: "ALL", // Empieza preseleccionado en Todos por comodidad
+      player_id: "ALL",
       concept: "Mensualidad",
       amount: 25,
       status: "pending" as "pending" | "paid",
       due_date: new Date().toISOString().split("T")[0],
       paid_date: "",
       notes: "",
+      season: getCurrentSeason(),
     },
   });
 
-  // Fetch lista de usuarios para el selector
   useEffect(() => {
-    async function fetchUsers() {
+    async function fetchSeniorPlayers() {
       try {
-        const res = await fetch("/api/users");
+        const season = getCurrentSeason();
+        const gender = user?.gender ? `&gender=${user.gender}` : "";
+        const res = await fetch(`/api/payments?season=${encodeURIComponent(season)}${gender}`);
         if (!res.ok) throw new Error("Error cargando jugadores");
         const data = await res.json();
-        setUsers(data.map((u: { id: string; user_name: string }) => ({ id: u.id, name: u.user_name || "Desconocido" })));
+        setPlayers(
+          (data.seniorPlayers ?? []).map(
+            (p: { id: string; name: string; user_id?: string | null }) => ({
+              id: p.id,
+              name: p.name,
+              user_id: p.user_id ?? null,
+            })
+          )
+        );
       } catch (err) {
-        console.error("No se pudo cargar la lista de todos los jugadores:", err);
+        console.error("No se pudo cargar el roster sénior:", err);
       } finally {
-        setIsUsersLoading(false);
+        setIsPlayersLoading(false);
       }
     }
-    
+
     if (user?.isAdmin) {
-      fetchUsers();
+      fetchSeniorPlayers();
     }
   }, [user]);
 
@@ -84,18 +97,20 @@ export default function AdminPaymentsPage() {
     );
   }
 
-  // Enviar Petición
   const onSubmit = async (data: PaymentFormValues) => {
     setMessage(null);
     try {
       const payload = {
         ...data,
+        ...(data.player_id === "ALL" && user.gender
+          ? { gender: user.gender }
+          : {}),
       };
 
       const res = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       const responseJson = await res.json();
@@ -104,24 +119,27 @@ export default function AdminPaymentsPage() {
 
       setMessage({ type: "success", text: responseJson.message || "Guardado correctamente" });
       reset();
-      // Volver a la tabla admin después de un tiempo
       setTimeout(() => router.push("/payments"), 2000);
-      
     } catch (err: unknown) {
       setMessage({ type: "error", text: `Error: ${(err as Error).message}` });
     }
   };
 
-  const userOptions = [
-    { value: "ALL", label: "A todos los jugadores (masivo)" },
-    ...users.map((u) => ({ value: u.id, label: u.name })),
+  const playerOptions = [
+    { value: "ALL", label: "A todos los sénior activos (masivo)" },
+    ...players.map((p) => ({
+      value: p.id,
+      label: p.user_id
+        ? p.name
+        : `${p.name} · sin cuenta (no dado de alta)`,
+    })),
   ];
 
   return (
     <main className="flex justify-center w-full px-2 py-4 md:px-4 md:py-10">
       <div className="w-full max-w-2xl">
-        <button 
-          onClick={() => router.push('/payments')}
+        <button
+          onClick={() => router.push("/payments")}
           className="mb-4 cursor-pointer text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition flex items-center gap-2 w-fit"
         >
           <FontAwesomeIcon icon={faArrowLeft} /> Volver a Pagos
@@ -129,7 +147,7 @@ export default function AdminPaymentsPage() {
 
         <FormLayout
           title="Añadir o editar pago (admin)"
-          description="Añade una nueva cuota a un jugador o a todo el club a la vez."
+          description="Añade una cuota a un jugador de alta en equipo sénior (con o sin cuenta TM) o a todos los activos de la temporada."
           onSubmit={handleSubmit(onSubmit)}
           loading={isSubmitting}
           buttonText="Guardar Cuota / Asignar"
@@ -150,16 +168,14 @@ export default function AdminPaymentsPage() {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Jugador */}
             <FormSelect
               label="Jugador *"
-              name="user_id"
+              name="player_id"
               control={control}
-              options={isUsersLoading ? [{ value: "", label: "Cargando..." }] : userOptions}
-              error={errors.user_id as FieldError}
+              options={isPlayersLoading ? [{ value: "", label: "Cargando..." }] : playerOptions}
+              error={errors.player_id as FieldError}
             />
 
-            {/* Concepto */}
             <FormInput
               label="Concepto *"
               name="concept"
@@ -170,7 +186,6 @@ export default function AdminPaymentsPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Importe */}
             <FormInput
               label="Importe (€) *"
               name="amount"
@@ -178,8 +193,7 @@ export default function AdminPaymentsPage() {
               register={register("amount")}
               error={errors.amount as FieldError}
             />
-            
-            {/* Estado */}
+
             <FormSelect
               label="Estado *"
               name="status"
@@ -193,14 +207,12 @@ export default function AdminPaymentsPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Fecha Vencimiento */}
             <FormDate
               label="Fecha límite *"
               name="due_date"
               register={register("due_date")}
               error={errors.due_date as FieldError}
             />
-            {/* Fecha Cobro */}
             <FormDate
               label="Fecha pagado (Opcional)"
               name="paid_date"

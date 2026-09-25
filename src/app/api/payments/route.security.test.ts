@@ -47,6 +47,27 @@ describe("GET /api/payments IDOR", () => {
     expect(body).not.toHaveProperty("authLastSignInAtByUserId");
   });
 
+  it("refuses a player asking for another playerId", async () => {
+    requireAllowedUser.mockResolvedValue({ user: PLAYER });
+    // Linked player lookup for actor
+    const playerLookup = createQueryChain({
+      data: { id: "own-player-id" },
+      error: null,
+    });
+    from.mockImplementation((table: string) => {
+      if (table === "players") return playerLookup;
+      return createQueryChain({ data: [], error: null });
+    });
+
+    const res = await GET(
+      new Request(`http://local/api/payments?playerId=other-player-id`)
+    );
+    expect(res.status).toBe(403);
+    expect(listUsers).not.toHaveBeenCalled();
+    const body = await jsonOf(res);
+    expect(body).not.toHaveProperty("data");
+  });
+
   it("refuses userId=ALL as a player (bulk identifier is not a self-read)", async () => {
     requireAllowedUser.mockResolvedValue({ user: PLAYER });
     const res = await GET(new Request("http://local/api/payments?userId=ALL"));
@@ -54,35 +75,59 @@ describe("GET /api/payments IDOR", () => {
     expect(from).not.toHaveBeenCalled();
   });
 
-  it("drops leaked rows if the database ignores the user_id filter", async () => {
+  it("drops leaked rows if the database ignores the player_id filter", async () => {
     requireAllowedUser.mockResolvedValue({ user: PLAYER });
-    const chain = createQueryChain({
+    const ownPlayerId = "own-player-id";
+    const playerLookup = createQueryChain({
+      data: { id: ownPlayerId },
+      error: null,
+    });
+    const paymentsChain = createQueryChain({
       data: [
-        { id: "p1", user_id: PLAYER.id, amount: 10, status: "pending" },
-        { id: "p2", user_id: OTHER_PLAYER.id, amount: 999, status: "pending" },
+        {
+          id: "p1",
+          player_id: ownPlayerId,
+          user_id: PLAYER.id,
+          amount: 10,
+          status: "pending",
+        },
+        {
+          id: "p2",
+          player_id: "other-player",
+          user_id: OTHER_PLAYER.id,
+          amount: 999,
+          status: "pending",
+        },
       ],
       error: null,
     });
-    from.mockReturnValue(chain);
+    from.mockImplementation((table: string) => {
+      if (table === "players") return playerLookup;
+      return paymentsChain;
+    });
 
     const res = await GET(new Request("http://local/api/payments"));
     expect(res.status).toBe(200);
-    expect(chain.eq).toHaveBeenCalledWith("user_id", PLAYER.id);
+    expect(paymentsChain.eq).toHaveBeenCalledWith("player_id", ownPlayerId);
     expect(listUsers).not.toHaveBeenCalled();
 
     const body = await jsonOf(res);
     expect(body.isAdmin).toBe(false);
     expect(body).not.toHaveProperty("authLastSignInAtByUserId");
-    const rows = body.data as { user_id: string; amount: number }[];
+    const rows = body.data as { player_id: string; amount: number }[];
     expect(rows).toHaveLength(1);
-    expect(rows[0].user_id).toBe(PLAYER.id);
-    expect(rows.some((r) => r.user_id === OTHER_PLAYER.id)).toBe(false);
+    expect(rows[0].player_id).toBe(ownPlayerId);
+    expect(rows.some((r) => r.player_id === "other-player")).toBe(false);
   });
 
   it("does not honor spoof headers that claim admin", async () => {
     requireAllowedUser.mockResolvedValue({ user: PLAYER });
-    const chain = createQueryChain({ data: [], error: null });
-    from.mockReturnValue(chain);
+    const playerLookup = createQueryChain({ data: null, error: null });
+    const paymentsChain = createQueryChain({ data: [], error: null });
+    from.mockImplementation((table: string) => {
+      if (table === "players") return playerLookup;
+      return paymentsChain;
+    });
 
     const res = await GET(
       new Request("http://local/api/payments", {
@@ -106,14 +151,14 @@ describe("POST /api/payments privilege", () => {
     from.mockReset();
   });
 
-  it("does not let a player insert a quota (including user_id=ALL)", async () => {
+  it("does not let a player insert a quota (including player_id=ALL)", async () => {
     requireAllowedUser.mockResolvedValue({ user: PLAYER });
     const res = await POST(
       new Request("http://local/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: "ALL",
+          player_id: "ALL",
           concept: "Mensualidad",
           amount: 1,
           status: "pending",
@@ -133,7 +178,7 @@ describe("POST /api/payments privilege", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: OTHER_PLAYER.id,
+          player_id: "some-player-id",
           concept: "Mensualidad",
           amount: 25,
           status: "pending",
@@ -146,15 +191,28 @@ describe("POST /api/payments privilege", () => {
 
   it("still allows a real admin through the same payload", async () => {
     requireAllowedUser.mockResolvedValue({ user: ADMIN });
-    const chain = createQueryChain({ data: null, error: null });
-    from.mockReturnValue(chain);
+    const playerChain = createQueryChain({
+      data: {
+        id: "player-1",
+        full_name: "Test Player",
+        first_name: "Test",
+        last_name: "Player",
+        user_id: OTHER_PLAYER.id,
+      },
+      error: null,
+    });
+    const paymentsChain = createQueryChain({ data: null, error: null });
+    from.mockImplementation((table: string) => {
+      if (table === "players") return playerChain;
+      return paymentsChain;
+    });
 
     const res = await POST(
       new Request("http://local/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: OTHER_PLAYER.id,
+          player_id: "player-1",
           concept: "Mensualidad",
           amount: 25,
           status: "pending",
@@ -162,7 +220,7 @@ describe("POST /api/payments privilege", () => {
       })
     );
     expect(res.status).toBe(200);
-    expect(chain.insert).toHaveBeenCalled();
+    expect(paymentsChain.insert).toHaveBeenCalled();
   });
 });
 

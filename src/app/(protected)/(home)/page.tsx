@@ -14,7 +14,11 @@ export default async function HomePage() {
       season,
       order: "asc",
     }),
-    getPaymentsSnapshot({ actor: user }),
+    getPaymentsSnapshot({
+      actor: user,
+      season,
+      gender: user.isAdmin ? user.gender ?? undefined : undefined,
+    }),
   ]);
 
   return (
