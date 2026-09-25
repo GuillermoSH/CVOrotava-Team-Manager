@@ -372,7 +372,7 @@ export async function ensureSeniorPlayerForUser(opts: {
   const rawName = (user.user_name as string | null)?.trim() || "";
   const targetNorm = normalizePersonName(rawName);
 
-  let unlinkedQuery = supabaseAdmin
+  const unlinkedQuery = supabaseAdmin
     .from("players")
     .select(
       `

@@ -2,7 +2,6 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import type { AllowedUser } from "@/lib/auth/require-allowed-user";
 import {
   listActiveSeniorPlayers,
-  listPaymentAssigneeOptions,
   seniorPlayerDisplayName,
   syncTmPlayersToSeniorRoster,
   type SeniorPlayerRow,
