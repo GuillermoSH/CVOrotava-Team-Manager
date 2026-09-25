@@ -19,6 +19,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import QuotaSeasonLayout from "@/components/payments/QuotaSeasonLayout";
 import { isQuotaOverdue } from "@/components/payments/quotaDates";
 import Tooltip, { TooltipGroup } from "@/components/ui/Tooltip";
+import { getCurrentSeason } from "@/utils/getCurrentSeason";
 
 const PaymentModal = dynamic(
   () => import("@/components/payments/PaymentModal"),
@@ -27,7 +28,8 @@ const PaymentModal = dynamic(
 
 interface Payment {
   id: string;
-  user_id: string;
+  user_id: string | null;
+  player_id: string | null;
   concept: string;
   amount: number;
   status: "pending" | "paid";
@@ -35,6 +37,7 @@ interface Payment {
   paid_date: string | null;
   notes: string | null;
   season: string | null;
+  player_name?: string | null;
   users?: { user_name: string };
 }
 
@@ -44,10 +47,13 @@ export default function AdminPlayerPaymentsDetail() {
   const { user } = useUser();
   const router = useRouter();
   const params = useParams();
-  const targetUserId = params.userId as string;
+  /** Prefer roster player id; legacy bookmarks may still pass a user id. */
+  const routeId = params.playerId as string;
   const reduceMotion = useReducedMotion();
 
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [resolvedPlayerId, setResolvedPlayerId] = useState<string | null>(null);
+  const [playerName, setPlayerName] = useState("Jugador");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,24 +61,51 @@ export default function AdminPlayerPaymentsDetail() {
   const [modalInitialData, setModalInitialData] =
     useState<PaymentModalInitialData | null>(null);
 
-  const playerName =
-    payments.length > 0 && payments[0].users?.user_name
-      ? payments[0].users.user_name
-      : "Jugador";
-
   useEffect(() => {
     fetchPayments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, targetUserId]);
+  }, [user, routeId]);
 
   async function fetchPayments() {
     if (!user?.isAdmin) return;
     try {
       setLoading(true);
-      const res = await fetch(`/api/payments?userId=${targetUserId}`);
-      if (!res.ok) throw new Error("Error cargando cuotas del jugador");
-      const json = await res.json();
-      setPayments(json.data || []);
+      // Prefer playerId; also try userId so old /admin/<userUuid> links still work.
+      let res = await fetch(`/api/payments?playerId=${routeId}`);
+      let json = await res.json();
+      if (res.ok && Array.isArray(json.data) && json.data.length === 0) {
+        const legacy = await fetch(`/api/payments?userId=${routeId}`);
+        if (legacy.ok) {
+          const legacyJson = await legacy.json();
+          if (Array.isArray(legacyJson.data) && legacyJson.data.length > 0) {
+            res = legacy;
+            json = legacyJson;
+          }
+        }
+      }
+      if (!res.ok) throw new Error(json.error || "Error cargando cuotas del jugador");
+      const rows = (json.data || []) as Payment[];
+      setPayments(rows);
+      const fromRow = rows.find((p) => p.player_id)?.player_id ?? null;
+      setResolvedPlayerId(fromRow || routeId);
+
+      const nameFromRows =
+        rows[0]?.player_name || rows[0]?.users?.user_name || null;
+      if (nameFromRows) {
+        setPlayerName(nameFromRows);
+      } else {
+        // Roster name when the player has no quotas yet.
+        const overviewRes = await fetch(
+          `/api/payments?season=${encodeURIComponent(getCurrentSeason())}`
+        );
+        if (overviewRes.ok) {
+          const overview = await overviewRes.json();
+          const match = (
+            overview.seniorPlayers as { id: string; name: string }[] | undefined
+          )?.find((p) => p.id === routeId);
+          if (match) setPlayerName(match.name);
+        }
+      }
     } catch (err: unknown) {
       setError((err as Error).message);
     } finally {
@@ -127,13 +160,17 @@ export default function AdminPlayerPaymentsDetail() {
   };
 
   const openEditModal = (payment: Payment) => {
-    setModalInitialData(payment);
+    setModalInitialData({
+      ...payment,
+      player_id: payment.player_id || resolvedPlayerId,
+    });
     setIsModalOpen(true);
   };
 
   const duplicatePayment = (payment: Payment) => {
     setModalInitialData({
       ...payment,
+      player_id: payment.player_id || resolvedPlayerId,
       status: "pending",
       paid_date: null,
       isDuplicate: true,
@@ -170,6 +207,8 @@ export default function AdminPlayerPaymentsDetail() {
   const totalPending = payments
     .filter((p) => p.status === "pending")
     .reduce((acc, p) => acc + Number(p.amount), 0);
+
+  const fixedPlayerId = resolvedPlayerId || routeId;
 
   return (
     <motion.div
@@ -330,12 +369,8 @@ export default function AdminPlayerPaymentsDetail() {
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchPayments}
         initialData={modalInitialData}
-        fixedUserId={targetUserId}
-        users={
-          payments.length > 0
-            ? [{ id: targetUserId, name: playerName }]
-            : []
-        }
+        fixedPlayerId={fixedPlayerId}
+        players={[{ id: fixedPlayerId, name: playerName }]}
       />
     </motion.div>
   );

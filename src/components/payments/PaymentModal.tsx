@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/forms";
 
 const paymentSchema = z.object({
-  user_id: z.string().min(1, "El jugador es obligatorio"),
+  player_id: z.string().min(1, "El jugador es obligatorio"),
   concept: z.string().min(3, "El concepto debe tener al menos 3 caracteres"),
   amount: z.coerce.number().min(1, "El importe es obligatorio"),
   status: z.enum(["pending", "paid"], { message: "Selecciona un estado" }),
@@ -30,7 +30,9 @@ export type PaymentFormValues = z.infer<typeof paymentSchema>;
 
 export type PaymentModalInitialData = {
   id?: string;
-  user_id: string;
+  player_id?: string | null;
+  /** Transition / display fallback. */
+  user_id?: string | null;
   concept: string;
   amount: number;
   status: "pending" | "paid";
@@ -46,9 +48,13 @@ interface PaymentModalProps {
   onClose: () => void;
   onSuccess: () => void;
   initialData?: PaymentModalInitialData | null;
-  fixedUserId?: string; // Pasa el ID si ya estamos en un jugador y no se debe cambiar
-  users: { id: string; name: string }[];
-  isUsersLoading?: boolean;
+  /** When set, player selector is locked to this roster player. */
+  fixedPlayerId?: string;
+  /** Roster senior players. `user_id` null ⇒ sin cuenta TM (se puede cobrar igual). */
+  players: { id: string; name: string; user_id?: string | null }[];
+  isPlayersLoading?: boolean;
+  /** Optional gender filter applied on bulk ALL. */
+  bulkGender?: string;
 }
 
 export default function PaymentModal({
@@ -56,9 +62,10 @@ export default function PaymentModal({
   onClose,
   onSuccess,
   initialData,
-  fixedUserId,
-  users,
-  isUsersLoading,
+  fixedPlayerId,
+  players,
+  isPlayersLoading,
+  bulkGender,
 }: Readonly<PaymentModalProps>) {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -71,7 +78,7 @@ export default function PaymentModal({
   } = useForm({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
-      user_id: fixedUserId || "ALL",
+      player_id: fixedPlayerId || "ALL",
       concept: "Mensualidad",
       amount: 25,
       status: "pending",
@@ -82,13 +89,16 @@ export default function PaymentModal({
     },
   });
 
-  // Si cambia el initialData, rellenamos el form
   useEffect(() => {
     if (isOpen) {
       setMessage(null);
       if (initialData) {
         reset({
-          user_id: initialData.user_id,
+          player_id:
+            initialData.player_id ||
+            fixedPlayerId ||
+            initialData.user_id ||
+            "",
           concept: initialData.concept,
           amount: initialData.amount,
           status: initialData.status,
@@ -99,7 +109,7 @@ export default function PaymentModal({
         });
       } else {
         reset({
-          user_id: fixedUserId || "ALL",
+          player_id: fixedPlayerId || "ALL",
           concept: "Mensualidad",
           amount: 25,
           status: "pending",
@@ -110,19 +120,24 @@ export default function PaymentModal({
         });
       }
     }
-  }, [isOpen, initialData, fixedUserId, reset]);
+  }, [isOpen, initialData, fixedPlayerId, reset]);
 
   const onSubmit = async (data: PaymentFormValues) => {
     setMessage(null);
     try {
-      const url = initialData?.id && !initialData.isDuplicate 
-        ? `/api/payments/${initialData.id}` 
-        : `/api/payments`;
-      
-      const method = initialData?.id && !initialData.isDuplicate ? "PATCH" : "POST";
+      const url =
+        initialData?.id && !initialData.isDuplicate
+          ? `/api/payments/${initialData.id}`
+          : `/api/payments`;
+
+      const method =
+        initialData?.id && !initialData.isDuplicate ? "PATCH" : "POST";
 
       const payload = {
         ...data,
+        ...(data.player_id === "ALL" && bulkGender
+          ? { gender: bulkGender }
+          : {}),
       };
 
       const res = await fetch(url, {
@@ -139,7 +154,7 @@ export default function PaymentModal({
         type: "success",
         text: responseJson.message || "Pago guardado con éxito",
       });
-      
+
       setTimeout(() => {
         onSuccess();
         onClose();
@@ -149,11 +164,23 @@ export default function PaymentModal({
     }
   };
 
-  const userOptions = fixedUserId 
-    ? users.filter(u => u.id === fixedUserId).map((u) => ({ value: u.id, label: u.name }))
+  const playerOptions = fixedPlayerId
+    ? players
+        .filter((p) => p.id === fixedPlayerId)
+        .map((p) => ({
+          value: p.id,
+          label: p.user_id
+            ? p.name
+            : `${p.name} · sin cuenta (no dado de alta)`,
+        }))
     : [
-        { value: "ALL", label: "A todos los jugadores (masivo)" },
-        ...users.map((u) => ({ value: u.id, label: u.name })),
+        { value: "ALL", label: "A todos los sénior activos (masivo)" },
+        ...players.map((p) => ({
+          value: p.id,
+          label: p.user_id
+            ? p.name
+            : `${p.name} · sin cuenta (no dado de alta)`,
+        })),
       ];
 
   if (!isOpen) return null;
@@ -161,7 +188,6 @@ export default function PaymentModal({
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
-        {/* Overlay backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -170,14 +196,12 @@ export default function PaymentModal({
           onClick={onClose}
         />
 
-        {/* Modal body */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           className="relative w-full max-w-2xl bg-[var(--color-bg-elevated)] border border-[var(--glass-border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         >
-          {/* Header */}
           <div className="flex justify-between items-center p-4 border-b border-[var(--glass-border)] bg-[var(--glass-surface)]">
             <h2 className="text-xl font-bold text-[var(--text-primary)]">
               {initialData && !initialData.isDuplicate ? "Editar pago" : "Añadir pago"}
@@ -190,7 +214,6 @@ export default function PaymentModal({
             </button>
           </div>
 
-          {/* Form */}
           <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar">
             {message && (
               <motion.div
@@ -211,10 +234,14 @@ export default function PaymentModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormSelect
                   label="Jugador *"
-                  name="user_id"
+                  name="player_id"
                   control={control}
-                  options={isUsersLoading ? [{ value: "", label: "Cargando..." }] : userOptions}
-                  error={errors.user_id as FieldError}
+                  options={
+                    isPlayersLoading
+                      ? [{ value: "", label: "Cargando..." }]
+                      : playerOptions
+                  }
+                  error={errors.player_id as FieldError}
                 />
 
                 <FormInput
@@ -225,6 +252,20 @@ export default function PaymentModal({
                   error={errors.concept as FieldError}
                 />
               </div>
+              {!fixedPlayerId && !isPlayersLoading && players.length === 0 ? (
+                <p className="-mt-2 text-xs text-[var(--text-muted)]">
+                  No hay jugadores de alta en equipo sénior para esta
+                  temporada/género. Créalos o asígnalos en el Portal.
+                </p>
+              ) : !fixedPlayerId &&
+                !isPlayersLoading &&
+                players.some((p) => !p.user_id) ? (
+                <p className="-mt-2 text-xs text-[var(--text-muted)]">
+                  Los marcados «sin cuenta» están en el roster sénior pero aún no
+                  tienen usuario de Team Manager enlazado. Se les puede asignar
+                  la cuota igual.
+                </p>
+              ) : null}
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <FormInput

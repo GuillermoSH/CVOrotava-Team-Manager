@@ -29,7 +29,8 @@ type PaymentStatus = "pending" | "paid";
 
 export interface Payment {
   id: string;
-  user_id: string;
+  user_id: string | null;
+  player_id: string | null;
   concept: string;
   amount: number;
   status: PaymentStatus;
@@ -39,11 +40,13 @@ export interface Payment {
   season: string | null;
   created_at: string;
   updated_at: string;
+  player_name?: string | null;
   users?: { user_name: string };
 }
 
 interface AdminOverviewRow {
-  user_id: string;
+  player_id: string;
+  user_id: string | null;
   player: string;
   pendingAmount: number;
   status: "success" | "warning" | "danger";
@@ -87,7 +90,7 @@ function statusRank(s: AdminOverviewRow["status"]): number {
 }
 
 function formatLastSignInLabel(iso: string | null | undefined): string {
-  if (!iso) return "Sin último acceso";
+  if (!iso) return "Sin cuenta / sin acceso";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "Sin último acceso";
   const date = d.toLocaleDateString("es-ES", {
@@ -98,49 +101,73 @@ function formatLastSignInLabel(iso: string | null | undefined): string {
   return `Últ. acceso ${date}`;
 }
 
-function applyPaymentsSnapshot(
-  json: {
-    data: Payment[];
-    isAdmin: boolean;
-    authLastSignInAtByUserId?: Record<string, string | null>;
-  }
-): { payments: Payment[]; adminOverview: AdminOverviewRow[] } {
-  const data = json.data;
-  const authLastSignInAtByUserId = json.authLastSignInAtByUserId ?? {};
+type SnapshotJson = {
+  data: Payment[];
+  isAdmin: boolean;
+  authLastSignInAtByUserId?: Record<string, string | null>;
+  adminOverview?: AdminOverviewRow[];
+  seniorPlayers?: { id: string; name: string; user_id: string | null }[];
+};
+
+function applyPaymentsSnapshot(json: SnapshotJson): {
+  payments: Payment[];
+  adminOverview: AdminOverviewRow[];
+  seniorPlayers: { id: string; name: string; user_id: string | null }[];
+} {
+  const seniorPlayers = (json.seniorPlayers ?? []).map((p) => ({
+    id: p.id,
+    name: p.name,
+    user_id: p.user_id ?? null,
+  }));
 
   if (json.isAdmin) {
+    if (json.adminOverview) {
+      return {
+        payments: [],
+        adminOverview: json.adminOverview,
+        seniorPlayers,
+      };
+    }
+
+    // Fallback if older response shape: aggregate by player_id.
     const playerMap = new Map<string, AdminOverviewRow>();
-    data.forEach((p) => {
-      if (!playerMap.has(p.user_id)) {
-        playerMap.set(p.user_id, {
+    const authLastSignInAtByUserId = json.authLastSignInAtByUserId ?? {};
+    json.data.forEach((p) => {
+      const key = p.player_id || p.user_id;
+      if (!key) return;
+      if (!playerMap.has(key)) {
+        playerMap.set(key, {
+          player_id: p.player_id || key,
           user_id: p.user_id,
-          player: p.users?.user_name || "Desconocido",
+          player: p.player_name || p.users?.user_name || "Desconocido",
           pendingAmount: 0,
           status: "success",
-          lastSignInAt: authLastSignInAtByUserId[p.user_id] ?? null,
+          lastSignInAt: p.user_id
+            ? (authLastSignInAtByUserId[p.user_id] ?? null)
+            : null,
         });
       }
       if (p.status === "pending") {
-        const row = playerMap.get(p.user_id)!;
+        const row = playerMap.get(key)!;
         row.pendingAmount += Number(p.amount);
         row.status = row.pendingAmount >= 100 ? "danger" : "warning";
       }
     });
-    return { payments: [], adminOverview: Array.from(playerMap.values()) };
+    return {
+      payments: [],
+      adminOverview: Array.from(playerMap.values()),
+      seniorPlayers,
+    };
   }
 
-  return { payments: data, adminOverview: [] };
+  return { payments: json.data, adminOverview: [], seniorPlayers: [] };
 }
 
 export default function PaymentsView({
   initialSnapshot,
   initialFilters,
 }: {
-  initialSnapshot: {
-    data: Payment[];
-    isAdmin: boolean;
-    authLastSignInAtByUserId?: Record<string, string | null>;
-  };
+  initialSnapshot: SnapshotJson;
   initialFilters: { season?: string; gender?: string };
 }) {
   const { user } = useUser();
@@ -152,6 +179,7 @@ export default function PaymentsView({
   const [adminOverview, setAdminOverview] = useState<AdminOverviewRow[]>(
     initial.adminOverview
   );
+  const [seniorPlayers, setSeniorPlayers] = useState(initial.seniorPlayers);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -162,8 +190,6 @@ export default function PaymentsView({
     gender: initialFilters.gender,
   });
 
-  const [allUsers, setAllUsers] = useState<{ id: string; name: string }[]>([]);
-  const [usersLoading, setUsersLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [adminSortField, setAdminSortField] =
     useState<AdminSortField>("name");
@@ -183,14 +209,11 @@ export default function PaymentsView({
       const res = await fetch(`/api/payments?${params.toString()}`);
       if (!res.ok) throw new Error("Error cargando los pagos");
 
-      const json = await res.json();
-      const parsed = applyPaymentsSnapshot({
-        data: json.data as Payment[],
-        isAdmin: json.isAdmin,
-        authLastSignInAtByUserId: json.authLastSignInAtByUserId,
-      });
+      const json = (await res.json()) as SnapshotJson;
+      const parsed = applyPaymentsSnapshot(json);
       setAdminOverview(parsed.adminOverview);
       setPayments(parsed.payments);
+      setSeniorPlayers(parsed.seniorPlayers);
     } catch (err: unknown) {
       setError((err as Error).message);
     } finally {
@@ -205,30 +228,6 @@ export default function PaymentsView({
     if (user) fetchPayments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, filters]);
-
-  useEffect(() => {
-    async function fetchAllUsers() {
-      if (!isModalOpen || !user?.isAdmin || allUsers.length > 0) return;
-      setUsersLoading(true);
-      try {
-        const res = await fetch("/api/users");
-        if (res.ok) {
-          const data = await res.json();
-          setAllUsers(
-            data.map((u: { id: string; user_name?: string | null }) => ({
-              id: u.id,
-              name: u.user_name || "Desconocido",
-            }))
-          );
-        }
-      } catch (err) {
-        console.error("Error al cargar usuarios", err);
-      } finally {
-        setUsersLoading(false);
-      }
-    }
-    fetchAllUsers();
-  }, [isModalOpen, user?.isAdmin, allUsers.length]);
 
   const totalPaid = payments
     .filter((p) => p.status === "paid")
@@ -290,7 +289,7 @@ export default function PaymentsView({
         title="Control de pagos"
         subtitle={
           user?.isAdmin
-            ? "Vista global de cuotas del club"
+            ? "Cuotas del roster sénior (con o sin cuenta)"
             : user?.isActive === false
               ? "Cuenta inactiva · puedes consultar lo que debes"
               : undefined
@@ -342,7 +341,7 @@ export default function PaymentsView({
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold tracking-tight sm:text-xl">
-                    Jugadores
+                    Jugadores sénior
                   </h2>
                   {adminOverview.length > 0 && (
                     <p className="mt-1 text-sm text-[var(--text-muted)]">
@@ -399,7 +398,8 @@ export default function PaymentsView({
 
               {adminOverview.length === 0 ? (
                 <p className="py-10 text-sm text-[var(--text-muted)]">
-                  No hay datos de pagos registrados en el club.
+                  No hay jugadores sénior activos en esta temporada
+                  {filters.gender ? " / género" : ""}.
                 </p>
               ) : (
                 <ul className="divide-y divide-[var(--glass-border)] border-t border-[var(--glass-border)]">
@@ -412,11 +412,11 @@ export default function PaymentsView({
                           : "player-avatar-tint--success";
 
                     return (
-                      <li key={item.user_id}>
+                      <li key={item.player_id}>
                         <button
                           type="button"
                           onClick={() =>
-                            router.push(`/payments/admin/${item.user_id}`)
+                            router.push(`/payments/admin/${item.player_id}`)
                           }
                           className="group flex w-full cursor-pointer flex-col gap-3 py-4 text-left transition-colors hover:bg-[var(--surface-faint)] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--accent)] sm:flex-row sm:items-center sm:gap-4"
                         >
@@ -431,7 +431,9 @@ export default function PaymentsView({
                                 {item.player}
                               </p>
                               <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
-                                {formatLastSignInLabel(item.lastSignInAt)}
+                                {item.user_id
+                                  ? formatLastSignInLabel(item.lastSignInAt)
+                                  : "Sin cuenta — no dado de alta en Team Manager"}
                               </p>
                             </div>
                           </div>
@@ -467,20 +469,18 @@ export default function PaymentsView({
                 </ul>
               )}
             </section>
+          ) : payments.length === 0 ? (
+            <div className="py-6">
+              <p className="font-semibold text-[var(--text-primary)]">
+                No tienes cuotas en esta temporada
+              </p>
+            </div>
           ) : (
-            payments.length === 0 ? (
-              <div className="py-6">
-                <p className="font-semibold text-[var(--text-primary)]">
-                  No tienes cuotas en esta temporada
-                </p>
-              </div>
-            ) : (
-              <QuotaSeasonLayout
-                pending={totalPending}
-                paid={totalPaid}
-                quotas={payments}
-              />
-            )
+            <QuotaSeasonLayout
+              pending={totalPending}
+              paid={totalPaid}
+              quotas={payments}
+            />
           )}
         </>
       )}
@@ -490,8 +490,9 @@ export default function PaymentsView({
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSuccess={fetchPayments}
-          users={allUsers}
-          isUsersLoading={usersLoading}
+          players={seniorPlayers}
+          isPlayersLoading={false}
+          bulkGender={filters.gender}
         />
       )}
     </motion.div>
