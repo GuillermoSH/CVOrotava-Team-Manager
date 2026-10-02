@@ -23,7 +23,7 @@ const paymentSchema = z.object({
   due_date: z.string().min(1, "La fecha de vencimiento es obligatoria"),
   paid_date: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
-  season: z.string().min(4, "Ejemplo: 2024/2025"),
+  season: z.string().min(4, "Ejemplo: 2026-27"),
 });
 
 export type PaymentFormValues = z.infer<typeof paymentSchema>;

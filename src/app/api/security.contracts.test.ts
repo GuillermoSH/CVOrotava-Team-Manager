@@ -91,6 +91,22 @@ describe("admin pages are gated on the server, not only in the client", () => {
   });
 });
 
+describe("match create/edit legacy pages redirect to MatchModal flows", () => {
+  it("create page redirects to calendar", () => {
+    const page = src("src/app/(protected)/matches/create/page.tsx");
+    expect(page).toContain('redirect("/matches")');
+  });
+
+  it("edit page redirects to match detail", () => {
+    const page = src("src/app/(protected)/matches/edit/[id]/page.tsx");
+    expect(page).toContain("redirect(`/matches/${id}`)");
+  });
+
+  it("obsolete MatchForm.tsx is gone", () => {
+    expect(() => src("src/components/calendar/MatchForm.tsx")).toThrow();
+  });
+});
+
 describe("forMatchId must be UUID-validated before PostgREST .or() interpolation", () => {
   it.each([
     "src/app/api/matches/route.ts",
@@ -125,6 +141,15 @@ describe("gate secret must not fall back to service role in production", () => {
   });
 });
 
+describe("allowlist lookup uses indexed eq on normalized email", () => {
+  it("allowlist.ts queries with eq(email, normalized)", () => {
+    const body = src("src/lib/auth/allowlist.ts");
+    expect(body).toContain(".eq(\"email\", normalized)");
+    expect(body).toContain("maybeSingle");
+    expect(body).not.toMatch(/select\(\s*["']email["']\s*\)\s*;[\s\S]*\.some\(/);
+  });
+});
+
 describe("users RLS must freeze privileged columns for client JWT", () => {
   it("migration splits policies and protects role/is_active", () => {
     const sql = src(
@@ -141,13 +166,13 @@ describe("users RLS must freeze privileged columns for client JWT", () => {
     expect(sql).toMatch(/for update/i);
   });
 
-  it("players/teams get allowlisted read RLS migration", () => {
+  it("players/teams RLS migration does not subquery allowed_emails (breaks Portal)", () => {
     const sql = src(
       "supabase/migrations/20261002141500_players_teams_rls_allowlisted_read.sql"
     );
-    expect(sql).toContain("Allowlisted users can read players");
-    expect(sql).toContain("Allowlisted users can read teams");
     expect(sql).toContain("enable row level security");
+    expect(sql).not.toMatch(/Allowlisted users can read players/);
+    expect(sql).toContain("allowed_emails");
   });
 });
 

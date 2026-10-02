@@ -50,8 +50,11 @@ function resultTone(match: Match): "win" | "loss" | "neutral" {
 
 export default function MatchDetailsView({
   match: initialMatch,
+  openEdit = false,
 }: {
   match: MatchDetail;
+  /** Deep-link from home "Añadir resultado" (?edit=1). */
+  openEdit?: boolean;
 }) {
   const { user } = useUser();
   const router = useRouter();
@@ -65,6 +68,15 @@ export default function MatchDetailsView({
   useEffect(() => {
     setMatch(initialMatch);
   }, [initialMatch]);
+
+  useEffect(() => {
+    if (!openEdit || !user?.isAdmin) return;
+    setEditing(matchToModalInitialValues(match));
+    setModalOpen(true);
+    router.replace(`/matches/${match.id}`, { scroll: false });
+    // Only on first mount / when deep-link flag arrives
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openEdit, user?.isAdmin]);
 
   const matchDate = useMemo(
     () => new Date(`${match.date}T${match.time}`),

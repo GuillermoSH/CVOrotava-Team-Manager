@@ -47,7 +47,13 @@ function ourTeamNormalizedSet(gender: "male" | "female"): Set<string> {
 }
 
 const formSchema = z.object({
-  season: z.string().regex(/^\d{2,4}\/\d{2,4}$/u, "Formato esperado: YYYY/YY o YY/YY"),
+  season: z
+    .string()
+    .regex(
+      /^\d{2,4}[/-]\d{2,4}$/u,
+      "Formato esperado: YYYY-YY (también se acepta YYYY/YY)"
+    )
+    .transform((s) => s.replace("/", "-")),
   gender: z.enum(["male", "female"]),
 });
 

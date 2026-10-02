@@ -22,7 +22,7 @@ const videoSchema = z.object({
   video_type: z.enum(VIDEO_TYPES, {
     message: "Selecciona el tipo de vídeo",
   }),
-  season: z.string().min(4, "Ejemplo: 2025/2026"),
+  season: z.string().min(4, "Ejemplo: 2026-27"),
   gender: z.enum(["male", "female"], {
     message: "Selecciona el género",
   }),

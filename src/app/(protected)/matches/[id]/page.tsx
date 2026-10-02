@@ -8,8 +8,10 @@ import { supabaseServer } from "@/lib/supabase/server";
 
 export default async function MatchDetailsPage(props: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ edit?: string }>;
 }) {
   const { id } = await props.params;
+  const searchParams = await props.searchParams;
 
   const supabase = await supabaseServer();
   const auth = await requireAllowedUser(supabase);
@@ -28,5 +30,11 @@ export default async function MatchDetailsPage(props: {
 
   if (!match) notFound();
 
-  return <MatchDetailsView key={id} match={match as MatchDetail} />;
+  return (
+    <MatchDetailsView
+      key={id}
+      match={match as MatchDetail}
+      openEdit={searchParams.edit === "1"}
+    />
+  );
 }

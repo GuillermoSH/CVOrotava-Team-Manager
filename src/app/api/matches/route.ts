@@ -34,7 +34,11 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
 
-  const limit = Number(searchParams.get("limit")) || null;
+  const rawLimit = Number(searchParams.get("limit")) || null;
+  const limit =
+    rawLimit && Number.isFinite(rawLimit)
+      ? Math.min(Math.max(1, Math.floor(rawLimit)), 200)
+      : null;
   const gender = searchParams.get("gender");
   const season = searchParams.get("season");
   const orderParam = searchParams.get("order") || "desc";

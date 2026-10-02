@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import MatchCard, { Match } from "@/components/calendar/MatchCard";
 import MatchMonthView from "@/components/calendar/MatchMonthView";
@@ -8,7 +8,6 @@ import type { MatchFormValues } from "@/components/calendar/MatchModal";
 import { matchToModalInitialValues } from "@/lib/matchFormValues";
 import MatchesSkeleton from "@/components/skeletons/MatchesSkeleton";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
-import { getCurrentSeason } from "@/utils/getCurrentSeason";
 import { fuzzyFilter } from "@/utils/fuzzy";
 import { useUser } from "@/contexts/UserContext";
 import { useSeasons } from "@/contexts/SeasonContext";
@@ -62,16 +61,27 @@ function monthLabel(key: string): string {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
+function matchesListUrl(season?: string, gender?: string) {
+  const params = new URLSearchParams({ order: "asc" });
+  if (season) params.set("season", season);
+  if (gender) params.set("gender", gender);
+  return `/api/matches?${params.toString()}`;
+}
+
 export default function CalendarView({
   initialMatches,
+  initialSeason,
+  initialGender,
 }: {
   initialMatches: Match[];
+  initialSeason: string;
+  initialGender?: string;
 }) {
   const { user, loading: userLoading } = useUser();
   const [matches, setMatches] = useState<Match[]>(initialMatches);
   const [filters, setFilters] = useState<Filters>({
-    season: getCurrentSeason(),
-    gender: user?.gender ?? undefined,
+    season: initialSeason,
+    gender: initialGender,
   });
   const { seasons } = useSeasons();
   const [loading, setLoading] = useState(false);
@@ -98,9 +108,15 @@ export default function CalendarView({
     MatchFormValues | undefined
   >(undefined);
 
-  const fetchMatches = async () => {
+  const fetchMatches = async (season?: string, gender?: string) => {
+    const s = season ?? filters.season;
+    const g = gender ?? filters.gender;
+    if (!s || !g) return;
+
     try {
-      const res = await fetch("/api/matches?order=asc");
+      setLoading(true);
+      setError("");
+      const res = await fetch(matchesListUrl(s, g));
       if (!res.ok) throw new Error("Error al obtener partidos");
       const data = (await res.json()) as Match[];
       setMatches(data);
@@ -118,6 +134,17 @@ export default function CalendarView({
       prev.gender ? prev : { ...prev, gender: user.gender ?? undefined }
     );
   }, [user?.gender]);
+
+  const skipFilterFetchRef = useRef(true);
+  useEffect(() => {
+    if (!filters.season || !filters.gender) return;
+    if (skipFilterFetchRef.current) {
+      skipFilterFetchRef.current = false;
+      return;
+    }
+    void fetchMatches(filters.season, filters.gender);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch when season/gender change only
+  }, [filters.season, filters.gender]);
 
   // Reset pagination when filters / search change
   useEffect(() => {

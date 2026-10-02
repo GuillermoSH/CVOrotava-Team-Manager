@@ -16,6 +16,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import PageHeader from "@/components/ui/PageHeader";
 import QuotaSeasonLayout from "@/components/payments/QuotaSeasonLayout";
+import { isQuotaOverdue } from "@/components/payments/quotaDates";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import { useSeasons } from "@/contexts/SeasonContext";
@@ -49,6 +50,7 @@ interface AdminOverviewRow {
   user_id: string | null;
   player: string;
   pendingAmount: number;
+  overdueCount: number;
   status: "success" | "warning" | "danger";
   lastSignInAt: string | null;
 }
@@ -141,6 +143,7 @@ function applyPaymentsSnapshot(json: SnapshotJson): {
           user_id: p.user_id,
           player: p.player_name || p.users?.user_name || "Desconocido",
           pendingAmount: 0,
+          overdueCount: 0,
           status: "success",
           lastSignInAt: p.user_id
             ? (authLastSignInAtByUserId[p.user_id] ?? null)
@@ -150,7 +153,13 @@ function applyPaymentsSnapshot(json: SnapshotJson): {
       if (p.status === "pending") {
         const row = playerMap.get(key)!;
         row.pendingAmount += Number(p.amount);
-        row.status = row.pendingAmount >= 100 ? "danger" : "warning";
+        if (isQuotaOverdue("pending", p.due_date)) {
+          row.overdueCount += 1;
+        }
+        row.status =
+          row.overdueCount > 0 || row.pendingAmount >= 100
+            ? "danger"
+            : "warning";
       }
     });
     return {
@@ -440,9 +449,17 @@ export default function PaymentsView({
 
                           <div className="flex items-center justify-between gap-4 sm:justify-end sm:gap-6">
                             {item.pendingAmount > 0 ? (
-                              <span className="text-lg font-bold tabular-nums text-[var(--accent)]">
-                                {item.pendingAmount}€
-                              </span>
+                              <div className="text-right">
+                                <span className="text-lg font-bold tabular-nums text-[var(--accent)]">
+                                  {item.pendingAmount}€
+                                </span>
+                                {item.overdueCount > 0 ? (
+                                  <p className="mt-0.5 text-[11px] font-medium text-[var(--color-danger)]">
+                                    {item.overdueCount} atrasada
+                                    {item.overdueCount === 1 ? "" : "s"}
+                                  </p>
+                                ) : null}
+                              </div>
                             ) : (
                               <span className="payment-label-ok text-sm font-semibold">
                                 Al día
@@ -456,7 +473,11 @@ export default function PaymentsView({
                                     : "badge-warning"
                                 }`}
                               >
-                                {item.status === "danger" ? "Crítico" : "Aviso"}
+                                {item.overdueCount > 0
+                                  ? "Atrasado"
+                                  : item.status === "danger"
+                                    ? "Crítico"
+                                    : "Aviso"}
                               </span>
                             ) : (
                               <span className="badge badge-success">OK</span>

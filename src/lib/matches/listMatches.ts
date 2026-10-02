@@ -13,8 +13,20 @@ export type ListMatchesOpts = {
   opponent?: string | null;
 };
 
-const MATCH_LIST_SELECT =
-  "*, venues(id, venue_name, location_type, location_url), match_sets(id, set_number, team_score, opponent_score)";
+const MATCH_LIST_SELECT = `
+  id,
+  date,
+  time,
+  opponent,
+  season,
+  result,
+  video_url,
+  notes,
+  gender,
+  venue_id,
+  venues(id, venue_name, location_type, location_url),
+  match_sets(id, set_number, team_score, opponent_score)
+`;
 
 /** Only interpolate validated UUIDs into PostgREST `.or()` filters. */
 function safeForMatchId(raw: string): string | null {

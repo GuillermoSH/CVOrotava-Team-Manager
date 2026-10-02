@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import {
   getCurrentSeason,
   getNextSeason,
+  normalizeSeasonId,
 } from "@/utils/getCurrentSeason";
 
 const fetchSeasons = unstable_cache(
@@ -40,7 +41,9 @@ const fetchSeasons = unstable_cache(
       if (d.season) seeded.add(d.season);
     }
 
-    return [...seeded].sort((a, b) => b.localeCompare(a));
+    return [...seeded]
+      .map((s) => normalizeSeasonId(s))
+      .sort((a, b) => b.localeCompare(a));
   },
   ["app-seasons"],
   { revalidate: 300 }

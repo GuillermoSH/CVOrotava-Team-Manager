@@ -18,6 +18,7 @@ export default async function HomePage() {
       actor: user,
       season,
       gender: user.isAdmin ? user.gender ?? undefined : undefined,
+      adminOverviewLite: user.isAdmin,
     }),
   ]);
 

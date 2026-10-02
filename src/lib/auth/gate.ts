@@ -1,6 +1,7 @@
 export const GATE_COOKIE = "cvorotava_gate";
 export const GATE_HEADER = "x-cvorotava-gate";
-export const GATE_TTL_SEC = 60;
+/** Short-lived gate cookie; longer TTL cuts duplicate auth.getUser + allowlist work. */
+export const GATE_TTL_SEC = 300;
 
 export type GateGender = "male" | "female" | null;
 

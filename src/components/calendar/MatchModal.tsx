@@ -15,7 +15,7 @@ const matchSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),
   time: z.string().min(1, "La hora es obligatoria"),
   opponent: z.string().min(2, "El rival es obligatorio"),
-  season: z.string().min(4, "Ej: 2024/2025"),
+  season: z.string().min(4, "Ej: 2026-27"),
   venue_id: z.string().uuid("Selecciona un pabellón válido").min(1, "Selecciona un pabellón"),
   video_url: z.string().optional().or(z.literal("")),
   notes: z.string().optional().or(z.literal("")),

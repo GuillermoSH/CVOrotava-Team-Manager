@@ -14,6 +14,7 @@ import {
 import { useUser } from "@/contexts/UserContext";
 import HomeSkeleton from "@/components/skeletons/HomeSkeleton";
 import PageHeader from "@/components/ui/PageHeader";
+import { isQuotaOverdue } from "@/components/payments/quotaDates";
 
 export type HomeMatch = {
   id: string;
@@ -38,9 +39,14 @@ export default function HomeView({
       player_id?: string | null;
       amount: string | number;
       status: string;
+      due_date?: string | null;
     }[];
     isAdmin: boolean;
-    adminOverview?: { player_id: string; pendingAmount: number }[];
+    adminOverview?: {
+      player_id: string;
+      pendingAmount: number;
+      overdueCount?: number;
+    }[];
   } | null;
 }) {
   const { user, loading } = useUser();
@@ -96,6 +102,9 @@ export default function HomeView({
 
   const pendingPayments =
     paymentsData?.data?.filter((p) => p.status === "pending") || [];
+  const overduePayments = pendingPayments.filter((p) =>
+    isQuotaOverdue("pending", p.due_date ?? null)
+  );
   const totalPending = pendingPayments.reduce(
     (acc, p) => acc + Number(p.amount),
     0
@@ -105,6 +114,11 @@ export default function HomeView({
     : new Set(
         pendingPayments.map((p) => p.player_id || p.user_id).filter(Boolean)
       ).size;
+  const usersOverdue = paymentsData?.adminOverview
+    ? paymentsData.adminOverview.filter((r) => (r.overdueCount ?? 0) > 0).length
+    : overduePayments.length > 0
+      ? 1
+      : 0;
   const greeting =
     user?.gender === "female" ? "Bienvenida" : "Bienvenido";
 
@@ -316,7 +330,18 @@ export default function HomeView({
                           <strong className="tabular-nums text-[var(--accent)]">
                             {totalPending}€
                           </strong>{" "}
-                          pendiente.
+                          pendiente
+                          {usersOverdue > 0 ? (
+                            <>
+                              ;{" "}
+                              <strong className="tabular-nums text-[var(--color-danger)]">
+                                {usersOverdue}
+                              </strong>{" "}
+                              con cuota{usersOverdue === 1 ? "" : "s"} atrasada
+                              {usersOverdue === 1 ? "" : "s"}
+                            </>
+                          ) : null}
+                          .
                         </>
                       ) : (
                         <span className="payment-blurb-ok font-medium">
@@ -334,6 +359,16 @@ export default function HomeView({
                         <strong className="tabular-nums text-[var(--accent)]">
                           {totalPending}€
                         </strong>
+                        {overduePayments.length > 0 ? (
+                          <>
+                            ;{" "}
+                            <strong className="tabular-nums text-[var(--color-danger)]">
+                              {overduePayments.length}
+                            </strong>{" "}
+                            ya vencida
+                            {overduePayments.length === 1 ? "" : "s"}
+                          </>
+                        ) : null}
                         .
                       </>
                     ) : (
@@ -452,7 +487,7 @@ export default function HomeView({
                         </span>
                       </span>
                       <Link
-                        href={`/matches/edit/${m.id}`}
+                        href={`/matches/${m.id}?edit=1`}
                         className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]"
                       >
                         Añadir resultado

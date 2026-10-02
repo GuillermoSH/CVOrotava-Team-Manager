@@ -1,8 +1,14 @@
 -- Defense in depth for Portal roster tables used by payments.
--- App reads/writes players via service role only; without RLS a leaked JWT
--- could still hit PostgREST. Enable RLS: allowlisted SELECT, no client writes.
 --
--- If `players` / `teams` do not exist in a given environment, wrap or skip.
+-- IMPORTANT: Do NOT add SELECT policies that subquery public.allowed_emails
+-- for `authenticated` unless that role has GRANT SELECT on allowed_emails.
+-- Otherwise Portal (/admin/jugadores, /admin/pagos) fails with
+-- "permission denied for table allowed_emails" when Postgres evaluates the
+-- policy expression — even if Portal's has_portal_role policies would allow.
+--
+-- Team Manager reads/writes players via service_role (bypasses RLS).
+-- Portal already defines players_select_scoped / teams_select_portal.
+-- This migration only enables RLS if needed and leaves Portal policies intact.
 
 do $do$
 begin
@@ -13,8 +19,6 @@ begin
 
   alter table public.players enable row level security;
 
-  -- Drop legacy/unknown permissive policies if present (names may vary).
-  -- Safe no-ops when missing.
   begin
     execute 'drop policy if exists "Enable read access for all users" on public.players';
     execute 'drop policy if exists "Enable insert for authenticated users only" on public.players';
@@ -24,21 +28,8 @@ begin
     null;
   end;
 
+  -- Remove broken allowlist policy if a previous version of this file created it.
   drop policy if exists "Allowlisted users can read players" on public.players;
-
-  create policy "Allowlisted users can read players"
-  on public.players
-  for select
-  to authenticated
-  using (
-    exists (
-      select 1
-      from public.allowed_emails ae
-      where ae.email = ((select auth.jwt()) ->> 'email'::text)
-    )
-  );
-  -- No INSERT/UPDATE/DELETE policies for authenticated → deny.
-  -- service_role bypasses RLS (supabaseAdmin / Portal sync).
 end;
 $do$;
 
@@ -52,17 +43,7 @@ begin
   alter table public.teams enable row level security;
 
   drop policy if exists "Allowlisted users can read teams" on public.teams;
-
-  create policy "Allowlisted users can read teams"
-  on public.teams
-  for select
-  to authenticated
-  using (
-    exists (
-      select 1
-      from public.allowed_emails ae
-      where ae.email = ((select auth.jwt()) ->> 'email'::text)
-    )
-  );
 end;
 $do$;
+
+grant select on public.allowed_emails to authenticated;
