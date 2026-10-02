@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { signGate, verifyGate, type GateClaims } from "@/lib/auth/gate";
 
 const sample = (): GateClaims => ({
@@ -13,8 +13,29 @@ const sample = (): GateClaims => ({
 });
 
 describe("gate cookie HMAC", () => {
-  beforeAll(() => {
-    process.env.SUPABASE_SERVICE_ROLE_KEY ??= "test-gate-secret-not-for-prod";
+  const original = {
+    gate: process.env.CVOROTAVA_GATE_SECRET,
+    service: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    nodeEnv: process.env.NODE_ENV,
+    vercelEnv: process.env.VERCEL_ENV,
+  };
+
+  beforeEach(() => {
+    process.env.CVOROTAVA_GATE_SECRET = "test-gate-secret-not-for-prod";
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    process.env.NODE_ENV = "test";
+    delete process.env.VERCEL_ENV;
+  });
+
+  afterEach(() => {
+    if (original.gate === undefined) delete process.env.CVOROTAVA_GATE_SECRET;
+    else process.env.CVOROTAVA_GATE_SECRET = original.gate;
+    if (original.service === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    else process.env.SUPABASE_SERVICE_ROLE_KEY = original.service;
+    process.env.NODE_ENV = original.nodeEnv;
+    if (original.vercelEnv === undefined) delete process.env.VERCEL_ENV;
+    else process.env.VERCEL_ENV = original.vercelEnv;
+    vi.restoreAllMocks();
   });
 
   it("round-trips a valid payload", async () => {
@@ -44,5 +65,51 @@ describe("gate cookie HMAC", () => {
     expect(await verifyGate("not-a-token")).toBeNull();
     expect(await verifyGate("")).toBeNull();
     expect(await verifyGate(null)).toBeNull();
+  });
+
+  it("prefers CVOROTAVA_GATE_SECRET over the service role key", async () => {
+    process.env.CVOROTAVA_GATE_SECRET = "dedicated-secret";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key";
+    const token = await signGate(sample());
+    expect(token).toBeTruthy();
+
+    process.env.CVOROTAVA_GATE_SECRET = "other-dedicated";
+    expect(await verifyGate(token)).toBeNull();
+
+    process.env.CVOROTAVA_GATE_SECRET = "dedicated-secret";
+    expect(await verifyGate(token)).not.toBeNull();
+  });
+
+  it("fails closed in production when CVOROTAVA_GATE_SECRET is missing", async () => {
+    delete process.env.CVOROTAVA_GATE_SECRET;
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key";
+    process.env.NODE_ENV = "production";
+
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(await signGate(sample())).toBeNull();
+    expect(err).toHaveBeenCalled();
+  });
+
+  it("fails closed when VERCEL_ENV is production even if NODE_ENV is not", async () => {
+    delete process.env.CVOROTAVA_GATE_SECRET;
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key";
+    process.env.NODE_ENV = "development";
+    process.env.VERCEL_ENV = "production";
+
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(await signGate(sample())).toBeNull();
+  });
+
+  it("allows service-role fallback in development with a warning", async () => {
+    delete process.env.CVOROTAVA_GATE_SECRET;
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "dev-service-role-fallback";
+    process.env.NODE_ENV = "development";
+    delete process.env.VERCEL_ENV;
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const token = await signGate(sample());
+    expect(token).toBeTruthy();
+    expect(await verifyGate(token)).not.toBeNull();
+    expect(warn).toHaveBeenCalled();
   });
 });

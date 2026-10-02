@@ -85,8 +85,69 @@ describe("admin pages are gated on the server, not only in the client", () => {
     "src/app/(protected)/payments/admin/layout.tsx",
     "src/app/(protected)/matches/create/layout.tsx",
     "src/app/(protected)/matches/edit/layout.tsx",
+    "src/app/(protected)/league-standings/upload/layout.tsx",
   ])("%s calls requireAdminPage", (file) => {
     expect(src(file)).toContain("requireAdminPage");
+  });
+});
+
+describe("forMatchId must be UUID-validated before PostgREST .or() interpolation", () => {
+  it.each([
+    "src/app/api/matches/route.ts",
+    "src/app/api/videos/route.ts",
+  ])("%s rejects invalid forMatchId with uuid + 400", (file) => {
+    const body = src(file);
+    expect(body).toContain("forMatchId");
+    expect(body).toMatch(/z\.string\(\)\.uuid\(\)/);
+    expect(body).toMatch(/status:\s*400/);
+  });
+
+  it.each([
+    "src/lib/matches/listMatches.ts",
+    "src/lib/videos/listVideos.ts",
+  ])("%s only interpolates UUID-safe forMatchId into .or()", (file) => {
+    const body = src(file);
+    expect(body).toMatch(/z\.string\(\)\.uuid\(\)/);
+    expect(body).toMatch(/\.or\(`/);
+  });
+});
+
+describe("gate secret must not fall back to service role in production", () => {
+  it("gate.ts prefers CVOROTAVA_GATE_SECRET and fails closed in production", () => {
+    const body = src("src/lib/auth/gate.ts");
+    expect(body).toContain("CVOROTAVA_GATE_SECRET");
+    expect(body).toMatch(/NODE_ENV\s*===\s*["']production["']/);
+    expect(body).toContain("VERCEL_ENV");
+    // Must not unconditionally OR the service role key as the secret.
+    expect(body).not.toMatch(
+      /CVOROTAVA_GATE_SECRET\s*\|\|\s*process\.env\.SUPABASE_SERVICE_ROLE_KEY/
+    );
+  });
+});
+
+describe("users RLS must freeze privileged columns for client JWT", () => {
+  it("migration splits policies and protects role/is_active", () => {
+    const sql = src(
+      "supabase/migrations/20261002140000_users_rls_protect_privileged_columns.sql"
+    );
+    expect(sql).toContain("users_select_own");
+    expect(sql).toContain("users_update_own");
+    expect(sql).toContain("protect_users_privileged_columns");
+    expect(sql).toMatch(/new\.role\s*:=\s*old\.role/);
+    expect(sql).toMatch(/new\.is_active\s*:=\s*old\.is_active/);
+    expect(sql).toContain("service_role");
+    expect(sql).not.toMatch(/\bfor all\b/i);
+    expect(sql).toMatch(/for select/i);
+    expect(sql).toMatch(/for update/i);
+  });
+
+  it("players/teams get allowlisted read RLS migration", () => {
+    const sql = src(
+      "supabase/migrations/20261002141500_players_teams_rls_allowlisted_read.sql"
+    );
+    expect(sql).toContain("Allowlisted users can read players");
+    expect(sql).toContain("Allowlisted users can read teams");
+    expect(sql).toContain("enable row level security");
   });
 });
 

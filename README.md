@@ -131,10 +131,17 @@ NEXT_PUBLIC_YOUTUBE_API_KEY=*****
 NEXT_PUBLIC_SUPABASE_URL=*****
 NEXT_PUBLIC_SUPABASE_ANON_KEY=*****
 SUPABASE_SERVICE_ROLE_KEY=*****
+# Required in production (Vercel). Independent HMAC secret for the short-lived gate cookie.
+# In local development, if unset, the app falls back to SUPABASE_SERVICE_ROLE_KEY with a warning.
+CVOROTAVA_GATE_SECRET=*****
 RESEND_API_KEY=*****
 RESEND_FROM_EMAIL=*****
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
+
+### 4️⃣ Migraciones Supabase (RLS)
+
+Las migraciones viven en `supabase/migrations/` (versionadas en git). Tras pull, aplicar las pendientes en el **SQL Editor** del proyecto Supabase (o `supabase db push` si usas CLI enlazado), en orden de timestamp. En concreto, la protección de `users.role` / `is_active` está en `20261002140000_users_rls_protect_privileged_columns.sql`.
 
 ---
 

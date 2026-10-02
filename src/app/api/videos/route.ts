@@ -34,8 +34,20 @@ export async function GET(req: Request) {
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "12", 10);
   const withoutMatch = searchParams.get("withoutMatch") === "true";
-  const forMatchId = searchParams.get("forMatchId");
+  const forMatchIdRaw = searchParams.get("forMatchId");
   const matchVideosOnly = searchParams.get("matchVideosOnly") === "true";
+
+  let forMatchId: string | null = null;
+  if (forMatchIdRaw) {
+    const parsed = z.string().uuid().safeParse(forMatchIdRaw);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid forMatchId" },
+        { status: 400 }
+      );
+    }
+    forMatchId = parsed.data;
+  }
 
   try {
     const data = await listVideos({

@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import {
   DEFAULT_VIDEO_PAGE_SIZE,
@@ -23,6 +24,13 @@ function normalizeMatch(
   return matches;
 }
 
+/** Only interpolate validated UUIDs into PostgREST `.or()` filters. */
+function safeForMatchId(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const parsed = z.string().uuid().safeParse(raw);
+  return parsed.success ? parsed.data : null;
+}
+
 export async function listVideos(
   opts: ListVideosOpts = {}
 ): Promise<VideoListItem[]> {
@@ -40,8 +48,9 @@ export async function listVideos(
   }
 
   if (opts.withoutMatch) {
-    if (opts.forMatchId) {
-      query = query.or(`match_id.is.null,match_id.eq.${opts.forMatchId}`);
+    const matchId = safeForMatchId(opts.forMatchId);
+    if (matchId) {
+      query = query.or(`match_id.is.null,match_id.eq.${matchId}`);
     } else {
       query = query.is("match_id", null);
     }

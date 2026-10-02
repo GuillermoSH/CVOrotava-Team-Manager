@@ -15,12 +15,47 @@ export type GateClaims = {
   exp: number;
 };
 
-function getSecret(): string | null {
+function isProductionRuntime(): boolean {
   return (
-    process.env.CVOROTAVA_GATE_SECRET ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    null
+    process.env.NODE_ENV === "production" ||
+    process.env.VERCEL_ENV === "production"
   );
+}
+
+/**
+ * Prefer CVOROTAVA_GATE_SECRET.
+ * Production: fail closed if missing (never fall back to the service role key).
+ * Development: allow SUPABASE_SERVICE_ROLE_KEY with a one-time console warning.
+ */
+let warnedProdMissing = false;
+let warnedDevFallback = false;
+
+function getSecret(): string | null {
+  const dedicated = process.env.CVOROTAVA_GATE_SECRET;
+  if (dedicated) return dedicated;
+
+  if (isProductionRuntime()) {
+    if (!warnedProdMissing) {
+      warnedProdMissing = true;
+      console.error(
+        "[gate] CVOROTAVA_GATE_SECRET is required in production; refusing to sign/verify."
+      );
+    }
+    return null;
+  }
+
+  const fallback = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (fallback) {
+    if (!warnedDevFallback) {
+      warnedDevFallback = true;
+      console.warn(
+        "[gate] CVOROTAVA_GATE_SECRET unset; falling back to SUPABASE_SERVICE_ROLE_KEY (development only)."
+      );
+    }
+    return fallback;
+  }
+
+  return null;
 }
 
 function bytesToB64Url(bytes: Uint8Array): string {

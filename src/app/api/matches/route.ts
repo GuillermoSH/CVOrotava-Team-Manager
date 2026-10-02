@@ -40,8 +40,20 @@ export async function GET(req: Request) {
   const orderParam = searchParams.get("order") || "desc";
   const hasResult = searchParams.get("hasResult") === "true";
   const withoutVideo = searchParams.get("withoutVideo") === "true";
-  const forMatchId = searchParams.get("forMatchId");
+  const forMatchIdRaw = searchParams.get("forMatchId");
   const opponent = searchParams.get("opponent");
+
+  let forMatchId: string | null = null;
+  if (forMatchIdRaw) {
+    const parsed = z.string().uuid().safeParse(forMatchIdRaw);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid forMatchId" },
+        { status: 400 }
+      );
+    }
+    forMatchId = parsed.data;
+  }
 
   try {
     const data = await listMatches({

@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export type ListMatchesOpts = {
@@ -14,6 +15,12 @@ export type ListMatchesOpts = {
 
 const MATCH_LIST_SELECT =
   "*, venues(id, venue_name, location_type, location_url), match_sets(id, set_number, team_score, opponent_score)";
+
+/** Only interpolate validated UUIDs into PostgREST `.or()` filters. */
+function safeForMatchId(raw: string): string | null {
+  const parsed = z.string().uuid().safeParse(raw);
+  return parsed.success ? parsed.data : null;
+}
 
 const listMatchesCached = cache(
   async (
@@ -41,8 +48,9 @@ const listMatchesCached = cache(
       query = query.not("result", "is", null).neq("result", "");
 
     if (withoutVideo === "1") {
-      if (forMatchId) {
-        query = query.or(`video_url.is.null,id.eq.${forMatchId}`);
+      const matchId = safeForMatchId(forMatchId);
+      if (matchId) {
+        query = query.or(`video_url.is.null,id.eq.${matchId}`);
       } else {
         query = query.is("video_url", null);
       }
