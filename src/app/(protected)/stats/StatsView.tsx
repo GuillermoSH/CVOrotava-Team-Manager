@@ -1,14 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { motion, useReducedMotion } from "framer-motion";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import PageHeader from "@/components/ui/PageHeader";
-import OpponentTierSection from "@/components/standings/OpponentTierSection";
+import SegmentedControl from "@/components/ui/SegmentedControl";
+import TeamCardPanel from "@/components/stats/competitive/TeamCardPanel";
+import RivalsPanel from "@/components/stats/competitive/RivalsPanel";
+import { FormPanel, NextMatchPanel, TopRivalPanel } from "@/components/stats/competitive/NextMatchPanel";
 import { StatsSummarySkeleton } from "@/components/skeletons/StatsSkeleton";
-import { useUser } from "@/contexts/UserContext";
 import { useSeasons } from "@/contexts/SeasonContext";
+import { useUser } from "@/contexts/UserContext";
+import { readPref, writePref } from "@/lib/prefs";
+import type { CompetitiveStats } from "@/lib/stats/competitive/build";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendarCheck,
@@ -26,6 +31,7 @@ import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 type Match = {
   id: string;
+  fed_match_id: number | null;
   season: string;
   gender: "male" | "female";
   result: string | null;
@@ -39,6 +45,20 @@ type Filters = {
 };
 
 const EASE = [0.16, 1, 0.3, 1] as const;
+
+type Tab = "resumen" | "rivales" | "liga" | "versus";
+type Scope = "liga" | "todas";
+const TAB_PREF_KEY = "cvorotava-stats-tab";
+
+const LeaguePanel = dynamic(() => import("@/components/stats/competitive/LeaguePanel"), {
+  ssr: false,
+  loading: () => <div className="h-64" aria-hidden />,
+});
+const VersusPanel = dynamic(() => import("@/components/stats/competitive/VersusPanel"), {
+  ssr: false,
+  loading: () => <div className="h-64" aria-hidden />,
+});
+const FedSyncStatus = dynamic(() => import("@/components/calendar/FedSyncStatus"), { ssr: false });
 
 const ResultDistributionChart = dynamic(
   () => import("@/components/stats/ResultDistributionChart"),
@@ -67,16 +87,38 @@ function rateTone(wr: number): string {
 export default function StatsView({
   initialMatches,
   initialFilters,
+  initialCompetitive,
 }: {
   initialMatches: Match[];
   initialFilters: Filters;
+  initialCompetitive: CompetitiveStats | null;
 }) {
-  const { user } = useUser();
   const reduceMotion = useReducedMotion();
+  const { user } = useUser();
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const { seasons } = useSeasons();
   const [matches, setMatches] = useState<Match[]>(initialMatches);
+  const [competitive, setCompetitive] = useState<CompetitiveStats | null>(initialCompetitive);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [tab, setTabState] = useState<Tab>("resumen");
+  const [scope, setScope] = useState<Scope>("liga");
+  const [selectedRival, setSelectedRival] = useState<number | null>(null);
+
+  useEffect(() => {
+    const saved = readPref(TAB_PREF_KEY);
+    if (saved === "resumen" || saved === "rivales" || saved === "liga" || saved === "versus") setTabState(saved);
+  }, []);
+
+  const setTab = (next: Tab) => {
+    setTabState(next);
+    writePref(TAB_PREF_KEY, next);
+  };
+
+  const openRival = (teamId: number) => {
+    setSelectedRival(teamId);
+    setTab("rivales");
+  };
 
   const filterConfigs: FilterConfig[] = [
     {
@@ -94,27 +136,51 @@ export default function StatsView({
     },
   ];
 
+  const loadAll = useCallback(async (f: Filters) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams();
+      if (f.season) params.set("season", f.season);
+      if (f.gender) params.set("gender", f.gender);
+      const qs = params.toString();
+      const [statsRes, compRes] = await Promise.all([
+        fetch(qs ? `/api/stats?${qs}` : "/api/stats"),
+        f.season && f.gender ? fetch(`/api/stats/competitive?${qs}`) : Promise.resolve(null),
+      ]);
+      const data = await statsRes.json();
+      setMatches(data.matches || []);
+      if (compRes) {
+        if (!compRes.ok) throw new Error("No se pudieron cargar las estadísticas competitivas");
+        setCompetitive((await compRes.json()) as CompetitiveStats);
+      } else {
+        setCompetitive(null);
+      }
+      setSelectedRival(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al cargar las estadísticas");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     const sameSeason = (filters.season ?? "") === (initialFilters.season ?? "");
     const sameGender = (filters.gender ?? "") === (initialFilters.gender ?? "");
     if (sameSeason && sameGender) return;
-    const loadStats = async () => {
-      setLoading(true);
-      const params = new URLSearchParams();
-      if (filters.season) params.set("season", filters.season);
-      if (filters.gender) params.set("gender", filters.gender);
-      const qs = params.toString();
-      const res = await fetch(qs ? `/api/stats?${qs}` : "/api/stats");
-      const data = await res.json();
-      setMatches(data.matches || []);
-      setLoading(false);
-    };
-    loadStats();
-  }, [filters.season, filters.gender, initialFilters.season, initialFilters.gender]);
+    void loadAll(filters);
+  }, [filters, initialFilters.season, initialFilters.gender, loadAll]);
 
+  const leagueIds = useMemo(() => new Set(competitive?.leagueMatchIds ?? []), [competitive]);
+  const canScope = Boolean(competitive?.hasLeague);
   const validMatches = useMemo(
-    () => matches.filter((m) => m.result),
-    [matches]
+    () =>
+      matches.filter(
+        (m) =>
+          m.result &&
+          (!canScope || scope === "todas" || (m.fed_match_id !== null && leagueIds.has(m.fed_match_id)))
+      ),
+    [matches, canScope, scope, leagueIds]
   );
 
   const wins = validMatches.filter((m) => {
@@ -268,6 +334,82 @@ export default function StatsView({
     },
   ];
 
+  const competitiveBlock = (content: ReactNode) =>
+    filters.gender && filters.season ? (
+      content
+    ) : (
+      <p className="text-sm text-[var(--text-muted)]">
+        Elige una temporada y un género en los filtros para ver la ficha y los rivales.
+      </p>
+    );
+
+  const seasonSummary = (
+    <section>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Temporada</h2>
+        {canScope ? (
+          <SegmentedControl
+            aria-label="Competiciones incluidas"
+            value={scope}
+            onChange={setScope}
+            options={[
+              { value: "liga", label: "Liga regular" },
+              { value: "todas", label: "Todas" },
+            ]}
+          />
+        ) : null}
+      </div>
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-5 border-b border-[var(--glass-border)] pb-8 sm:grid-cols-4">
+        {summaryMetrics.map((m) => (
+          <div key={m.key}>
+            <dt
+              className={`flex items-center gap-1.5 text-[0.65rem] font-semibold uppercase tracking-wider ${m.tone}`}
+            >
+              <FontAwesomeIcon icon={m.icon} className="text-[0.7rem]" aria-hidden />
+              {m.label}
+            </dt>
+            <dd className={`mt-1 text-xl font-bold tabular-nums tracking-tight sm:text-2xl ${m.tone}`}>
+              {m.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+
+  const detailCharts = (
+    <div className="grid gap-10 md:grid-cols-2 md:gap-x-10">
+      <section>
+        <h2 className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">Distribución de resultados</h2>
+        {resultDistSorted.length > 0 ? (
+          <ResultDistributionChart data={resultDistSorted} />
+        ) : (
+          <p className="py-6 text-sm text-[var(--text-muted)]">Sin resultados suficientes para mostrar el gráfico</p>
+        )}
+      </section>
+
+      <section>
+        <h2 className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">Rendimiento por lugar</h2>
+        <ul className="divide-y divide-[var(--glass-border)]">
+          {locationStats.map((loc) => (
+            <li key={loc.location} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+              <FontAwesomeIcon icon={loc.icon} className="w-4 shrink-0 text-sm text-[var(--accent)]" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-[var(--text-primary)]">{loc.location}</p>
+                <p className="text-xs text-[var(--text-muted)]">
+                  {loc.total} partido{loc.total === 1 ? "" : "s"}
+                </p>
+              </div>
+              <p className={`shrink-0 text-lg font-bold tabular-nums sm:text-xl ${rateTone(loc.winRate)}`}>
+                {loc.winRate}%
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
+
   return (
     <motion.div
       className="flex w-full flex-col text-[var(--text-primary)]"
@@ -277,99 +419,78 @@ export default function StatsView({
     >
       <PageHeader
         title="Estadísticas"
-        subtitle="Rendimiento del equipo por temporada y contexto"
+        subtitle={
+          <>
+            Rendimiento del equipo por temporada y contexto
+            <span className="mt-1 block text-xs">
+              <FedSyncStatus
+                isAdmin={Boolean(user?.isAdmin)}
+                onSynced={() => void loadAll(filters)}
+              />
+            </span>
+          </>
+        }
       />
 
-      <FilterBar
-        filters={filters}
-        setFilters={setFilters}
-        configs={filterConfigs}
-      />
+      <FilterBar filters={filters} setFilters={setFilters} configs={filterConfigs} />
+
+      <div className="mb-8">
+        <SegmentedControl
+          aria-label="Sección de estadísticas"
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: "resumen", label: "Resumen" },
+            { value: "rivales", label: "Rivales" },
+            { value: "liga", label: "Liga" },
+            { value: "versus", label: "Vs. año pasado" },
+          ]}
+        />
+      </div>
+
+      {error ? (
+        <p role="alert" className="mb-6 text-sm text-[var(--color-danger)]">
+          {error}{" "}
+          <button
+            type="button"
+            onClick={() => void loadAll(filters)}
+            className="font-semibold underline underline-offset-2 hover:text-[var(--accent)]"
+          >
+            Reintentar
+          </button>
+        </p>
+      ) : null}
 
       {loading ? (
         <StatsSummarySkeleton />
+      ) : tab === "rivales" ? (
+        competitiveBlock(
+          competitive ? (
+            <RivalsPanel stats={competitive} selectedId={selectedRival} onSelect={setSelectedRival} />
+          ) : null
+        )
+      ) : tab === "liga" ? (
+        competitiveBlock(competitive ? <LeaguePanel stats={competitive} /> : null)
+      ) : tab === "versus" ? (
+        competitiveBlock(competitive ? <VersusPanel stats={competitive} /> : null)
       ) : (
-        <div className="flex w-full flex-col gap-10 lg:gap-12">
-          <section>
-            <h2 className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">
-              Resumen
-            </h2>
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-5 border-b border-[var(--glass-border)] pb-8 sm:grid-cols-4">
-              {summaryMetrics.map((m) => (
-                <div key={m.key}>
-                  <dt
-                    className={`flex items-center gap-1.5 text-[0.65rem] font-semibold uppercase tracking-wider ${m.tone}`}
-                  >
-                    <FontAwesomeIcon
-                      icon={m.icon}
-                      className="text-[0.7rem]"
-                      aria-hidden
-                    />
-                    {m.label}
-                  </dt>
-                  <dd
-                    className={`mt-1 text-xl font-bold tabular-nums tracking-tight sm:text-2xl ${m.tone}`}
-                  >
-                    {m.value}
-                  </dd>
+        <div className="flex w-full flex-col gap-10 lg:gap-14">
+          {competitiveBlock(
+            competitive ? (
+              <div className="grid gap-8 lg:grid-cols-[19.5rem_minmax(0,1fr)] lg:gap-14">
+                <div className="order-2 lg:order-1">
+                  <TeamCardPanel stats={competitive} />
                 </div>
-              ))}
-            </dl>
-          </section>
-
-          <div className="grid gap-10 md:grid-cols-2 md:gap-x-10">
-            <section>
-              <h2 className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">
-                Distribución de resultados
-              </h2>
-              {resultDistSorted.length > 0 ? (
-                <ResultDistributionChart data={resultDistSorted} />
-              ) : (
-                <p className="py-6 text-sm text-[var(--text-muted)]">
-                  Sin resultados suficientes para mostrar el gráfico
-                </p>
-              )}
-            </section>
-
-            <section>
-              <h2 className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">
-                Rendimiento por lugar
-              </h2>
-              <ul className="divide-y divide-[var(--glass-border)]">
-                {locationStats.map((loc) => (
-                  <li
-                    key={loc.location}
-                    className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
-                  >
-                    <FontAwesomeIcon
-                      icon={loc.icon}
-                      className="w-4 shrink-0 text-sm text-[var(--accent)]"
-                      aria-hidden
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-[var(--text-primary)]">
-                        {loc.location}
-                      </p>
-                      <p className="text-xs text-[var(--text-muted)]">
-                        {loc.total} partido{loc.total === 1 ? "" : "s"}
-                      </p>
-                    </div>
-                    <p
-                      className={`shrink-0 text-lg font-bold tabular-nums sm:text-xl ${rateTone(loc.winRate)}`}
-                    >
-                      {loc.winRate}%
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </div>
-
-          <OpponentTierSection
-            season={filters.season}
-            gender={filters.gender}
-            isAdmin={Boolean(user?.isAdmin)}
-          />
+                <div className="order-1 flex flex-col gap-9 lg:order-2">
+                  <NextMatchPanel stats={competitive} onOpenRival={openRival} />
+                  <FormPanel stats={competitive} />
+                  <TopRivalPanel stats={competitive} onOpenRival={openRival} />
+                </div>
+              </div>
+            ) : null
+          )}
+          {seasonSummary}
+          {detailCharts}
         </div>
       )}
     </motion.div>

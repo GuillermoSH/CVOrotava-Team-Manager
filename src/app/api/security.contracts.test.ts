@@ -29,9 +29,10 @@ const mutating: Array<{ file: string; methods: string[] }> = [
   { file: "src/app/api/payments/[id]/route.ts", methods: ["PATCH", "DELETE"] },
   { file: "src/app/api/users/route.ts", methods: ["GET", "PATCH"] },
   { file: "src/app/api/allowed-emails/route.ts", methods: ["GET", "POST", "PATCH", "DELETE"] },
-  { file: "src/app/api/league-standings/import/route.ts", methods: ["POST"] },
-  { file: "src/app/api/team-aliases/route.ts", methods: ["POST"] },
-  { file: "src/app/api/team-aliases/[id]/route.ts", methods: ["DELETE"] },
+  { file: "src/app/api/fed/sync/route.ts", methods: ["POST"] },
+  { file: "src/app/api/venues/[id]/route.ts", methods: ["PATCH"] },
+  { file: "src/app/api/venues/[id]/merge/route.ts", methods: ["POST"] },
+  { file: "src/app/api/venues/reconcile/route.ts", methods: ["POST"] },
 ];
 
 describe("mutating APIs must gate with requireAdmin, not membership", () => {
@@ -85,9 +86,32 @@ describe("admin pages are gated on the server, not only in the client", () => {
     "src/app/(protected)/payments/admin/layout.tsx",
     "src/app/(protected)/matches/create/layout.tsx",
     "src/app/(protected)/matches/edit/layout.tsx",
-    "src/app/(protected)/league-standings/upload/layout.tsx",
+    "src/app/(protected)/venues/layout.tsx",
   ])("%s calls requireAdminPage", (file) => {
     expect(src(file)).toContain("requireAdminPage");
+  });
+});
+
+describe("federation sync cron is gated by CRON_SECRET", () => {
+  const body = () => handlerBody(src("src/app/api/cron/fed-sync/route.ts"), "GET");
+
+  it("compares the Bearer token against CRON_SECRET", () => {
+    expect(body()).toContain("process.env.CRON_SECRET");
+    expect(body()).toMatch(/Bearer \$\{secret\}/);
+  });
+
+  it("fails closed when CRON_SECRET is unset", () => {
+    expect(body()).toMatch(/if \(!secret/);
+  });
+});
+
+describe("manual standings upload is retired (data comes from the federation)", () => {
+  it.each([
+    "src/app/api/league-standings/import/route.ts",
+    "src/app/api/team-aliases/route.ts",
+    "src/app/(protected)/league-standings/upload/page.tsx",
+  ])("%s is gone", (file) => {
+    expect(() => src(file)).toThrow();
   });
 });
 

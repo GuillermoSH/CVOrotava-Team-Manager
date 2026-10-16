@@ -7,8 +7,9 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   test: {
     environment: "node",
-    include: ["src/**/*.security.test.ts", "src/**/*.test.ts"],
+    include: ["src/**/*.security.test.ts", "src/**/*.test.ts", "src/**/*.test.tsx"],
   },
+  oxc: { jsx: { runtime: "automatic" } },
   resolve: {
     alias: {
       "@": path.resolve(root, "./src"),
