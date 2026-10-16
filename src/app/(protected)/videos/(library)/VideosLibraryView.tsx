@@ -90,6 +90,7 @@ export default function VideosLibraryView({
     {
       key: "season",
       label: "Temporada",
+      required: true,
       options: seasons.map((s) => ({ label: s, value: s })),
     },
     {
@@ -100,6 +101,7 @@ export default function VideosLibraryView({
     {
       key: "gender",
       label: "Género",
+      required: true,
       options: [
         { label: "Masculino", value: "male" },
         { label: "Femenino", value: "female" },

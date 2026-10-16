@@ -13,6 +13,8 @@ export type FilterConfig = {
   key: string;
   label: string;
   options: FilterOption[];
+  /** No se puede vaciar (ni con Limpiar). P. ej. temporada / género. */
+  required?: boolean;
 };
 
 type FilterBarProps = {
@@ -28,19 +30,21 @@ export default function FilterBar({
   configs,
   className,
 }: Readonly<FilterBarProps>) {
-  const toggleFilter = (key: string, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: prev[key] === value ? undefined : value,
-    }));
+  const requiredKeys = new Set(configs.filter((c) => c.required).map((c) => c.key));
+
+  const setFilterValue = (key: string, value: string | undefined) => {
+    if (value === undefined && requiredKeys.has(key)) return;
+    setFilters((prev) => {
+      if (prev[key] === value) return prev;
+      return { ...prev, [key]: value };
+    });
   };
 
-  const activeCount = Object.values(filters).filter(Boolean).length;
+  const clearableActive = configs.some((c) => !c.required && Boolean(filters[c.key]));
 
   return (
-    <div
-      className={`flex flex-wrap items-center gap-2 ${className ?? "mb-5"}`}
-    >      {configs.map((config) => {
+    <div className={`flex flex-wrap items-center gap-2 ${className ?? "mb-5"}`}>
+      {configs.map((config) => {
         const currentValue = filters[config.key];
         const selectedLabel = config.options.find((opt) => opt.value === currentValue)?.label;
 
@@ -50,33 +54,37 @@ export default function FilterBar({
             label={config.label}
             options={config.options.map((opt) => opt.label)}
             value={selectedLabel}
+            clearable={!config.required}
             onChange={(label) => {
               if (!label.trim()) {
-                setFilters((prev) => ({ ...prev, [config.key]: undefined }));
+                setFilterValue(config.key, undefined);
                 return;
               }
               const selected = config.options.find((opt) => opt.label === label);
-              if (selected) toggleFilter(config.key, selected.value);
+              if (selected) setFilterValue(config.key, selected.value);
             }}
           />
         );
       })}
 
-      {activeCount > 0 && (
+      {clearableActive ? (
         <button
           type="button"
           onClick={() => {
-            const cleared = Object.fromEntries(
-              Object.keys(filters).map((k) => [k, undefined])
-            );
-            setFilters(cleared);
+            setFilters((prev) => {
+              const next = { ...prev };
+              for (const config of configs) {
+                if (!config.required) next[config.key] = undefined;
+              }
+              return next;
+            });
           }}
           className="inline-flex min-h-9 cursor-pointer touch-manipulation items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-faint)] hover:text-[var(--accent)]"
         >
           <FontAwesomeIcon icon={faXmark} className="text-[10px] opacity-80" />
-          Limpiar todo
+          Limpiar filtros
         </button>
-      )}
+      ) : null}
     </div>
   );
 }

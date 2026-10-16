@@ -10,9 +10,17 @@ type DropdownProps = {
   options: string[];
   value?: string;
   onChange: (value: string) => void;
+  /** Si false, no hay acción «Limpiar» en el menú (filtros obligatorios). */
+  clearable?: boolean;
 };
 
-export default function FilterDropdown({ label, options, value, onChange }: Readonly<DropdownProps>) {
+export default function FilterDropdown({
+  label,
+  options,
+  value,
+  onChange,
+  clearable = true,
+}: Readonly<DropdownProps>) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -74,18 +82,19 @@ export default function FilterDropdown({ label, options, value, onChange }: Read
               </button>
             ))}
 
-            {value && (
+            {clearable && value ? (
               <button
+                type="button"
                 onClick={() => {
                   onChange("");
                   setIsOpen(false);
                 }}
-                className="w-full cursor-pointer text-left px-3.5 py-2.5 text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/5 transition-all rounded-b-lg border-t border-white/5"
+                className="w-full cursor-pointer text-left px-3.5 py-2.5 text-[var(--text-muted)] transition-all hover:bg-red-500/5 hover:text-red-400 rounded-b-lg border-t border-white/5"
               >
                 <FontAwesomeIcon icon={faTrash} className="mr-1.5" />
                 Limpiar
               </button>
-            )}
+            ) : null}
           </motion.div>
         )}
       </AnimatePresence>

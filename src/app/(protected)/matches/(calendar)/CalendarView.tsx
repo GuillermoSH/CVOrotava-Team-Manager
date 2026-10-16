@@ -235,11 +235,13 @@ export default function CalendarView({
     {
       key: "season",
       label: "Temporada",
+      required: true,
       options: seasons.map((s) => ({ label: s, value: s })),
     },
     {
       key: "gender",
       label: "Género",
+      required: true,
       options: [
         { label: "Masculino", value: "male" },
         { label: "Femenino", value: "female" },

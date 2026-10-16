@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, useReducedMotion } from "framer-motion";
 import { PaymentsListSkeleton } from "@/components/skeletons/PaymentsSkeleton";
@@ -230,11 +230,16 @@ export default function PaymentsView({
     }
   };
 
+  // Solo saltar el primer fetch con usuario (datos SSR). Comparar con initialFilters
+  // dejaba datos viejos al volver a temporada/género por defecto.
+  const skipFilterFetchRef = useRef(true);
   useEffect(() => {
-    const sameSeason = (filters.season ?? "") === (initialFilters.season ?? "");
-    const sameGender = (filters.gender ?? "") === (initialFilters.gender ?? "");
-    if (sameSeason && sameGender) return;
-    if (user) fetchPayments();
+    if (!user) return;
+    if (skipFilterFetchRef.current) {
+      skipFilterFetchRef.current = false;
+      return;
+    }
+    void fetchPayments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, filters]);
 
@@ -271,6 +276,7 @@ export default function PaymentsView({
     {
       key: "season",
       label: "Temporada",
+      required: true,
       options: seasons.map((s) => ({ label: s, value: s })),
     },
     ...(user?.isAdmin
@@ -278,6 +284,7 @@ export default function PaymentsView({
           {
             key: "gender",
             label: "Género",
+            required: true,
             options: [
               { label: "Masculino", value: "male" },
               { label: "Femenino", value: "female" },
