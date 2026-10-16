@@ -108,7 +108,11 @@ describe("GET /api/payments IDOR", () => {
 
     const res = await GET(new Request("http://local/api/payments"));
     expect(res.status).toBe(200);
-    expect(paymentsChain.eq).toHaveBeenCalledWith("player_id", ownPlayerId);
+    // Filtro en la base de datos: su ficha + cuotas antiguas solo por usuario (sin ficha).
+    const orFilter = paymentsChain.or.mock.calls[0][0] as string;
+    expect(orFilter).toContain(`player_id.eq.${ownPlayerId}`);
+    expect(orFilter).toContain(`user_id.eq.${PLAYER.id}`);
+    expect(orFilter).not.toContain("other-player");
     expect(listUsers).not.toHaveBeenCalled();
 
     const body = await jsonOf(res);

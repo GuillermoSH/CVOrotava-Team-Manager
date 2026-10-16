@@ -17,6 +17,7 @@ export function createQueryChain(result: QueryResult = { data: [], error: null }
     "delete",
     "neq",
     "not",
+    "or",
     "in",
     "is",
     "limit",
@@ -38,6 +39,7 @@ export function createQueryChain(result: QueryResult = { data: [], error: null }
   return chain as typeof chain & {
     select: ReturnType<typeof vi.fn>;
     eq: ReturnType<typeof vi.fn>;
+    or: ReturnType<typeof vi.fn>;
     order: ReturnType<typeof vi.fn>;
     insert: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;

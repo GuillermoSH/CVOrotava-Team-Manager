@@ -171,7 +171,9 @@ describe("users RLS must freeze privileged columns for client JWT", () => {
       "supabase/migrations/20261002141500_players_teams_rls_allowlisted_read.sql"
     );
     expect(sql).toContain("enable row level security");
-    expect(sql).not.toMatch(/Allowlisted users can read players/);
+    // Puede mencionar la política solo para borrarla; nunca para crearla.
+    expect(sql).not.toMatch(/create\s+policy[^;]*Allowlisted users can read/i);
+    expect(sql).toMatch(/drop policy if exists "Allowlisted users can read players"/i);
     expect(sql).toContain("allowed_emails");
   });
 });
