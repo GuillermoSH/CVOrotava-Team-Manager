@@ -41,9 +41,13 @@ const fetchSeasons = unstable_cache(
       if (d.season) seeded.add(d.season);
     }
 
-    return [...seeded]
-      .map((s) => normalizeSeasonId(s))
-      .sort((a, b) => b.localeCompare(a));
+    const normalized = new Set<string>();
+    for (const s of seeded) {
+      const id = normalizeSeasonId(s);
+      if (id) normalized.add(id);
+    }
+
+    return [...normalized].sort((a, b) => b.localeCompare(a));
   },
   ["app-seasons"],
   { revalidate: 300 }

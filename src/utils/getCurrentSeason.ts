@@ -1,16 +1,19 @@
 /**
  * Canonical season label shared with Portal: `YYYY-YY` (e.g. `2026-27`).
- * Accepts legacy Team Manager `YYYY/YY` and normalizes to hyphen.
+ * Accepts legacy Team Manager `YYYY/YY`, `YYYY/YYYY`, and hyphen variants.
  */
 
-const SEASON_RE = /^(\d{4})[/-](\d{2})$/;
+const SEASON_SHORT_RE = /^(\d{4})[/-](\d{2})$/;
+const SEASON_FULL_RE = /^(\d{4})[/-](\d{4})$/;
 
 /** Normalize any known season label to Portal/TM canonical `YYYY-YY`. */
 export function normalizeSeasonId(season: string): string {
-  const trimmed = season.trim();
-  const match = trimmed.match(SEASON_RE);
-  if (!match) return trimmed;
-  return `${match[1]}-${match[2]}`;
+  const trimmed = season.trim().replace(/[\r\n]+/g, "");
+  const short = trimmed.match(SEASON_SHORT_RE);
+  if (short) return `${short[1]}-${short[2]}`;
+  const full = trimmed.match(SEASON_FULL_RE);
+  if (full) return `${full[1]}-${full[2].slice(-2)}`;
+  return trimmed;
 }
 
 /** Temporada deportiva: arranca en septiembre. Ej: 2026-27 */

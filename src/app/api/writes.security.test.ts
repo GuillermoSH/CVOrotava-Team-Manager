@@ -40,7 +40,7 @@ const matchBody = {
   date: "2026-01-01",
   time: "20:00",
   opponent: "Rival",
-  season: "2025/2026",
+  season: "2025-26",
   gender: "male",
   venue_id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
 };

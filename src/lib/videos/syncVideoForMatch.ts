@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import type { VideoType } from "@/lib/videos/constants";
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 const MATCH_VIDEO_TYPES: VideoType[] = ["league_match", "friendly_match"];
 
@@ -61,7 +62,7 @@ export async function syncVideoForMatch(
   const videoPayload = {
     url,
     match_id: params.matchId,
-    season: params.season,
+    season: normalizeSeasonId(params.season),
     gender: params.gender,
     video_type: videoType,
   };

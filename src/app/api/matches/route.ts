@@ -5,13 +5,14 @@ import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { syncVideoForMatch } from "@/lib/videos/syncVideoForMatch";
 import { listMatches } from "@/lib/matches/listMatches";
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 import { z } from "zod";
 
 const matchSchema = z.object({
   date: z.string(),
   time: z.string(),
   opponent: z.string(),
-  season: z.string(),
+  season: z.string().min(4).transform(normalizeSeasonId),
   gender: z.enum(["male", "female"]),
   venue_id: z.string().uuid(),
   result: z.string().optional().nullable(),

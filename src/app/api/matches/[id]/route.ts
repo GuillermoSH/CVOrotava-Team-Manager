@@ -5,6 +5,7 @@ import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { syncVideoForMatch } from "@/lib/videos/syncVideoForMatch";
 import { getMatchById } from "@/lib/matches/getMatchById";
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 type MatchSetInput = { team_score: number; opponent_score: number };
 
@@ -47,13 +48,18 @@ export async function PUT(
     const { id } = await params;
     const body = await req.json();
 
+    const season =
+      typeof body.season === "string" && body.season.trim()
+        ? normalizeSeasonId(body.season)
+        : body.season;
+
     const { data: updatedMatch, error } = await supabaseAdmin
       .from("matches")
       .update({
         date: body.date,
         time: body.time,
         opponent: body.opponent,
-        season: body.season,
+        season,
         result: body.result || null,
         video_url: body.video_url || null,
         notes: body.notes || null,

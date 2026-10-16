@@ -13,6 +13,12 @@ describe("season helpers — Portal/TM YYYY-YY", () => {
     expect(normalizeSeasonId(" 2025/26 ")).toBe("2025-26");
   });
 
+  it("normalizes full end-year forms to YYYY-YY", () => {
+    expect(normalizeSeasonId("2025-26")).toBe("2025-26");
+    expect(normalizeSeasonId("2025-2026")).toBe("2025-26");
+    expect(normalizeSeasonId("2026/2027")).toBe("2026-27");
+  });
+
   it("getCurrentSeason uses hyphen (Sep 2026 → 2026-27)", () => {
     expect(getCurrentSeason(new Date(2026, 8, 15))).toBe("2026-27");
     expect(getCurrentSeason(new Date(2026, 2, 1))).toBe("2025-26");

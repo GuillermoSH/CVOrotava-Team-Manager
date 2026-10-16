@@ -5,7 +5,7 @@
 -- explain (analyze, buffers, format text)
 -- select m.id, m.date, m.time, m.opponent, m.season, m.gender, m.result
 -- from public.matches m
--- where m.season = '2025/2026' and m.gender = 'male'
+-- where m.season = '2025-26' and m.gender = 'male'
 -- order by m.date asc, m.time asc;
 
 -- Pagos por usuario y fecha (jugador autenticado; el plan real con RLS puede variar)
@@ -13,13 +13,13 @@
 -- select id, user_id, concept, amount, status, due_date, paid_date, notes, season, created_at, updated_at
 -- from public.payments
 -- where user_id = '00000000-0000-0000-0000-000000000000'::uuid
---   and season = '2025/2026'
+--   and season = '2025-26'
 -- order by due_date asc nulls last;
 
 -- Videos paginados (orden por created_at)
 -- explain (analyze, buffers, format text)
 -- select id, url, created_at, category, season, competition_type, gender
 -- from public.videos
--- where season = '2025/2026'
+-- where season = '2025-26'
 -- order by created_at desc
 -- limit 12 offset 0;

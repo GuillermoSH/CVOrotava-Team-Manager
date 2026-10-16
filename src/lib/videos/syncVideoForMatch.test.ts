@@ -33,7 +33,7 @@ describe("syncVideoForMatch", () => {
     await syncVideoForMatch({
       matchId: "match-1",
       videoUrl: "",
-      season: "2025/2026",
+      season: "2025-26",
       gender: "male",
     });
 
@@ -56,7 +56,7 @@ describe("syncVideoForMatch", () => {
     await syncVideoForMatch({
       matchId: "match-1",
       videoUrl: "https://youtube.com/watch?v=abc",
-      season: "2025/2026",
+      season: "2025-26",
       gender: "male",
     });
 
@@ -82,7 +82,7 @@ describe("linkVideoToMatch", () => {
           id: "v1",
           url: "https://youtube.com/watch?v=x",
           video_type: "training",
-          season: "2025/2026",
+          season: "2025-26",
           gender: "male",
           match_id: null,
         },

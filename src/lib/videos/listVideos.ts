@@ -8,6 +8,7 @@ import {
   type VideoListItem,
   type VideoMatchSummary,
 } from "@/lib/videos/constants";
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 export {
   DEFAULT_VIDEO_PAGE_SIZE,
@@ -39,7 +40,7 @@ export async function listVideos(
 
   let query = supabaseAdmin.from("videos").select(VIDEO_LIST_WITH_MATCH);
 
-  if (opts.season) query = query.eq("season", opts.season);
+  if (opts.season) query = query.eq("season", normalizeSeasonId(opts.season));
   if (opts.video_type) query = query.eq("video_type", opts.video_type);
   if (opts.gender) query = query.eq("gender", opts.gender);
 

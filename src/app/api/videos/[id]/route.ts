@@ -5,11 +5,12 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { VIDEO_LIST_COLUMNS, VIDEO_LIST_WITH_MATCH, VIDEO_TYPES, type VideoMatchSummary } from "@/lib/videos/constants";
 import { linkVideoToMatch } from "@/lib/videos/syncVideoForMatch";
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 const videoBodySchema = z.object({
   url: z.string().url(),
   video_type: z.enum(VIDEO_TYPES),
-  season: z.string().min(4),
+  season: z.string().min(4).transform(normalizeSeasonId),
   gender: z.enum(["male", "female"]),
   match_id: z.string().uuid().nullable().optional(),
 });

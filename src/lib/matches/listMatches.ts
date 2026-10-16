@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 export type ListMatchesOpts = {
   gender?: string | null;
@@ -53,7 +54,7 @@ const listMatchesCached = cache(
       .order("date", { ascending })
       .order("time", { ascending });
 
-    if (season) query = query.eq("season", season);
+    if (season) query = query.eq("season", normalizeSeasonId(season));
     if (gender) query = query.eq("gender", gender);
     if (limit) query = query.limit(limit);
     if (hasResult === "1")
