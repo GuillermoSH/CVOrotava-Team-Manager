@@ -199,9 +199,13 @@ export default function HomeView({
               <h2 className="text-lg font-semibold tracking-tight sm:text-xl">
                 Tu temporada
               </h2>
-              <p className="text-sm text-[var(--text-muted)]">
-                Rendimiento y calendario
-              </p>
+              <Link
+                href="/stats"
+                className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              >
+                Ver estadísticas
+                <FontAwesomeIcon icon={faArrowRight} className="text-xs" aria-hidden />
+              </Link>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-[minmax(0,6.5rem)_1fr] sm:items-start sm:gap-8">

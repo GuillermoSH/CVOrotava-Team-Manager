@@ -22,7 +22,7 @@ export default function ThemeToggle({
 
   const sizing =
     variant === "compact"
-      ? "h-9 w-9 sm:h-9 sm:w-9"
+      ? "h-11 w-11 touch-manipulation sm:h-9 sm:w-9"
       : "gap-2 px-3.5 py-2 text-sm font-medium";
 
   return (
