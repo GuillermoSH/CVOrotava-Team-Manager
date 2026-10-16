@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { motion, useReducedMotion } from "framer-motion";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
@@ -8,7 +8,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import TeamCardPanel from "@/components/stats/competitive/TeamCardPanel";
 import RivalsPanel from "@/components/stats/competitive/RivalsPanel";
-import { FormPanel, NextMatchPanel, TopRivalPanel } from "@/components/stats/competitive/NextMatchPanel";
+import { FormPanel, NextMatchPanel, PositionPanel } from "@/components/stats/competitive/NextMatchPanel";
 import { StatsSummarySkeleton } from "@/components/skeletons/StatsSkeleton";
 import { useSeasons } from "@/contexts/SeasonContext";
 import { useUser } from "@/contexts/UserContext";
@@ -28,6 +28,7 @@ import {
   faPercent,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { prettyTeamName } from "@/lib/fed/linkPlan";
 
 type Match = {
   id: string;
@@ -124,11 +125,13 @@ export default function StatsView({
     {
       key: "season",
       label: "Temporada",
+      required: true,
       options: seasons.map((s) => ({ label: s, value: s })),
     },
     {
       key: "gender",
       label: "Género",
+      required: true,
       options: [
         { label: "Masculino", value: "male" },
         { label: "Femenino", value: "female" },
@@ -164,12 +167,16 @@ export default function StatsView({
     }
   }, []);
 
+  // Solo saltar el primer paint (datos SSR). Comparar con initialFilters fallaba al
+  // volver a temporada/género por defecto: el estado ya era de otro filtro.
+  const skipFilterFetchRef = useRef(true);
   useEffect(() => {
-    const sameSeason = (filters.season ?? "") === (initialFilters.season ?? "");
-    const sameGender = (filters.gender ?? "") === (initialFilters.gender ?? "");
-    if (sameSeason && sameGender) return;
+    if (skipFilterFetchRef.current) {
+      skipFilterFetchRef.current = false;
+      return;
+    }
     void loadAll(filters);
-  }, [filters, initialFilters.season, initialFilters.gender, loadAll]);
+  }, [filters, loadAll]);
 
   const leagueIds = useMemo(() => new Set(competitive?.leagueMatchIds ?? []), [competitive]);
   const canScope = Boolean(competitive?.hasLeague);
@@ -269,7 +276,7 @@ export default function StatsView({
         ? "text-[var(--color-danger)]"
         : "text-[var(--text-secondary)]";
 
-  const summaryMetrics: {
+  const pulseMetrics: {
     key: string;
     label: string;
     value: ReactNode;
@@ -304,6 +311,15 @@ export default function StatsView({
       tone: "text-[var(--text-primary)]",
       icon: faPercent,
     },
+  ];
+
+  const extraMetrics: {
+    key: string;
+    label: string;
+    value: ReactNode;
+    tone: string;
+    icon: IconDefinition;
+  }[] = [
     {
       key: "sets",
       label: "Sets F–C",
@@ -339,11 +355,21 @@ export default function StatsView({
       content
     ) : (
       <p className="text-sm text-[var(--text-muted)]">
-        Elige una temporada y un género en los filtros para ver la ficha y los rivales.
+        Elige una temporada y un género en los filtros para ver clasificación, próximo partido y rivales.
       </p>
     );
 
-  const seasonSummary = (
+  const metricCell = (m: (typeof pulseMetrics)[number]) => (
+    <div key={m.key}>
+      <dt className={`flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-wider ${m.tone}`}>
+        <FontAwesomeIcon icon={m.icon} className="text-[0.7rem]" aria-hidden />
+        {m.label}
+      </dt>
+      <dd className={`mt-1 text-xl font-bold tabular-nums tracking-tight sm:text-2xl ${m.tone}`}>{m.value}</dd>
+    </div>
+  );
+
+  const seasonPulse = (
     <section>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Temporada</h2>
@@ -359,55 +385,54 @@ export default function StatsView({
           />
         ) : null}
       </div>
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-5 border-b border-[var(--glass-border)] pb-8 sm:grid-cols-4">
-        {summaryMetrics.map((m) => (
-          <div key={m.key}>
-            <dt
-              className={`flex items-center gap-1.5 text-[0.65rem] font-semibold uppercase tracking-wider ${m.tone}`}
-            >
-              <FontAwesomeIcon icon={m.icon} className="text-[0.7rem]" aria-hidden />
-              {m.label}
-            </dt>
-            <dd className={`mt-1 text-xl font-bold tabular-nums tracking-tight sm:text-2xl ${m.tone}`}>
-              {m.value}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-4">{pulseMetrics.map(metricCell)}</dl>
     </section>
   );
 
-  const detailCharts = (
-    <div className="grid gap-10 md:grid-cols-2 md:gap-x-10">
-      <section>
-        <h2 className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">Distribución de resultados</h2>
-        {resultDistSorted.length > 0 ? (
-          <ResultDistributionChart data={resultDistSorted} />
-        ) : (
-          <p className="py-6 text-sm text-[var(--text-muted)]">Sin resultados suficientes para mostrar el gráfico</p>
-        )}
-      </section>
-
-      <section>
-        <h2 className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">Rendimiento por lugar</h2>
-        <ul className="divide-y divide-[var(--glass-border)]">
-          {locationStats.map((loc) => (
-            <li key={loc.location} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-              <FontAwesomeIcon icon={loc.icon} className="w-4 shrink-0 text-sm text-[var(--accent)]" aria-hidden />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-[var(--text-primary)]">{loc.location}</p>
-                <p className="text-xs text-[var(--text-muted)]">
-                  {loc.total} partido{loc.total === 1 ? "" : "s"}
-                </p>
-              </div>
-              <p className={`shrink-0 text-lg font-bold tabular-nums sm:text-xl ${rateTone(loc.winRate)}`}>
-                {loc.winRate}%
+  const seasonDetails = (
+    <details className="group border-t border-[var(--glass-border)] pt-6">
+      <summary className="cursor-pointer text-sm font-semibold text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">
+        Más de la temporada
+      </summary>
+      <div className="mt-6 flex flex-col gap-10">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-4">{extraMetrics.map(metricCell)}</dl>
+        <div className="grid gap-10 md:grid-cols-2 md:gap-x-10">
+          <section>
+            <h3 className="mb-4 text-base font-semibold tracking-tight sm:text-lg">Distribución de resultados</h3>
+            {resultDistSorted.length > 0 ? (
+              <ResultDistributionChart data={resultDistSorted} />
+            ) : (
+              <p className="py-6 text-sm text-[var(--text-muted)]">
+                Sin resultados suficientes para mostrar el gráfico
               </p>
-            </li>
-          ))}
-        </ul>
-      </section>
-    </div>
+            )}
+          </section>
+          <section>
+            <h3 className="mb-4 text-base font-semibold tracking-tight sm:text-lg">Rendimiento por lugar</h3>
+            <ul className="divide-y divide-[var(--glass-border)]">
+              {locationStats.map((loc) => (
+                <li key={loc.location} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                  <FontAwesomeIcon
+                    icon={loc.icon}
+                    className="w-4 shrink-0 text-sm text-[var(--accent)]"
+                    aria-hidden
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{loc.location}</p>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      {loc.total} partido{loc.total === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  <p className={`shrink-0 text-lg font-bold tabular-nums sm:text-xl ${rateTone(loc.winRate)}`}>
+                    {loc.winRate}%
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+      </div>
+    </details>
   );
 
   return (
@@ -421,7 +446,7 @@ export default function StatsView({
         title="Estadísticas"
         subtitle={
           <>
-            Rendimiento del equipo por temporada y contexto
+            Cómo vamos esta temporada
             <span className="mt-1 block text-xs">
               <FedSyncStatus
                 isAdmin={Boolean(user?.isAdmin)}
@@ -443,7 +468,7 @@ export default function StatsView({
             { value: "resumen", label: "Resumen" },
             { value: "rivales", label: "Rivales" },
             { value: "liga", label: "Liga" },
-            { value: "versus", label: "Vs. año pasado" },
+            { value: "versus", label: "Comparar" },
           ]}
         />
       </div>
@@ -482,15 +507,28 @@ export default function StatsView({
                   <TeamCardPanel stats={competitive} />
                 </div>
                 <div className="order-1 flex flex-col gap-9 lg:order-2">
+                  <PositionPanel stats={competitive} onOpenLeague={() => setTab("liga")} />
                   <NextMatchPanel stats={competitive} onOpenRival={openRival} />
                   <FormPanel stats={competitive} />
-                  <TopRivalPanel stats={competitive} onOpenRival={openRival} />
+                  {competitive.rivals[0] ? (
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      Rival a batir:{" "}
+                      <button
+                        type="button"
+                        onClick={() => openRival(competitive.rivals[0].teamId)}
+                        className="font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                      >
+                        {prettyTeamName(competitive.rivals[0].name)}
+                      </button>
+                      <span className="text-[var(--text-muted)]"> — {competitive.rivals[0].reason}</span>
+                    </p>
+                  ) : null}
                 </div>
               </div>
             ) : null
           )}
-          {seasonSummary}
-          {detailCharts}
+          {seasonPulse}
+          {seasonDetails}
         </div>
       )}
     </motion.div>

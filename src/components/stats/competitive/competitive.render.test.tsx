@@ -4,7 +4,7 @@ import type { FedTournamentBundle } from "@/lib/fed/parse";
 import fixture from "@/lib/stats/competitive/__fixtures__/liga-masculina-2024-27.json";
 import { buildCompetitiveStats } from "@/lib/stats/competitive/build";
 import { seasonDataFromBundles } from "@/lib/stats/competitive/fromBundles";
-import { FormPanel, NextMatchPanel, TopRivalPanel } from "./NextMatchPanel";
+import { FormPanel, NextMatchPanel, PositionPanel, TopRivalPanel } from "./NextMatchPanel";
 import LeaguePanel from "./LeaguePanel";
 import RivalsPanel from "./RivalsPanel";
 import TeamCardPanel from "./TeamCardPanel";
@@ -53,6 +53,22 @@ describe("ficha del equipo", () => {
       today: "2027-10-01",
     });
     expect(clean(html(<TeamCardPanel stats={sinLiga} />))).toContain("Todavía no hay una liga");
+  });
+});
+
+describe("clasificación en resumen", () => {
+  it("muestra puesto, puntos y enlace a la tabla", () => {
+    const out = clean(html(<PositionPanel stats={full} onOpenLeague={noop} />));
+    expect(out).toContain("Clasificación");
+    expect(out).toContain("5.º");
+    expect(out).toContain("de 12");
+    expect(out).toContain("34 pts · 10V 12D");
+    expect(out).toContain("Ver tabla completa");
+  });
+
+  it("arranque sin partidos jugados: avisa en vez de inventar puesto", () => {
+    const out = clean(html(<PositionPanel stats={start} onOpenLeague={noop} />));
+    expect(out).toContain("Sin partidos aún");
   });
 });
 

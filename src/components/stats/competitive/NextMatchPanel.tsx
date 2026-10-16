@@ -3,7 +3,65 @@
 import { prettyTeamName } from "@/lib/fed/linkPlan";
 import type { CompetitiveStats } from "@/lib/stats/competitive/build";
 import { FormPips, Meter, Stars, TagChip } from "./ui";
-import { percent, whenLabel } from "./format";
+import { ordinal, percent, whenLabel } from "./format";
+
+/** Puesto en liga: la historia principal del Resumen. */
+export function PositionPanel({
+  stats,
+  onOpenLeague,
+}: Readonly<{ stats: CompetitiveStats; onOpenLeague: () => void }>) {
+  if (!stats.hasLeague || !stats.group) {
+    return (
+      <section aria-labelledby="position-title">
+        <h2 id="position-title" className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">
+          Clasificación
+        </h2>
+        <p className="text-sm text-[var(--text-muted)]">
+          Todavía no hay una liga con nuestro equipo en esta temporada.
+        </p>
+      </section>
+    );
+  }
+
+  const ours = stats.standings.find((t) => t.isOurs);
+  const played = ours?.played ?? 0;
+  const position = ours && played > 0 ? ours.position : null;
+  const points = ours?.leaguePoints ?? 0;
+  const wins = ours?.wins ?? 0;
+  const losses = ours?.losses ?? 0;
+
+  return (
+    <section aria-labelledby="position-title">
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 id="position-title" className="text-lg font-semibold tracking-tight sm:text-xl">
+          Clasificación
+        </h2>
+        <p className="text-sm text-[var(--text-muted)]">{prettyTeamName(stats.group.name)}</p>
+      </div>
+      {position !== null ? (
+        <p className="text-4xl font-bold tracking-tight tabular-nums sm:text-5xl">
+          {ordinal(position)}
+          <span className="ml-2 text-lg font-semibold text-[var(--text-secondary)] sm:text-xl">
+            de {stats.group.teams}
+          </span>
+        </p>
+      ) : (
+        <p className="text-2xl font-bold tracking-tight text-[var(--text-secondary)]">Sin partidos aún</p>
+      )}
+      <p className="mt-2 text-sm tabular-nums text-[var(--text-secondary)]">
+        {points} pts · {wins}V {losses}D
+        {played > 0 ? ` · ${played} jugados` : ""}
+      </p>
+      <button
+        type="button"
+        onClick={onOpenLeague}
+        className="mt-3 text-sm font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+      >
+        Ver tabla completa
+      </button>
+    </section>
+  );
+}
 
 export function NextMatchPanel({
   stats,
