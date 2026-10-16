@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightFromBracket, faUsers } from "@fortawesome/free-solid-svg-icons";
+import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";
 import { useNavPending } from "@/contexts/NavPendingContext";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -189,23 +189,25 @@ export default function AppShell() {
           </span>
         </Link>
         <div className="flex items-center gap-1.5">
-          {user?.isAdmin ? (
-            <Tooltip label="Usuarios">
-              <Link
-                href="/access"
-                onClick={() => markPending("/access")}
-                aria-label="Usuarios"
-                aria-current={isActive("/access") ? "page" : undefined}
-                className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors ${
-                  isActive("/access")
-                    ? "border-[var(--glass-border)] bg-[var(--glass-surface)] text-[var(--accent)]"
-                    : "border-[var(--glass-border)] bg-[var(--glass-surface)] text-[var(--text-muted)] hover:text-[var(--accent)]"
-                }`}
-              >
-                <FontAwesomeIcon icon={faUsers} className="text-xs" />
-              </Link>
-            </Tooltip>
-          ) : null}
+          {navItems
+            .filter((item) => item.adminOnly)
+            .map((item) => (
+              <Tooltip key={item.href} label={item.name}>
+                <Link
+                  href={item.href}
+                  onClick={() => markPending(item.href)}
+                  aria-label={item.name}
+                  aria-current={isActive(item.href) ? "page" : undefined}
+                  className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors ${
+                    isActive(item.href)
+                      ? "border-[var(--glass-border)] bg-[var(--glass-surface)] text-[var(--accent)]"
+                      : "border-[var(--glass-border)] bg-[var(--glass-surface)] text-[var(--text-muted)] hover:text-[var(--accent)]"
+                  }`}
+                >
+                  <FontAwesomeIcon icon={item.icon} className="text-xs" />
+                </Link>
+              </Tooltip>
+            ))}
           <ThemeToggle />
           <button
             type="button"

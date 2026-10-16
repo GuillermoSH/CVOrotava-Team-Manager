@@ -5,6 +5,7 @@ import {
   faChartSimple,
   faMoneyBill,
   faUsers,
+  faLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
@@ -24,6 +25,12 @@ export const APP_NAV_ITEMS: AppNavItem[] = [
   { name: "Videos", href: "/videos", icon: faVideo },
   { name: "Estadísticas", href: "/stats", icon: faChartSimple, shortName: "Stats" },
   { name: "Pagos", href: "/payments", icon: faMoneyBill },
+  {
+    name: "Pabellones",
+    href: "/venues",
+    icon: faLocationDot,
+    adminOnly: true,
+  },
   {
     name: "Usuarios",
     href: "/access",
