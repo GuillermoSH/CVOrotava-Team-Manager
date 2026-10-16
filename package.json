@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "fed:sync": "tsx --env-file=.env.local scripts/fed-sync.ts"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.0.1",
@@ -37,7 +38,6 @@
     "recharts": "^3.3.0",
     "resend": "^6.1.2",
     "sileo": "^0.1.5",
-    "xlsx": "^0.18.5",
     "zod": "^4.1.12"
   },
   "devDependencies": {
@@ -51,6 +51,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.3",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^4.1.11"
   }
