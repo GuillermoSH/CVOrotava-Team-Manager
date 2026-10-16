@@ -13,7 +13,7 @@ export default async function CalendarPage() {
     order: "asc",
     season,
     gender,
-  })) as Match[];
+  })) as unknown as Match[];
 
   return (
     <CalendarView

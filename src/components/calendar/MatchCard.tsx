@@ -59,7 +59,7 @@ export default function MatchCard({
     "Partido vs " + match.opponent
   )}&dates=${startUTC}/${endUTC}&details=${encodeURIComponent(
     match.notes || ""
-  )}&location=${encodeURIComponent(match.venues.venue_name || "")}`;
+  )}&location=${encodeURIComponent(match.venues?.venue_name || "")}`;
 
   const tagMap = {
     outside_island: {
@@ -78,7 +78,7 @@ export default function MatchCard({
       className: "text-[var(--color-success)]",
     },
   } as const;
-  const tag = tagMap[match.venues.location_type];
+  const tag = match.venues ? tagMap[match.venues.location_type] : null;
 
   const scoreClass =
     tone === "win"
@@ -143,17 +143,17 @@ export default function MatchCard({
                   icon={faLocationDot}
                   className="shrink-0 text-[0.7rem] text-[var(--accent)]"
                 />
-                {match.venues.location_url ? (
+                {match.venues?.location_url ? (
                   <a
-                    href={match.venues.location_url}
+                    href={match.venues?.location_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="truncate transition-colors hover:text-[var(--accent-hover)]"
                   >
-                    {match.venues.venue_name}
+                    {match.venues?.venue_name}
                   </a>
                 ) : (
-                  <span className="truncate">{match.venues.venue_name}</span>
+                  <span className="truncate">{match.venues?.venue_name}</span>
                 )}
               </p>
             </div>

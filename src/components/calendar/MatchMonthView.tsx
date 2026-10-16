@@ -15,7 +15,7 @@ import type { Match } from "./MatchCard.types";
 
 const WEEKDAYS = ["L", "M", "X", "J", "V", "S", "D"];
 
-type LocationType = Match["venues"]["location_type"];
+type LocationType = NonNullable<Match["venues"]>["location_type"];
 
 const LOCATION_PRIORITY: LocationType[] = [
   "outside_island",

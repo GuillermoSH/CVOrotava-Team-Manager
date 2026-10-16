@@ -11,7 +11,8 @@ export type MatchLikeForModal = {
   video_url?: string | null;
   notes?: string | null;
   gender: "male" | "female";
-  venues: { id: string };
+  fed_match_id?: number | null;
+  venues: { id: string } | null;
   match_sets?: Array<{
     set_number: number;
     team_score: number;
@@ -30,7 +31,8 @@ export function matchToModalInitialValues(match: MatchLikeForModal): MatchFormVa
     result: match.result || "",
     video_url: match.video_url || "",
     notes: match.notes || "",
-    venue_id: match.venues.id,
+    venue_id: match.venues?.id ?? "",
+    fed_match_id: match.fed_match_id ?? null,
     gender: match.gender,
     match_sets: sets.map(({ team_score, opponent_score }) => ({
       team_score,

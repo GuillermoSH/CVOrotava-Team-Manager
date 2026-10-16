@@ -25,6 +25,7 @@ const MATCH_LIST_SELECT = `
   notes,
   gender,
   venue_id,
+  fed_match_id,
   venues(id, venue_name, location_type, location_url),
   match_sets(id, set_number, team_score, opponent_score)
 `;

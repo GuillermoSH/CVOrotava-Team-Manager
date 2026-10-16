@@ -23,6 +23,10 @@ import SegmentedControl from "@/components/ui/SegmentedControl";
 import Pagination from "@/components/ui/Pagination";
 import { readPref, writePref } from "@/lib/prefs";
 
+const FedSyncStatus = dynamic(() => import("@/components/calendar/FedSyncStatus"), {
+  ssr: false,
+});
+
 const MatchModal = dynamic(() => import("@/components/calendar/MatchModal"), {
   ssr: false,
 });
@@ -161,7 +165,7 @@ export default function CalendarView({
 
     return fuzzyFilter(filtered, query, (m) => [
       m.opponent,
-      m.venues.venue_name,
+      m.venues?.venue_name ?? "",
       m.result ?? "",
       m.notes ?? "",
     ]);
@@ -262,6 +266,12 @@ export default function CalendarView({
                 {filteredMatches.length === 1 ? "" : "s"}
               </span>
             )}
+            <span className="mt-1 block text-xs">
+              <FedSyncStatus
+                isAdmin={Boolean(user?.isAdmin)}
+                onSynced={() => void fetchMatches()}
+              />
+            </span>
           </>
         }
         actions={

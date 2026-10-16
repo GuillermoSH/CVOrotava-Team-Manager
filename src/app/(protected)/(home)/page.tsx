@@ -24,7 +24,7 @@ export default async function HomePage() {
 
   return (
     <HomeView
-      initialMatches={matches as HomeMatch[]}
+      initialMatches={matches as unknown as HomeMatch[]}
       initialPayments={
         paymentsResult.status === "ok" ? paymentsResult.body : null
       }

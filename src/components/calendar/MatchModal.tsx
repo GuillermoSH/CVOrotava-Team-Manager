@@ -4,7 +4,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes, faSpinner, faTrash, faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
+import { faTimes, faSpinner, faTrash, faPlus, faMinus, faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { FormInput, FormDate, FormTime, FormSelect } from "@/components/ui/forms";
 import { getCurrentSeason, getSeasonSelectOptions } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
@@ -16,11 +16,13 @@ const matchSchema = z.object({
   time: z.string().min(1, "La hora es obligatoria"),
   opponent: z.string().min(2, "El rival es obligatorio"),
   season: z.string().min(4, "Ej: 2026-27"),
-  venue_id: z.string().uuid("Selecciona un pabellón válido").min(1, "Selecciona un pabellón"),
+  venue_id: z.string(),
   video_url: z.string().optional().or(z.literal("")),
   notes: z.string().optional().or(z.literal("")),
   result: z.string().optional().or(z.literal("")),
   gender: z.enum(["male", "female"], { message: "El género es obligatorio" }),
+  /** Partido de la federación: el pabellón puede venir vacío y lo gestiona el sync. */
+  fed_match_id: z.number().nullable().optional(),
   match_sets: z
     .array(
       z.object({
@@ -30,6 +32,10 @@ const matchSchema = z.object({
     )
     .max(5)
     .optional(),
+}).superRefine((v, ctx) => {
+  if (!v.fed_match_id && !z.string().uuid().safeParse(v.venue_id).success) {
+    ctx.addIssue({ code: "custom", path: ["venue_id"], message: "Selecciona un pabellón válido" });
+  }
 });
 
 export type MatchFormValues = z.infer<typeof matchSchema>;
@@ -70,6 +76,9 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
       match_sets: [],
     },
   });
+
+  /** Campos de competición gestionados por la sincronización con la federación. */
+  const fromFed = Boolean(initialData?.fed_match_id);
 
   const season = watch("season");
   const gender = watch("gender");
@@ -159,13 +168,15 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
       computedResult = `${team}-${opp}`;
     }
 
-    const payload = {
-      ...data,
-      result:
-        data.match_sets && data.match_sets.length > 0
-          ? computedResult
-          : data.result?.trim() || null,
-    };
+    const payload = fromFed
+      ? { opponent: data.opponent, video_url: data.video_url, notes: data.notes }
+      : {
+          ...data,
+          result:
+            data.match_sets && data.match_sets.length > 0
+              ? computedResult
+              : data.result?.trim() || null,
+        };
 
     try {
       const isEdit = !!initialData?.id;
@@ -282,6 +293,15 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
 
             <div className="p-5 overflow-y-auto hidden-scrollbar">
               <form id="matchForm" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {fromFed && (
+                  <p className="flex items-start gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--glass-surface)] p-3 text-xs text-[var(--text-secondary)]">
+                    <FontAwesomeIcon icon={faCircleInfo} className="mt-0.5 text-[var(--accent)]" />
+                    <span>
+                      Partido de la federación: fecha, hora, pabellón, temporada, resultado y sets se
+                      actualizan solos cada lunes. Aquí puedes editar el rival, el vídeo y las notas.
+                    </span>
+                  </p>
+                )}
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--accent)] mb-3">Información Principal</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -295,24 +315,24 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                          </div>
                       </div>
                     ) : (
-                      <FormSelect label="Pabellón *" name="venue_id" control={control} options={venueOptions} error={errors.venue_id} />
+                      <FormSelect label={fromFed ? "Pabellón" : "Pabellón *"} name="venue_id" control={control} options={venueOptions} error={errors.venue_id} disabled={fromFed} />
                     )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <fieldset disabled={fromFed} className="grid grid-cols-1 sm:grid-cols-2 gap-4 disabled:opacity-60">
                   <FormDate label="Fecha *" name="date" register={register("date")} error={errors.date} />
                   <FormTime label="Hora *" name="time" register={register("time")} error={errors.time} />
-                </div>
+                </fieldset>
 
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--accent)] mb-3">Clasificación</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormSelect label="Temporada *" name="season" control={control} options={getSeasonSelectOptions()} error={errors.season} />
+                    <FormSelect label="Temporada *" name="season" control={control} options={getSeasonSelectOptions()} error={errors.season} disabled={fromFed} />
                     <FormSelect label="Género *" name="gender" control={control} options={[
                       { value: "male", label: "Masculino" },
                       { value: "female", label: "Femenino" },
-                    ]} error={errors.gender} />
+                    ]} error={errors.gender} disabled={fromFed} />
                   </div>
                 </div>
 
@@ -331,10 +351,10 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                   <FormInput label="Notas externas" name="notes" register={register("notes")} error={errors.notes} placeholder="Alguna lesión, retraso..." />
                 </div>
 
-                <div className="mt-6 border-t border-[var(--glass-border)] pt-4">
+                <fieldset disabled={fromFed} className="mt-6 border-t border-[var(--glass-border)] pt-4 disabled:opacity-60">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-[var(--text-primary)] text-sm font-semibold">Sets Finalizados (Opcional)</h3>
-                    {fields.length < 5 && (
+                    {fields.length < 5 && !fromFed && (
                       <button
                         type="button"
                         onClick={() => append({ team_score: 0, opponent_score: 0 })}
@@ -371,13 +391,13 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                             min={0}
                           />
                         </div>
-                        <button
+                        {!fromFed && <button
                           type="button"
                           onClick={() => remove(index)}
                           className="cursor-pointer h-[38px] px-3 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition self-end"
                         >
                           <FontAwesomeIcon icon={faMinus} />
-                        </button>
+                        </button>}
                       </div>
                     ))}
                     {fields.length === 0 && (
@@ -386,7 +406,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                       </div>
                     )}
                   </div>
-                </div>
+                </fieldset>
 
                 {message && (
                   <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${message.type === "success" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"}`}>
@@ -397,7 +417,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
             </div>
 
             <div className="p-5 border-t border-[var(--glass-border)] flex flex-wrap-reverse sm:flex-nowrap gap-3 items-center justify-between bg-[var(--surface-faint)] rounded-b-2xl">
-              {initialData ? (
+              {initialData && !fromFed ? (
                 <button
                   type="button"
                   onClick={handleDelete}

@@ -12,6 +12,7 @@ const MATCH_DETAIL_SELECT = `
   notes,
   gender,
   venue_id,
+  fed_match_id,
   venues (
     id,
     venue_name,
