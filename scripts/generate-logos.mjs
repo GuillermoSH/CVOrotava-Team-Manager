@@ -1,94 +1,81 @@
-import sharp from "sharp";
-import { mkdirSync } from "node:fs";
+/**
+ * Sync club logos from CVOrotava-Portal (canonical optimized WebPs + favicon).
+ *
+ * Usage (from Team Manager root, sibling Portal checkout):
+ *   node scripts/generate-logos.mjs
+ */
+import { cpSync, mkdirSync, existsSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { execFileSync } from "node:child_process";
 
-const OUT_DIR = "public/assets/imgs";
-const SIZES = [32, 64, 128, 192, 256, 512];
-/** Matches --color-bg-elevated in dark theme */
-const DARK = { r: 20, g: 20, b: 24, alpha: 1 };
-const PAD = 0.1;
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, "..");
+const PORTAL = resolve(ROOT, "../CVOrotava-Portal");
+const PORTAL_LOGO = join(PORTAL, "public/logo");
+const OUT_LOGO = join(ROOT, "public/logo");
 
-mkdirSync(OUT_DIR, { recursive: true });
-
-async function resizedLogo(src, box) {
-  return sharp(src)
-    .resize(box, box, {
-      fit: "contain",
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    })
-    .png()
-    .toBuffer();
+if (!existsSync(PORTAL_LOGO)) {
+  console.error("Portal logos not found at", PORTAL_LOGO);
+  process.exit(1);
 }
 
-async function writeSquare({ src, name, size, background }) {
-  const inner = Math.round(size * (1 - PAD * 2));
-  const logo = await resizedLogo(src, inner);
-  const base = sharp({
-    create: {
-      width: size,
-      height: size,
-      channels: 4,
-      background,
-    },
-  }).composite([{ input: logo, gravity: "centre" }]);
+mkdirSync(OUT_LOGO, { recursive: true });
+cpSync(PORTAL_LOGO, OUT_LOGO, { recursive: true });
+console.log("synced", OUT_LOGO);
 
-  const out = `${OUT_DIR}/${name}_${size}.webp`;
-  await base.webp({ quality: 92, alphaQuality: 90, effort: 6 }).toFile(out);
-  console.log("wrote", out);
+const faviconSrc = join(PORTAL, "app/favicon.ico");
+const faviconDst = join(ROOT, "src/app/favicon.ico");
+cpSync(faviconSrc, faviconDst);
+console.log("wrote", faviconDst);
+
+const blanco64 = join(OUT_LOGO, "logo_blanco_64.webp");
+const blanco256 = join(OUT_LOGO, "logo_blanco_256.webp");
+const iconOut = join(ROOT, "src/app/icon.png");
+const appleOut = join(ROOT, "src/app/apple-icon.png");
+
+function magick(args) {
+  try {
+    execFileSync("magick", args, { stdio: "inherit" });
+  } catch {
+    execFileSync("convert", args, { stdio: "inherit" });
+  }
 }
 
-for (const size of SIZES) {
-  await writeSquare({
-    src: `${OUT_DIR}/logo_blanco.png`,
-    name: "logo_blanco",
-    size,
-    background: DARK,
-  });
-  await writeSquare({
-    src: `${OUT_DIR}/logo_negro.png`,
-    name: "logo_negro",
-    size,
-    background: { r: 0, g: 0, b: 0, alpha: 0 },
-  });
-}
+magick([
+  blanco64,
+  "-resize",
+  "26x26",
+  "(",
+  "-size",
+  "32x32",
+  "xc:#141418",
+  ")",
+  "+swap",
+  "-gravity",
+  "center",
+  "-compose",
+  "over",
+  "-composite",
+  `PNG32:${iconOut}`,
+]);
+console.log("wrote", iconOut);
 
-await sharp({
-  create: { width: 32, height: 32, channels: 4, background: DARK },
-})
-  .composite([
-    {
-      input: await resizedLogo(`${OUT_DIR}/logo_blanco.png`, 26),
-      gravity: "centre",
-    },
-  ])
-  .png()
-  .toFile("src/app/icon.png");
-console.log("wrote src/app/icon.png");
-
-await sharp({
-  create: { width: 180, height: 180, channels: 4, background: DARK },
-})
-  .composite([
-    {
-      input: await resizedLogo(`${OUT_DIR}/logo_blanco.png`, 150),
-      gravity: "centre",
-    },
-  ])
-  .png()
-  .toFile("src/app/apple-icon.png");
-console.log("wrote src/app/apple-icon.png");
-
-mkdirSync("src/emails/assets", { recursive: true });
-const emailLogoBuf = await sharp({
-  create: { width: 192, height: 192, channels: 4, background: DARK },
-})
-  .composite([
-    {
-      input: await resizedLogo(`${OUT_DIR}/logo_blanco.png`, 160),
-      gravity: "centre",
-    },
-  ])
-  .png()
-  .toBuffer();
-await sharp(emailLogoBuf).toFile(`${OUT_DIR}/logo_email.png`);
-await sharp(emailLogoBuf).toFile("src/emails/assets/logo_email.png");
-console.log("wrote logo_email.png");
+magick([
+  blanco256,
+  "-resize",
+  "150x150",
+  "(",
+  "-size",
+  "180x180",
+  "xc:#141418",
+  ")",
+  "+swap",
+  "-gravity",
+  "center",
+  "-compose",
+  "over",
+  "-composite",
+  `PNG32:${appleOut}`,
+]);
+console.log("wrote", appleOut);

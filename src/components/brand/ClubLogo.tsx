@@ -1,41 +1,94 @@
 import Image from "next/image";
-import {
-  CLUB_LOGO_TILE_BG,
-  clubLogoSrc,
-} from "@/lib/brand/logo";
+import { clubLogoSrc, type ClubLogoVariant } from "@/lib/brand/logo";
 
-const DIM = {
-  nav: { box: "h-8 w-8 md:h-9 md:w-9", px: 36, radius: "rounded-lg" },
-  header: { box: "h-16 w-16", px: 64, radius: "rounded-2xl" },
-  splash: { box: "h-36 w-36 sm:h-44 sm:w-44", px: 176, radius: "rounded-2xl" },
+/** Presets alineados con Portal `Logo` (+ splash del login). */
+export const clubLogoSizeClass = {
+  nav: "size-7 sm:size-8",
+  header: "size-16",
+  splash: "size-36 sm:size-44",
 } as const;
 
-export type ClubLogoSize = keyof typeof DIM;
+export type ClubLogoSize = keyof typeof clubLogoSizeClass;
 
+const PRESET_PX: Record<ClubLogoSize, number> = {
+  nav: 32,
+  header: 64,
+  splash: 176,
+};
+
+function LogoImage({
+  variant,
+  px,
+  priority,
+  alt,
+}: {
+  variant: ClubLogoVariant;
+  px: number;
+  priority: boolean;
+  alt: string;
+}) {
+  return (
+    <Image
+      src={clubLogoSrc(px, variant)}
+      alt={alt}
+      fill
+      sizes={`${px}px`}
+      className="object-contain"
+      priority={priority}
+    />
+  );
+}
+
+/**
+ * Marca del club sin tile (como Portal). Claro/oscuro vía `data-theme` en `html`.
+ */
 export default function ClubLogo({
   size,
   priority = false,
   className,
+  px,
+  variant,
 }: {
   size: ClubLogoSize;
   priority?: boolean;
   className?: string;
+  /** Override del px de asset; por defecto según preset. */
+  px?: number;
+  /** Fuerza una sola variante; por defecto ambas según tema. */
+  variant?: ClubLogoVariant;
 }) {
-  const dim = DIM[size];
+  const displayPx = px ?? PRESET_PX[size];
   return (
     <div
-      className={`relative overflow-hidden border border-white/12 shadow-[0_1px_0_rgba(255,255,255,0.06)] ${dim.box} ${dim.radius} ${className ?? ""}`}
-      style={{ backgroundColor: CLUB_LOGO_TILE_BG }}
+      className={`relative shrink-0 ${className ?? clubLogoSizeClass[size]}`}
     >
-      <Image
-        src={clubLogoSrc(dim.px)}
-        alt="Club Voleibol Orotava"
-        width={dim.px}
-        height={dim.px}
-        sizes={`${dim.px}px`}
-        className="h-full w-full object-cover"
-        priority={priority}
-      />
+      {variant ? (
+        <LogoImage
+          variant={variant}
+          px={displayPx}
+          priority={priority}
+          alt="Club Voleibol Orotava"
+        />
+      ) : (
+        <>
+          <div className="club-logo--light absolute inset-0">
+            <LogoImage
+              variant="claro"
+              px={displayPx}
+              priority={priority}
+              alt="Club Voleibol Orotava"
+            />
+          </div>
+          <div className="club-logo--dark absolute inset-0" aria-hidden>
+            <LogoImage
+              variant="blanco"
+              px={displayPx}
+              priority={priority}
+              alt=""
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

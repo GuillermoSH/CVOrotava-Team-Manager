@@ -120,16 +120,14 @@ export default function AppShell() {
         className="fixed inset-y-0 left-0 z-[var(--z-navbar)] hidden w-[var(--sidebar-width)] flex-col border-r border-[var(--glass-border)] bg-[color-mix(in_srgb,var(--color-bg)_94%,transparent)] backdrop-blur-xl md:flex"
         aria-label="Navegación principal"
       >
-        <div className="flex h-16 shrink-0 items-center gap-2.5 px-5">
+        <div className="flex h-16 shrink-0 items-center justify-center px-5">
           <Link
             href="/"
             onClick={() => markPending("/")}
-            className="group flex items-center gap-2.5"
+            aria-label="Inicio — C.V. Orotava"
+            className="rounded-lg p-1 transition-colors hover:bg-[var(--glass-surface)]"
           >
-            <ClubLogo size="nav" />
-            <span className="text-base font-semibold tracking-tight text-[var(--text-primary)]">
-              CVOrotava
-            </span>
+            <ClubLogo size="nav" className="size-12" px={56} />
           </Link>
         </div>
 
@@ -181,12 +179,10 @@ export default function AppShell() {
         <Link
           href="/"
           onClick={() => markPending("/")}
-          className="flex items-center gap-2"
+          aria-label="Inicio — C.V. Orotava"
+          className="rounded-lg p-0.5 transition-colors hover:bg-[var(--glass-surface)]"
         >
           <ClubLogo size="nav" />
-          <span className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
-            CVOrotava
-          </span>
         </Link>
         <div className="flex items-center gap-1.5">
           {navItems

@@ -64,7 +64,7 @@ export default function TeamCardPanel({ stats }: Readonly<{ stats: CompetitiveSt
             </p>
           </div>
           <Image
-            src="/assets/imgs/logo_blanco_128.webp"
+            src="/logo/logo_blanco_128.webp"
             alt=""
             width={52}
             height={52}

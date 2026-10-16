@@ -1,18 +1,14 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import GoogleBtn from "@/components/ui/GoogleBtn";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import ClubLogo from "@/components/brand/ClubLogo";
+import LoginAmbient from "@/components/ui/LoginAmbient";
 import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const FLIGHT_MS = 0.9;
-
-const LoginParticles = dynamic(() => import("@/components/ui/LoginParticles"), {
-  ssr: false,
-});
 
 type Phase = "cover" | "reveal" | "done";
 
@@ -66,13 +62,12 @@ export default function LoginPage() {
               "radial-gradient(ellipse 70% 50% at 50% 18%, var(--accent-muted), transparent 70%)",
           }}
         />
-        {uncovered && <LoginParticles />}
+        {uncovered ? <LoginAmbient /> : null}
 
         <div className="absolute top-4 right-4 z-30 md:top-6 md:right-6">
           <ThemeToggle variant="expanded" />
         </div>
 
-        {/* Login already in final layout — the cover sits on top until the logo lands */}
         <div
           className="relative z-10 flex w-full max-w-[360px] flex-col items-center"
           aria-hidden={!uncovered}
@@ -87,11 +82,11 @@ export default function LoginPage() {
                 <ClubLogo size="header" priority />
               </motion.div>
             ) : (
-              <div className="h-16 w-16" aria-hidden />
+              <div className="size-16" aria-hidden />
             )}
 
             <div className="text-center">
-              <h1 className="text-[1.75rem] font-semibold leading-tight tracking-[-0.03em] text-[var(--text-primary)] sm:text-[2rem]">
+              <h1 className="text-[1.5rem] font-semibold leading-tight tracking-[-0.03em] text-[var(--text-primary)] sm:text-[1.75rem]">
                 C.V. Orotava
               </h1>
               <p className="mt-1.5 text-sm font-medium text-[var(--text-secondary)]">
@@ -122,7 +117,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Solid cover: logo tapando el login; al revelar solo se desvanece el velo (el logo ya voló fuera) */}
         {phase === "cover" && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-[var(--color-bg)]">
             <motion.div

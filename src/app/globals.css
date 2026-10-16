@@ -753,6 +753,14 @@ html[data-theme="light"] .match-status-pill--past {
   animation: float 3s ease-in-out infinite;
 }
 
+/* Club logo: claro en tema claro, blanco en oscuro (sin tile) */
+[data-theme="dark"] .club-logo--light {
+  display: none;
+}
+[data-theme="light"] .club-logo--dark {
+  display: none;
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 6px;
