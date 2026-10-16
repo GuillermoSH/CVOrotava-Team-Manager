@@ -8,6 +8,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faSpinner, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FormInput, FormSelect } from "@/components/ui/forms";
+import { useConfirmDialog } from "@/components/ui/useConfirmDialog";
 import { getCurrentSeason, getSeasonSelectOptions } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
 import { VIDEO_TYPES, VIDEO_TYPE_OPTIONS, MATCH_VIDEO_TYPES } from "@/lib/videos/constants";
@@ -47,6 +48,7 @@ export default function VideoModal({
 }: Readonly<VideoModalProps>) {
   const { user } = useUser();
   const reduceMotion = useReducedMotion();
+  const { ask, dialog: confirmDialog } = useConfirmDialog();
   const [isDeleting, setIsDeleting] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -156,13 +158,13 @@ export default function VideoModal({
 
   const handleDelete = async () => {
     if (!initialData?.id) return;
-    if (
-      !confirm(
-        "¿Eliminar este vídeo? Esta acción no se puede deshacer."
-      )
-    ) {
-      return;
-    }
+    const ok = await ask({
+      title: "Eliminar vídeo",
+      description: "Se quitará el enlace de este vídeo de la biblioteca. Esta acción no se puede deshacer.",
+      confirmLabel: "Eliminar vídeo",
+      tone: "danger",
+    });
+    if (!ok) return;
 
     setIsDeleting(true);
     setMessage(null);
@@ -187,6 +189,8 @@ export default function VideoModal({
   };
 
   return (
+    <>
+    {confirmDialog}
     <AnimatePresence>
       {isOpen && (
         <div
@@ -376,5 +380,6 @@ export default function VideoModal({
         </div>
       )}
     </AnimatePresence>
+    </>
   );
 }

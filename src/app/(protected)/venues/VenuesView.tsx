@@ -13,6 +13,7 @@ import {
 import PageHeader from "@/components/ui/PageHeader";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import Select from "@/components/ui/Select";
+import { useConfirmDialog } from "@/components/ui/useConfirmDialog";
 import type { AdminVenue, LocationType } from "@/lib/venues/adminVenues";
 import { planVenueMerges } from "@/lib/venues/adminVenues";
 
@@ -37,6 +38,7 @@ async function call(url: string, method: string, body?: unknown) {
 
 export default function VenuesView({ initialVenues }: Readonly<{ initialVenues: AdminVenue[] }>) {
   const router = useRouter();
+  const { ask, dialog: confirmDialog } = useConfirmDialog();
   const [venues, setVenues] = useState(initialVenues);
   const [busy, setBusy] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -82,19 +84,50 @@ export default function VenuesView({ initialVenues }: Readonly<{ initialVenues: 
   const setLocation = (v: AdminVenue, location_type: LocationType) =>
     run(v.id, () => call(`/api/venues/${v.id}`, "PATCH", { location_type }), `${v.venue_name}: ${LOCATION_LABEL[location_type]}`);
 
-  const confirm = (v: AdminVenue) =>
+  const markReviewed = (v: AdminVenue) =>
     run(v.id, () => call(`/api/venues/${v.id}`, "PATCH", { reviewed: true }), `${v.venue_name} revisado`);
 
-  const merge = (v: AdminVenue, into: string, intoName: string) => {
-    if (!window.confirm(`¿Fusionar «${v.venue_name}» en «${intoName}»? Sus partidos pasan a ese pabellón.`)) return;
+  const merge = async (v: AdminVenue, into: string, intoName: string) => {
+    const ok = await ask({
+      title: "Fusionar pabellón",
+      description: (
+        <>
+          <span className="font-medium text-[var(--text-primary)]">«{v.venue_name}»</span> se
+          fusionará en{" "}
+          <span className="font-medium text-[var(--text-primary)]">«{intoName}»</span>. Los{" "}
+          {v.matches_count} partido{v.matches_count === 1 ? "" : "s"} de este pabellón pasan al
+          destino. Esta acción no se puede deshacer desde aquí.
+        </>
+      ),
+      confirmLabel: "Fusionar",
+      tone: "danger",
+    });
+    if (!ok) return;
     return run(v.id, () => call(`/api/venues/${v.id}/merge`, "POST", { into }), `Fusionado en ${intoName}`);
   };
 
-  const applySuggestions = () =>
-    run("all", () => call("/api/venues/reconcile", "POST"), `${suggestedMerges.length} pabellones fusionados`);
+  const applySuggestions = async () => {
+    const n = suggestedMerges.length;
+    const ok = await ask({
+      title: "Aplicar fusiones sugeridas",
+      description: (
+        <>
+          Se fusionarán <span className="font-medium text-[var(--text-primary)]">{n}</span>{" "}
+          pabellón{n === 1 ? "" : "es"} duplicados según las sugerencias automáticas. Los partidos
+          de cada duplicado pasan al pabellón canónico. Revisa la lista si alguna sugerencia no te
+          convence.
+        </>
+      ),
+      confirmLabel: `Aplicar ${n} fusión${n === 1 ? "" : "es"}`,
+      tone: "danger",
+    });
+    if (!ok) return;
+    return run("all", () => call("/api/venues/reconcile", "POST"), `${n} pabellones fusionados`);
+  };
 
   return (
     <div>
+      {confirmDialog}
       <PageHeader
         title="Pabellones"
         subtitle={
@@ -217,7 +250,7 @@ export default function VenuesView({ initialVenues }: Readonly<{ initialVenues: 
                   <button
                     type="button"
                     disabled={busy !== null}
-                    onClick={() => confirm(v)}
+                    onClick={() => markReviewed(v)}
                     className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--glass-border)] px-3 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--glass-surface)] disabled:opacity-50"
                   >
                     <FontAwesomeIcon icon={faCheck} className="text-[0.7rem]" />

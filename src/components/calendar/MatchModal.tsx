@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faSpinner, faTrash, faPlus, faMinus, faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { FormInput, FormDate, FormTime, FormSelect } from "@/components/ui/forms";
+import { useConfirmDialog } from "@/components/ui/useConfirmDialog";
 import { getCurrentSeason, getSeasonSelectOptions } from "@/utils/getCurrentSeason";
 import { useUser } from "@/contexts/UserContext";
 import VideoPicker from "@/components/matches/VideoPicker";
@@ -55,6 +56,7 @@ type MatchModalProps = {
 
 export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: Readonly<MatchModalProps>) {
   const { user } = useUser();
+  const { ask, dialog: confirmDialog } = useConfirmDialog();
   const [venues, setVenues] = useState<VenueOption[]>([]);
   const [loadingVenues, setLoadingVenues] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -206,8 +208,26 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
 
   const handleDelete = async () => {
     if (!initialData?.id) return;
-    if (!confirm("¿Estás seguro de que deseas eliminar este partido? Esta acción no se puede deshacer.")) return;
-    
+    const ok = await ask({
+      title: "Eliminar partido",
+      description: (
+        <>
+          Se borrará el partido
+          {initialData.opponent ? (
+            <>
+              {" "}
+              contra{" "}
+              <span className="font-medium text-[var(--text-primary)]">{initialData.opponent}</span>
+            </>
+          ) : null}
+          . Esta acción no se puede deshacer.
+        </>
+      ),
+      confirmLabel: "Eliminar partido",
+      tone: "danger",
+    });
+    if (!ok) return;
+
     setIsDeleting(true);
     setMessage(null);
     try {
@@ -259,6 +279,8 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
   ];
 
   return (
+    <>
+    {confirmDialog}
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
@@ -442,5 +464,6 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
         </div>
       )}
     </AnimatePresence>
+    </>
   );
 }
