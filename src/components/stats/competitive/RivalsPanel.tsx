@@ -26,7 +26,6 @@ function Dossier({ rival, today }: Readonly<{ rival: RivalEntry; today: string }
         <h3 className="text-xl font-bold leading-tight tracking-tight">{prettyTeamName(rival.name)}</h3>
         <p className="mt-1 text-sm text-[var(--text-secondary)]">
           {rival.position !== null ? `${ordinal(rival.position)} en la liga · ${rival.leaguePoints} pts` : "Sin partidos jugados esta temporada"}
-          {rival.rating !== null ? ` · rating ${rival.rating}` : ""}
         </p>
       </header>
 
@@ -44,7 +43,7 @@ function Dossier({ rival, today }: Readonly<{ rival: RivalEntry; today: string }
         </div>
       ) : (
         <p className="text-sm text-[var(--text-secondary)]">
-          {rival.isNew ? "Rival nuevo en la liga." : "Sin referencia comparable del año pasado."} Su rating y la
+          {rival.isNew ? "Rival nuevo en la liga." : "Sin referencia comparable del año pasado."} Su nivel y la
           probabilidad se activan cuando haya jugado 3 partidos esta temporada.
         </p>
       )}
@@ -200,11 +199,11 @@ export default function RivalsPanel({
         </summary>
         <ul className="mt-2 space-y-1.5 text-[var(--text-muted)]">
           <li>
-            El <span className="text-[var(--text-secondary)]">rating</span> sube o baja tras cada partido de la liga según
-            el resultado en sets y la fuerza del rival; arranca desde el rating final del año pasado.
+            El <span className="text-[var(--text-secondary)]">nivel</span> de cada equipo sube o baja con sus resultados en
+            la liga (cuenta el marcador en sets y a quién se gana) y arranca desde cómo acabó el año pasado.
           </li>
           <li>
-            La <span className="text-[var(--text-secondary)]">probabilidad</span> sale de comparar ratings. Es una
+            La <span className="text-[var(--text-secondary)]">probabilidad</span> compara el nivel de los dos equipos. Es una
             estimación calibrada con los resultados de las últimas temporadas, no una promesa.
           </li>
           <li>
@@ -215,7 +214,7 @@ export default function RivalsPanel({
             La <span className="text-[var(--text-secondary)]">prioridad</span> suma cercanía en la tabla, si nos ganó la
             última vez, cuándo toca el próximo cruce y lo difícil que es.
           </li>
-          <li>Un rival sin referencia sale sin rating hasta que haya jugado 3 partidos esta temporada.</li>
+          <li>Un rival sin referencia sale sin probabilidad ni estrellas hasta que haya jugado 3 partidos esta temporada.</li>
         </ul>
       </details>
     </section>

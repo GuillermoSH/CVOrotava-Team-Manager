@@ -132,7 +132,7 @@ export default function TeamCardPanel({ stats }: Readonly<{ stats: CompetitiveSt
           ))}
           <li className="pt-1">
             Cada atributo compara con el resto de equipos del grupo (45 = el peor, 99 = el mejor). La valoración
-            mezcla el rating de liga (40 %) y los atributos.
+            mezcla el nivel en la liga (40 %) y los atributos.
           </li>
         </ul>
       </details>

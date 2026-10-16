@@ -91,6 +91,7 @@ describe("rivales", () => {
     expect(out).toContain("Cómo se calcula");
     expect(out).toContain("Probabilidad de ganar");
     expect(out).toContain("Nos ganó 3-0 el 07/02");
+    expect(out).not.toMatch(/rating/i);
   });
 
   it("rival expandido en móvil muestra su dossier", () => {
@@ -104,7 +105,7 @@ describe("rivales", () => {
     const out = clean(html(<RivalsPanel stats={start} selectedId={null} onSelect={noop} />));
     expect(out).toContain("Rival nuevo");
     expect(out).toContain("Sin datos");
-    expect(out).not.toMatch(/rating NaN/);
+    expect(out).not.toMatch(/rating|NaN/i);
   });
 });
 
@@ -114,6 +115,7 @@ describe("liga", () => {
     expect(out).toContain("Liga Oro · 12 equipos");
     expect(out.indexOf("CDV San Roque")).toBeLessThan(out.indexOf("CD Voleypuerto"));
     expect(out).toContain("63"); // puntos del líder
+    expect(out).not.toMatch(/rating|1500/i); // sin jerga de Elo en la tabla
     expect(out).toContain("Carrera de posiciones");
     expect(out).toMatch(/ahora 5\.º; mejor puesto \d\.º/);
   });

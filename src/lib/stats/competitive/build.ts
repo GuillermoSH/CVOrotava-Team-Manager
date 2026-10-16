@@ -20,8 +20,6 @@ export type StandingsLine = {
   leaguePoints: number;
   setsFor: number;
   setsAgainst: number;
-  /** Rating Elo; null = «limpio». */
-  rating: number | null;
 };
 
 export type CompetitiveStats = {
@@ -219,7 +217,6 @@ export function buildCompetitiveStats(input: {
     rivals,
     standings: standings.map((r) => {
       const t = teamById.get(r.team_id);
-      const rated = (elo.played.get(r.team_id) ?? 0) >= MIN_MATCHES_FOR_RATING || hasPrior.has(r.team_id);
       return {
         position: r.position,
         teamId: r.team_id,
@@ -231,7 +228,6 @@ export function buildCompetitiveStats(input: {
         leaguePoints: r.league_points,
         setsFor: r.sets_for,
         setsAgainst: r.sets_against,
-        rating: rated ? Math.round(elo.final.get(r.team_id) ?? cfg.base) : null,
       };
     }),
     positionsByRound: positionsByRound(groupMatches),

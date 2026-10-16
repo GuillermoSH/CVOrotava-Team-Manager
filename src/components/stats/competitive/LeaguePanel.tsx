@@ -4,7 +4,7 @@ import { prettyTeamName } from "@/lib/fed/linkPlan";
 import type { CompetitiveStats } from "@/lib/stats/competitive/build";
 import PositionRace from "./PositionRace";
 
-const th = "px-2 py-2 text-right text-xs font-semibold text-[var(--text-muted)]";
+const th = "px-2 py-2 text-xs font-semibold text-[var(--text-muted)]";
 const td = "px-2 py-2.5 text-right tabular-nums";
 
 export default function LeaguePanel({ stats }: Readonly<{ stats: CompetitiveStats }>) {
@@ -37,29 +37,26 @@ export default function LeaguePanel({ stats }: Readonly<{ stats: CompetitiveStat
             <caption className="sr-only">Clasificación de {prettyTeamName(stats.group.name)}</caption>
             <thead>
               <tr className="border-b border-[var(--glass-border)]">
-                <th scope="col" className={`${th} w-8`}>
+                <th scope="col" className={`${th} w-8 text-right`}>
                   #
                 </th>
                 <th scope="col" className={`${th} text-left`}>
                   Equipo
                 </th>
-                <th scope="col" className={th}>
+                <th scope="col" className={`${th} text-right`}>
                   PJ
                 </th>
-                <th scope="col" className={`${th} hidden sm:table-cell`}>
+                <th scope="col" className={`${th} hidden text-right sm:table-cell`}>
                   V
                 </th>
-                <th scope="col" className={`${th} hidden sm:table-cell`}>
+                <th scope="col" className={`${th} hidden text-right sm:table-cell`}>
                   D
                 </th>
-                <th scope="col" className={`${th} hidden sm:table-cell`}>
+                <th scope="col" className={`${th} hidden text-right sm:table-cell`}>
                   Sets
                 </th>
-                <th scope="col" className={th}>
+                <th scope="col" className={`${th} text-right`}>
                   Pts
-                </th>
-                <th scope="col" className={th} title="Estimación de nivel: 1500 es la media de la liga">
-                  Rating
                 </th>
               </tr>
             </thead>
@@ -78,16 +75,11 @@ export default function LeaguePanel({ stats }: Readonly<{ stats: CompetitiveStat
                     {t.setsFor}–{t.setsAgainst}
                   </td>
                   <td className={`${td} font-bold text-[var(--text-primary)]`}>{t.leaguePoints}</td>
-                  <td className={td}>{t.rating ?? "—"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <p className="mt-3 max-w-prose text-xs text-[var(--text-muted)]">
-          El rating estima el nivel de cada equipo (1500 es la media de la liga). Los equipos sin referencia salen sin
-          rating hasta que juegan 3 partidos.
-        </p>
       </section>
 
       <section aria-labelledby="race-title">
