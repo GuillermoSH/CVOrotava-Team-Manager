@@ -40,25 +40,32 @@ export default function CardExplainer({
           <h4 id="ficha-atributos" className={H4}>
             Los seis atributos
           </h4>
-          <ul className="mt-1 space-y-3">
+          <ul className="mt-2 divide-y divide-[var(--glass-border)]">
             {attributes.map((a) => {
               const def = ATTRIBUTE_DEFS.find((d) => d.key === a.key);
               const help = ATTRIBUTE_HELP[a.key];
               if (!def) return null;
               return (
-                <li key={a.key}>
-                  <p>
-                    <span className="font-medium text-[var(--text-secondary)]">{a.label}</span>
-                    {a.value === null ? " · sin dato todavía" : ` · ${a.value}`}
+                <li key={a.key} className="space-y-1 py-3 first:pt-0 last:pb-0">
+                  <p className="flex items-baseline justify-between gap-3 text-[var(--text-secondary)]">
+                    <span className="font-semibold">{a.label}</span>
+                    <span className="tabular-nums font-semibold">{a.value ?? "Sin dato"}</span>
                   </p>
                   <p>{help.what}</p>
-                  <p>Cálculo: {help.how}</p>
                   <p>
-                    {a.value === null
-                      ? `Hace falta tener al menos ${def.minSample} ${help.unit} para calcularlo.`
-                      : `Vuestros números: ${a.detail}.`}
+                    <strong className="font-medium text-[var(--text-secondary)]">Cálculo:</strong> {help.how}
                   </p>
                   <p>
+                    {a.value === null ? (
+                      `Hace falta tener al menos ${def.minSample} ${help.unit} para calcularlo.`
+                    ) : (
+                      <>
+                        <strong className="font-medium text-[var(--text-secondary)]">Vuestros números:</strong>{" "}
+                        {a.detail}.
+                      </>
+                    )}
+                  </p>
+                  <p className="text-xs">
                     Pesa un {pct(def.weight)} en la valoración
                     {a.value === null ? "" : `; se calcula con al menos ${def.minSample} ${help.unit}`}.
                   </p>
