@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, useReducedMotion } from "framer-motion";
 import { PaymentsListSkeleton } from "@/components/skeletons/PaymentsSkeleton";
@@ -16,6 +16,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import PageHeader from "@/components/ui/PageHeader";
 import QuotaSeasonLayout from "@/components/payments/QuotaSeasonLayout";
+import { isQuotaOverdue } from "@/components/payments/quotaDates";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import { useSeasons } from "@/contexts/SeasonContext";
@@ -49,6 +50,7 @@ interface AdminOverviewRow {
   user_id: string | null;
   player: string;
   pendingAmount: number;
+  overdueCount: number;
   status: "success" | "warning" | "danger";
   lastSignInAt: string | null;
 }
@@ -141,6 +143,7 @@ function applyPaymentsSnapshot(json: SnapshotJson): {
           user_id: p.user_id,
           player: p.player_name || p.users?.user_name || "Desconocido",
           pendingAmount: 0,
+          overdueCount: 0,
           status: "success",
           lastSignInAt: p.user_id
             ? (authLastSignInAtByUserId[p.user_id] ?? null)
@@ -150,7 +153,13 @@ function applyPaymentsSnapshot(json: SnapshotJson): {
       if (p.status === "pending") {
         const row = playerMap.get(key)!;
         row.pendingAmount += Number(p.amount);
-        row.status = row.pendingAmount >= 100 ? "danger" : "warning";
+        if (isQuotaOverdue("pending", p.due_date)) {
+          row.overdueCount += 1;
+        }
+        row.status =
+          row.overdueCount > 0 || row.pendingAmount >= 100
+            ? "danger"
+            : "warning";
       }
     });
     return {
@@ -221,11 +230,16 @@ export default function PaymentsView({
     }
   };
 
+  // Solo saltar el primer fetch con usuario (datos SSR). Comparar con initialFilters
+  // dejaba datos viejos al volver a temporada/género por defecto.
+  const skipFilterFetchRef = useRef(true);
   useEffect(() => {
-    const sameSeason = (filters.season ?? "") === (initialFilters.season ?? "");
-    const sameGender = (filters.gender ?? "") === (initialFilters.gender ?? "");
-    if (sameSeason && sameGender) return;
-    if (user) fetchPayments();
+    if (!user) return;
+    if (skipFilterFetchRef.current) {
+      skipFilterFetchRef.current = false;
+      return;
+    }
+    void fetchPayments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, filters]);
 
@@ -262,6 +276,7 @@ export default function PaymentsView({
     {
       key: "season",
       label: "Temporada",
+      required: true,
       options: seasons.map((s) => ({ label: s, value: s })),
     },
     ...(user?.isAdmin
@@ -269,6 +284,7 @@ export default function PaymentsView({
           {
             key: "gender",
             label: "Género",
+            required: true,
             options: [
               { label: "Masculino", value: "male" },
               { label: "Femenino", value: "female" },
@@ -440,9 +456,17 @@ export default function PaymentsView({
 
                           <div className="flex items-center justify-between gap-4 sm:justify-end sm:gap-6">
                             {item.pendingAmount > 0 ? (
-                              <span className="text-lg font-bold tabular-nums text-[var(--accent)]">
-                                {item.pendingAmount}€
-                              </span>
+                              <div className="text-right">
+                                <span className="text-lg font-bold tabular-nums text-[var(--accent)]">
+                                  {item.pendingAmount}€
+                                </span>
+                                {item.overdueCount > 0 ? (
+                                  <p className="mt-0.5 text-[11px] font-medium text-[var(--color-danger)]">
+                                    {item.overdueCount} atrasada
+                                    {item.overdueCount === 1 ? "" : "s"}
+                                  </p>
+                                ) : null}
+                              </div>
                             ) : (
                               <span className="payment-label-ok text-sm font-semibold">
                                 Al día
@@ -456,7 +480,11 @@ export default function PaymentsView({
                                     : "badge-warning"
                                 }`}
                               >
-                                {item.status === "danger" ? "Crítico" : "Aviso"}
+                                {item.overdueCount > 0
+                                  ? "Atrasado"
+                                  : item.status === "danger"
+                                    ? "Crítico"
+                                    : "Aviso"}
                               </span>
                             ) : (
                               <span className="badge badge-success">OK</span>

@@ -16,16 +16,18 @@ export async function isEmailAllowlisted(
   email: string
 ): Promise<boolean> {
   const normalized = normalizeEmail(email);
-  const { data, error } = await supabase.from("allowed_emails").select("email");
+  const { data, error } = await supabase
+    .from("allowed_emails")
+    .select("email")
+    .eq("email", normalized)
+    .maybeSingle();
 
   if (error) {
     console.error("allowed_emails lookup failed:", error.message);
     return false; // fail closed
   }
 
-  return (data ?? []).some(
-    (row) => normalizeEmail(String(row.email ?? "")) === normalized
-  );
+  return Boolean(data?.email);
 }
 
 /** Clear every Supabase auth cookie on a concrete response (Route Handler redirects). */

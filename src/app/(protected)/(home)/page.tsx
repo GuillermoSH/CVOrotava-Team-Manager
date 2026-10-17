@@ -18,12 +18,13 @@ export default async function HomePage() {
       actor: user,
       season,
       gender: user.isAdmin ? user.gender ?? undefined : undefined,
+      adminOverviewLite: user.isAdmin,
     }),
   ]);
 
   return (
     <HomeView
-      initialMatches={matches as HomeMatch[]}
+      initialMatches={matches as unknown as HomeMatch[]}
       initialPayments={
         paymentsResult.status === "ok" ? paymentsResult.body : null
       }

@@ -5,8 +5,21 @@ import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { syncVideoForMatch } from "@/lib/videos/syncVideoForMatch";
 import { getMatchById } from "@/lib/matches/getMatchById";
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 type MatchSetInput = { team_score: number; opponent_score: number };
+
+/** Partidos enlazados con la federación: solo estos campos son nuestros. */
+const FED_EDITABLE = ["opponent", "video_url", "notes"] as const;
+
+async function getFedMatchId(id: string): Promise<number | null> {
+  const { data } = await supabaseAdmin
+    .from("matches")
+    .select("fed_match_id")
+    .eq("id", id)
+    .maybeSingle();
+  return (data?.fed_match_id as number | null | undefined) ?? null;
+}
 
 export async function GET(
   _req: NextRequest,
@@ -47,13 +60,40 @@ export async function PUT(
     const { id } = await params;
     const body = await req.json();
 
+    if (await getFedMatchId(id)) {
+      const patch: Record<string, unknown> = {};
+      for (const k of FED_EDITABLE) {
+        if (body[k] !== undefined) patch[k] = k === "opponent" ? body[k] : body[k] || null;
+      }
+      const { data: updatedFed, error: fedErr } = await supabaseAdmin
+        .from("matches")
+        .update(patch)
+        .eq("id", id)
+        .select()
+        .single();
+      if (fedErr) return NextResponse.json({ error: fedErr.message }, { status: 400 });
+
+      await syncVideoForMatch({
+        matchId: id,
+        videoUrl: updatedFed.video_url,
+        season: updatedFed.season,
+        gender: updatedFed.gender,
+      });
+      return NextResponse.json(updatedFed, { status: 200 });
+    }
+
+    const season =
+      typeof body.season === "string" && body.season.trim()
+        ? normalizeSeasonId(body.season)
+        : body.season;
+
     const { data: updatedMatch, error } = await supabaseAdmin
       .from("matches")
       .update({
         date: body.date,
         time: body.time,
         opponent: body.opponent,
-        season: body.season,
+        season,
         result: body.result || null,
         video_url: body.video_url || null,
         notes: body.notes || null,
@@ -114,6 +154,13 @@ export async function DELETE(
     if ("response" in auth) return auth.response;
 
     const { id } = await params;
+
+    if (await getFedMatchId(id)) {
+      return NextResponse.json(
+        { error: "Es un partido de la federación: se volvería a crear en la próxima sincronización." },
+        { status: 409 }
+      );
+    }
 
     const { data, error } = await supabaseAdmin
       .from("matches")

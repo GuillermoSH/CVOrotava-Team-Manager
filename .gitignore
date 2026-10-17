@@ -46,5 +46,7 @@ next-env.d.ts
 # local pnpm store (never commit)
 .pnpm-store/
 
-# supabase CLI / local migrations (managed outside git)
-/supabase/
+# supabase CLI local state — migrations are versioned
+/supabase/.temp/
+/supabase/.branches/
+# linked project metadata may contain refs; keep local

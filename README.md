@@ -131,10 +131,29 @@ NEXT_PUBLIC_YOUTUBE_API_KEY=*****
 NEXT_PUBLIC_SUPABASE_URL=*****
 NEXT_PUBLIC_SUPABASE_ANON_KEY=*****
 SUPABASE_SERVICE_ROLE_KEY=*****
+# Required in production (Vercel). Independent HMAC secret for the short-lived gate cookie.
+# In local development, if unset, the app falls back to SUPABASE_SERVICE_ROLE_KEY with a warning.
+CVOROTAVA_GATE_SECRET=*****
 RESEND_API_KEY=*****
 RESEND_FROM_EMAIL=*****
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+# Vercel Cron (sincronización semanal con la federación). Vercel lo envía como Bearer.
+CRON_SECRET=*****
 ```
+
+### 4️⃣ Migraciones Supabase (RLS)
+
+Las migraciones viven en `supabase/migrations/` (versionadas en git). Tras pull, aplicar las pendientes en el **SQL Editor** del proyecto Supabase (o `supabase db push` si usas CLI enlazado), en orden de timestamp. En concreto, la protección de `users.role` / `is_active` está en `20261002140000_users_rls_protect_privileged_columns.sql`.
+
+### 5️⃣ Datos de la Federación Canaria (Leverade)
+
+Calendario, resultados, sets y clasificaciones de la Liga Canaria Sénior se sincronizan desde la API pública de Leverade (plataforma de la FCVB) a las tablas `fed_*` y de ahí a `matches` / `match_sets`.
+
+- **Automático:** Vercel Cron cada lunes a las 08:00 UTC (`vercel.json` → `/api/cron/fed-sync`, temporada actual).
+- **Manual (admin):** botón «Sincronizar ahora» en el calendario.
+- **Terminal:** `pnpm fed:sync` (temporada actual), `pnpm fed:sync --all` (histórico desde 2019-20), `pnpm fed:sync --season 2025-26`, `--dry-run` para no escribir.
+
+En partidos enlazados (`matches.fed_match_id`) la federación es dueña de fecha, hora, pabellón, temporada, resultado y sets; el rival, el vídeo y las notas siguen siendo editables. Los pabellones nuevos se crean como «casa»/«fuera»: revisa los que sean de otra isla y márcalos como viaje.
 
 ---
 

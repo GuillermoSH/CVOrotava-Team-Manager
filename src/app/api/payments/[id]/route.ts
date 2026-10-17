@@ -3,6 +3,7 @@ import { z } from "zod";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 const patchSchema = z.object({
   concept: z.string().optional(),
@@ -11,7 +12,11 @@ const patchSchema = z.object({
   due_date: z.string().optional().nullable(),
   paid_date: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
-  season: z.string().optional().nullable(),
+  season: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((s) => (s == null || s === "" ? s : normalizeSeasonId(s))),
 });
 
 export async function PATCH(

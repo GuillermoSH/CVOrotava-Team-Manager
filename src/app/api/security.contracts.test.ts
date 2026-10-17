@@ -29,9 +29,10 @@ const mutating: Array<{ file: string; methods: string[] }> = [
   { file: "src/app/api/payments/[id]/route.ts", methods: ["PATCH", "DELETE"] },
   { file: "src/app/api/users/route.ts", methods: ["GET", "PATCH"] },
   { file: "src/app/api/allowed-emails/route.ts", methods: ["GET", "POST", "PATCH", "DELETE"] },
-  { file: "src/app/api/league-standings/import/route.ts", methods: ["POST"] },
-  { file: "src/app/api/team-aliases/route.ts", methods: ["POST"] },
-  { file: "src/app/api/team-aliases/[id]/route.ts", methods: ["DELETE"] },
+  { file: "src/app/api/fed/sync/route.ts", methods: ["POST"] },
+  { file: "src/app/api/venues/[id]/route.ts", methods: ["PATCH"] },
+  { file: "src/app/api/venues/[id]/merge/route.ts", methods: ["POST"] },
+  { file: "src/app/api/venues/reconcile/route.ts", methods: ["POST"] },
 ];
 
 describe("mutating APIs must gate with requireAdmin, not membership", () => {
@@ -85,8 +86,119 @@ describe("admin pages are gated on the server, not only in the client", () => {
     "src/app/(protected)/payments/admin/layout.tsx",
     "src/app/(protected)/matches/create/layout.tsx",
     "src/app/(protected)/matches/edit/layout.tsx",
+    "src/app/(protected)/venues/layout.tsx",
   ])("%s calls requireAdminPage", (file) => {
     expect(src(file)).toContain("requireAdminPage");
+  });
+});
+
+describe("federation sync cron is gated by CRON_SECRET", () => {
+  const body = () => handlerBody(src("src/app/api/cron/fed-sync/route.ts"), "GET");
+
+  it("compares the Bearer token against CRON_SECRET", () => {
+    expect(body()).toContain("process.env.CRON_SECRET");
+    expect(body()).toMatch(/Bearer \$\{secret\}/);
+  });
+
+  it("fails closed when CRON_SECRET is unset", () => {
+    expect(body()).toMatch(/if \(!secret/);
+  });
+});
+
+describe("manual standings upload is retired (data comes from the federation)", () => {
+  it.each([
+    "src/app/api/league-standings/import/route.ts",
+    "src/app/api/team-aliases/route.ts",
+    "src/app/(protected)/league-standings/upload/page.tsx",
+  ])("%s is gone", (file) => {
+    expect(() => src(file)).toThrow();
+  });
+});
+
+describe("match create/edit legacy pages redirect to MatchModal flows", () => {
+  it("create page redirects to calendar", () => {
+    const page = src("src/app/(protected)/matches/create/page.tsx");
+    expect(page).toContain('redirect("/matches")');
+  });
+
+  it("edit page redirects to match detail", () => {
+    const page = src("src/app/(protected)/matches/edit/[id]/page.tsx");
+    expect(page).toContain("redirect(`/matches/${id}`)");
+  });
+
+  it("obsolete MatchForm.tsx is gone", () => {
+    expect(() => src("src/components/calendar/MatchForm.tsx")).toThrow();
+  });
+});
+
+describe("forMatchId must be UUID-validated before PostgREST .or() interpolation", () => {
+  it.each([
+    "src/app/api/matches/route.ts",
+    "src/app/api/videos/route.ts",
+  ])("%s rejects invalid forMatchId with uuid + 400", (file) => {
+    const body = src(file);
+    expect(body).toContain("forMatchId");
+    expect(body).toMatch(/z\.string\(\)\.uuid\(\)/);
+    expect(body).toMatch(/status:\s*400/);
+  });
+
+  it.each([
+    "src/lib/matches/listMatches.ts",
+    "src/lib/videos/listVideos.ts",
+  ])("%s only interpolates UUID-safe forMatchId into .or()", (file) => {
+    const body = src(file);
+    expect(body).toMatch(/z\.string\(\)\.uuid\(\)/);
+    expect(body).toMatch(/\.or\(`/);
+  });
+});
+
+describe("gate secret must not fall back to service role in production", () => {
+  it("gate.ts prefers CVOROTAVA_GATE_SECRET and fails closed in production", () => {
+    const body = src("src/lib/auth/gate.ts");
+    expect(body).toContain("CVOROTAVA_GATE_SECRET");
+    expect(body).toMatch(/NODE_ENV\s*===\s*["']production["']/);
+    expect(body).toContain("VERCEL_ENV");
+    // Must not unconditionally OR the service role key as the secret.
+    expect(body).not.toMatch(
+      /CVOROTAVA_GATE_SECRET\s*\|\|\s*process\.env\.SUPABASE_SERVICE_ROLE_KEY/
+    );
+  });
+});
+
+describe("allowlist lookup uses indexed eq on normalized email", () => {
+  it("allowlist.ts queries with eq(email, normalized)", () => {
+    const body = src("src/lib/auth/allowlist.ts");
+    expect(body).toContain(".eq(\"email\", normalized)");
+    expect(body).toContain("maybeSingle");
+    expect(body).not.toMatch(/select\(\s*["']email["']\s*\)\s*;[\s\S]*\.some\(/);
+  });
+});
+
+describe("users RLS must freeze privileged columns for client JWT", () => {
+  it("migration splits policies and protects role/is_active", () => {
+    const sql = src(
+      "supabase/migrations/20261002140000_users_rls_protect_privileged_columns.sql"
+    );
+    expect(sql).toContain("users_select_own");
+    expect(sql).toContain("users_update_own");
+    expect(sql).toContain("protect_users_privileged_columns");
+    expect(sql).toMatch(/new\.role\s*:=\s*old\.role/);
+    expect(sql).toMatch(/new\.is_active\s*:=\s*old\.is_active/);
+    expect(sql).toContain("service_role");
+    expect(sql).not.toMatch(/\bfor all\b/i);
+    expect(sql).toMatch(/for select/i);
+    expect(sql).toMatch(/for update/i);
+  });
+
+  it("players/teams RLS migration does not subquery allowed_emails (breaks Portal)", () => {
+    const sql = src(
+      "supabase/migrations/20261002141500_players_teams_rls_allowlisted_read.sql"
+    );
+    expect(sql).toContain("enable row level security");
+    // Puede mencionar la política solo para borrarla; nunca para crearla.
+    expect(sql).not.toMatch(/create\s+policy[^;]*Allowlisted users can read/i);
+    expect(sql).toMatch(/drop policy if exists "Allowlisted users can read players"/i);
+    expect(sql).toContain("allowed_emails");
   });
 });
 

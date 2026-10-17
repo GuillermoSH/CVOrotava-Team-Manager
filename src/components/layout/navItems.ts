@@ -5,6 +5,7 @@ import {
   faChartSimple,
   faMoneyBill,
   faUsers,
+  faLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
@@ -16,14 +17,25 @@ export type AppNavItem = {
   shortName?: string;
   /** Only shown to club admins. */
   adminOnly?: boolean;
+  /**
+   * Incluir en la barra inferior móvil.
+   * Default: true si no es adminOnly. Stats va al menú «Más» para dejar ≤4 tabs.
+   */
+  bottomNav?: boolean;
 };
 
 export const APP_NAV_ITEMS: AppNavItem[] = [
   { name: "Inicio", href: "/", icon: faHome },
   { name: "Calendario", href: "/matches", icon: faCalendarDays, shortName: "Partidos" },
   { name: "Videos", href: "/videos", icon: faVideo },
-  { name: "Estadísticas", href: "/stats", icon: faChartSimple, shortName: "Stats" },
+  { name: "Estadísticas", href: "/stats", icon: faChartSimple, bottomNav: false },
   { name: "Pagos", href: "/payments", icon: faMoneyBill },
+  {
+    name: "Pabellones",
+    href: "/venues",
+    icon: faLocationDot,
+    adminOnly: true,
+  },
   {
     name: "Usuarios",
     href: "/access",

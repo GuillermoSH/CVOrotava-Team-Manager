@@ -6,6 +6,8 @@ import {
   syncTmPlayersToSeniorRoster,
   type SeniorPlayerRow,
 } from "@/lib/payments/seniorPlayers";
+import { isQuotaOverdue } from "@/components/payments/quotaDates";
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 /** Last sign-in via Auth Admin: paginate listUsers instead of N× getUserById. */
 async function authLastSignInByUserIds(userIds: string[]) {
@@ -90,6 +92,7 @@ export type AdminOverviewRow = {
   user_id: string | null;
   player: string;
   pendingAmount: number;
+  overdueCount: number;
   status: "success" | "warning" | "danger";
   lastSignInAt: string | null;
 };
@@ -112,6 +115,8 @@ export type GetPaymentsSnapshotOpts = {
   targetUserId?: string | null;
   season?: string | null;
   gender?: string | null;
+  /** Home / summary: skip roster sync + Auth listUsers (full overview still on /payments). */
+  adminOverviewLite?: boolean;
 };
 
 export type GetPaymentsSnapshotResult =
@@ -136,17 +141,22 @@ function buildAdminOverview(
   authLastSignInAtByUserId: Record<string, string | null>
 ): AdminOverviewRow[] {
   const pendingByPlayer = new Map<string, number>();
+  const overdueByPlayer = new Map<string, number>();
   for (const p of payments) {
     if (p.status !== "pending") continue;
     const key = p.player_id;
     if (!key) continue;
     pendingByPlayer.set(key, (pendingByPlayer.get(key) ?? 0) + Number(p.amount));
+    if (isQuotaOverdue("pending", p.due_date)) {
+      overdueByPlayer.set(key, (overdueByPlayer.get(key) ?? 0) + 1);
+    }
   }
 
   return roster.map((player) => {
     const pendingAmount = pendingByPlayer.get(player.id) ?? 0;
+    const overdueCount = overdueByPlayer.get(player.id) ?? 0;
     let status: AdminOverviewRow["status"] = "success";
-    if (pendingAmount >= 100) status = "danger";
+    if (overdueCount > 0 || pendingAmount >= 100) status = "danger";
     else if (pendingAmount > 0) status = "warning";
 
     return {
@@ -154,6 +164,7 @@ function buildAdminOverview(
       user_id: player.user_id,
       player: seniorPlayerDisplayName(player),
       pendingAmount,
+      overdueCount,
       status,
       lastSignInAt: player.user_id
         ? (authLastSignInAtByUserId[player.user_id] ?? null)
@@ -196,7 +207,9 @@ async function resolveTargetPlayerId(opts: {
 export async function getPaymentsSnapshot(
   opts: GetPaymentsSnapshotOpts
 ): Promise<GetPaymentsSnapshotResult> {
-  const { actor, targetPlayerId, targetUserId, season, gender } = opts;
+  const { actor, targetPlayerId, targetUserId, season, gender, adminOverviewLite } =
+    opts;
+  const seasonKey = season?.trim() ? normalizeSeasonId(season.trim()) : null;
   const isAdmin = actor.isAdmin;
 
   if (isAdmin) {
@@ -216,7 +229,7 @@ export async function getPaymentsSnapshot(
           )
           .eq("user_id", targetUserId)
           .order("due_date", { ascending: true, nullsFirst: false });
-        if (season) legacyQuery = legacyQuery.eq("season", season);
+        if (seasonKey) legacyQuery = legacyQuery.eq("season", seasonKey);
 
         const { data: legacyPayments, error: legacyError } = await legacyQuery;
         if (legacyError) return { status: "error", message: legacyError.message };
@@ -257,7 +270,7 @@ export async function getPaymentsSnapshot(
         query = query.eq("player_id", resolvedPlayerId);
       }
 
-      if (season) query = query.eq("season", season);
+      if (seasonKey) query = query.eq("season", seasonKey);
 
       const { data: payments, error } = await query;
       if (error) return { status: "error", message: error.message };
@@ -272,7 +285,6 @@ export async function getPaymentsSnapshot(
     }
 
     // Admin overview: sync TM player accounts → senior roster, then list.
-    const seasonKey = season?.trim() || null;
     if (!seasonKey) {
       return {
         status: "error",
@@ -280,12 +292,14 @@ export async function getPaymentsSnapshot(
       };
     }
 
-    const synced = await syncTmPlayersToSeniorRoster({
-      season: seasonKey,
-      gender,
-    });
-    if (!synced.ok) {
-      return { status: "error", message: synced.message };
+    if (!adminOverviewLite) {
+      const synced = await syncTmPlayersToSeniorRoster({
+        season: seasonKey,
+        gender,
+      });
+      if (!synced.ok) {
+        return { status: "error", message: synced.message };
+      }
     }
 
     const rosterResult = await listActiveSeniorPlayers({
@@ -319,7 +333,9 @@ export async function getPaymentsSnapshot(
     const linkedUserIds = roster
       .map((p) => p.user_id)
       .filter((id): id is string => Boolean(id));
-    const authLastSignInAtByUserId = await authLastSignInByUserIds(linkedUserIds);
+    const authLastSignInAtByUserId = adminOverviewLite
+      ? {}
+      : await authLastSignInByUserIds(linkedUserIds);
 
     const adminOverview = buildAdminOverview(
       roster,
@@ -374,7 +390,7 @@ export async function getPaymentsSnapshot(
     query = query.eq("user_id", actor.id);
   }
 
-  if (season) query = query.eq("season", season);
+  if (seasonKey) query = query.eq("season", seasonKey);
 
   const { data: payments, error } = await query;
   if (error) return { status: "error", message: error.message };

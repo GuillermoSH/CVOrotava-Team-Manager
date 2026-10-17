@@ -1,4 +1,4 @@
-import { parseResultString } from "@/lib/standings/resolveOpponent";
+import { parseResultString } from "@/lib/matches/parseResult";
 import { VIDEO_TYPE_LABELS, type VideoType } from "@/lib/videos/constants";
 
 export type VideoEmailMatchInput = {

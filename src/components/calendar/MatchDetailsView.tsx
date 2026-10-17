@@ -50,8 +50,11 @@ function resultTone(match: Match): "win" | "loss" | "neutral" {
 
 export default function MatchDetailsView({
   match: initialMatch,
+  openEdit = false,
 }: {
   match: MatchDetail;
+  /** Deep-link from home "Añadir resultado" (?edit=1). */
+  openEdit?: boolean;
 }) {
   const { user } = useUser();
   const router = useRouter();
@@ -65,6 +68,15 @@ export default function MatchDetailsView({
   useEffect(() => {
     setMatch(initialMatch);
   }, [initialMatch]);
+
+  useEffect(() => {
+    if (!openEdit || !user?.isAdmin) return;
+    setEditing(matchToModalInitialValues(match));
+    setModalOpen(true);
+    router.replace(`/matches/${match.id}`, { scroll: false });
+    // Only on first mount / when deep-link flag arrives
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openEdit, user?.isAdmin]);
 
   const matchDate = useMemo(
     () => new Date(`${match.date}T${match.time}`),
@@ -83,7 +95,7 @@ export default function MatchDetailsView({
     "Partido vs " + match.opponent
   )}&dates=${startUTC}/${endUTC}&details=${encodeURIComponent(
     match.notes || ""
-  )}&location=${encodeURIComponent(match.venues.venue_name || "")}`;
+  )}&location=${encodeURIComponent(match.venues?.venue_name || "")}`;
 
   const sortedSets = [...(match.match_sets || [])].sort(
     (a, b) => a.set_number - b.set_number
@@ -130,7 +142,7 @@ export default function MatchDetailsView({
       className: "text-[var(--color-success)]",
     },
   } as const;
-  const tag = tagMap[match.venues.location_type];
+  const tag = match.venues ? tagMap[match.venues.location_type] : null;
 
   const scoreClass =
     tone === "win"
@@ -249,18 +261,18 @@ export default function MatchDetailsView({
                   icon={faLocationDot}
                   className="shrink-0 text-[0.7rem] text-[var(--accent)]"
                 />
-                {match.venues.location_url ? (
+                {match.venues?.location_url ? (
                   <a
-                    href={match.venues.location_url}
+                    href={match.venues?.location_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="truncate transition-colors hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                   >
-                    {match.venues.venue_name}
+                    {match.venues?.venue_name}
                   </a>
                 ) : (
                   <span className="truncate">
-                    {match.venues.venue_name || "Sin pabellón asignado"}
+                    {match.venues?.venue_name || "Sin pabellón asignado"}
                   </span>
                 )}
               </p>

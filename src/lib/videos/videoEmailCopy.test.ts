@@ -59,7 +59,7 @@ describe("video email copy", () => {
     const copy = buildNewVideoEmailCopy({
       videoType: "league_match",
       gender: "male",
-      season: "2025/2026",
+      season: "2025-26",
       match: {
         id: "m1",
         date: "2026-03-14",
@@ -82,14 +82,14 @@ describe("video email copy", () => {
     expect(copy.recap?.outcomeLabel).toBe("Victoria");
     expect(copy.recap?.sets).toContain("25-20");
     expect(copy.body).toContain("CV Tacoronte");
-    expect(copy.kicker).toBe("Senior masculino · 2025/2026");
+    expect(copy.kicker).toBe("Senior masculino · 2025-26");
   });
 
   it("uses a generic league subject when the calendar has no match", () => {
     const copy = buildNewVideoEmailCopy({
       videoType: "league_match",
       gender: "female",
-      season: "2025/2026",
+      season: "2025-26",
     });
     expect(copy.subject).toBe("Ya está el vídeo · Partido de Liga");
     expect(copy.recap).toBeNull();
@@ -122,7 +122,7 @@ describe("video email copy", () => {
     const copy = buildNewVideoEmailCopy({
       videoType: "training",
       gender: "female",
-      season: "2025/2026",
+      season: "2025-26",
       match: {
         id: "should-ignore",
         date: "2026-01-01",

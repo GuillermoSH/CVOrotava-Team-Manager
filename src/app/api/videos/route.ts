@@ -12,11 +12,12 @@ import { VIDEO_LIST_WITH_MATCH, VIDEO_TYPES } from "@/lib/videos/constants";
 import { DATE_INPUT_RE, todayDateInput } from "@/lib/videos/date";
 import { linkVideoToMatch } from "@/lib/videos/syncVideoForMatch";
 import { notifyNewVideo } from "@/lib/videos/notifyNewVideo";
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 const videoBodySchema = z.object({
   url: z.string().url(),
   video_type: z.enum(VIDEO_TYPES),
-  season: z.string().min(4),
+  season: z.string().min(4).transform(normalizeSeasonId),
   gender: z.enum(["male", "female"]),
   recorded_at: z.string().regex(DATE_INPUT_RE).optional(),
   match_id: z.string().uuid().nullable().optional(),
@@ -36,8 +37,20 @@ export async function GET(req: Request) {
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "12", 10);
   const withoutMatch = searchParams.get("withoutMatch") === "true";
-  const forMatchId = searchParams.get("forMatchId");
+  const forMatchIdRaw = searchParams.get("forMatchId");
   const matchVideosOnly = searchParams.get("matchVideosOnly") === "true";
+
+  let forMatchId: string | null = null;
+  if (forMatchIdRaw) {
+    const parsed = z.string().uuid().safeParse(forMatchIdRaw);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid forMatchId" },
+        { status: 400 }
+      );
+    }
+    forMatchId = parsed.data;
+  }
 
   try {
     const data = await listVideos({

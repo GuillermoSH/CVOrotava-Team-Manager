@@ -22,6 +22,7 @@ import SegmentedControl from "@/components/ui/SegmentedControl";
 import Pagination from "@/components/ui/Pagination";
 import { readPref, writePref } from "@/lib/prefs";
 import { sileo } from "sileo";
+import { useConfirmDialog } from "@/components/ui/useConfirmDialog";
 import {
   isInactiveAccess,
   isRegisteredAccess,
@@ -92,6 +93,7 @@ export default function AccessView({
 }) {
   const { user } = useUser();
   const reduceMotion = useReducedMotion();
+  const { ask, dialog: confirmDialog } = useConfirmDialog();
 
   const [rows, setRows] = useState<AllowedEmailRow[]>(initialRows);
   const [loading, setLoading] = useState(initialRows.length === 0);
@@ -356,7 +358,19 @@ export default function AccessView({
   };
 
   const removeEmail = async (email: string) => {
-    if (!confirm(`¿Quitar el acceso de ${email}?`)) return;
+    const ok = await ask({
+      title: "Quitar acceso",
+      description: (
+        <>
+          <span className="font-medium text-[var(--text-primary)]">{email}</span>{" "}
+          dejará de poder entrar al Team Manager. Sus datos no se borran; puedes
+          volver a autorizar el email más tarde.
+        </>
+      ),
+      confirmLabel: "Quitar acceso",
+      tone: "danger",
+    });
+    if (!ok) return;
     setSaving(true);
     setError(null);
     try {
@@ -395,6 +409,7 @@ export default function AccessView({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, ease: EASE }}
     >
+      {confirmDialog}
       <PageHeader
         title="Usuarios"
         subtitle={

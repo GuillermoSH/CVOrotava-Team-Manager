@@ -1,0 +1,10742 @@
+{
+ "data": {
+  "type": "tournament",
+  "id": "1341786",
+  "attributes": {
+   "gender": "male",
+   "modality": "teams",
+   "name": "Liga Canaria Sénior Masculina 2026/27 (2ª Div. Masculina)",
+   "order": 8,
+   "status": "in_progress",
+   "created_at": "2026-08-13 11:01:27",
+   "updated_at": "2026-10-13 10:01:13"
+  },
+  "relationships": {
+   "category": {
+    "data": {
+     "type": "category",
+     "id": "3333"
+    }
+   },
+   "delegation": {
+    "data": {
+     "type": "delegation",
+     "id": "702"
+    }
+   },
+   "discipline": {
+    "data": {
+     "type": "discipline",
+     "id": "11"
+    }
+   },
+   "facility": {
+    "data": null
+   },
+   "manager": {
+    "data": {
+     "type": "manager",
+     "id": "288589"
+    }
+   },
+   "scoringcriterion": {
+    "data": {
+     "type": "scoringcriterion",
+     "id": "46676"
+    }
+   },
+   "season": {
+    "data": {
+     "type": "season",
+     "id": "9113"
+    }
+   },
+   "groups": {
+    "data": [
+     {
+      "type": "group",
+      "id": "3711351"
+     },
+     {
+      "type": "group",
+      "id": "3711352"
+     }
+    ]
+   },
+   "teams": {
+    "data": [
+     {
+      "type": "team",
+      "id": "15920692"
+     },
+     {
+      "type": "team",
+      "id": "15925160"
+     },
+     {
+      "type": "team",
+      "id": "15927937"
+     },
+     {
+      "type": "team",
+      "id": "15930180"
+     },
+     {
+      "type": "team",
+      "id": "15930744"
+     },
+     {
+      "type": "team",
+      "id": "15935273"
+     },
+     {
+      "type": "team",
+      "id": "15937168"
+     },
+     {
+      "type": "team",
+      "id": "15937840"
+     },
+     {
+      "type": "team",
+      "id": "15938767"
+     },
+     {
+      "type": "team",
+      "id": "15940072"
+     },
+     {
+      "type": "team",
+      "id": "15941872"
+     },
+     {
+      "type": "team",
+      "id": "15944355"
+     },
+     {
+      "type": "team",
+      "id": "15946243"
+     },
+     {
+      "type": "team",
+      "id": "15946244"
+     },
+     {
+      "type": "team",
+      "id": "15946245"
+     }
+    ]
+   }
+  }
+ },
+ "included": [
+  {
+   "type": "result",
+   "id": "195974384",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903695",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15930744",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903695"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974390",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903695",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946243",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903695"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974385",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903696",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15930744",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903696"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974391",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903696",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946243",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903696"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974386",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903697",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15930744",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903697"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974392",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903697",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946243",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903697"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974387",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903698",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15930744",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903698"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974393",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903698",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946243",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903698"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974388",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903699",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15930744",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903699"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974394",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903699",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946243",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903699"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974396",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903700",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15930180",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903700"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974402",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903700",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15920692",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903700"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974397",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903701",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15930180",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903701"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974403",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903701",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15920692",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903701"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974398",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903702",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15930180",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903702"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974404",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903702",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15920692",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903702"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974399",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903703",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15930180",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903703"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974405",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903703",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15920692",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903703"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974400",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903704",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15930180",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903704"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974406",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903704",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15920692",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903704"
+     }
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "87983",
+   "attributes": {
+    "active": true,
+    "latitude": 28.1101076,
+    "longitude": -15.4289443,
+    "name": "Pab. Mpal. Carlos García San Román",
+    "address": null,
+    "postal_code": "35012",
+    "city": "Las Palmas de Gran Canaria",
+    "province": "Las Palmas",
+    "phone": null,
+    "created_at": "2020-10-05 12:09:31",
+    "updated_at": "2025-09-10 08:38:11"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903695",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145742999"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195974384"
+      },
+      {
+       "type": "result",
+       "id": "195974390"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903696",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145742999"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195974385"
+      },
+      {
+       "type": "result",
+       "id": "195974391"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903697",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145742999"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195974386"
+      },
+      {
+       "type": "result",
+       "id": "195974392"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903698",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145742999"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195974387"
+      },
+      {
+       "type": "result",
+       "id": "195974393"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903699",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145742999"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195974388"
+      },
+      {
+       "type": "result",
+       "id": "195974394"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974389",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15930744",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974395",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145742999",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946243",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "90256",
+   "attributes": {
+    "active": true,
+    "latitude": 28.0924091,
+    "longitude": -15.430715,
+    "name": "Pab. Mpal. El Batán",
+    "address": null,
+    "postal_code": null,
+    "city": "Las Palmas de Gran Canaria",
+    "province": "Las Palmas",
+    "phone": null,
+    "created_at": "2021-03-15 18:34:13",
+    "updated_at": "2025-09-10 09:37:40"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903700",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743000"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195974396"
+      },
+      {
+       "type": "result",
+       "id": "195974402"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903701",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743000"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195974397"
+      },
+      {
+       "type": "result",
+       "id": "195974403"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903702",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743000"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195974398"
+      },
+      {
+       "type": "result",
+       "id": "195974404"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903703",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743000"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195974399"
+      },
+      {
+       "type": "result",
+       "id": "195974405"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903704",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743000"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195974400"
+      },
+      {
+       "type": "result",
+       "id": "195974406"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974401",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15930180",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195974407",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743000",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15920692",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "65112",
+   "attributes": {
+    "active": true,
+    "latitude": 0,
+    "longitude": 0,
+    "name": "IES Doctoral",
+    "address": null,
+    "postal_code": null,
+    "city": null,
+    "province": null,
+    "phone": null,
+    "created_at": "2018-10-11 12:49:42",
+    "updated_at": "2022-09-06 17:09:54"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "125536",
+   "attributes": {
+    "active": true,
+    "latitude": 0,
+    "longitude": 0,
+    "name": "Ciudad Deportiva El Tablero",
+    "address": null,
+    "postal_code": "35100",
+    "city": "Maspalomas",
+    "province": "Las Palmas",
+    "phone": null,
+    "created_at": "2025-11-05 21:39:41",
+    "updated_at": "2026-10-14 12:48:56"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "65098",
+   "attributes": {
+    "active": true,
+    "latitude": 0,
+    "longitude": 0,
+    "name": "IES Simón Pérez",
+    "address": null,
+    "postal_code": null,
+    "city": null,
+    "province": null,
+    "phone": null,
+    "created_at": "2018-10-11 09:54:38",
+    "updated_at": "2022-09-06 17:09:54"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "118825",
+   "attributes": {
+    "active": true,
+    "latitude": 28.1376813,
+    "longitude": -15.6344123,
+    "name": "Pabellón Beatríz Mendoza Rivero",
+    "address": null,
+    "postal_code": null,
+    "city": null,
+    "province": null,
+    "phone": null,
+    "created_at": "2024-10-17 16:00:59",
+    "updated_at": "2025-10-09 11:22:51"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "118834",
+   "attributes": {
+    "active": true,
+    "latitude": 0,
+    "longitude": 0,
+    "name": "Pab. Playa de Arinaga 3",
+    "address": null,
+    "postal_code": null,
+    "city": "Agüimes",
+    "province": "Las Plamas",
+    "phone": null,
+    "created_at": "2024-10-17 16:15:25",
+    "updated_at": "2026-10-13 18:49:17"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "110117",
+   "attributes": {
+    "active": true,
+    "latitude": 28.4999327,
+    "longitude": -13.8612255,
+    "name": "Pabellón Municipal Oasis",
+    "address": null,
+    "postal_code": null,
+    "city": "Puerto del Rosario, Fuerteventura",
+    "province": "Las Palmas",
+    "phone": null,
+    "created_at": "2023-10-16 20:10:48",
+    "updated_at": "2025-11-03 11:03:40"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145742999",
+   "attributes": {
+    "number": null,
+    "date": "2026-10-25 12:00:00",
+    "datetime": "2026-10-25 12:00:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "meta": {
+    "home_team": "15930744",
+    "away_team": "15946243"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "87983"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19819943"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3903695"
+      },
+      {
+       "type": "period",
+       "id": "3903696"
+      },
+      {
+       "type": "period",
+       "id": "3903697"
+      },
+      {
+       "type": "period",
+       "id": "3903698"
+      },
+      {
+       "type": "period",
+       "id": "3903699"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195974389"
+      },
+      {
+       "type": "result",
+       "id": "195974395"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145743000",
+   "attributes": {
+    "number": null,
+    "date": "2026-10-25 17:00:00",
+    "datetime": "2026-10-25 17:00:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "meta": {
+    "home_team": "15930180",
+    "away_team": "15920692"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "90256"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19819943"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3903700"
+      },
+      {
+       "type": "period",
+       "id": "3903701"
+      },
+      {
+       "type": "period",
+       "id": "3903702"
+      },
+      {
+       "type": "period",
+       "id": "3903703"
+      },
+      {
+       "type": "period",
+       "id": "3903704"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195974401"
+      },
+      {
+       "type": "result",
+       "id": "195974407"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976092",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903977",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903977"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976098",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903977",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15937840",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903977"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976093",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903978",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903978"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976099",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903978",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15937840",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903978"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976094",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903979",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903979"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976100",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903979",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15937840",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903979"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976095",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903980",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903980"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976101",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903980",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15937840",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903980"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976096",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903981",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903981"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976102",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3903981",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15937840",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3903981"
+     }
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "78339",
+   "attributes": {
+    "active": true,
+    "latitude": 0,
+    "longitude": 0,
+    "name": "Pabellón M. Quiquirá",
+    "address": null,
+    "postal_code": null,
+    "city": null,
+    "province": null,
+    "phone": null,
+    "created_at": "2019-10-14 17:18:29",
+    "updated_at": "2025-10-06 17:06:13"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903977",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743586"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976092"
+      },
+      {
+       "type": "result",
+       "id": "195976098"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903978",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743586"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976093"
+      },
+      {
+       "type": "result",
+       "id": "195976099"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903979",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743586"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976094"
+      },
+      {
+       "type": "result",
+       "id": "195976100"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903980",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743586"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976095"
+      },
+      {
+       "type": "result",
+       "id": "195976101"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3903981",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743586"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976096"
+      },
+      {
+       "type": "result",
+       "id": "195976102"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976097",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976103",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743586",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15937840",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "62834",
+   "attributes": {
+    "active": true,
+    "latitude": 28.5178992,
+    "longitude": -16.39064170000006,
+    "name": "Pabellón Goya Dorta",
+    "address": "Valle Guerra",
+    "postal_code": null,
+    "city": null,
+    "province": "Santa Cruz de Tenerife",
+    "phone": null,
+    "created_at": "2018-07-18 07:58:45",
+    "updated_at": "2026-10-14 15:33:03"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "63106",
+   "attributes": {
+    "active": true,
+    "latitude": 0,
+    "longitude": 0,
+    "name": "Pabellón Pablos Abril",
+    "address": null,
+    "postal_code": null,
+    "city": null,
+    "province": null,
+    "phone": null,
+    "created_at": "2018-07-29 09:04:31",
+    "updated_at": "2022-09-06 17:09:53"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976152",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904002",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15927937",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904002"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976158",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904002",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904002"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976153",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904003",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15927937",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904003"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976159",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904003",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904003"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976154",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904004",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15927937",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904004"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976160",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904004",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904004"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976155",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904005",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15927937",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904005"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976161",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904005",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904005"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976156",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904006",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15927937",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904006"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976162",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904006",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904006"
+     }
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "63560",
+   "attributes": {
+    "active": true,
+    "latitude": 28.474652,
+    "longitude": -16.2909953,
+    "name": "Colegio Cisneros Alter",
+    "address": null,
+    "postal_code": null,
+    "city": "San Cristobal de la Laguna",
+    "province": "Tenerife",
+    "phone": null,
+    "created_at": "2018-08-23 14:48:01",
+    "updated_at": "2025-09-15 08:35:33"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "130178",
+   "attributes": {
+    "active": true,
+    "latitude": 28.6605662,
+    "longitude": -17.9151385,
+    "name": "Polideportivo Severo Rodríguez",
+    "address": "Calle Ramón Pol 1",
+    "postal_code": null,
+    "city": "Los Llanos de Aridane ( La Palma)",
+    "province": "Santa Cruz de Tenerife",
+    "phone": null,
+    "created_at": "2026-10-14 15:35:35",
+    "updated_at": "2026-10-14 15:35:35"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "78342",
+   "attributes": {
+    "active": true,
+    "latitude": null,
+    "longitude": null,
+    "name": "Pab. CEIP San Matías",
+    "address": null,
+    "postal_code": null,
+    "city": null,
+    "province": "Santa Cruz de Tenerife",
+    "phone": null,
+    "created_at": "2019-10-14 17:18:33",
+    "updated_at": "2025-10-06 17:09:20"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904002",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743591"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976152"
+      },
+      {
+       "type": "result",
+       "id": "195976158"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904003",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743591"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976153"
+      },
+      {
+       "type": "result",
+       "id": "195976159"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904004",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743591"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976154"
+      },
+      {
+       "type": "result",
+       "id": "195976160"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904005",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743591"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976155"
+      },
+      {
+       "type": "result",
+       "id": "195976161"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904006",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743591"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976156"
+      },
+      {
+       "type": "result",
+       "id": "195976162"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976157",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15927937",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976163",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743591",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "facility",
+   "id": "118685",
+   "attributes": {
+    "active": true,
+    "latitude": 0,
+    "longitude": 0,
+    "name": "Pabellón Rosendo Alonso Tapia",
+    "address": null,
+    "postal_code": null,
+    "city": "Candelaria",
+    "province": "Santa Cruz de Tenerife",
+    "phone": null,
+    "created_at": "2024-10-11 17:26:58",
+    "updated_at": "2025-02-13 11:15:13"
+   },
+   "relationships": {
+    "manager": {
+     "data": {
+      "type": "manager",
+      "id": "288589"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976224",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904032",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904032"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976230",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904032",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15938767",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904032"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976225",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904033",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904033"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976231",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904033",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15938767",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904033"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976226",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904034",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904034"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976232",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904034",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15938767",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904034"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976227",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904035",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904035"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976233",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904035",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15938767",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904035"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976228",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904036",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904036"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976234",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904036",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15938767",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904036"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904032",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743597"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976224"
+      },
+      {
+       "type": "result",
+       "id": "195976230"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904033",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743597"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976225"
+      },
+      {
+       "type": "result",
+       "id": "195976231"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904034",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743597"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976226"
+      },
+      {
+       "type": "result",
+       "id": "195976232"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904035",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743597"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976227"
+      },
+      {
+       "type": "result",
+       "id": "195976233"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904036",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743597"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976228"
+      },
+      {
+       "type": "result",
+       "id": "195976234"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976229",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976235",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743597",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15938767",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976236",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904037",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946245",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904037"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976242",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:06",
+    "updated_at": "2026-10-14 15:39:06"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904037",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904037"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976237",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904038",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946245",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904038"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976243",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:06",
+    "updated_at": "2026-10-14 15:39:06"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904038",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904038"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976238",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904039",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946245",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904039"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976244",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:06",
+    "updated_at": "2026-10-14 15:39:06"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904039",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904039"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976239",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904040",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946245",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904040"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976245",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:06",
+    "updated_at": "2026-10-14 15:39:06"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904040",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904040"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976240",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:06",
+    "updated_at": "2026-10-14 15:39:06"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904041",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946245",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904041"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976246",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:06",
+    "updated_at": "2026-10-14 15:39:06"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904041",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904041"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904037",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743598"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976236"
+      },
+      {
+       "type": "result",
+       "id": "195976242"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904038",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743598"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976237"
+      },
+      {
+       "type": "result",
+       "id": "195976243"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904039",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743598"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976238"
+      },
+      {
+       "type": "result",
+       "id": "195976244"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904040",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743598"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976239"
+      },
+      {
+       "type": "result",
+       "id": "195976245"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904041",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743598"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976240"
+      },
+      {
+       "type": "result",
+       "id": "195976246"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976241",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:06",
+    "updated_at": "2026-10-14 15:39:06"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946245",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976247",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:06",
+    "updated_at": "2026-10-14 15:39:06"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743598",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976284",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904057",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904057"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976290",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904057",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15944355",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904057"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976285",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904058",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904058"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976291",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904058",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15944355",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904058"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976286",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904059",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904059"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976292",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904059",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15944355",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904059"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976287",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904060",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904060"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976293",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904060",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15944355",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904060"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976288",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904061",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904061"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976294",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904061",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15944355",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904061"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904057",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743602"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976284"
+      },
+      {
+       "type": "result",
+       "id": "195976290"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904058",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743602"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976285"
+      },
+      {
+       "type": "result",
+       "id": "195976291"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904059",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743602"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976286"
+      },
+      {
+       "type": "result",
+       "id": "195976292"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904060",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743602"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976287"
+      },
+      {
+       "type": "result",
+       "id": "195976293"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904061",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743602"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976288"
+      },
+      {
+       "type": "result",
+       "id": "195976294"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976289",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976295",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743602",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15944355",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976320",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904072",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15940072",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904072"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976326",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904072",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904072"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976321",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904073",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15940072",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904073"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976327",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904073",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904073"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976322",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904074",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15940072",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904074"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976328",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904074",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904074"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976323",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904075",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15940072",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904075"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976329",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904075",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904075"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976324",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904076",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15940072",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904076"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976330",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904076",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904076"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904072",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743605"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976320"
+      },
+      {
+       "type": "result",
+       "id": "195976326"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904073",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743605"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976321"
+      },
+      {
+       "type": "result",
+       "id": "195976327"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904074",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743605"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976322"
+      },
+      {
+       "type": "result",
+       "id": "195976328"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904075",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743605"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976323"
+      },
+      {
+       "type": "result",
+       "id": "195976329"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904076",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743605"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976324"
+      },
+      {
+       "type": "result",
+       "id": "195976330"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976325",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15940072",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976331",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743605",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976344",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904082",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15937840",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904082"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976350",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904082",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904082"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976345",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904083",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15937840",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904083"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976351",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904083",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904083"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976346",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904084",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15937840",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904084"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976352",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904084",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904084"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976347",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904085",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15937840",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904085"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976353",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:09",
+    "updated_at": "2026-10-14 15:39:09"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904085",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904085"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976348",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904086",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15937840",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904086"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976354",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:09",
+    "updated_at": "2026-10-14 15:39:09"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904086",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904086"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904082",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743607"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976344"
+      },
+      {
+       "type": "result",
+       "id": "195976350"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904083",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743607"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976345"
+      },
+      {
+       "type": "result",
+       "id": "195976351"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904084",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743607"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976346"
+      },
+      {
+       "type": "result",
+       "id": "195976352"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904085",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743607"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976347"
+      },
+      {
+       "type": "result",
+       "id": "195976353"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904086",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743607"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976348"
+      },
+      {
+       "type": "result",
+       "id": "195976354"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976349",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15937840",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976355",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:09",
+    "updated_at": "2026-10-14 15:39:09"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743607",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976404",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904107",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904107"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976410",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904107",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15927937",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904107"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976405",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904108",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904108"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976411",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904108",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15927937",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904108"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976406",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904109",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904109"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976412",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904109",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15927937",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904109"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976407",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904110",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904110"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976413",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904110",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15927937",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904110"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976408",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904111",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904111"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976414",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904111",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15927937",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904111"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904107",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743612"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976404"
+      },
+      {
+       "type": "result",
+       "id": "195976410"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904108",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743612"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976405"
+      },
+      {
+       "type": "result",
+       "id": "195976411"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904109",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743612"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976406"
+      },
+      {
+       "type": "result",
+       "id": "195976412"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904110",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743612"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976407"
+      },
+      {
+       "type": "result",
+       "id": "195976413"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904111",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743612"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976408"
+      },
+      {
+       "type": "result",
+       "id": "195976414"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976409",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976415",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743612",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15927937",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976476",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904137",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15938767",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904137"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976482",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904137",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904137"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976477",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904138",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15938767",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904138"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976483",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904138",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904138"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976478",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904139",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15938767",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904139"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976484",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904139",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904139"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976479",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904140",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15938767",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904140"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976485",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904140",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904140"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976480",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904141",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15938767",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904141"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976486",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904141",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904141"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904137",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743618"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976476"
+      },
+      {
+       "type": "result",
+       "id": "195976482"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904138",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743618"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976477"
+      },
+      {
+       "type": "result",
+       "id": "195976483"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904139",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743618"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976478"
+      },
+      {
+       "type": "result",
+       "id": "195976484"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904140",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743618"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976479"
+      },
+      {
+       "type": "result",
+       "id": "195976485"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904141",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743618"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976480"
+      },
+      {
+       "type": "result",
+       "id": "195976486"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976481",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15938767",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976487",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743618",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976488",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904142",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904142"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976494",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904142",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946245",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904142"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976489",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904143",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904143"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976495",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904143",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946245",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904143"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976490",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904144",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904144"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976496",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904144",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946245",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904144"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976491",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904145",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904145"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976497",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904145",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946245",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904145"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976492",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904146",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904146"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976498",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904146",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946245",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904146"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904142",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743619"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976488"
+      },
+      {
+       "type": "result",
+       "id": "195976494"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904143",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743619"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976489"
+      },
+      {
+       "type": "result",
+       "id": "195976495"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904144",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743619"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976490"
+      },
+      {
+       "type": "result",
+       "id": "195976496"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904145",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743619"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976491"
+      },
+      {
+       "type": "result",
+       "id": "195976497"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904146",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743619"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976492"
+      },
+      {
+       "type": "result",
+       "id": "195976498"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976493",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976499",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743619",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15946245",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976536",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904162",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15944355",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904162"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976542",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904162",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904162"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976537",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904163",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15944355",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904163"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976543",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904163",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904163"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976538",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904164",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15944355",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904164"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976544",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904164",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904164"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976539",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904165",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15944355",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904165"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976545",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904165",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904165"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976540",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904166",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15944355",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904166"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976546",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904166",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904166"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904162",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743623"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976536"
+      },
+      {
+       "type": "result",
+       "id": "195976542"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904163",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743623"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976537"
+      },
+      {
+       "type": "result",
+       "id": "195976543"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904164",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743623"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976538"
+      },
+      {
+       "type": "result",
+       "id": "195976544"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904165",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743623"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976539"
+      },
+      {
+       "type": "result",
+       "id": "195976545"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904166",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743623"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976540"
+      },
+      {
+       "type": "result",
+       "id": "195976546"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976541",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15944355",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976547",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743623",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976572",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904177",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904177"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976578",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904177",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15940072",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904177"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976573",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904178",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904178"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976579",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904178",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15940072",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904178"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976574",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904179",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904179"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976580",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904179",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15940072",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904179"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976575",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904180",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904180"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976581",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904180",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15940072",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904180"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976576",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904181",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904181"
+     }
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976582",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "3904181",
+      "type": "period"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15940072",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": {
+      "type": "period",
+      "id": "3904181"
+     }
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904177",
+   "attributes": {
+    "finished": false,
+    "name": "Set 1",
+    "order": 1,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743626"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976572"
+      },
+      {
+       "type": "result",
+       "id": "195976578"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904178",
+   "attributes": {
+    "finished": false,
+    "name": "Set 2",
+    "order": 2,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743626"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976573"
+      },
+      {
+       "type": "result",
+       "id": "195976579"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904179",
+   "attributes": {
+    "finished": false,
+    "name": "Set 3",
+    "order": 3,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743626"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976574"
+      },
+      {
+       "type": "result",
+       "id": "195976580"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904180",
+   "attributes": {
+    "finished": false,
+    "name": "Set 4",
+    "order": 4,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743626"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976575"
+      },
+      {
+       "type": "result",
+       "id": "195976581"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "period",
+   "id": "3904181",
+   "attributes": {
+    "finished": false,
+    "name": "Tie Break",
+    "order": 5,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "periodable": {
+     "data": {
+      "type": "match",
+      "id": "145743626"
+     }
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976576"
+      },
+      {
+       "type": "result",
+       "id": "195976582"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976577",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15941872",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "result",
+   "id": "195976583",
+   "attributes": {
+    "value": null,
+    "score": null,
+    "created_at": "2026-10-14 15:39:15",
+    "updated_at": "2026-10-14 15:39:15"
+   },
+   "relationships": {
+    "match": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "parent": {
+     "data": {
+      "id": "145743626",
+      "type": "match"
+     }
+    },
+    "team": {
+     "data": {
+      "id": "15940072",
+      "type": "team"
+     }
+    },
+    "period": {
+     "data": null
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145743586",
+   "attributes": {
+    "number": null,
+    "date": "2026-10-24 15:30:00",
+    "datetime": "2026-10-24 15:30:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "meta": {
+    "home_team": "15941872",
+    "away_team": "15937840"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "78339"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19820015"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3903977"
+      },
+      {
+       "type": "period",
+       "id": "3903978"
+      },
+      {
+       "type": "period",
+       "id": "3903979"
+      },
+      {
+       "type": "period",
+       "id": "3903980"
+      },
+      {
+       "type": "period",
+       "id": "3903981"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976097"
+      },
+      {
+       "type": "result",
+       "id": "195976103"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145743591",
+   "attributes": {
+    "number": null,
+    "date": "2026-11-01 17:00:00",
+    "datetime": "2026-11-01 17:00:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:39:03",
+    "updated_at": "2026-10-14 15:39:03"
+   },
+   "meta": {
+    "home_team": "15927937",
+    "away_team": "15941872"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "78342"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19820016"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3904002"
+      },
+      {
+       "type": "period",
+       "id": "3904003"
+      },
+      {
+       "type": "period",
+       "id": "3904004"
+      },
+      {
+       "type": "period",
+       "id": "3904005"
+      },
+      {
+       "type": "period",
+       "id": "3904006"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976157"
+      },
+      {
+       "type": "result",
+       "id": "195976163"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145743597",
+   "attributes": {
+    "number": null,
+    "date": "2026-11-14 17:30:00",
+    "datetime": "2026-11-14 17:30:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "meta": {
+    "home_team": "15941872",
+    "away_team": "15938767"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "78339"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19820018"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3904032"
+      },
+      {
+       "type": "period",
+       "id": "3904033"
+      },
+      {
+       "type": "period",
+       "id": "3904034"
+      },
+      {
+       "type": "period",
+       "id": "3904035"
+      },
+      {
+       "type": "period",
+       "id": "3904036"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976229"
+      },
+      {
+       "type": "result",
+       "id": "195976235"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145743598",
+   "attributes": {
+    "number": null,
+    "date": "2026-11-21 15:00:00",
+    "datetime": "2026-11-21 15:00:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "meta": {
+    "home_team": "15946245",
+    "away_team": "15941872"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "63106"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19820019"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3904037"
+      },
+      {
+       "type": "period",
+       "id": "3904038"
+      },
+      {
+       "type": "period",
+       "id": "3904039"
+      },
+      {
+       "type": "period",
+       "id": "3904040"
+      },
+      {
+       "type": "period",
+       "id": "3904041"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976241"
+      },
+      {
+       "type": "result",
+       "id": "195976247"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145743602",
+   "attributes": {
+    "number": null,
+    "date": "2026-11-28 19:30:00",
+    "datetime": "2026-11-28 19:30:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "meta": {
+    "home_team": "15941872",
+    "away_team": "15944355"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "78339"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19820020"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3904057"
+      },
+      {
+       "type": "period",
+       "id": "3904058"
+      },
+      {
+       "type": "period",
+       "id": "3904059"
+      },
+      {
+       "type": "period",
+       "id": "3904060"
+      },
+      {
+       "type": "period",
+       "id": "3904061"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976289"
+      },
+      {
+       "type": "result",
+       "id": "195976295"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145743605",
+   "attributes": {
+    "number": null,
+    "date": "2026-12-12 15:00:00",
+    "datetime": "2026-12-12 15:00:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "meta": {
+    "home_team": "15940072",
+    "away_team": "15941872"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "63560"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19820021"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3904072"
+      },
+      {
+       "type": "period",
+       "id": "3904073"
+      },
+      {
+       "type": "period",
+       "id": "3904074"
+      },
+      {
+       "type": "period",
+       "id": "3904075"
+      },
+      {
+       "type": "period",
+       "id": "3904076"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976325"
+      },
+      {
+       "type": "result",
+       "id": "195976331"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145743607",
+   "attributes": {
+    "number": null,
+    "date": "2026-12-20 12:00:00",
+    "datetime": "2026-12-20 12:00:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "meta": {
+    "home_team": "15937840",
+    "away_team": "15941872"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "130178"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19820022"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3904082"
+      },
+      {
+       "type": "period",
+       "id": "3904083"
+      },
+      {
+       "type": "period",
+       "id": "3904084"
+      },
+      {
+       "type": "period",
+       "id": "3904085"
+      },
+      {
+       "type": "period",
+       "id": "3904086"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976349"
+      },
+      {
+       "type": "result",
+       "id": "195976355"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145743612",
+   "attributes": {
+    "number": null,
+    "date": "2027-01-09 17:30:00",
+    "datetime": "2027-01-09 17:30:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:39:10",
+    "updated_at": "2026-10-14 15:39:10"
+   },
+   "meta": {
+    "home_team": "15941872",
+    "away_team": "15927937"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "78339"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19820023"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3904107"
+      },
+      {
+       "type": "period",
+       "id": "3904108"
+      },
+      {
+       "type": "period",
+       "id": "3904109"
+      },
+      {
+       "type": "period",
+       "id": "3904110"
+      },
+      {
+       "type": "period",
+       "id": "3904111"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976409"
+      },
+      {
+       "type": "result",
+       "id": "195976415"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145743618",
+   "attributes": {
+    "number": null,
+    "date": "2027-01-23 17:00:00",
+    "datetime": "2027-01-23 17:00:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "meta": {
+    "home_team": "15938767",
+    "away_team": "15941872"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "62834"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19820025"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3904137"
+      },
+      {
+       "type": "period",
+       "id": "3904138"
+      },
+      {
+       "type": "period",
+       "id": "3904139"
+      },
+      {
+       "type": "period",
+       "id": "3904140"
+      },
+      {
+       "type": "period",
+       "id": "3904141"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976481"
+      },
+      {
+       "type": "result",
+       "id": "195976487"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145743619",
+   "attributes": {
+    "number": null,
+    "date": "2027-01-30 19:30:00",
+    "datetime": "2027-01-30 19:30:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "meta": {
+    "home_team": "15941872",
+    "away_team": "15946245"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "78339"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19820026"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3904142"
+      },
+      {
+       "type": "period",
+       "id": "3904143"
+      },
+      {
+       "type": "period",
+       "id": "3904144"
+      },
+      {
+       "type": "period",
+       "id": "3904145"
+      },
+      {
+       "type": "period",
+       "id": "3904146"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976493"
+      },
+      {
+       "type": "result",
+       "id": "195976499"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145743623",
+   "attributes": {
+    "number": null,
+    "date": "2027-02-13 18:00:00",
+    "datetime": "2027-02-13 18:00:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "meta": {
+    "home_team": "15944355",
+    "away_team": "15941872"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "118685"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19820027"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3904162"
+      },
+      {
+       "type": "period",
+       "id": "3904163"
+      },
+      {
+       "type": "period",
+       "id": "3904164"
+      },
+      {
+       "type": "period",
+       "id": "3904165"
+      },
+      {
+       "type": "period",
+       "id": "3904166"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976541"
+      },
+      {
+       "type": "result",
+       "id": "195976547"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "match",
+   "id": "145743626",
+   "attributes": {
+    "number": null,
+    "date": "2027-02-20 17:00:00",
+    "datetime": "2027-02-20 17:00:00",
+    "display_timezone": "Atlantic/Canary",
+    "finished": false,
+    "canceled": false,
+    "postponed": false,
+    "rest": false,
+    "report": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "meta": {
+    "home_team": "15941872",
+    "away_team": "15940072"
+   },
+   "relationships": {
+    "faceoff": {
+     "data": null
+    },
+    "facility": {
+     "data": {
+      "type": "facility",
+      "id": "78339"
+     }
+    },
+    "round": {
+     "data": {
+      "type": "round",
+      "id": "19820028"
+     }
+    },
+    "periods": {
+     "data": [
+      {
+       "type": "period",
+       "id": "3904177"
+      },
+      {
+       "type": "period",
+       "id": "3904178"
+      },
+      {
+       "type": "period",
+       "id": "3904179"
+      },
+      {
+       "type": "period",
+       "id": "3904180"
+      },
+      {
+       "type": "period",
+       "id": "3904181"
+      }
+     ]
+    },
+    "results": {
+     "data": [
+      {
+       "type": "result",
+       "id": "195976577"
+      },
+      {
+       "type": "result",
+       "id": "195976583"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "round",
+   "id": "19819943",
+   "attributes": {
+    "end_date": null,
+    "limit_date": null,
+    "name": "1",
+    "order": 1,
+    "start_date": null,
+    "created_at": "2026-10-14 15:19:37",
+    "updated_at": "2026-10-14 15:19:37"
+   },
+   "relationships": {
+    "group": {
+     "data": {
+      "type": "group",
+      "id": "3711351"
+     }
+    },
+    "matches": {
+     "data": [
+      {
+       "type": "match",
+       "id": "145742999"
+      },
+      {
+       "type": "match",
+       "id": "145743000"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "round",
+   "id": "19820015",
+   "attributes": {
+    "end_date": null,
+    "limit_date": null,
+    "name": "1",
+    "order": 1,
+    "start_date": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "group": {
+     "data": {
+      "type": "group",
+      "id": "3711352"
+     }
+    },
+    "matches": {
+     "data": [
+      {
+       "type": "match",
+       "id": "145743586"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "round",
+   "id": "19820016",
+   "attributes": {
+    "end_date": null,
+    "limit_date": null,
+    "name": "2",
+    "order": 2,
+    "start_date": null,
+    "created_at": "2026-10-14 15:39:02",
+    "updated_at": "2026-10-14 15:39:02"
+   },
+   "relationships": {
+    "group": {
+     "data": {
+      "type": "group",
+      "id": "3711352"
+     }
+    },
+    "matches": {
+     "data": [
+      {
+       "type": "match",
+       "id": "145743591"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "round",
+   "id": "19820018",
+   "attributes": {
+    "end_date": null,
+    "limit_date": null,
+    "name": "4",
+    "order": 4,
+    "start_date": null,
+    "created_at": "2026-10-14 15:39:04",
+    "updated_at": "2026-10-14 15:39:04"
+   },
+   "relationships": {
+    "group": {
+     "data": {
+      "type": "group",
+      "id": "3711352"
+     }
+    },
+    "matches": {
+     "data": [
+      {
+       "type": "match",
+       "id": "145743597"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "round",
+   "id": "19820019",
+   "attributes": {
+    "end_date": null,
+    "limit_date": null,
+    "name": "5",
+    "order": 5,
+    "start_date": null,
+    "created_at": "2026-10-14 15:39:05",
+    "updated_at": "2026-10-14 15:39:05"
+   },
+   "relationships": {
+    "group": {
+     "data": {
+      "type": "group",
+      "id": "3711352"
+     }
+    },
+    "matches": {
+     "data": [
+      {
+       "type": "match",
+       "id": "145743598"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "round",
+   "id": "19820020",
+   "attributes": {
+    "end_date": null,
+    "limit_date": null,
+    "name": "6",
+    "order": 6,
+    "start_date": null,
+    "created_at": "2026-10-14 15:39:06",
+    "updated_at": "2026-10-14 15:39:06"
+   },
+   "relationships": {
+    "group": {
+     "data": {
+      "type": "group",
+      "id": "3711352"
+     }
+    },
+    "matches": {
+     "data": [
+      {
+       "type": "match",
+       "id": "145743602"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "round",
+   "id": "19820021",
+   "attributes": {
+    "end_date": null,
+    "limit_date": null,
+    "name": "7",
+    "order": 7,
+    "start_date": null,
+    "created_at": "2026-10-14 15:39:07",
+    "updated_at": "2026-10-14 15:39:07"
+   },
+   "relationships": {
+    "group": {
+     "data": {
+      "type": "group",
+      "id": "3711352"
+     }
+    },
+    "matches": {
+     "data": [
+      {
+       "type": "match",
+       "id": "145743605"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "round",
+   "id": "19820022",
+   "attributes": {
+    "end_date": null,
+    "limit_date": null,
+    "name": "8",
+    "order": 8,
+    "start_date": null,
+    "created_at": "2026-10-14 15:39:08",
+    "updated_at": "2026-10-14 15:39:08"
+   },
+   "relationships": {
+    "group": {
+     "data": {
+      "type": "group",
+      "id": "3711352"
+     }
+    },
+    "matches": {
+     "data": [
+      {
+       "type": "match",
+       "id": "145743607"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "round",
+   "id": "19820023",
+   "attributes": {
+    "end_date": null,
+    "limit_date": null,
+    "name": "9",
+    "order": 9,
+    "start_date": null,
+    "created_at": "2026-10-14 15:39:09",
+    "updated_at": "2026-10-14 15:39:09"
+   },
+   "relationships": {
+    "group": {
+     "data": {
+      "type": "group",
+      "id": "3711352"
+     }
+    },
+    "matches": {
+     "data": [
+      {
+       "type": "match",
+       "id": "145743612"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "round",
+   "id": "19820025",
+   "attributes": {
+    "end_date": null,
+    "limit_date": null,
+    "name": "11",
+    "order": 11,
+    "start_date": null,
+    "created_at": "2026-10-14 15:39:11",
+    "updated_at": "2026-10-14 15:39:11"
+   },
+   "relationships": {
+    "group": {
+     "data": {
+      "type": "group",
+      "id": "3711352"
+     }
+    },
+    "matches": {
+     "data": [
+      {
+       "type": "match",
+       "id": "145743618"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "round",
+   "id": "19820026",
+   "attributes": {
+    "end_date": null,
+    "limit_date": null,
+    "name": "12",
+    "order": 12,
+    "start_date": null,
+    "created_at": "2026-10-14 15:39:12",
+    "updated_at": "2026-10-14 15:39:12"
+   },
+   "relationships": {
+    "group": {
+     "data": {
+      "type": "group",
+      "id": "3711352"
+     }
+    },
+    "matches": {
+     "data": [
+      {
+       "type": "match",
+       "id": "145743619"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "round",
+   "id": "19820027",
+   "attributes": {
+    "end_date": null,
+    "limit_date": null,
+    "name": "13",
+    "order": 13,
+    "start_date": null,
+    "created_at": "2026-10-14 15:39:13",
+    "updated_at": "2026-10-14 15:39:13"
+   },
+   "relationships": {
+    "group": {
+     "data": {
+      "type": "group",
+      "id": "3711352"
+     }
+    },
+    "matches": {
+     "data": [
+      {
+       "type": "match",
+       "id": "145743623"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "round",
+   "id": "19820028",
+   "attributes": {
+    "end_date": null,
+    "limit_date": null,
+    "name": "14",
+    "order": 14,
+    "start_date": null,
+    "created_at": "2026-10-14 15:39:14",
+    "updated_at": "2026-10-14 15:39:14"
+   },
+   "relationships": {
+    "group": {
+     "data": {
+      "type": "group",
+      "id": "3711352"
+     }
+    },
+    "matches": {
+     "data": [
+      {
+       "type": "match",
+       "id": "145743626"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "group",
+   "id": "3711351",
+   "attributes": {
+    "name": "GRUPO LAS PALMAS",
+    "order": 2,
+    "type": "league",
+    "group": null,
+    "promote": 0,
+    "relegate": 0,
+    "created_at": "2026-08-13 11:04:14",
+    "updated_at": "2026-10-05 12:48:51"
+   },
+   "relationships": {
+    "tournament": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    },
+    "rounds": {
+     "data": [
+      {
+       "type": "round",
+       "id": "19819943"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "group",
+   "id": "3711352",
+   "attributes": {
+    "name": "GRUPO TENERIFE",
+    "order": 3,
+    "type": "league",
+    "group": null,
+    "promote": 0,
+    "relegate": 0,
+    "created_at": "2026-08-13 11:04:26",
+    "updated_at": "2026-10-05 12:49:03"
+   },
+   "relationships": {
+    "tournament": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    },
+    "rounds": {
+     "data": [
+      {
+       "type": "round",
+       "id": "19820015"
+      },
+      {
+       "type": "round",
+       "id": "19820016"
+      },
+      {
+       "type": "round",
+       "id": "19820018"
+      },
+      {
+       "type": "round",
+       "id": "19820019"
+      },
+      {
+       "type": "round",
+       "id": "19820020"
+      },
+      {
+       "type": "round",
+       "id": "19820021"
+      },
+      {
+       "type": "round",
+       "id": "19820022"
+      },
+      {
+       "type": "round",
+       "id": "19820023"
+      },
+      {
+       "type": "round",
+       "id": "19820025"
+      },
+      {
+       "type": "round",
+       "id": "19820026"
+      },
+      {
+       "type": "round",
+       "id": "19820027"
+      },
+      {
+       "type": "round",
+       "id": "19820028"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "type": "season",
+   "id": "9113",
+   "attributes": {
+    "name": "Temporada 2026-2027 Voleibol",
+    "order": 18
+   }
+  },
+  {
+   "type": "team",
+   "id": "15920692",
+   "attributes": {
+    "equipment_1": "",
+    "equipment_2": "",
+    "headquarter": "Pab. Mpal. Playa de Arinaga",
+    "name": "DOS 19 ARINAGA",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-08-24 08:50:13",
+    "updated_at": "2026-09-09 15:59:21"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/AaOOD8CS2Qjl.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "4737501"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15925160",
+   "attributes": {
+    "equipment_1": "",
+    "equipment_2": "",
+    "headquarter": "Pab. Beatríz Mendoza Rivero",
+    "name": "CV GUPANE GUIA",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-09-01 15:33:59",
+    "updated_at": "2026-10-14 15:18:56"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/AaOSqD431i0D.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "9474900"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15927937",
+   "attributes": {
+    "equipment_1": "",
+    "equipment_2": "",
+    "headquarter": "Pabellón CEIP San Matías",
+    "name": "CV YEJARAFE",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-09-06 11:30:17",
+    "updated_at": "2026-09-09 15:49:45"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/AaywLb4zQhmr.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "4497007"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15930180",
+   "attributes": {
+    "equipment_1": "",
+    "equipment_2": "",
+    "headquarter": "Polideportivo Municipal El Batán",
+    "name": "CV SAN ROQUE",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-09-08 17:14:59",
+    "updated_at": "2026-09-09 15:51:20"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/AaC4B8d2CyqA.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "4496989"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15930744",
+   "attributes": {
+    "equipment_1": "",
+    "equipment_2": "",
+    "headquarter": "Pab. Mpal. Carlos García San Román",
+    "name": "CV SUAC CANARIAS",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-09-09 15:50:23",
+    "updated_at": "2026-09-09 15:55:58"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/Aaofu47m37Hb.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "8205114"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15935273",
+   "attributes": {
+    "equipment_1": null,
+    "equipment_2": null,
+    "headquarter": null,
+    "name": "CV DUNAS AUTOART CANARIAS",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-09-16 14:34:12",
+    "updated_at": "2026-09-16 14:34:12"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/sjubKkLwcDLISsnXWgg5qDN5.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "9816175"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15937168",
+   "attributes": {
+    "equipment_1": null,
+    "equipment_2": null,
+    "headquarter": "Pabellón Municipal Oasis",
+    "name": "BENTAGUAIRE PUERTO DEL ROSARIO",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-09-19 11:15:26",
+    "updated_at": "2026-09-19 11:15:26"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/AaBq4XpBul4K.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "4496866"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15937840",
+   "attributes": {
+    "equipment_1": null,
+    "equipment_2": null,
+    "headquarter": null,
+    "name": "LA PALMA VOLLEYBALL",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-09-21 12:32:11",
+    "updated_at": "2026-09-21 12:32:11"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/AairA0D4cqeH.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "9835397"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15938767",
+   "attributes": {
+    "equipment_1": null,
+    "equipment_2": null,
+    "headquarter": null,
+    "name": "JALEO AZAHAR ECOCENTRO",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-09-23 02:24:52",
+    "updated_at": "2026-09-23 02:24:52"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/AasTPjbnLoQq.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "9823627"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15940072",
+   "attributes": {
+    "equipment_1": null,
+    "equipment_2": null,
+    "headquarter": "Pabellon Cisneros Alter",
+    "name": "CISNEROS LA LAGUNA",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-09-25 08:59:26",
+    "updated_at": "2026-09-25 08:59:26"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/AaUUaswFMXTt.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "4496871"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15941872",
+   "attributes": {
+    "equipment_1": "",
+    "equipment_2": "",
+    "headquarter": "Pabellón Quiquirá",
+    "name": "CV OROTAVA-PUERTO DE LA CRUZ",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-09-28 12:02:43",
+    "updated_at": "2026-10-05 09:40:33"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/AapdKwvQkqy4.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "4496978"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15944355",
+   "attributes": {
+    "equipment_1": "",
+    "equipment_2": "",
+    "headquarter": "Pabellón Rosendo Alonso Tapia",
+    "name": "CD TAKNARA",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-10-01 11:44:35",
+    "updated_at": "2026-10-14 15:23:07"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/AaQIt9RlQT0c.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "4496992"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15946243",
+   "attributes": {
+    "equipment_1": null,
+    "equipment_2": null,
+    "headquarter": null,
+    "name": "CV SAYRE CANARIAS LUZ",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-10-05 12:51:04",
+    "updated_at": "2026-10-05 12:51:04"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/AaIp944385Zc.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "4496991"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15946244",
+   "attributes": {
+    "equipment_1": null,
+    "equipment_2": null,
+    "headquarter": null,
+    "name": "MEET MUSIC TOURISM",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-10-05 12:51:37",
+    "updated_at": "2026-10-05 12:51:37"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/AaSFLWhjoQen.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "8493637"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  },
+  {
+   "type": "team",
+   "id": "15946245",
+   "attributes": {
+    "equipment_1": null,
+    "equipment_2": null,
+    "headquarter": null,
+    "name": "CV ACENVOLEY",
+    "status": "setting_up",
+    "adjusted_phaseresult_value": null,
+    "canceled": null,
+    "validated": null,
+    "created_at": "2026-10-05 12:54:21",
+    "updated_at": "2026-10-05 12:54:21"
+   },
+   "meta": {
+    "avatar": {
+     "large": "https://cdn.leverade.com/thumbnails/AaGbo6q98FN6.500x500.jpg"
+    }
+   },
+   "relationships": {
+    "category": {
+     "data": null
+    },
+    "club": {
+     "data": {
+      "type": "club",
+      "id": "9155513"
+     }
+    },
+    "registrable": {
+     "data": {
+      "type": "tournament",
+      "id": "1341786"
+     }
+    }
+   }
+  }
+ ]
+}

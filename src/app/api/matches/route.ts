@@ -5,13 +5,14 @@ import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { syncVideoForMatch } from "@/lib/videos/syncVideoForMatch";
 import { listMatches } from "@/lib/matches/listMatches";
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 import { z } from "zod";
 
 const matchSchema = z.object({
   date: z.string(),
   time: z.string(),
   opponent: z.string(),
-  season: z.string(),
+  season: z.string().min(4).transform(normalizeSeasonId),
   gender: z.enum(["male", "female"]),
   venue_id: z.string().uuid(),
   result: z.string().optional().nullable(),
@@ -34,14 +35,30 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
 
-  const limit = Number(searchParams.get("limit")) || null;
+  const rawLimit = Number(searchParams.get("limit")) || null;
+  const limit =
+    rawLimit && Number.isFinite(rawLimit)
+      ? Math.min(Math.max(1, Math.floor(rawLimit)), 200)
+      : null;
   const gender = searchParams.get("gender");
   const season = searchParams.get("season");
   const orderParam = searchParams.get("order") || "desc";
   const hasResult = searchParams.get("hasResult") === "true";
   const withoutVideo = searchParams.get("withoutVideo") === "true";
-  const forMatchId = searchParams.get("forMatchId");
+  const forMatchIdRaw = searchParams.get("forMatchId");
   const opponent = searchParams.get("opponent");
+
+  let forMatchId: string | null = null;
+  if (forMatchIdRaw) {
+    const parsed = z.string().uuid().safeParse(forMatchIdRaw);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid forMatchId" },
+        { status: 400 }
+      );
+    }
+    forMatchId = parsed.data;
+  }
 
   try {
     const data = await listMatches({

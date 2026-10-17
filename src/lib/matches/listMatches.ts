@@ -1,5 +1,7 @@
 import { cache } from "react";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 export type ListMatchesOpts = {
   gender?: string | null;
@@ -12,8 +14,27 @@ export type ListMatchesOpts = {
   opponent?: string | null;
 };
 
-const MATCH_LIST_SELECT =
-  "*, venues(id, venue_name, location_type, location_url), match_sets(id, set_number, team_score, opponent_score)";
+const MATCH_LIST_SELECT = `
+  id,
+  date,
+  time,
+  opponent,
+  season,
+  result,
+  video_url,
+  notes,
+  gender,
+  venue_id,
+  fed_match_id,
+  venues(id, venue_name, location_type, location_url),
+  match_sets(id, set_number, team_score, opponent_score)
+`;
+
+/** Only interpolate validated UUIDs into PostgREST `.or()` filters. */
+function safeForMatchId(raw: string): string | null {
+  const parsed = z.string().uuid().safeParse(raw);
+  return parsed.success ? parsed.data : null;
+}
 
 const listMatchesCached = cache(
   async (
@@ -34,15 +55,16 @@ const listMatchesCached = cache(
       .order("date", { ascending })
       .order("time", { ascending });
 
-    if (season) query = query.eq("season", season);
+    if (season) query = query.eq("season", normalizeSeasonId(season));
     if (gender) query = query.eq("gender", gender);
     if (limit) query = query.limit(limit);
     if (hasResult === "1")
       query = query.not("result", "is", null).neq("result", "");
 
     if (withoutVideo === "1") {
-      if (forMatchId) {
-        query = query.or(`video_url.is.null,id.eq.${forMatchId}`);
+      const matchId = safeForMatchId(forMatchId);
+      if (matchId) {
+        query = query.or(`video_url.is.null,id.eq.${matchId}`);
       } else {
         query = query.is("video_url", null);
       }

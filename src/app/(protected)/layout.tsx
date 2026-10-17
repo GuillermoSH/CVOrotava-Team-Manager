@@ -24,7 +24,13 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const result = await loadAppUser();
+  const [result, seasonsResult] = await Promise.all([
+    loadAppUser(),
+    listSeasons().catch((err) => {
+      console.error("listSeasons failed:", err);
+      return [getCurrentSeason()] as string[];
+    }),
+  ]);
 
   if (!result.ok) {
     if (result.reason === "unauthenticated") redirect("/login");
@@ -48,12 +54,7 @@ export default async function ProtectedLayout({
     isActive: user.isActive,
   };
 
-  let seasons: string[] = [getCurrentSeason()];
-  try {
-    seasons = await listSeasons();
-  } catch (err) {
-    console.error("listSeasons failed:", err);
-  }
+  const seasons = seasonsResult;
 
   return (
     <UserProvider initialUser={appUser}>

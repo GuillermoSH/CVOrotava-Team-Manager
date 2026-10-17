@@ -19,7 +19,9 @@ import PageHeader from "@/components/ui/PageHeader";
 import QuotaSeasonLayout from "@/components/payments/QuotaSeasonLayout";
 import { isQuotaOverdue } from "@/components/payments/quotaDates";
 import Tooltip, { TooltipGroup } from "@/components/ui/Tooltip";
+import { useConfirmDialog } from "@/components/ui/useConfirmDialog";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
+import { sileo } from "sileo";
 
 const PaymentModal = dynamic(
   () => import("@/components/payments/PaymentModal"),
@@ -46,6 +48,7 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 export default function AdminPlayerPaymentsDetail() {
   const { user } = useUser();
   const router = useRouter();
+  const { ask, dialog: confirmDialog } = useConfirmDialog();
   const params = useParams();
   /** Prefer roster player id; legacy bookmarks may still pass a user id. */
   const routeId = params.playerId as string;
@@ -114,7 +117,21 @@ export default function AdminPlayerPaymentsDetail() {
   }
 
   const markAsPaid = async (paymentId: string) => {
-    if (!confirm("¿Marcar esta cuota como pagada?")) return;
+    const payment = payments.find((p) => p.id === paymentId);
+    const ok = await ask({
+      title: "Marcar como pagada",
+      description: payment ? (
+        <>
+          Se marcará{" "}
+          <span className="font-medium text-[var(--text-primary)]">{payment.concept}</span> (
+          {Number(payment.amount).toLocaleString("es-ES")} €) como pagada.
+        </>
+      ) : (
+        "Se marcará esta cuota como pagada."
+      ),
+      confirmLabel: "Marcar pagada",
+    });
+    if (!ok) return;
     try {
       const res = await fetch(`/api/payments/${paymentId}`, {
         method: "PATCH",
@@ -128,18 +145,32 @@ export default function AdminPlayerPaymentsDetail() {
       setPayments((prev) =>
         prev.map((p) => (p.id === paymentId ? { ...p, status: "paid" } : p))
       );
+      sileo.success({ title: "Cuota marcada como pagada" });
     } catch (err: unknown) {
-      alert("Error: " + (err as Error).message);
+      sileo.error({
+        title: "No se pudo actualizar",
+        description: (err as Error).message,
+      });
     }
   };
 
   const deletePayment = async (paymentId: string) => {
-    if (
-      !confirm(
-        "¿Estás seguro de que quieres eliminar este pago por completo? Esta acción no se puede deshacer."
-      )
-    )
-      return;
+    const payment = payments.find((p) => p.id === paymentId);
+    const ok = await ask({
+      title: "Eliminar pago",
+      description: payment ? (
+        <>
+          Se eliminará por completo{" "}
+          <span className="font-medium text-[var(--text-primary)]">{payment.concept}</span>. Esta
+          acción no se puede deshacer.
+        </>
+      ) : (
+        "Se eliminará este pago por completo. Esta acción no se puede deshacer."
+      ),
+      confirmLabel: "Eliminar pago",
+      tone: "danger",
+    });
+    if (!ok) return;
     try {
       const res = await fetch(`/api/payments/${paymentId}`, {
         method: "DELETE",
@@ -149,8 +180,12 @@ export default function AdminPlayerPaymentsDetail() {
         throw new Error(data.error || "No se pudo eliminar");
       }
       setPayments((prev) => prev.filter((p) => p.id !== paymentId));
+      sileo.success({ title: "Pago eliminado" });
     } catch (err: unknown) {
-      alert("Error: " + (err as Error).message);
+      sileo.error({
+        title: "No se pudo eliminar",
+        description: (err as Error).message,
+      });
     }
   };
 
@@ -217,6 +252,7 @@ export default function AdminPlayerPaymentsDetail() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, ease: EASE }}
     >
+      {confirmDialog}
       <button
         type="button"
         onClick={() => router.push("/payments")}

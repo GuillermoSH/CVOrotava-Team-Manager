@@ -48,15 +48,14 @@ export function isExcludedTestPlayerName(name: string | null | undefined): boole
   return /jugador\s*de\s*pruebas/i.test((name ?? "").trim());
 }
 
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
+
 /**
- * Portal stores seasons as `YYYY-YY` (e.g. `2026-27`).
- * Team Manager payments UI historically uses `YYYY/YY` (e.g. `2026/27`).
+ * Portal / Team Manager canonical season: `YYYY-YY` (e.g. `2026-27`).
+ * Accepts legacy `YYYY/YY` and normalizes.
  */
 export function toPortalSeasonId(season: string): string {
-  const trimmed = season.trim();
-  const match = trimmed.match(/^(\d{4})[/-](\d{2})$/);
-  if (!match) return trimmed;
-  return `${match[1]}-${match[2]}`;
+  return normalizeSeasonId(season);
 }
 
 /**

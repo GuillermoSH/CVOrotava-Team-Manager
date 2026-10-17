@@ -32,7 +32,7 @@ const sample = {
   date: "2026-03-14",
   time: "20:00",
   opponent: "CV Tacoronte",
-  season: "2025/2026",
+  season: "2025-26",
   result: "3-1",
   gender: "male",
   video_url: null,
@@ -52,7 +52,7 @@ describe("findMatchForVideoEmail", () => {
       matchId: "match-1",
       url: "https://youtu.be/abc",
       gender: "male",
-      season: "2025/2026",
+      season: "2025-26",
       videoType: "league_match",
     });
 
@@ -71,7 +71,7 @@ describe("findMatchForVideoEmail", () => {
     const match = await findMatchForVideoEmail({
       url: "https://youtu.be/abc",
       gender: "male",
-      season: "2025/2026",
+      season: "2025-26",
       videoType: "league_match",
     });
 
@@ -91,7 +91,7 @@ describe("findMatchForVideoEmail", () => {
     const match = await findMatchForVideoEmail({
       url: "https://youtu.be/abc",
       gender: "male",
-      season: "2025/2026",
+      season: "2025-26",
       videoType: "league_match",
     });
 
@@ -110,7 +110,7 @@ describe("findMatchForVideoEmail", () => {
     const match = await findMatchForVideoEmail({
       url: "https://youtu.be/abc",
       gender: "male",
-      season: "2025/2026",
+      season: "2025-26",
       videoType: "league_match",
     });
 
@@ -123,7 +123,7 @@ describe("findMatchForVideoEmail", () => {
     const match = await findMatchForVideoEmail({
       url: "https://youtu.be/abc",
       gender: "male",
-      season: "2025/2026",
+      season: "2025-26",
       videoType: "training",
     });
 
