@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { prettyTeamName } from "@/lib/fed/linkPlan";
 import { clubLogoSrc } from "@/lib/brand/logo";
 import type { CompetitiveStats } from "@/lib/stats/competitive/build";
-import { MIN_MATCHES_FOR_CARD } from "@/lib/stats/competitive/card";
+import { MIN_MATCHES_FOR_CARD, TIER_MIN } from "@/lib/stats/competitive/card";
+import CardExplainer from "./CardExplainer";
 import { ordinal } from "./format";
 import { Meter, useCountUp } from "./ui";
 
@@ -72,8 +73,8 @@ function tierOf(
   surface: CardSurface
 ): { label: string; color: string } {
   if (ovr === null) return { label: "Sin ficha", color: surface.muted };
-  if (ovr >= 85) return { label: "Oro", color: surface.gold };
-  if (ovr >= 70) return { label: "Plata", color: surface.silver };
+  if (ovr >= TIER_MIN.oro) return { label: "Oro", color: surface.gold };
+  if (ovr >= TIER_MIN.plata) return { label: "Plata", color: surface.silver };
   return { label: "Bronce", color: surface.bronze };
 }
 
@@ -182,22 +183,7 @@ export default function TeamCardPanel({ stats }: Readonly<{ stats: CompetitiveSt
         </div>
       ) : null}
 
-      <details className="group mt-4 text-sm">
-        <summary className="cursor-pointer text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">
-          Cómo sale cada número
-        </summary>
-        <ul className="mt-2 space-y-1.5 text-[var(--text-muted)]">
-          {shown.attributes.map((a) => (
-            <li key={a.key}>
-              <span className="font-medium text-[var(--text-secondary)]">{a.label}:</span> {a.detail}
-            </li>
-          ))}
-          <li className="pt-1">
-            Cada atributo compara con el resto de equipos del grupo (45 = el peor, 99 = el mejor). La valoración
-            mezcla el nivel en la liga (40 %) y los atributos.
-          </li>
-        </ul>
-      </details>
+      <CardExplainer teamName={prettyTeamName(shown.teamName)} attributes={shown.attributes} />
     </section>
   );
 }

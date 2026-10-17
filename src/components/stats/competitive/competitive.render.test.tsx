@@ -3,6 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import type { FedTournamentBundle } from "@/lib/fed/parse";
 import fixture from "@/lib/stats/competitive/__fixtures__/liga-masculina-2024-27.json";
 import { buildCompetitiveStats } from "@/lib/stats/competitive/build";
+import { RATING_WEIGHT } from "@/lib/stats/competitive/card";
+import { ATTRIBUTE_DEFS } from "@/lib/stats/competitive/metrics";
 import { seasonDataFromBundles } from "@/lib/stats/competitive/fromBundles";
 import { FormPanel, NextMatchPanel, PositionPanel, TopRivalPanel } from "./NextMatchPanel";
 import LeaguePanel from "./LeaguePanel";
@@ -37,6 +39,28 @@ describe("ficha del equipo", () => {
     expect(out).toContain("34 pts · 10V 12D");
     for (const label of ["Ataque", "Defensa", "Cierre", "Remontada", "Casa", "Viaje"]) expect(out).toContain(label);
     expect(out).toContain("Cómo sale cada número");
+  });
+
+  it("la explicación cuenta de dónde sale cada número, con los datos reales y sin jerga", () => {
+    const out = clean(html(<TeamCardPanel stats={full} />));
+    const text = out.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").replaceAll("&amp;", "&");
+    expect(text).toContain("La escala de 45 a 99");
+    expect(text).toContain("Un 72 significa estar justo en la mitad del grupo");
+    expect(text).toContain("un 40 % es el nivel del equipo en la liga");
+    expect(text).toContain("el 60 % restante");
+    expect(text).toContain("Pesa un 15 % en la valoración");
+    expect(text).toContain("Pesa un 7,5 % en la valoración");
+    expect(text).toContain("Puntos en contra ÷ sets jugados");
+    expect(text).toContain("menos es mejor");
+    expect(text).toMatch(/Vuestros números: \d+,\d puntos por set/);
+    expect(text).toMatch(/Vuestros números: \d+,\d encajados por set/);
+    expect(text).toContain("Oro desde 85, Plata de 70 a 84 y Bronce por debajo de 70");
+    expect(text).not.toMatch(/rating|elo\b|1500/i);
+  });
+
+  it("los pesos de la valoración suman el 100 %", () => {
+    const total = ATTRIBUTE_DEFS.reduce((acc, d) => acc + d.weight, RATING_WEIGHT);
+    expect(total).toBeCloseTo(1, 10);
   });
 
   it("arranque de temporada: enseña la ficha del año pasado y cuántos partidos faltan", () => {

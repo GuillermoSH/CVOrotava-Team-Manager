@@ -24,7 +24,11 @@ export type TeamCard = {
 export const MIN_MATCHES_FOR_CARD = 4;
 export const MIN_MATCHES_FOR_RATING = 3;
 
-const RATING_WEIGHT = 0.4;
+/** Peso del nivel en la liga dentro de la valoración global; el resto lo ponen los atributos. */
+export const RATING_WEIGHT = 0.4;
+
+/** Valoración mínima de cada categoría de la ficha. */
+export const TIER_MIN = { oro: 85, plata: 70 } as const;
 
 export function buildCard(input: {
   season: string;
