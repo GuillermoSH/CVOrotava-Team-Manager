@@ -37,13 +37,11 @@ export default function HomeSkeleton() {
         </div>
         <div className="flex flex-col gap-8 lg:col-span-5">
           <section>
-            <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">Cuotas</h2>
-            <Bone className="h-20 rounded-xl" />
+            <Bone className="mb-3 h-6 w-28" />
+            <Bone className="h-28 rounded-xl" />
           </section>
           <section>
-            <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">
-              Últimos resultados
-            </h2>
+            <Bone className="mb-3 h-6 w-20" />
             <Bone className="h-32 rounded-xl" />
           </section>
         </div>

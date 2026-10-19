@@ -21,11 +21,11 @@ export default function LatestVideos({ videos }: Readonly<{ videos: VideoListIte
           <FontAwesomeIcon icon={faArrowRight} className="text-xs" aria-hidden />
         </Link>
       </div>
-      <ul className="grid grid-cols-2 gap-x-4 gap-y-5 lg:grid-cols-4">
-        {videos.map((v) => {
+      <ul className="grid max-w-3xl grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3">
+        {videos.slice(0, 3).map((v, i) => {
           const title = v.match ? `vs ${v.match.opponent}` : VIDEO_TYPE_LABELS[v.video_type];
           return (
-            <li key={v.id} className="min-w-0">
+            <li key={v.id} className={`min-w-0 ${i === 2 ? "max-sm:hidden" : ""}`}>
               <a
                 href={v.url}
                 target="_blank"
@@ -37,11 +37,11 @@ export default function LatestVideos({ videos }: Readonly<{ videos: VideoListIte
                     src={getThumbnailUrl(v.url, "mq")}
                     alt=""
                     fill
-                    sizes="(max-width: 1024px) 50vw, 25vw"
+                    sizes="(max-width: 640px) 50vw, 240px"
                     className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                   />
                   <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/35">
-                    <span className="flex size-10 items-center justify-center rounded-full border border-white/25 bg-black/40 text-white backdrop-blur-sm">
+                    <span className="flex size-9 items-center justify-center rounded-full border border-white/25 bg-black/40 text-white backdrop-blur-sm">
                       <FontAwesomeIcon icon={faPlay} className="ml-0.5 text-sm" aria-hidden />
                     </span>
                   </span>

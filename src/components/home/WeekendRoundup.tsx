@@ -31,7 +31,7 @@ export default function WeekendRoundup({ roundup }: Readonly<{ roundup: Roundup 
       : `${shortDate(roundup.dateFrom)} – ${shortDate(roundup.dateTo)}`;
 
   return (
-    <section>
+    <section className="@container">
       <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
         <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Así quedó la jornada</h2>
         <p className="text-sm text-[var(--text-muted)]">
@@ -39,7 +39,7 @@ export default function WeekendRoundup({ roundup }: Readonly<{ roundup: Roundup 
           {range}
         </p>
       </div>
-      <ul className="flex flex-col gap-0.5">
+      <ul className="grid gap-x-6 gap-y-0.5 @3xl:grid-cols-2">
         <Row m={ours} />
         {others.map((m) => (
           <Row key={m.id} m={m} />

@@ -20,6 +20,7 @@ import LatestVideos from "@/components/home/LatestVideos";
 import WeekendRoundup from "@/components/home/WeekendRoundup";
 import AchievementsGlance from "@/components/home/AchievementsGlance";
 import AdminPending from "@/components/home/AdminPending";
+import PaymentsCard from "@/components/home/PaymentsCard";
 import Birthdays from "@/components/home/Birthdays";
 import type { VideoListItem } from "@/lib/videos/constants";
 import type { Achievement } from "@/lib/stats/competitive/achievements";
@@ -229,10 +230,14 @@ export default function HomeView({
   const playedShare =
     seasonTotal > 0 ? Math.min(100, (totalPlayed / seasonTotal) * 100) : 0;
 
-  const recentResults = playedMatches
+  // Forma: últimos 5 partidos con marcador, del más antiguo al más reciente.
+  const form = playedMatches
     .filter((m) => m.result)
-    .slice(-3)
-    .reverse();
+    .slice(-5)
+    .map((m) => {
+      const [us, them] = String(m.result).split("-").map(Number);
+      return { id: m.id, won: us > them, result: String(m.result), opponent: m.opponent };
+    });
 
   if (loading) return <HomeSkeleton />;
 
@@ -353,224 +358,75 @@ export default function HomeView({
                 </div>
               </div>
             </div>
-          </section>
-        </div>
 
-        {/* ── Right column: payments + results + admin ── */}
-        <div className="flex flex-col gap-8 lg:col-span-5">
-          {paymentsData && (
-            <section>
-              <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">
-                Cuotas
-              </h2>
-              <Link
-                href="/payments"
-                className={`group flex flex-col gap-2 rounded-xl border px-4 py-3.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)] sm:flex-row sm:items-center sm:justify-between ${
-                  totalPending > 0
-                    ? "border-[color-mix(in_srgb,var(--accent)_35%,var(--glass-border))] bg-[var(--accent-muted)]"
-                    : "border-[var(--glass-border)] bg-transparent hover:bg-[var(--glass-surface)]"
-                }`}
-              >
-                <div className="min-w-0">
-                  <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
-                    {paymentsData.isAdmin ? (
-                      totalPending > 0 ? (
-                        <>
-                          Hay{" "}
-                          <strong className="tabular-nums text-[var(--text-primary)]">
-                            {usersInDebt}
-                          </strong>{" "}
-                          jugador{usersInDebt === 1 ? "" : "es"} con{" "}
-                          <strong className="tabular-nums text-[var(--accent)]">
-                            {totalPending}€
-                          </strong>{" "}
-                          pendiente
-                          {usersOverdue > 0 ? (
-                            <>
-                              ;{" "}
-                              <strong className="tabular-nums text-[var(--color-danger)]">
-                                {usersOverdue}
-                              </strong>{" "}
-                              con cuota{usersOverdue === 1 ? "" : "s"} atrasada
-                              {usersOverdue === 1 ? "" : "s"}
-                            </>
-                          ) : null}
-                          .
-                        </>
-                      ) : (
-                        <span className="payment-blurb-ok font-medium">
-                          Todos los jugadores están al día con sus pagos.
-                        </span>
-                      )
-                    ) : totalPending > 0 ? (
-                      <>
-                        Tienes{" "}
-                        <strong className="tabular-nums text-[var(--text-primary)]">
-                          {pendingPayments.length}
-                        </strong>{" "}
-                        pago{pendingPayments.length === 1 ? "" : "s"} sin
-                        liquidar por{" "}
-                        <strong className="tabular-nums text-[var(--accent)]">
-                          {totalPending}€
-                        </strong>
-                        {overduePayments.length > 0 ? (
-                          <>
-                            ;{" "}
-                            <strong className="tabular-nums text-[var(--color-danger)]">
-                              {overduePayments.length}
-                            </strong>{" "}
-                            ya vencida
-                            {overduePayments.length === 1 ? "" : "s"}
-                          </>
-                        ) : null}
-                        .
-                      </>
-                    ) : (
-                      <span className="payment-blurb-ok font-medium">
-                        ¡Perfecto! Estás al día con todos tus pagos.
-                      </span>
-                    )}
-                  </p>
-                  {!paymentsData.isAdmin && nextDue?.due_date ? (
-                    <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
-                      Próxima cuota:{" "}
-                      <span className="font-medium text-[var(--text-primary)]">
-                        {nextDue.concept ?? "Cuota"} · {Number(nextDue.amount)}€
-                      </span>
-                      , vence el{" "}
-                      {new Date(`${String(nextDue.due_date).slice(0, 10)}T12:00:00`).toLocaleDateString("es-ES", {
-                        day: "numeric",
-                        month: "long",
-                      })}
-                    </p>
-                  ) : null}
-                </div>
-                <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors group-hover:text-[var(--accent)]">
-                  Ver detalles
-                  <FontAwesomeIcon
-                    icon={faArrowRight}
-                    className="text-xs transition-transform group-hover:translate-x-0.5"
-                  />
-                </span>
-              </Link>
-            </section>
-          )}
-
-          <section>
-            <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">
-              Últimos resultados
-            </h2>
-
-            {recentResults.length === 0 ? (
-              <p className="border-t border-[var(--glass-border)] py-6 text-sm text-[var(--text-muted)]">
-                No hay resultados recientes.
-              </p>
-            ) : (
-              <ul className="divide-y divide-[var(--glass-border)] border-y border-[var(--glass-border)]">
-                {recentResults.map((m) => {
-                  const [us, them] = m.result
-                    ? m.result.split("-").map(Number)
-                    : [0, 0];
-                  const isWin = us > them;
-
-                  return (
-                    <li
-                      key={m.id}
-                      className="flex items-center justify-between gap-3 py-3"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">
-                          {m.gender === "male" ? "S.M." : "S.F."} vs{" "}
-                          <span className="text-[var(--text-secondary)]">
-                            {m.opponent}
-                          </span>
-                        </p>
-                        <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-                          {new Date(m.date).toLocaleDateString("es-ES", {
-                            day: "2-digit",
-                            month: "short",
-                          })}{" "}
-                          · {m.venues?.venue_name || "Sin pabellón"}
-                        </p>
-                      </div>
+            {form.length > 0 ? (
+              <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                <span className="text-[var(--text-secondary)]">Forma</span>
+                <ul className="flex items-center gap-1.5">
+                  {form.map((f) => (
+                    <li key={f.id}>
                       <span
-                        className={`shrink-0 rounded-md px-2 py-1 text-sm font-bold tabular-nums ${
-                          isWin
-                            ? "match-result-score--win"
-                            : "match-result-score--loss"
+                        title={`${f.won ? "Victoria" : "Derrota"} vs ${f.opponent} (${f.result})`}
+                        className={`inline-flex size-7 items-center justify-center rounded-md text-xs font-bold ${
+                          f.won ? "match-result-score--win" : "match-result-score--loss"
                         }`}
                       >
-                        {m.result}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
-
-          {user?.isAdmin && (
-            <section>
-              <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">
-                Partidos sin resultado
-              </h2>
-
-              {pendingMatches.length === 0 ? (
-                <p className="status-chip-all-clear inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium">
-                  <span
-                    className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]"
-                    aria-hidden
-                  />
-                  Todo actualizado
-                </p>
-              ) : (
-                <ul className="divide-y divide-[var(--glass-border)] border-y border-[var(--glass-border)]">
-                  {pendingMatches.slice(0, 5).map((m) => (
-                    <li
-                      key={m.id}
-                      className="flex flex-col gap-1.5 py-3 sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <span className="text-sm text-[var(--text-secondary)]">
-                        <span className="font-medium text-[var(--text-primary)]">
-                          {m.opponent}
-                        </span>
-                        <span className="text-[var(--text-muted)]">
-                          {" "}
-                          ·{" "}
-                          {new Date(m.date).toLocaleDateString("es-ES", {
-                            day: "2-digit",
-                            month: "short",
-                          })}
+                        <span aria-hidden>{f.won ? "V" : "D"}</span>
+                        <span className="sr-only">
+                          {f.won ? "Victoria" : "Derrota"} vs {f.opponent}, {f.result}
                         </span>
                       </span>
-                      <Link
-                        href={`/matches/${m.id}?edit=1`}
-                        className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]"
-                      >
-                        Añadir resultado
-                        <FontAwesomeIcon
-                          icon={faArrowRight}
-                          className="text-xs"
-                        />
-                      </Link>
                     </li>
                   ))}
                 </ul>
-              )}
-            </section>
-          )}
+              </div>
+            ) : null}
+          </section>
+        </div>
+
+        {/* ── Columna derecha: lo que pide atención ── */}
+        <div className="flex flex-col gap-8 lg:col-span-5">
+          {user?.isAdmin && extras.adminPending ? (
+            <AdminPending
+              data={extras.adminPending}
+              payments={
+                paymentsData?.isAdmin
+                  ? { usersInDebt, totalPending, usersOverdue }
+                  : null
+              }
+              matchesWithoutResult={pendingMatches.map((m) => ({
+                id: m.id,
+                opponent: m.opponent,
+                date: m.date,
+              }))}
+              now={now}
+            />
+          ) : paymentsData && !paymentsData.isAdmin ? (
+            <PaymentsCard
+              pendingCount={pendingPayments.length}
+              overdueCount={overduePayments.length}
+              total={totalPending}
+              nextDue={nextDue?.due_date ? { concept: nextDue.concept, amount: nextDue.amount, due_date: String(nextDue.due_date) } : null}
+            />
+          ) : null}
+
+          {!user?.isAdmin && extras.gender ? (
+            <AchievementsGlance
+              achievements={extras.achievements}
+              season={extras.season}
+              gender={extras.gender}
+            />
+          ) : null}
         </div>
       </div>
 
       <div className="mt-10 flex flex-col gap-10">
-        <LatestVideos videos={extras.videos} />
-
-        {extras.roundup || extras.achievements.length > 0 ? (
+        {user?.isAdmin ? (
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-x-10">
             <div className="lg:col-span-7">
               {extras.roundup ? <WeekendRoundup roundup={extras.roundup} /> : null}
             </div>
-            <div className="lg:col-span-5">
+            <div className="flex flex-col gap-10 lg:col-span-5">
               {extras.gender ? (
                 <AchievementsGlance
                   achievements={extras.achievements}
@@ -578,20 +434,14 @@ export default function HomeView({
                   gender={extras.gender}
                 />
               ) : null}
+              {extras.adminPending ? <Birthdays birthdays={extras.adminPending.birthdays} /> : null}
             </div>
           </div>
+        ) : extras.roundup ? (
+          <WeekendRoundup roundup={extras.roundup} />
         ) : null}
 
-        {user?.isAdmin && extras.adminPending ? (
-          <div className="grid gap-10 lg:grid-cols-12 lg:gap-x-10">
-            <div className="lg:col-span-7">
-              <AdminPending data={extras.adminPending} now={now} />
-            </div>
-            <div className="lg:col-span-5">
-              <Birthdays birthdays={extras.adminPending.birthdays} />
-            </div>
-          </div>
-        ) : null}
+        <LatestVideos videos={extras.videos} />
       </div>
     </motion.div>
   );

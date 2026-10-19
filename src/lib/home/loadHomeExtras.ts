@@ -10,7 +10,7 @@ import { pendingDocs, upcomingBirthdays, type BirthdayRow, type PlayerDocsRow } 
 import type { AdminPendingData } from "./loadAdminPending.types";
 import { buildWeekendRoundup, type WeekendRoundup } from "./weekendRoundup";
 
-export const HOME_VIDEO_COUNT = 4;
+export const HOME_VIDEO_COUNT = 3;
 
 export function loadLatestVideos(gender: string | null): Promise<VideoListItem[]> {
   return listVideos({ gender, limit: HOME_VIDEO_COUNT });
