@@ -7,10 +7,13 @@ import { VIDEO_TYPE_LABELS, type VideoListItem } from "@/lib/videos/constants";
 import { videoRecordedDate } from "@/lib/videos/date";
 import { formatMatchDate } from "@/lib/matches/formatMatchLabel";
 
-export default function LatestVideos({ videos }: Readonly<{ videos: VideoListItem[] }>) {
+export default function LatestVideos({
+  videos,
+  compact = false,
+}: Readonly<{ videos: VideoListItem[]; /** Miniaturas pequeñas para una columna estrecha (3 en fila). */ compact?: boolean }>) {
   if (videos.length === 0) return null;
   return (
-    <section className="max-w-3xl">
+    <section className={compact ? undefined : "max-w-3xl"}>
       <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
         <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Últimos vídeos</h2>
         <Link
@@ -21,11 +24,17 @@ export default function LatestVideos({ videos }: Readonly<{ videos: VideoListIte
           <FontAwesomeIcon icon={faArrowRight} className="text-xs" aria-hidden />
         </Link>
       </div>
-      <ul className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3">
+      <ul
+        className={
+          compact
+            ? "grid grid-cols-3 gap-x-3 gap-y-4"
+            : "grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3"
+        }
+      >
         {videos.slice(0, 3).map((v, i) => {
           const title = v.match ? `vs ${v.match.opponent}` : VIDEO_TYPE_LABELS[v.video_type];
           return (
-            <li key={v.id} className={`min-w-0 ${i === 2 ? "max-sm:hidden" : ""}`}>
+            <li key={v.id} className={`min-w-0 ${i === 2 && !compact ? "max-sm:hidden" : ""}`}>
               <a
                 href={v.url}
                 target="_blank"
@@ -41,7 +50,7 @@ export default function LatestVideos({ videos }: Readonly<{ videos: VideoListIte
                     className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                   />
                   <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/35">
-                    <span className="flex size-9 items-center justify-center rounded-full border border-white/25 bg-black/40 text-white backdrop-blur-sm">
+                    <span className={`flex items-center justify-center rounded-full border border-white/25 bg-black/40 text-white backdrop-blur-sm ${compact ? "size-7" : "size-9"}`}>
                       <FontAwesomeIcon icon={faPlay} className="ml-0.5 text-sm" aria-hidden />
                     </span>
                   </span>
@@ -51,10 +60,12 @@ export default function LatestVideos({ videos }: Readonly<{ videos: VideoListIte
                     </span>
                   ) : null}
                 </span>
-                <span className="mt-2 block truncate text-sm font-medium group-hover:text-[var(--accent)]">
+                <span
+                  className={`mt-2 block truncate font-medium group-hover:text-[var(--accent)] ${compact ? "text-xs" : "text-sm"}`}
+                >
                   {title}
                 </span>
-                <span className="block truncate text-xs text-[var(--text-muted)]">
+                <span className={`block truncate text-[var(--text-muted)] ${compact ? "text-[0.7rem]" : "text-xs"}`}>
                   {VIDEO_TYPE_LABELS[v.video_type]} · {formatMatchDate(videoRecordedDate(v))}
                 </span>
               </a>
