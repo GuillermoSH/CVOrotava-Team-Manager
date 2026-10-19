@@ -156,11 +156,41 @@ function relIds(res: JsonApiResource, rel: string): string[] {
   return Array.isArray(d) ? d.map((x) => x.id) : [];
 }
 
-/** "2026-10-24 15:30:00" → { date: "2026-10-24", time: "15:30:00" } */
-function splitDateTime(v: unknown): { date: string | null; time: string | null } {
+/**
+ * `datetime` de Leverade viene en UTC y `display_timezone` indica la zona en la
+ * que se muestra (verificado contra el calendario oficial en PDF: en horario de
+ * verano la API da 15:30 y el PDF 16:30; en invierno coinciden).
+ * "2026-10-24 15:30:00" + "Atlantic/Canary" → { date: "2026-10-24", time: "16:30:00" }
+ */
+function splitDateTime(
+  v: unknown,
+  timeZone: string
+): { date: string | null; time: string | null } {
   const s = str(v);
-  const m = s && /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}(?::\d{2})?)/.exec(s);
-  return m ? { date: m[1], time: m[2] } : { date: null, time: null };
+  const m = s && /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/.exec(s);
+  if (!m) return { date: null, time: null };
+
+  const utc = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] ?? 0)));
+  try {
+    const p = Object.fromEntries(
+      new Intl.DateTimeFormat("en-GB", {
+        timeZone,
+        hourCycle: "h23",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      })
+        .formatToParts(utc)
+        .map((x) => [x.type, x.value])
+    );
+    return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}:${p.second}` };
+  } catch {
+    // Zona desconocida: nos quedamos con el valor tal cual viene
+    return { date: `${m[1]}-${m[2]}-${m[3]}`, time: `${m[4]}:${m[5]}:${m[6] ?? "00"}` };
+  }
 }
 
 /** Marcas de auditoría de Leverade ("YYYY-MM-DD HH:MM:SS", UTC) → ISO. */
@@ -307,7 +337,8 @@ export function parseTournamentBundle(doc: JsonApiDocument): FedTournamentBundle
       }
     }
 
-    const { date, time } = splitDateTime(m.attributes?.datetime ?? m.attributes?.date);
+    const timezone = str(m.attributes?.display_timezone) ?? "Atlantic/Canary";
+    const { date, time } = splitDateTime(m.attributes?.datetime ?? m.attributes?.date, timezone);
     const finished = bool(m.attributes?.finished);
     const matchId = Number(m.id);
 
@@ -321,7 +352,7 @@ export function parseTournamentBundle(doc: JsonApiDocument): FedTournamentBundle
       facility_id: int(relId(m, "facility")),
       local_date: date,
       local_time: time,
-      timezone: str(m.attributes?.display_timezone) ?? "Atlantic/Canary",
+      timezone,
       finished,
       canceled: bool(m.attributes?.canceled),
       postponed: bool(m.attributes?.postponed),
