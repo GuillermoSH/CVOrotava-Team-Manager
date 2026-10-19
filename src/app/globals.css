@@ -109,6 +109,10 @@
 }
 
 /* ── Modo claro (misma línea visual: rojo, cristal, profundidad suave) ── */
+html[data-sidebar="collapsed"] {
+  --sidebar-width: 4.5rem;
+}
+
 html[data-theme="light"] {
   --color-bg: #f0f0f4;
   --color-bg-elevated: #ffffff;

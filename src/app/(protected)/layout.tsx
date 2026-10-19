@@ -62,7 +62,7 @@ export default async function ProtectedLayout({
         <NavPendingProvider>
           <AppShell />
           <AmbientBackground />
-          <main className="relative min-h-screen w-full px-4 pb-[calc(var(--bottom-nav-height)+1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(var(--mobile-top-height)+1rem)] md:ml-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))] md:px-8 md:pb-12 md:pt-8 lg:px-10">
+          <main className="relative min-h-screen w-full px-4 pb-[calc(var(--bottom-nav-height)+1.5rem+env(safe-area-inset-bottom,0px))] pt-[calc(var(--mobile-top-height)+1rem)] md:ml-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))] md:transition-[margin-left,width] md:duration-200 md:ease-out motion-reduce:md:transition-none md:px-8 md:pb-12 md:pt-8 lg:px-10">
             <PendingMain>{children}</PendingMain>
           </main>
         </NavPendingProvider>

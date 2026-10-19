@@ -23,6 +23,10 @@ const themeInit = `
   } catch (e) {
     document.documentElement.dataset.theme = 'dark';
   }
+  try {
+    document.documentElement.dataset.sidebar =
+      localStorage.getItem('cvorotava-sidebar-collapsed') === '1' ? 'collapsed' : 'expanded';
+  } catch (e) {}
 })();
 `;
 
