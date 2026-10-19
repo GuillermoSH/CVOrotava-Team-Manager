@@ -1,6 +1,6 @@
 // src/contexts/SeasonContext.tsx
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 type SeasonContextType = {
   seasons: string[];
@@ -19,10 +19,10 @@ export function SeasonProvider({
   initialSeasons,
 }: {
   children: React.ReactNode;
-  initialSeasons?: string[];
+  initialSeasons: string[];
 }) {
-  const [seasons, setSeasons] = useState<string[]>(initialSeasons ?? []);
-  const [loading, setLoading] = useState(!initialSeasons);
+  const [seasons, setSeasons] = useState<string[]>(initialSeasons);
+  const [loading, setLoading] = useState(false);
 
   const fetchSeasons = async () => {
     try {
@@ -35,13 +35,6 @@ export function SeasonProvider({
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (initialSeasons) return;
-    fetchSeasons();
-    // Initial list comes from the protected layout RSC.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <SeasonContext.Provider value={{ seasons, loading, refreshSeasons: fetchSeasons }}>

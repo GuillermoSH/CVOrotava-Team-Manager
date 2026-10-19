@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -63,7 +63,6 @@ export default function VideoModal({
     register,
     control,
     handleSubmit,
-    watch,
     setValue,
     formState: { errors, isSubmitting },
     reset,
@@ -80,10 +79,10 @@ export default function VideoModal({
     },
   });
 
-  const videoType = watch("video_type");
-  const season = watch("season");
-  const gender = watch("gender");
-  const matchId = watch("match_id") ?? "";
+  const videoType = useWatch({ control, name: "video_type" });
+  const season = useWatch({ control, name: "season" });
+  const gender = useWatch({ control, name: "gender" });
+  const matchId = useWatch({ control, name: "match_id" }) ?? "";
   const showMatchPicker = MATCH_VIDEO_TYPES.includes(videoType);
 
   useEffect(() => {

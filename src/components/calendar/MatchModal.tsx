@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -63,7 +63,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
   const [selectedVideoId, setSelectedVideoId] = useState("");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const { register, control, handleSubmit, watch, setValue, formState: { errors, isSubmitting }, reset } = useForm<MatchFormValues>({
+  const { register, control, handleSubmit, setValue, formState: { errors, isSubmitting }, reset } = useForm<MatchFormValues>({
     resolver: zodResolver(matchSchema),
     defaultValues: initialData || {
       date: "",
@@ -82,8 +82,8 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
   /** Campos de competición gestionados por la sincronización con la federación. */
   const fromFed = Boolean(initialData?.fed_match_id);
 
-  const season = watch("season");
-  const gender = watch("gender");
+  const season = useWatch({ control, name: "season" });
+  const gender = useWatch({ control, name: "gender" });
 
   const { fields, append, remove } = useFieldArray({
     control,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -74,29 +74,19 @@ export default function HomeView({
 
   const pendingMatches = playedMatches.filter((m) => !m.result);
 
-  const playedWithResult = useMemo(
-    () => playedMatches.filter((m) => m.result).length,
-    [playedMatches]
-  );
+  const playedWithResult = playedMatches.filter((m) => m.result).length;
 
-  const winRate = useMemo(
-    () =>
-      playedWithResult > 0 ? Math.round((wins / playedWithResult) * 100) : 0,
-    [wins, playedWithResult]
-  );
+  const winRate =
+    playedWithResult > 0 ? Math.round((wins / playedWithResult) * 100) : 0;
 
   const seasonTotal = totalPlayed + totalUpcoming;
   const playedShare =
     seasonTotal > 0 ? Math.min(100, (totalPlayed / seasonTotal) * 100) : 0;
 
-  const recentResults = useMemo(
-    () =>
-      playedMatches
-        .filter((m) => m.result)
-        .slice(-3)
-        .reverse(),
-    [playedMatches]
-  );
+  const recentResults = playedMatches
+    .filter((m) => m.result)
+    .slice(-3)
+    .reverse();
 
   if (loading) return <HomeSkeleton />;
 
