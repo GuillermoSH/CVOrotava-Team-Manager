@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import Script from "next/script";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import AppToaster from "@/components/ui/AppToaster";
 import "./globals.css";
@@ -34,14 +33,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" data-theme="dark" suppressHydrationWarning>
+      <head>
+        <script
+          id="cvorotava-theme-init"
+          dangerouslySetInnerHTML={{ __html: themeInit }}
+        />
+      </head>
       <body
         className={`${poppins.className} antialiased min-h-screen bg-[var(--color-bg)] text-[var(--text-primary)]`}
       >
-        <Script
-          id="cvorotava-theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: themeInit }}
-        />
         <ThemeProvider>
           {children}
           <AppToaster />

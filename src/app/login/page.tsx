@@ -35,8 +35,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setAuthError(authErrorMessage(params.get("error")));
+    // Sin ?error= no se toca: en Strict Mode el efecto corre dos veces y la
+    // segunda ya no ve el parámetro (se limpia de la URL en la primera).
     if (params.has("error")) {
+      setAuthError(authErrorMessage(params.get("error")));
       const url = new URL(window.location.href);
       url.searchParams.delete("error");
       window.history.replaceState({}, "", url.pathname + url.search);
