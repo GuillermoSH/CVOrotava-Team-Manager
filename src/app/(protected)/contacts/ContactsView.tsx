@@ -41,21 +41,26 @@ function CopyLine({
   what,
 }: Readonly<{ icon: typeof faPhone; value: string; what: string }>) {
   return (
-    <span className="inline-flex min-w-0 items-center gap-2">
-      <FontAwesomeIcon icon={icon} className="text-xs text-[var(--text-muted)]" />
-      <span className="min-w-0 select-all break-all">{value}</span>
+    <div className="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-[var(--glass-border)] bg-[var(--surface-faint)] py-1 pl-3 pr-1 text-sm lg:border-0 lg:bg-transparent lg:p-0">
+      <span className="flex min-w-0 items-center gap-2.5">
+        <FontAwesomeIcon icon={icon} className="w-3 shrink-0 text-xs text-[var(--text-muted)]" />
+        <span className="min-w-0 select-all break-all tabular-nums">{value}</span>
+      </span>
       <button
         type="button"
         onClick={() => copy(value, what)}
         aria-label={`Copiar ${what.toLowerCase()} de ${value}`}
         title={`Copiar ${what.toLowerCase()}`}
-        className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-[var(--glass-border)] text-xs text-[var(--text-secondary)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+        className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-xs text-[var(--text-secondary)] transition-colors hover:bg-[var(--accent-muted)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
       >
         <FontAwesomeIcon icon={faCopy} />
       </button>
-    </span>
+    </div>
   );
 }
+
+const ROW_GRID =
+  "lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,1.4fr)] lg:items-center lg:gap-x-8";
 
 export default function ContactsView({
   clubs,
@@ -76,20 +81,21 @@ export default function ContactsView({
     <div className="flex w-full flex-col text-[var(--text-primary)]">
       <PageHeader
         title="Contactos"
-        subtitle={`${clubs.length} clubes rivales en ${season}${
-          withoutContact > 0 ? ` · ${withoutContact} sin datos de contacto` : ""
-        } · datos públicos de la federación`}
+        subtitle={`${clubs.length} clubes rivales · temporada ${season}${
+          withoutContact > 0 ? ` · ${withoutContact} sin contacto en la federación` : ""
+        }`}
       />
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
         <Select
           aria-label="Temporada"
           size="compact"
+          className="w-full sm:w-36"
           value={season}
           onChange={(s) => router.push(`/contacts?season=${encodeURIComponent(s)}`)}
           options={seasons.map((s) => ({ value: s, label: s }))}
         />
-        <label className="relative block max-w-sm flex-1">
+        <label className="relative block w-full sm:max-w-sm">
           <span className="sr-only">Buscar club</span>
           <FontAwesomeIcon
             icon={faMagnifyingGlass}
@@ -100,7 +106,7 @@ export default function ContactsView({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar club, correo o teléfono…"
-            className="w-full rounded-xl border border-[var(--form-input-border)] bg-[var(--form-input-bg)] py-2.5 pl-10 pr-4 text-sm text-[var(--text-primary)] placeholder:text-[var(--form-placeholder)] outline-none transition-colors focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)]"
+            className="min-h-9 w-full rounded-xl border border-[var(--form-input-border)] bg-[var(--form-input-bg)] py-2 pl-10 pr-4 text-sm text-[var(--text-primary)] placeholder:text-[var(--form-placeholder)] outline-none transition-colors focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)]"
           />
         </label>
       </div>
@@ -112,29 +118,52 @@ export default function ContactsView({
             : "Sin resultados."}
         </p>
       ) : (
-        <ul className="divide-y divide-[var(--glass-border)] border-y border-[var(--glass-border)]">
-          {visible.map((c) => (
-            <li key={c.id} className="flex flex-col gap-2 py-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="min-w-0">
-                <p className="font-semibold">{c.name}</p>
-                <p className="mt-0.5 text-xs text-[var(--text-muted)]">{c.tournaments.join(" · ")}</p>
-              </div>
-              <div className="flex min-w-0 flex-col gap-1.5 text-sm lg:items-end">
-                {c.phone ? <CopyLine icon={faPhone} value={c.phone} what="Teléfono" /> : null}
-                {c.email ? <CopyLine icon={faEnvelope} value={c.email} what="Correo" /> : null}
-                {c.headquarter ? (
-                  <span className="inline-flex items-center gap-1.5 text-[var(--text-muted)]">
-                    <FontAwesomeIcon icon={faLocationDot} className="text-xs" />
-                    {c.headquarter}
-                  </span>
-                ) : null}
-                {!c.phone && !c.email ? (
-                  <span className="text-[var(--text-muted)]">Sin datos de contacto en la federación</span>
-                ) : null}
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div>
+          <div
+            aria-hidden
+            className={`${ROW_GRID} max-lg:hidden border-b border-[var(--glass-border)] pb-2 text-xs font-medium text-[var(--text-muted)]`}
+          >
+            <span>Club</span>
+            <span>Teléfono</span>
+            <span>Correo</span>
+          </div>
+          <ul className="divide-y divide-[var(--glass-border)] max-lg:border-y max-lg:border-[var(--glass-border)]">
+            {visible.map((c) => (
+              <li key={c.id} className={`${ROW_GRID} flex flex-col gap-3 py-4`}>
+                <div className="min-w-0">
+                  <p className="font-semibold">{c.name}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">
+                    {c.tournaments.join(" · ")}
+                  </p>
+                  {c.headquarter ? (
+                    <p className="mt-1 flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
+                      <FontAwesomeIcon icon={faLocationDot} className="w-3 shrink-0" />
+                      {c.headquarter}
+                    </p>
+                  ) : null}
+                </div>
+                {c.phone || c.email ? (
+                  <>
+                    {c.phone ? (
+                      <CopyLine icon={faPhone} value={c.phone} what="Teléfono" />
+                    ) : (
+                      <span className="hidden lg:block" aria-hidden />
+                    )}
+                    {c.email ? (
+                      <CopyLine icon={faEnvelope} value={c.email} what="Correo" />
+                    ) : (
+                      <span className="hidden lg:block" aria-hidden />
+                    )}
+                  </>
+                ) : (
+                  <p className="text-sm text-[var(--text-muted)] lg:col-span-2">
+                    Sin datos de contacto en la federación
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
