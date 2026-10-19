@@ -6,8 +6,8 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useSyncExternalStore,
 } from "react";
+import { useHydrated } from "@/lib/useHydrated";
 import { usePref } from "@/lib/usePref";
 
 export type Theme = "light" | "dark";
@@ -21,8 +21,6 @@ function applyTheme(theme: Theme) {
 const parseTheme = (raw: string | null): Theme =>
   raw === "light" ? "light" : "dark";
 
-const subscribeNever = () => () => {};
-
 type ThemeContextValue = {
   theme: Theme;
   setTheme: (t: Theme) => void;
@@ -35,11 +33,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = usePref<Theme>(STORAGE_KEY, parseTheme);
   // false en servidor y durante la hidratación, true después.
-  const mounted = useSyncExternalStore(
-    subscribeNever,
-    () => true,
-    () => false
-  );
+  const mounted = useHydrated();
 
   useEffect(() => {
     applyTheme(theme);

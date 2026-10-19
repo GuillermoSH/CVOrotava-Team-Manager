@@ -51,8 +51,6 @@ export function UserProvider({
         }
         setLoading(false);
       })();
-    } else {
-      setLoading(false);
     }
   }, [initialUser]);
 

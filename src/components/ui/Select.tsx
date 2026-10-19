@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { useHydrated } from "@/lib/useHydrated";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown, faCheck } from "@fortawesome/free-solid-svg-icons";
@@ -82,7 +83,7 @@ export default function Select({
 
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<MenuPos | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHydrated();
   const [activeIndex, setActiveIndex] = useState(0);
 
   const flat = useMemo(() => flattenSelectOptions(options), [options]);
@@ -105,10 +106,6 @@ export default function Select({
   }, [options]);
 
   const selected = flat.find((o) => o.value === value);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const updatePos = useCallback(() => {
     const trigger = triggerRef.current;

@@ -96,6 +96,13 @@ export default function CalendarView({
   );
   const [upcomingPage, setUpcomingPage] = useState(1);
   const [playedPage, setPlayedPage] = useState(1);
+  const pageResetKey = `${filters.season}|${filters.gender}|${query}`;
+  const [prevPageResetKey, setPrevPageResetKey] = useState(pageResetKey);
+  if (prevPageResetKey !== pageResetKey) {
+    setPrevPageResetKey(pageResetKey);
+    setUpcomingPage(1);
+    setPlayedPage(1);
+  }
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMatch, setEditingMatch] = useState<
@@ -139,12 +146,6 @@ export default function CalendarView({
     void fetchMatches(filters.season, filters.gender);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch when season/gender change only
   }, [filters.season, filters.gender]);
-
-  // Reset pagination when filters / search change
-  useEffect(() => {
-    setUpcomingPage(1);
-    setPlayedPage(1);
-  }, [filters.season, filters.gender, query]);
 
   const filteredMatches = useMemo(() => {
     let filtered = [...matches];

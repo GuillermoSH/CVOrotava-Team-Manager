@@ -11,11 +11,10 @@ export function useCountUp(target: number | null, ms = 900): number | null {
   const reduce = useReducedMotion();
   const [value, setValue] = useState<number | null>(reduce ? target : target === null ? null : 0);
 
+  const animate = target !== null && !reduce;
+
   useEffect(() => {
-    if (target === null || reduce) {
-      setValue(target);
-      return;
-    }
+    if (!animate) return;
     let raf = 0;
     const start = performance.now();
     const tick = (now: number) => {
@@ -25,9 +24,9 @@ export function useCountUp(target: number | null, ms = 900): number | null {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [target, ms, reduce]);
+  }, [animate, target, ms]);
 
-  return value;
+  return animate ? value : target;
 }
 
 /** true tras el primer pintado: sirve para que las barras crezcan desde 0. */

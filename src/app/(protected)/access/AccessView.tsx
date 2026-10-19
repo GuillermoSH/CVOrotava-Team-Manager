@@ -170,17 +170,6 @@ export default function AccessView({
     [filtered, groupBy]
   );
 
-  useEffect(() => {
-    setPageByGroup((prev) => {
-      const next = { ...prev };
-      for (const g of groups) {
-        const count = Math.max(1, Math.ceil(g.rows.length / PAGE_SIZE));
-        if ((next[g.key] ?? 1) > count) next[g.key] = count;
-      }
-      return next;
-    });
-  }, [groups]);
-
   const filterConfigs: FilterConfig[] = [
     {
       key: "status",
@@ -537,11 +526,11 @@ export default function AccessView({
       ) : (
         <div className="flex flex-col gap-8">
           {groups.map((group) => {
-            const page = pageByGroup[group.key] ?? 1;
             const pageCount = Math.max(
               1,
               Math.ceil(group.rows.length / PAGE_SIZE)
             );
+            const page = Math.min(pageByGroup[group.key] ?? 1, pageCount);
             const slice = group.rows.slice(
               (page - 1) * PAGE_SIZE,
               page * PAGE_SIZE

@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { useHydrated } from "@/lib/useHydrated";
 
 type TooltipGroupCtx = {
   skipDelay: boolean;
@@ -60,13 +61,9 @@ export default function Tooltip({ label, children }: TooltipProps) {
   const showTimer = useRef<number>(0);
   const visible = useRef(false);
   const touchPointer = useRef(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHydrated();
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const updatePos = useCallback(() => {
     const trigger = triggerRef.current;

@@ -30,7 +30,8 @@ export default function LoginPage() {
   const [phase, setPhase] = useState<Phase>("cover");
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const uncovered = phase !== "cover";
+  const currentPhase: Phase = reduceMotion ? "done" : phase;
+  const uncovered = currentPhase !== "cover";
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -43,10 +44,7 @@ export default function LoginPage() {
   }, []);
 
   useEffect(() => {
-    if (reduceMotion) {
-      setPhase("done");
-      return;
-    }
+    if (reduceMotion) return;
     const hold = window.setTimeout(() => setPhase("reveal"), 700);
     return () => window.clearTimeout(hold);
   }, [reduceMotion]);
@@ -117,7 +115,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {phase === "cover" && (
+        {currentPhase === "cover" && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-[var(--color-bg)]">
             <motion.div
               layoutId="club-logo"
@@ -128,7 +126,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        {phase === "reveal" && (
+        {currentPhase === "reveal" && (
           <motion.div
             aria-hidden
             className="pointer-events-none absolute inset-0 z-20 bg-[var(--color-bg)]"
