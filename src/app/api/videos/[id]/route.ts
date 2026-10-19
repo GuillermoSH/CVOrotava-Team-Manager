@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { VIDEO_LIST_COLUMNS, VIDEO_LIST_WITH_MATCH, VIDEO_TYPES, type VideoMatchSummary } from "@/lib/videos/constants";
+import { DATE_INPUT_RE, todayDateInput } from "@/lib/videos/date";
 import { linkVideoToMatch } from "@/lib/videos/syncVideoForMatch";
 import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
@@ -12,6 +13,7 @@ const videoBodySchema = z.object({
   video_type: z.enum(VIDEO_TYPES),
   season: z.string().min(4).transform(normalizeSeasonId),
   gender: z.enum(["male", "female"]),
+  recorded_at: z.string().regex(DATE_INPUT_RE).optional(),
   match_id: z.string().uuid().nullable().optional(),
 });
 
@@ -35,11 +37,15 @@ export async function PUT(
       );
     }
 
-    const { match_id, ...videoData } = parsed.data;
+    const { match_id, recorded_at, ...videoData } = parsed.data;
 
     const { data, error } = await supabaseAdmin
       .from("videos")
-      .update({ ...videoData, match_id: null })
+      .update({
+        ...videoData,
+        recorded_at: recorded_at ?? todayDateInput(),
+        match_id: null,
+      })
       .eq("id", id)
       .select(VIDEO_LIST_COLUMNS)
       .single();

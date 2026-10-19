@@ -9,6 +9,7 @@ import {
   VIDEO_LIST_COLUMNS,
 } from "@/lib/videos/listVideos";
 import { VIDEO_LIST_WITH_MATCH, VIDEO_TYPES } from "@/lib/videos/constants";
+import { DATE_INPUT_RE, todayDateInput } from "@/lib/videos/date";
 import { linkVideoToMatch } from "@/lib/videos/syncVideoForMatch";
 import { notifyNewVideo } from "@/lib/videos/notifyNewVideo";
 import { normalizeSeasonId } from "@/utils/getCurrentSeason";
@@ -18,6 +19,7 @@ const videoBodySchema = z.object({
   video_type: z.enum(VIDEO_TYPES),
   season: z.string().min(4).transform(normalizeSeasonId),
   gender: z.enum(["male", "female"]),
+  recorded_at: z.string().regex(DATE_INPUT_RE).optional(),
   match_id: z.string().uuid().nullable().optional(),
   notify_team: z.boolean().optional().default(true),
 });
@@ -88,7 +90,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { match_id, notify_team, ...videoData } = parsed.data;
+    const { match_id, notify_team, recorded_at, ...videoData } = parsed.data;
 
     const { data: existing } = await supabaseAdmin
       .from("videos")
@@ -99,7 +101,16 @@ export async function POST(req: Request) {
 
     const { data, error } = await supabaseAdmin
       .from("videos")
-      .upsert([{ ...videoData, match_id: null }], { onConflict: "url" })
+      .upsert(
+        [
+          {
+            ...videoData,
+            recorded_at: recorded_at ?? todayDateInput(),
+            match_id: null,
+          },
+        ],
+        { onConflict: "url" }
+      )
       .select(VIDEO_LIST_COLUMNS)
       .single();
 

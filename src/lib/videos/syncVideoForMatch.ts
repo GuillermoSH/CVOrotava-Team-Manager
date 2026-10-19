@@ -10,6 +10,7 @@ export type SyncVideoForMatchParams = {
   season: string;
   gender: "male" | "female";
   videoType?: VideoType;
+  recordedAt?: string | null;
 };
 
 /** Clear match_id on any video currently linked to this match. */
@@ -65,6 +66,7 @@ export async function syncVideoForMatch(
     season: normalizeSeasonId(params.season),
     gender: params.gender,
     video_type: videoType,
+    ...(params.recordedAt ? { recorded_at: params.recordedAt } : {}),
   };
 
   if (byUrl) {

@@ -24,6 +24,7 @@ import {
   normalizeVideoGroupPref,
   type VideoGroupBy,
 } from "@/lib/videos/groupVideos";
+import { videoRecordedDate } from "@/lib/videos/date";
 
 const VideoModal = dynamic(() => import("@/components/videos/VideoModal"), {
   ssr: false,
@@ -166,6 +167,7 @@ export default function VideosLibraryView({
             season: v.season,
             gender: v.gender,
             match_id: v.match_id ?? "",
+            recorded_at: videoRecordedDate(v),
           });
           setIsModalOpen(true);
         }}

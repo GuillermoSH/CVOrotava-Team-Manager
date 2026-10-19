@@ -3,6 +3,7 @@ import {
   VIDEO_TYPES,
   VIDEO_TYPE_GROUP_LABELS,
 } from "@/lib/videos/constants";
+import { videoRecordedDate } from "@/lib/videos/date";
 
 export type VideoGroupBy = "none" | "type" | "month";
 
@@ -22,8 +23,7 @@ export type VideoGroup = {
 };
 
 function monthKey(iso: string): string {
-  const d = new Date(iso);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  return iso.slice(0, 7);
 }
 
 function monthLabel(key: string): string {
@@ -54,7 +54,7 @@ export function groupVideos(
 
   const buckets = new Map<string, Video[]>();
   for (const v of videos) {
-    const key = monthKey(v.created_at);
+    const key = monthKey(videoRecordedDate(v));
     const list = buckets.get(key);
     if (list) list.push(v);
     else buckets.set(key, [v]);

@@ -17,7 +17,7 @@ type MatchPickerProps = {
   season: string;
   gender: string;
   value: string;
-  onChange: (matchId: string) => void;
+  onChange: (matchId: string, match?: MatchOption | null) => void;
   forMatchId?: string;
   disabled?: boolean;
   label?: string;
@@ -79,7 +79,12 @@ export default function MatchPicker({
       ) : (
         <Select
           value={value}
-          onChange={onChange}
+          onChange={(id) =>
+            onChange(
+              id,
+              id ? (matches.find((m) => m.id === id) ?? null) : null
+            )
+          }
           options={options}
           placeholder="Selecciona un partido"
           disabled={disabled || !season || !gender}
