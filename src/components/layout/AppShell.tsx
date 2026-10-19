@@ -166,19 +166,17 @@ function SidebarProfile({
   initials: string;
   onLogout: () => void;
 }) {
-  const { theme, toggleTheme, mounted } = useTheme();
+  const { theme, setTheme, mounted } = useTheme();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
-  const isLight = theme === "light";
-
   const close = () => setOpen(false);
   useDismiss(open, close, rootRef);
 
   useEffect(() => {
-    if (open) menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
+    if (open) menuRef.current?.querySelector<HTMLElement>('[role^="menuitem"]')?.focus();
   }, [open]);
 
   const onMenuKey = (event: React.KeyboardEvent) => {
@@ -189,14 +187,14 @@ function SidebarProfile({
       return;
     }
     event.preventDefault();
-    const items = [...(menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])];
+    const items = [...(menuRef.current?.querySelectorAll<HTMLElement>('[role^="menuitem"]') ?? [])];
     const index = items.indexOf(document.activeElement as HTMLElement);
     const next = event.key === "ArrowDown" ? index + 1 : index - 1;
     items[(next + items.length) % items.length]?.focus();
   };
 
-  const itemClass =
-    "flex w-full cursor-pointer items-center gap-3 px-3.5 py-2.5 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:bg-[var(--surface-faint)] hover:bg-[var(--surface-faint)]";
+  const rowClass =
+    "flex h-8 w-full cursor-pointer items-center justify-between gap-3 rounded-md px-2 text-left text-[13px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-faint)] hover:text-[var(--text-primary)] focus-visible:bg-[var(--surface-faint)] focus-visible:text-[var(--text-primary)] focus-visible:outline-none";
 
   return (
     <div ref={rootRef} className="relative mt-auto border-t border-[var(--glass-border)] p-3">
@@ -207,21 +205,49 @@ function SidebarProfile({
           role="menu"
           aria-label="Cuenta"
           onKeyDown={onMenuKey}
-          className="absolute inset-x-3 bottom-[calc(100%-0.25rem)] z-[var(--z-dropdown)] overflow-hidden rounded-xl border border-[var(--glass-border)] bg-[var(--color-bg-elevated)] py-1 shadow-xl shadow-black/25"
+          className="absolute inset-x-3 bottom-[calc(100%-0.25rem)] z-[var(--z-dropdown)] rounded-lg border border-[var(--glass-border)] bg-[var(--color-bg-elevated)] p-1 shadow-lg shadow-black/20"
         >
-          <button
-            type="button"
-            role="menuitem"
-            disabled={!mounted}
-            onClick={() => {
-              toggleTheme();
-              setOpen(false);
-            }}
-            className={`${itemClass} text-[var(--text-secondary)] hover:text-[var(--text-primary)]`}
-          >
-            <FontAwesomeIcon icon={isLight ? faMoon : faSun} className="w-4 text-sm" aria-hidden />
-            {isLight ? "Modo oscuro" : "Modo claro"}
-          </button>
+          <div className="px-2 pb-2 pt-1.5">
+            <p className="truncate text-[13px] font-medium text-[var(--text-primary)]">{name}</p>
+            <p className="truncate text-xs text-[var(--text-muted)]">{role}</p>
+          </div>
+          <div role="separator" className="-mx-1 my-1 h-px bg-[var(--glass-border)]" />
+
+          <div className="flex h-8 items-center justify-between gap-3 px-2 text-[13px] text-[var(--text-secondary)]">
+            <span id={`${menuId}-theme`}>Tema</span>
+            <div
+              role="group"
+              aria-labelledby={`${menuId}-theme`}
+              className="flex items-center gap-0.5 rounded-md border border-[var(--glass-border)] p-0.5"
+            >
+              {(
+                [
+                  { value: "light", label: "Claro", icon: faSun },
+                  { value: "dark", label: "Oscuro", icon: faMoon },
+                ] as const
+              ).map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={theme === opt.value}
+                  aria-label={opt.label}
+                  title={opt.label}
+                  disabled={!mounted}
+                  onClick={() => setTheme(opt.value)}
+                  className={`inline-flex size-6 cursor-pointer items-center justify-center rounded text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:opacity-60 ${
+                    theme === opt.value
+                      ? "bg-[var(--glass-surface)] text-[var(--text-primary)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  }`}
+                >
+                  <FontAwesomeIcon icon={opt.icon} aria-hidden />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div role="separator" className="-mx-1 my-1 h-px bg-[var(--glass-border)]" />
           <button
             type="button"
             role="menuitem"
@@ -229,10 +255,10 @@ function SidebarProfile({
               setOpen(false);
               onLogout();
             }}
-            className={`${itemClass} text-[var(--text-secondary)] hover:text-[var(--accent)]`}
+            className={rowClass}
           >
-            <FontAwesomeIcon icon={faRightFromBracket} className="w-4 text-sm" aria-hidden />
             Cerrar sesión
+            <FontAwesomeIcon icon={faRightFromBracket} className="text-xs text-[var(--text-muted)]" aria-hidden />
           </button>
         </div>
       ) : null}
