@@ -27,11 +27,8 @@ export async function POST() {
   await supabase.auth.signOut();
   cookieStore.set("cvorotava_gate", "", { path: "/", maxAge: 0 });
 
-  // 🔁 Redirigir al login
-  return NextResponse.redirect(
-    new URL(
-      "/login",
-      process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-    )
-  );
+  // El cliente (fetch) navega a /login por su cuenta. Una redirección aquí apuntaba a
+  // NEXT_PUBLIC_SITE_URL: si ese origen no es el de la app (otro puerto en local), fetch
+  // la seguía a otro origen y fallaba por CORS con «Failed to fetch».
+  return NextResponse.json({ ok: true });
 }

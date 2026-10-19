@@ -147,7 +147,7 @@ export function claimsMatchUser(
   return claims.sub === userId && claims.email === email;
 }
 
-/** RSC / Route Handler: header from middleware, else cookie. */
+/** RSC / Route Handler: header from proxy, else cookie. */
 export async function readGateFromRequest(): Promise<GateClaims | null> {
   try {
     const { cookies, headers } = await import("next/headers");

@@ -21,7 +21,7 @@ import {
 import PageHeader from "@/components/ui/PageHeader";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import Pagination from "@/components/ui/Pagination";
-import { readPref, writePref } from "@/lib/prefs";
+import { usePref } from "@/lib/usePref";
 
 const FedSyncStatus = dynamic(() => import("@/components/calendar/FedSyncStatus"), {
   ssr: false,
@@ -91,21 +91,18 @@ export default function CalendarView({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
-  const [view, setViewState] = useState<ViewMode>("list");
+  const [view, setView] = usePref<ViewMode>(VIEW_PREF_KEY, (raw) =>
+    raw === "month" ? "month" : "list"
+  );
   const [upcomingPage, setUpcomingPage] = useState(1);
   const [playedPage, setPlayedPage] = useState(1);
-
-  useEffect(() => {
-    const stored = readPref(VIEW_PREF_KEY);
-    if (stored === "list" || stored === "month") {
-      setViewState(stored);
-    }
-  }, []);
-
-  const setView = (next: ViewMode) => {
-    setViewState(next);
-    writePref(VIEW_PREF_KEY, next);
-  };
+  const pageResetKey = `${filters.season}|${filters.gender}|${query}`;
+  const [prevPageResetKey, setPrevPageResetKey] = useState(pageResetKey);
+  if (prevPageResetKey !== pageResetKey) {
+    setPrevPageResetKey(pageResetKey);
+    setUpcomingPage(1);
+    setPlayedPage(1);
+  }
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMatch, setEditingMatch] = useState<
@@ -149,12 +146,6 @@ export default function CalendarView({
     void fetchMatches(filters.season, filters.gender);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch when season/gender change only
   }, [filters.season, filters.gender]);
-
-  // Reset pagination when filters / search change
-  useEffect(() => {
-    setUpcomingPage(1);
-    setPlayedPage(1);
-  }, [filters.season, filters.gender, query]);
 
   const filteredMatches = useMemo(() => {
     let filtered = [...matches];

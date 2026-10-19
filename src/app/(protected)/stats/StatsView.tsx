@@ -12,7 +12,7 @@ import { FormPanel, NextMatchPanel, PositionPanel } from "@/components/stats/com
 import { StatsSummarySkeleton } from "@/components/skeletons/StatsSkeleton";
 import { useSeasons } from "@/contexts/SeasonContext";
 import { useUser } from "@/contexts/UserContext";
-import { readPref, writePref } from "@/lib/prefs";
+import { usePref } from "@/lib/usePref";
 import type { CompetitiveStats } from "@/lib/stats/competitive/build";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -102,19 +102,11 @@ export default function StatsView({
   const [competitive, setCompetitive] = useState<CompetitiveStats | null>(initialCompetitive);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTabState] = useState<Tab>("resumen");
+  const [tab, setTab] = usePref<Tab>(TAB_PREF_KEY, (raw) =>
+    raw === "rivales" || raw === "liga" || raw === "versus" ? raw : "resumen"
+  );
   const [scope, setScope] = useState<Scope>("liga");
   const [selectedRival, setSelectedRival] = useState<number | null>(null);
-
-  useEffect(() => {
-    const saved = readPref(TAB_PREF_KEY);
-    if (saved === "resumen" || saved === "rivales" || saved === "liga" || saved === "versus") setTabState(saved);
-  }, []);
-
-  const setTab = (next: Tab) => {
-    setTabState(next);
-    writePref(TAB_PREF_KEY, next);
-  };
 
   const openRival = (teamId: number) => {
     setSelectedRival(teamId);

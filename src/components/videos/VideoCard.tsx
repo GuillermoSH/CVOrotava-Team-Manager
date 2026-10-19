@@ -30,6 +30,8 @@ type VideoCardProps = {
   video: Video;
   isAdmin?: boolean;
   onEdit?: (video: Video) => void;
+  /** Miniatura sobre el pliegue: se carga sin esperar (candidata a LCP). */
+  eager?: boolean;
 };
 
 function parseResult(result: string | null | undefined): {
@@ -48,6 +50,7 @@ export default function VideoCard({
   video,
   isAdmin,
   onEdit,
+  eager = false,
 }: Readonly<VideoCardProps>) {
   const [youtubeTitle, setYoutubeTitle] = useState("");
   const linked = video.match;
@@ -82,6 +85,7 @@ export default function VideoCard({
           src={getThumbnailUrl(video.url, "max")}
           alt={displayTitle}
           fill
+          loading={eager ? "eager" : "lazy"}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
         />

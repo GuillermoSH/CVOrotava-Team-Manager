@@ -33,7 +33,7 @@ function userFromGate(userId: string, claims: GateClaims): AllowedUser {
 
 /**
  * Session + club profile for protected RSC. Deduped per request with cache()
- * and the middleware gate so layout + page share one getUser.
+ * and the proxy gate so layout + page share one getUser.
  */
 export const loadAppUser = cache(async (): Promise<LoadAppUserResult> => {
   const {

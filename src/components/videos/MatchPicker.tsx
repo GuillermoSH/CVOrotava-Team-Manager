@@ -32,15 +32,19 @@ export default function MatchPicker({
   disabled,
   label = "Partido vinculado",
 }: Readonly<MatchPickerProps>) {
-  const [matches, setMatches] = useState<MatchOption[]>([]);
-  const [loading, setLoading] = useState(true);
+  const requestKey =
+    season && gender ? `${season}|${gender}|${forMatchId ?? ""}` : null;
+  const [result, setResult] = useState<{
+    key: string | null;
+    data: MatchOption[];
+  }>({ key: null, data: [] });
+  const loading = requestKey !== null && result.key !== requestKey;
+  const matches = requestKey !== null && result.key === requestKey ? result.data : [];
 
   useEffect(() => {
-    if (!season || !gender) {
-      setMatches([]);
-      setLoading(false);
-      return;
-    }
+    if (!season || !gender) return;
+    const key = `${season}|${gender}|${forMatchId ?? ""}`;
+    let cancelled = false;
 
     const params = new URLSearchParams({
       season,
@@ -50,12 +54,15 @@ export default function MatchPicker({
     });
     if (forMatchId) params.set("forMatchId", forMatchId);
 
-    setLoading(true);
     fetch(`/api/matches?${params}`)
       .then((res) => (res.ok ? res.json() : []))
-      .then((data: MatchOption[]) => setMatches(data))
-      .catch(() => setMatches([]))
-      .finally(() => setLoading(false));
+      .catch(() => [])
+      .then((data: MatchOption[]) => {
+        if (!cancelled) setResult({ key, data });
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [season, gender, forMatchId]);
 
   const options = [

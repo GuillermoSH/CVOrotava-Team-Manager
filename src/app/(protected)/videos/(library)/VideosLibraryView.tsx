@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import VideosGrid from "@/components/videos/VideosGrid";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
@@ -18,7 +18,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import PageHeader from "@/components/ui/PageHeader";
 import SegmentedControl from "@/components/ui/SegmentedControl";
-import { readPref, writePref } from "@/lib/prefs";
+import { usePref } from "@/lib/usePref";
 import {
   VIDEO_GROUP_OPTIONS,
   normalizeVideoGroupPref,
@@ -57,19 +57,12 @@ export default function VideosLibraryView({
     VideoFormValues | undefined
   >(undefined);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [groupBy, setGroupByState] = useState<VideoGroupBy>("none");
+  const [storedGroupBy, setGroupBy] = usePref<VideoGroupBy>(
+    GROUP_PREF_KEY,
+    normalizeVideoGroupPref
+  );
 
   useViewportHeight();
-
-  useEffect(() => {
-    const stored = readPref(GROUP_PREF_KEY);
-    setGroupByState(normalizeVideoGroupPref(stored));
-  }, []);
-
-  const setGroupBy = (next: VideoGroupBy) => {
-    setGroupByState(next);
-    writePref(GROUP_PREF_KEY, next);
-  };
 
   const groupOptions = useMemo(
     () =>
@@ -80,12 +73,12 @@ export default function VideosLibraryView({
     [filters.video_type]
   );
 
-  useEffect(() => {
-    if (!groupOptions.some((opt) => opt.value === groupBy)) {
-      setGroupByState("none");
-      writePref(GROUP_PREF_KEY, "none");
-    }
-  }, [groupOptions, groupBy]);
+  // Si la agrupación guardada no aplica con los filtros actuales, se muestra sin agrupar.
+  const groupBy: VideoGroupBy = groupOptions.some(
+    (opt) => opt.value === storedGroupBy
+  )
+    ? storedGroupBy
+    : "none";
 
   const filterConfigs: FilterConfig[] = [
     {

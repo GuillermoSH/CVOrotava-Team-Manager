@@ -30,12 +30,15 @@ export default function LoginPage() {
   const [phase, setPhase] = useState<Phase>("cover");
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const uncovered = phase !== "cover";
+  const currentPhase: Phase = reduceMotion ? "done" : phase;
+  const uncovered = currentPhase !== "cover";
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setAuthError(authErrorMessage(params.get("error")));
+    // Sin ?error= no se toca: en Strict Mode el efecto corre dos veces y la
+    // segunda ya no ve el parámetro (se limpia de la URL en la primera).
     if (params.has("error")) {
+      setAuthError(authErrorMessage(params.get("error")));
       const url = new URL(window.location.href);
       url.searchParams.delete("error");
       window.history.replaceState({}, "", url.pathname + url.search);
@@ -43,10 +46,7 @@ export default function LoginPage() {
   }, []);
 
   useEffect(() => {
-    if (reduceMotion) {
-      setPhase("done");
-      return;
-    }
+    if (reduceMotion) return;
     const hold = window.setTimeout(() => setPhase("reveal"), 700);
     return () => window.clearTimeout(hold);
   }, [reduceMotion]);
@@ -117,7 +117,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {phase === "cover" && (
+        {currentPhase === "cover" && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-[var(--color-bg)]">
             <motion.div
               layoutId="club-logo"
@@ -128,7 +128,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        {phase === "reveal" && (
+        {currentPhase === "reveal" && (
           <motion.div
             aria-hidden
             className="pointer-events-none absolute inset-0 z-20 bg-[var(--color-bg)]"

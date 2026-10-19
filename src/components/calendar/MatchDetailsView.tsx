@@ -60,14 +60,16 @@ export default function MatchDetailsView({
   const router = useRouter();
   const reduceMotion = useReducedMotion();
   const [match, setMatch] = useState(initialMatch);
+  const [prevInitialMatch, setPrevInitialMatch] = useState(initialMatch);
+  if (prevInitialMatch !== initialMatch) {
+    setPrevInitialMatch(initialMatch);
+    setMatch(initialMatch);
+  }
+  const [now] = useState(() => Date.now());
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<MatchFormValues | undefined>(
     undefined
   );
-
-  useEffect(() => {
-    setMatch(initialMatch);
-  }, [initialMatch]);
 
   useEffect(() => {
     if (!openEdit || !user?.isAdmin) return;
@@ -83,7 +85,7 @@ export default function MatchDetailsView({
     [match.date, match.time]
   );
   const matchEnd = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000);
-  const isPast = Date.now() > matchEnd.getTime();
+  const isPast = now > matchEnd.getTime();
   const isUpcoming = !isPast;
   const tone = resultTone(match);
 
@@ -326,6 +328,7 @@ export default function MatchDetailsView({
                           src={thumbUrl}
                           alt={`Vídeo del partido contra ${match.opponent}`}
                           fill
+                          loading="eager"
                           className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                           sizes="(max-width: 1024px) 100vw, 55vw"
                         />

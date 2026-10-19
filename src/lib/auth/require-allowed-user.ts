@@ -27,6 +27,11 @@ export type AllowedUser = {
   gender: "male" | "female" | null;
 };
 
+/** Unión explícita: sin ella TS añade `response?: undefined` a la rama de éxito y `"response" in auth` no estrecha. */
+export type RequireAllowedResult =
+  | { readonly response: NextResponse }
+  | { readonly user: AllowedUser };
+
 /**
  * Valida sesión Supabase (cookies) y que el email siga en allowed_emails.
  * Por defecto bloquea usuarios con is_active = false (salvo admin).
@@ -36,7 +41,7 @@ export type AllowedUser = {
 export async function requireAllowedUser(
   supabase: SupabaseClient,
   options: RequireAllowedOptions = {}
-) {
+): Promise<RequireAllowedResult> {
   const {
     data: { user },
     error,

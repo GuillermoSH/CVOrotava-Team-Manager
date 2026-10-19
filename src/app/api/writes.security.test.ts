@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NextRequest } from "next/server";
 import { PLAYER } from "@/test/security/fixtures";
 import { createQueryChain } from "@/test/security/queryChain";
 
@@ -66,7 +67,7 @@ describe("club writes as a player must not touch supabaseAdmin", () => {
   });
 
   it("PUT /api/matches/[id]", async () => {
-    const res = await PUT(new Request("http://local/api/matches/id", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(matchBody) }), {
+    const res = await PUT(new NextRequest("http://local/api/matches/id", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(matchBody) }), {
       params: Promise.resolve({ id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb" }),
     });
     expect(res.status).toBe(403);
@@ -75,7 +76,7 @@ describe("club writes as a player must not touch supabaseAdmin", () => {
 
   it("DELETE /api/matches/[id]", async () => {
     const res = await DELETE(
-      new Request("http://local/api/matches/id", { method: "DELETE" }),
+      new NextRequest("http://local/api/matches/id", { method: "DELETE" }),
       { params: Promise.resolve({ id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb" }) }
     );
     expect(res.status).toBe(403);
@@ -116,7 +117,7 @@ describe("club writes as a player must not touch supabaseAdmin", () => {
 
   it("PUT /api/videos/[id]", async () => {
     const res = await PUT_VIDEO(
-      new Request("http://local/api/videos/id", {
+      new NextRequest("http://local/api/videos/id", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: "https://youtube.com/watch?v=x" }),
@@ -129,7 +130,7 @@ describe("club writes as a player must not touch supabaseAdmin", () => {
 
   it("DELETE /api/videos/[id]", async () => {
     const res = await DELETE_VIDEO(
-      new Request("http://local/api/videos/id", { method: "DELETE" }),
+      new NextRequest("http://local/api/videos/id", { method: "DELETE" }),
       { params: Promise.resolve({ id: "cccccccc-cccc-cccc-cccc-cccccccccccc" }) }
     );
     expect(res.status).toBe(403);

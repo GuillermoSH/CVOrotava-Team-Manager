@@ -49,8 +49,11 @@ function VideoGridCards({
   onEdit,
   reduceMotion,
   cardVariants,
+  eagerCount = 0,
 }: {
   videos: Video[];
+  /** Cuántas primeras miniaturas cargar sin lazy (primera fila visible). */
+  eagerCount?: number;
   isAdmin?: boolean;
   onEdit?: (video: Video) => void;
   reduceMotion: boolean | null;
@@ -66,7 +69,7 @@ function VideoGridCards({
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
       <AnimatePresence>
-        {videos.map((video) => (
+        {videos.map((video, index) => (
           <motion.div
             key={video.id}
             variants={cardVariants}
@@ -77,7 +80,12 @@ function VideoGridCards({
                 : { opacity: 0, y: 8, transition: { duration: 0.2 } }
             }
           >
-            <VideoCard video={video} isAdmin={isAdmin} onEdit={onEdit} />
+            <VideoCard
+              video={video}
+              isAdmin={isAdmin}
+              onEdit={onEdit}
+              eager={index < eagerCount}
+            />
           </motion.div>
         ))}
       </AnimatePresence>
@@ -164,7 +172,7 @@ export default function VideosGrid({
         initial="hidden"
         animate="visible"
       >
-        {groups.map((group) => (
+        {groups.map((group, groupIndex) => (
           <section key={group.key} className="min-w-0">
             {showSectionHeaders ? (
               <header className="mb-3 flex items-baseline justify-between gap-3 border-b border-[var(--glass-border)] pb-2">
@@ -182,6 +190,7 @@ export default function VideosGrid({
               onEdit={onEdit}
               reduceMotion={reduceMotion}
               cardVariants={cardVariants}
+              eagerCount={groupIndex === 0 ? 4 : 0}
             />
           </section>
         ))}

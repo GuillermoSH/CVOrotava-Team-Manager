@@ -61,7 +61,7 @@ describe("parseTournamentBundle — partido terminado (Copa Gobierno 2026)", () 
       home_league_points: 2,
       away_league_points: 1,
       local_date: "2026-09-25",
-      local_time: "08:30:00",
+      local_time: "09:30:00",
       timezone: "Atlantic/Canary",
     });
     expect(m.report_url).toContain("pdf-url-redirect");
@@ -111,13 +111,21 @@ describe("parseTournamentBundle — liga en curso (Sénior Masculina 2026/27)", 
       away_team_id: 15937840,
       facility_id: 78339,
       local_date: "2026-10-24",
-      local_time: "15:30:00",
+      local_time: "16:30:00", // API: 15:30 UTC; PDF oficial: 16:30 (verano canario)
       finished: false,
       home_sets: null,
       away_sets: null,
       home_league_points: null,
     });
     expect(b.sets.some((s) => s.match_id === 145743586)).toBe(false);
+  });
+
+  it("hora local: +1 h en verano canario y sin cambio en invierno (contra el PDF oficial)", () => {
+    const ours = (date: string) =>
+      b.matches.find((x) => x.local_date === date && [x.home_team_id, x.away_team_id].includes(15941872))!;
+    expect(ours("2026-10-24").local_time).toBe("16:30:00");
+    expect(ours("2026-11-01").local_time).toBe("17:00:00");
+    expect(ours("2026-11-14").local_time).toBe("17:30:00");
   });
 
   it("lee el ID de club (estable entre temporadas) y lo agrupa en clubs", () => {

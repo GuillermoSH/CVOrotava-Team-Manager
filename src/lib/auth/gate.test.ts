@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { signGate, verifyGate, type GateClaims } from "@/lib/auth/gate";
 
+// @types/node tipa NODE_ENV como solo lectura; los tests lo cambian a propósito.
+const mutableEnv = process.env as Record<string, string | undefined>;
+
 const sample = (): GateClaims => ({
   sub: "11111111-1111-1111-1111-111111111111",
   email: "jugador@cvorotava.test",
@@ -23,7 +26,7 @@ describe("gate cookie HMAC", () => {
   beforeEach(() => {
     process.env.CVOROTAVA_GATE_SECRET = "test-gate-secret-not-for-prod";
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-    process.env.NODE_ENV = "test";
+    mutableEnv.NODE_ENV = "test";
     delete process.env.VERCEL_ENV;
   });
 
@@ -32,7 +35,7 @@ describe("gate cookie HMAC", () => {
     else process.env.CVOROTAVA_GATE_SECRET = original.gate;
     if (original.service === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY;
     else process.env.SUPABASE_SERVICE_ROLE_KEY = original.service;
-    process.env.NODE_ENV = original.nodeEnv;
+    mutableEnv.NODE_ENV = original.nodeEnv;
     if (original.vercelEnv === undefined) delete process.env.VERCEL_ENV;
     else process.env.VERCEL_ENV = original.vercelEnv;
     vi.restoreAllMocks();
@@ -83,7 +86,7 @@ describe("gate cookie HMAC", () => {
   it("fails closed in production when CVOROTAVA_GATE_SECRET is missing", async () => {
     delete process.env.CVOROTAVA_GATE_SECRET;
     process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key";
-    process.env.NODE_ENV = "production";
+    mutableEnv.NODE_ENV = "production";
 
     const err = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(await signGate(sample())).toBeNull();
@@ -93,7 +96,7 @@ describe("gate cookie HMAC", () => {
   it("fails closed when VERCEL_ENV is production even if NODE_ENV is not", async () => {
     delete process.env.CVOROTAVA_GATE_SECRET;
     process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key";
-    process.env.NODE_ENV = "development";
+    mutableEnv.NODE_ENV = "development";
     process.env.VERCEL_ENV = "production";
 
     vi.spyOn(console, "error").mockImplementation(() => {});
@@ -103,7 +106,7 @@ describe("gate cookie HMAC", () => {
   it("allows service-role fallback in development with a warning", async () => {
     delete process.env.CVOROTAVA_GATE_SECRET;
     process.env.SUPABASE_SERVICE_ROLE_KEY = "dev-service-role-fallback";
-    process.env.NODE_ENV = "development";
+    mutableEnv.NODE_ENV = "development";
     delete process.env.VERCEL_ENV;
 
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});

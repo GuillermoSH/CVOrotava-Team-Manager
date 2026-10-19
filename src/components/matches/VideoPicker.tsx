@@ -31,15 +31,19 @@ export default function VideoPicker({
   disabled,
   label = "Vídeo de la biblioteca",
 }: Readonly<VideoPickerProps>) {
-  const [videos, setVideos] = useState<VideoOption[]>([]);
-  const [loading, setLoading] = useState(true);
+  const requestKey =
+    season && gender ? `${season}|${gender}|${forMatchId ?? ""}` : null;
+  const [result, setResult] = useState<{
+    key: string | null;
+    data: VideoOption[];
+  }>({ key: null, data: [] });
+  const loading = requestKey !== null && result.key !== requestKey;
+  const videos = requestKey !== null && result.key === requestKey ? result.data : [];
 
   useEffect(() => {
-    if (!season || !gender) {
-      setVideos([]);
-      setLoading(false);
-      return;
-    }
+    if (!season || !gender) return;
+    const key = `${season}|${gender}|${forMatchId ?? ""}`;
+    let cancelled = false;
 
     const params = new URLSearchParams({
       season,
@@ -49,12 +53,15 @@ export default function VideoPicker({
     });
     if (forMatchId) params.set("forMatchId", forMatchId);
 
-    setLoading(true);
     fetch(`/api/videos?${params}`)
       .then((res) => (res.ok ? res.json() : []))
-      .then((data: VideoOption[]) => setVideos(data))
-      .catch(() => setVideos([]))
-      .finally(() => setLoading(false));
+      .catch(() => [])
+      .then((data: VideoOption[]) => {
+        if (!cancelled) setResult({ key, data });
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [season, gender, forMatchId]);
 
   const options = [

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { sileo } from "sileo";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -40,13 +40,16 @@ export default function VenuesView({ initialVenues }: Readonly<{ initialVenues: 
   const router = useRouter();
   const { ask, dialog: confirmDialog } = useConfirmDialog();
   const [venues, setVenues] = useState(initialVenues);
+  const [prevInitialVenues, setPrevInitialVenues] = useState(initialVenues);
+  if (prevInitialVenues !== initialVenues) {
+    setPrevInitialVenues(initialVenues);
+    setVenues(initialVenues);
+  }
   const [busy, setBusy] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const pendingCount = venues.filter((v) => v.needs_review).length;
   const [tab, setTab] = useState<Tab>(pendingCount > 0 ? "pending" : "all");
   const [mergeTarget, setMergeTarget] = useState<Record<string, string>>({});
-
-  useEffect(() => setVenues(initialVenues), [initialVenues]);
 
   const suggestedMerges = useMemo(() => planVenueMerges(venues), [venues]);
 

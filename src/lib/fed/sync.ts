@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
 import { FCVB_MANAGER_ID, leveradeGet } from "./client";
+import { syncClubContacts, type ClubContactSummary } from "./clubContacts";
 import { linkOurMatches, type LinkSummary } from "./linkMatches";
 import {
   FIRST_SYNCED_SEASON,
@@ -31,6 +32,8 @@ export type FedSyncSummary = {
   skipped: { id: number; name: string; reason: string }[];
   /** Volcado a `matches` (solo si no es dry-run). */
   link?: LinkSummary;
+  /** Contacto de los clubes rivales (email, teléfono, sede). */
+  clubContacts?: ClubContactSummary;
 };
 
 type Candidate = { id: string; name: string };
@@ -193,6 +196,7 @@ export async function syncFed(opts: {
   const { supabase, scope, trigger, dryRun = false, log = () => {} } = opts;
   const range = seasonRange(scope);
   const summary: FedSyncSummary = { scope, tournaments: [], skipped: [] };
+  const rivalClubIds = new Set<number>();
 
   let runId: number | null = null;
   if (!dryRun) {
@@ -228,6 +232,9 @@ export async function syncFed(opts: {
       }
 
       if (!dryRun) await writeTournamentBundle(supabase, bundle);
+      for (const team of bundle.teams) {
+        if (!team.is_our_club && team.club_id !== null) rivalClubIds.add(team.club_id);
+      }
 
       const entry = {
         id: t.id,
@@ -250,6 +257,22 @@ export async function syncFed(opts: {
         `→ matches: ${summary.link.linked} enlazados (${summary.link.updated} actualizados), ` +
           `${summary.link.created} creados, ${summary.link.newVenues.length} pabellones nuevos`
       );
+    }
+
+    if (!dryRun) {
+      // Secundario: si falla (p. ej. migración sin aplicar) no invalida el calendario ya sincronizado.
+      try {
+        summary.clubContacts = await syncClubContacts({
+          supabase,
+          clubIds: [...rivalClubIds],
+          log,
+        });
+        log(
+          `→ contactos de clubes: ${summary.clubContacts.updated} actualizados, ${summary.clubContacts.failed} con error`
+        );
+      } catch (err) {
+        log(`→ contactos de clubes omitidos: ${err instanceof Error ? err.message : String(err)}`);
+      }
     }
 
     if (runId !== null) {

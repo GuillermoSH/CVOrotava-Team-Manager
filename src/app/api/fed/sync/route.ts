@@ -54,8 +54,8 @@ export async function POST() {
       scope: { kind: "current" },
       trigger: "manual",
     });
-    revalidateTag("venues");
-    revalidateTag("fed");
+    revalidateTag("venues", { expire: 0 });
+    revalidateTag("fed", { expire: 0 });
     return NextResponse.json({ ok: true, summary, last: await getLastFedSync() });
   } catch (err) {
     console.error("[fed sync manual]", err);

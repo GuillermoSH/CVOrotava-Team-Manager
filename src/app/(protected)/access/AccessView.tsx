@@ -20,7 +20,7 @@ import { AccessListSkeleton } from "@/components/skeletons/AccessSkeleton";
 import FilterBar, { type FilterConfig } from "@/components/ui/FilterBar";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import Pagination from "@/components/ui/Pagination";
-import { readPref, writePref } from "@/lib/prefs";
+import { usePref } from "@/lib/usePref";
 import { sileo } from "sileo";
 import { useConfirmDialog } from "@/components/ui/useConfirmDialog";
 import {
@@ -108,7 +108,10 @@ export default function AccessView({
   const [filters, setFilters] = useState<Record<string, string | undefined>>(
     {}
   );
-  const [groupBy, setGroupByState] = useState<AccessGroupBy>("status");
+  const [groupBy, setStoredGroupBy] = usePref<AccessGroupBy>(
+    GROUP_PREF_KEY,
+    (raw) => (isAccessGroupBy(raw) ? raw : "status")
+  );
   const [pageByGroup, setPageByGroup] = useState<Record<string, number>>({});
 
   const load = useCallback(async () => {
@@ -137,14 +140,8 @@ export default function AccessView({
     if (user?.isAdmin) load();
   }, [user, load, initialRows.length]);
 
-  useEffect(() => {
-    const stored = readPref(GROUP_PREF_KEY);
-    if (isAccessGroupBy(stored)) setGroupByState(stored);
-  }, []);
-
   const setGroupBy = (next: AccessGroupBy) => {
-    setGroupByState(next);
-    writePref(GROUP_PREF_KEY, next);
+    setStoredGroupBy(next);
     setPageByGroup({});
   };
 
@@ -172,17 +169,6 @@ export default function AccessView({
     () => groupAccessRows(filtered, groupBy),
     [filtered, groupBy]
   );
-
-  useEffect(() => {
-    setPageByGroup((prev) => {
-      const next = { ...prev };
-      for (const g of groups) {
-        const count = Math.max(1, Math.ceil(g.rows.length / PAGE_SIZE));
-        if ((next[g.key] ?? 1) > count) next[g.key] = count;
-      }
-      return next;
-    });
-  }, [groups]);
 
   const filterConfigs: FilterConfig[] = [
     {
@@ -540,11 +526,11 @@ export default function AccessView({
       ) : (
         <div className="flex flex-col gap-8">
           {groups.map((group) => {
-            const page = pageByGroup[group.key] ?? 1;
             const pageCount = Math.max(
               1,
               Math.ceil(group.rows.length / PAGE_SIZE)
             );
+            const page = Math.min(pageByGroup[group.key] ?? 1, pageCount);
             const slice = group.rows.slice(
               (page - 1) * PAGE_SIZE,
               page * PAGE_SIZE
