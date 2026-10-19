@@ -35,9 +35,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // false en servidor y durante la hidratación, true después.
   const mounted = useHydrated();
 
+  // Hasta hidratar, `theme` es el valor por defecto del servidor; aplicarlo
+  // pisaría el tema que ya puso el script del <head>.
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
+    if (mounted) applyTheme(theme);
+  }, [mounted, theme]);
 
   const toggleTheme = useCallback(
     () => setTheme(theme === "dark" ? "light" : "dark"),
