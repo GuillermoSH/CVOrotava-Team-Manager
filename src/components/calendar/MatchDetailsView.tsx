@@ -328,6 +328,7 @@ export default function MatchDetailsView({
                           src={thumbUrl}
                           alt={`Vídeo del partido contra ${match.opponent}`}
                           fill
+                          loading="eager"
                           className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                           sizes="(max-width: 1024px) 100vw, 55vw"
                         />
