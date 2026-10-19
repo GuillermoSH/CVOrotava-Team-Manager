@@ -422,21 +422,31 @@ export default function HomeView({
 
       <div className="mt-10 flex flex-col gap-10">
         {user?.isAdmin ? (
-          <div className="grid gap-10 lg:grid-cols-12 lg:gap-x-10">
-            <div className="lg:col-span-7">
-              {extras.roundup ? <WeekendRoundup roundup={extras.roundup} /> : null}
-            </div>
-            <div className="flex flex-col gap-10 lg:col-span-5">
-              {extras.gender ? (
-                <AchievementsGlance
-                  achievements={extras.achievements}
-                  season={extras.season}
-                  gender={extras.gender}
-                />
-              ) : null}
-              {extras.adminPending ? <Birthdays birthdays={extras.adminPending.birthdays} /> : null}
-            </div>
-          </div>
+          (() => {
+            const achievements = extras.gender ? (
+              <AchievementsGlance
+                achievements={extras.achievements}
+                season={extras.season}
+                gender={extras.gender}
+              />
+            ) : null;
+            const birthdays = extras.adminPending?.birthdays ?? [];
+            // Sin jornada que mostrar (inicio de temporada) los logros ocupan su sitio, sin dejar hueco.
+            const left = extras.roundup ? <WeekendRoundup roundup={extras.roundup} /> : achievements;
+            const right = (
+              <>
+                {extras.roundup ? achievements : null}
+                <Birthdays birthdays={birthdays} />
+              </>
+            );
+            const hasRight = Boolean(extras.roundup && achievements) || birthdays.length > 0;
+            return (
+              <div className="grid gap-10 lg:grid-cols-12 lg:gap-x-10">
+                <div className={hasRight ? "lg:col-span-7" : "lg:col-span-12"}>{left}</div>
+                {hasRight ? <div className="flex flex-col gap-10 lg:col-span-5">{right}</div> : null}
+              </div>
+            );
+          })()
         ) : extras.roundup ? (
           <WeekendRoundup roundup={extras.roundup} />
         ) : null}

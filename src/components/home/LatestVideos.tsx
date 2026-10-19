@@ -10,7 +10,7 @@ import { formatMatchDate } from "@/lib/matches/formatMatchLabel";
 export default function LatestVideos({ videos }: Readonly<{ videos: VideoListItem[] }>) {
   if (videos.length === 0) return null;
   return (
-    <section>
+    <section className="max-w-3xl">
       <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
         <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Últimos vídeos</h2>
         <Link
@@ -21,7 +21,7 @@ export default function LatestVideos({ videos }: Readonly<{ videos: VideoListIte
           <FontAwesomeIcon icon={faArrowRight} className="text-xs" aria-hidden />
         </Link>
       </div>
-      <ul className="grid max-w-3xl grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3">
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3">
         {videos.slice(0, 3).map((v, i) => {
           const title = v.match ? `vs ${v.match.opponent}` : VIDEO_TYPE_LABELS[v.video_type];
           return (
