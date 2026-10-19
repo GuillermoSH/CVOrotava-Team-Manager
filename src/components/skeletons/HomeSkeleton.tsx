@@ -24,7 +24,7 @@ export default function HomeSkeleton() {
             <Bone className="h-64 rounded-2xl sm:h-48" />
           </section>
           <section>
-            <h2 className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">
+            <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">
               Tu temporada
             </h2>
             <div className="grid gap-6 sm:grid-cols-[minmax(0,6.5rem)_1fr]">
@@ -35,9 +35,17 @@ export default function HomeSkeleton() {
             </div>
           </section>
         </div>
-        <div className="flex flex-col gap-6 lg:col-span-5">
-          <Bone className="h-28 rounded-2xl" />
-          <Bone className="h-40 rounded-2xl" />
+        <div className="flex flex-col gap-8 lg:col-span-5">
+          <section>
+            <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">Cuotas</h2>
+            <Bone className="h-20 rounded-xl" />
+          </section>
+          <section>
+            <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">
+              Últimos resultados
+            </h2>
+            <Bone className="h-32 rounded-xl" />
+          </section>
         </div>
       </div>
     </div>

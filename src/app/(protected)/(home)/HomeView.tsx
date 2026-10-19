@@ -57,29 +57,32 @@ function NextMatchCard({ match, now }: Readonly<{ match: HomeMatch; now: Date }>
   const time = hasTime ? match.time!.slice(0, 5) : null;
   const category = match.gender === "male" ? "Sénior Masculino" : "Sénior Femenino";
 
-  return (
-    <article className="relative flex flex-col gap-5 rounded-2xl border border-[var(--glass-border)] bg-[var(--color-bg-elevated)] p-4 sm:flex-row sm:gap-6 sm:p-5">
-      <div className="flex shrink-0 items-center gap-4 sm:w-28 sm:flex-col sm:items-stretch sm:gap-3">
-        <div className="flex w-20 flex-col items-center rounded-xl bg-[var(--surface-faint)] py-2.5 text-center ring-1 ring-inset ring-[var(--glass-border)] sm:w-full">
-          <span className="text-xs font-medium capitalize text-[var(--text-muted)]">{weekday}</span>
-          <span className="text-4xl font-bold leading-none tabular-nums tracking-tight">
-            {start.getDate()}
-          </span>
-          <span className="mt-0.5 text-xs capitalize text-[var(--text-secondary)]">{month}</span>
-        </div>
-        <div className="flex flex-col sm:items-center">
-          {time ? (
-            <span className="text-2xl font-semibold leading-none tabular-nums sm:text-xl">{time}</span>
-          ) : (
-            <span className="text-sm text-[var(--text-muted)]">Hora por confirmar</span>
-          )}
-          <span className="mt-1 text-sm font-semibold text-[var(--accent)]">
-            {countdownLabel(days)}
-          </span>
-        </div>
-      </div>
+  const secondaryAction =
+    "relative z-10 inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-[var(--glass-border)] px-3.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]";
 
-      <div className="flex min-w-0 flex-1 flex-col gap-4">
+  return (
+    <div className="@container">
+      <article className="relative grid gap-x-6 gap-y-5 rounded-2xl border border-[var(--glass-border)] bg-[var(--color-bg-elevated)] p-4 @lg:grid-cols-[7rem_minmax(0,1fr)] @lg:p-5 @3xl:grid-cols-[7rem_minmax(0,1fr)_12.5rem] @3xl:items-center">
+        <div className="flex items-center gap-4 @lg:flex-col @lg:items-stretch @lg:gap-3">
+          <div className="flex w-20 flex-col items-center rounded-xl bg-[var(--surface-faint)] py-2.5 text-center ring-1 ring-inset ring-[var(--glass-border)] @lg:w-full">
+            <span className="text-xs font-medium capitalize text-[var(--text-muted)]">{weekday}</span>
+            <span className="text-4xl font-bold leading-none tabular-nums tracking-tight">
+              {start.getDate()}
+            </span>
+            <span className="mt-0.5 text-xs capitalize text-[var(--text-secondary)]">{month}</span>
+          </div>
+          <div className="flex flex-col @lg:items-center">
+            {time ? (
+              <span className="text-2xl font-semibold leading-none tabular-nums @lg:text-xl">{time}</span>
+            ) : (
+              <span className="text-sm text-[var(--text-muted)]">Hora por confirmar</span>
+            )}
+            <span className="mt-1 text-sm font-semibold text-[var(--accent)]">
+              {countdownLabel(days)}
+            </span>
+          </div>
+        </div>
+
         <div className="min-w-0">
           <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-[var(--text-secondary)]">
             <span>{category}</span>
@@ -90,7 +93,7 @@ function NextMatchCard({ match, now }: Readonly<{ match: HomeMatch; now: Date }>
               </span>
             ) : null}
           </p>
-          <h3 className="mt-1 text-2xl font-bold tracking-tight text-balance sm:text-3xl">
+          <h3 className="mt-1 text-2xl font-bold tracking-tight text-balance @lg:text-3xl">
             <Link
               href={`/matches/${match.id}`}
               className="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-[var(--accent)]"
@@ -108,17 +111,20 @@ function NextMatchCard({ match, now }: Readonly<{ match: HomeMatch; now: Date }>
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span aria-hidden className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--accent)] px-3.5 text-sm font-semibold text-white">
+        <div className="flex flex-col gap-2 @lg:col-span-2 @lg:flex-row @lg:flex-wrap @3xl:col-span-1 @3xl:flex-col">
+          <span
+            aria-hidden
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-3.5 text-sm font-semibold text-white"
+          >
             Ver partido
-            <FontAwesomeIcon icon={faArrowRight} className="text-xs" aria-hidden />
+            <FontAwesomeIcon icon={faArrowRight} className="text-xs" />
           </span>
           {match.venues?.location_url ? (
             <a
               href={match.venues.location_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="relative z-10 inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--glass-border)] px-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              className={secondaryAction}
             >
               <FontAwesomeIcon icon={faLocationDot} className="text-xs" aria-hidden />
               Cómo llegar
@@ -133,14 +139,14 @@ function NextMatchCard({ match, now }: Readonly<{ match: HomeMatch; now: Date }>
             })}
             target="_blank"
             rel="noopener noreferrer"
-            className="relative z-10 inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--glass-border)] px-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+            className={secondaryAction}
           >
             <FontAwesomeIcon icon={faCalendarPlus} className="text-xs" aria-hidden />
             Añadir al calendario
           </a>
         </div>
-      </div>
-    </article>
+      </article>
+    </div>
   );
 }
 
@@ -268,7 +274,7 @@ export default function HomeView({
           </section>
 
           <section>
-            <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
+            <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
               <h2 className="text-lg font-semibold tracking-tight sm:text-xl">
                 Tu temporada
               </h2>
@@ -281,56 +287,44 @@ export default function HomeView({
               </Link>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-[minmax(0,6.5rem)_1fr] sm:items-start sm:gap-8">
+            <div className="grid gap-x-10 gap-y-5 border-t border-[var(--glass-border)] pt-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-end">
               <div>
-                <p className="text-4xl font-bold tabular-nums tracking-tight sm:text-5xl">
+                <p className="text-5xl font-bold leading-none tabular-nums tracking-tight">
                   {winRate}
-                  <span className="text-xl font-semibold text-[var(--text-muted)] sm:text-2xl">
-                    %
+                  <span className="text-2xl font-semibold text-[var(--text-muted)]">%</span>
+                </p>
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                  de victorias
+                  <span className="text-[var(--text-muted)]">
+                    {playedWithResult > 0
+                      ? ` · ${wins} de ${playedWithResult}`
+                      : " · aún sin resultados"}
                   </span>
-                </p>
-                <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
-                  victorias
-                </p>
-                <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">
-                  {playedWithResult > 0 ? (
-                    <>
-                      {wins} victoria{wins === 1 ? "" : "s"} ·{" "}
-                      {playedWithResult} con resultado
-                    </>
-                  ) : (
-                    "Aún sin partidos con resultado"
-                  )}
                 </p>
               </div>
 
-              <div className="min-w-0 space-y-5">
-                <div>
-                  <div className="mb-2 flex items-baseline justify-between gap-3">
-                    <span className="text-sm text-[var(--text-secondary)]">
-                      Calendario
-                    </span>
-                    <span className="text-xs tabular-nums text-[var(--text-muted)]">
-                      {totalPlayed} jugados
-                      {seasonTotal > 0 && (
-                        <>
-                          {" · "}
-                          {totalUpcoming} restante
-                          {totalUpcoming === 1 ? "" : "s"}
-                        </>
-                      )}
-                    </span>
-                  </div>
+              <div className="min-w-0">
+                <div className="mb-2 flex items-baseline justify-between gap-3 text-sm">
+                  <span className="text-[var(--text-secondary)]">Calendario</span>
+                  <span className="tabular-nums text-[var(--text-muted)]">
+                    {totalPlayed} jugados
+                    {seasonTotal > 0 && (
+                      <>
+                        {" · "}
+                        {totalUpcoming} restante{totalUpcoming === 1 ? "" : "s"}
+                      </>
+                    )}
+                  </span>
+                </div>
+                <div
+                  className="h-2 overflow-hidden rounded-full bg-[var(--progress-track)]"
+                  role="img"
+                  aria-label={`Progreso del calendario: ${Math.round(playedShare)} por ciento jugado`}
+                >
                   <div
-                    className="h-1.5 overflow-hidden rounded-full bg-[var(--progress-track)]"
-                    role="img"
-                    aria-label={`Progreso del calendario: ${Math.round(playedShare)} por ciento jugado`}
-                  >
-                    <div
-                      className="h-full bg-[var(--accent)] transition-[width] duration-500 ease-out"
-                      style={{ width: `${playedShare}%` }}
-                    />
-                  </div>
+                    className="h-full bg-[var(--accent)] transition-[width] duration-500 ease-out"
+                    style={{ width: `${playedShare}%` }}
+                  />
                 </div>
               </div>
             </div>
@@ -341,6 +335,9 @@ export default function HomeView({
         <div className="flex flex-col gap-8 lg:col-span-5">
           {paymentsData && (
             <section>
+              <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">
+                Cuotas
+              </h2>
               <Link
                 href="/payments"
                 className={`group flex flex-col gap-2 rounded-xl border px-4 py-3.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)] sm:flex-row sm:items-center sm:justify-between ${
@@ -350,10 +347,7 @@ export default function HomeView({
                 }`}
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[var(--text-primary)]">
-                    Estado de cuotas
-                  </p>
-                  <p className="mt-1 text-sm leading-relaxed text-[var(--text-secondary)]">
+                  <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
                     {paymentsData.isAdmin ? (
                       totalPending > 0 ? (
                         <>
@@ -425,14 +419,9 @@ export default function HomeView({
           )}
 
           <section>
-            <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
-              <h2 className="text-lg font-semibold tracking-tight sm:text-xl">
-                Últimos resultados
-              </h2>
-              <p className="text-sm text-[var(--text-muted)]">
-                Últimos 3 con marcador
-              </p>
-            </div>
+            <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">
+              Últimos resultados
+            </h2>
 
             {recentResults.length === 0 ? (
               <p className="border-t border-[var(--glass-border)] py-6 text-sm text-[var(--text-muted)]">
@@ -484,14 +473,9 @@ export default function HomeView({
 
           {user?.isAdmin && (
             <section>
-              <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
-                <h2 className="text-lg font-semibold tracking-tight sm:text-xl">
-                  Partidos sin resultado
-                </h2>
-                <p className="text-sm text-[var(--text-muted)]">
-                  Pendientes de marcador
-                </p>
-              </div>
+              <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">
+                Partidos sin resultado
+              </h2>
 
               {pendingMatches.length === 0 ? (
                 <p className="status-chip-all-clear inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium">
