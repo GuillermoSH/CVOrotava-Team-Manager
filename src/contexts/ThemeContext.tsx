@@ -6,8 +6,9 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
 } from "react";
+import { usePref } from "@/lib/usePref";
 
 export type Theme = "light" | "dark";
 
@@ -16,6 +17,11 @@ const STORAGE_KEY = "cvorotava-theme";
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
 }
+
+const parseTheme = (raw: string | null): Theme =>
+  raw === "light" ? "light" : "dark";
+
+const subscribeNever = () => () => {};
 
 type ThemeContextValue = {
   theme: Theme;
@@ -27,49 +33,26 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = usePref<Theme>(STORAGE_KEY, parseTheme);
+  // false en servidor y durante la hidratación, true después.
+  const mounted = useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false
+  );
 
   useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    const initial =
-      stored === "light" || stored === "dark" ? stored : "dark";
-    setThemeState(initial);
-    applyTheme(initial);
-  }, []);
+    applyTheme(theme);
+  }, [theme]);
 
-  const setTheme = useCallback((t: Theme) => {
-    setThemeState(t);
-    applyTheme(t);
-    try {
-      localStorage.setItem(STORAGE_KEY, t);
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  const toggleTheme = useCallback(() => {
-    setThemeState((prev) => {
-      const next = prev === "dark" ? "light" : "dark";
-      applyTheme(next);
-      try {
-        localStorage.setItem(STORAGE_KEY, next);
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
-  }, []);
+  const toggleTheme = useCallback(
+    () => setTheme(theme === "dark" ? "light" : "dark"),
+    [theme, setTheme]
+  );
 
   const value = useMemo(
-    () => ({
-      theme: mounted ? theme : "dark",
-      setTheme,
-      toggleTheme,
-      mounted,
-    }),
-    [mounted, theme, setTheme, toggleTheme]
+    () => ({ theme, setTheme, toggleTheme, mounted }),
+    [theme, setTheme, toggleTheme, mounted]
   );
 
   return (
