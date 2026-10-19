@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { groupRivalClubs, type ClubRow } from "./rivalClubs";
-import { telHref } from "./telHref";
 
 const club = (id: number, name: string, over: Partial<ClubRow> = {}): ClubRow => ({
   id,
@@ -45,12 +44,5 @@ describe("groupRivalClubs", () => {
       clubs
     );
     expect(out).toEqual([]);
-  });
-});
-
-describe("telHref", () => {
-  it("deja solo dígitos y el +", () => {
-    expect(telHref("+34 600 12-34-56")).toBe("tel:+34600123456");
-    expect(telHref("922 33 44 55")).toBe("tel:922334455");
   });
 });

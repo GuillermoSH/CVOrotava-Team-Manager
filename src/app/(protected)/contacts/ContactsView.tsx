@@ -4,14 +4,15 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faCopy,
   faEnvelope,
   faLocationDot,
   faMagnifyingGlass,
   faPhone,
 } from "@fortawesome/free-solid-svg-icons";
+import { sileo } from "sileo";
 import PageHeader from "@/components/ui/PageHeader";
 import Select from "@/components/ui/Select";
-import { telHref } from "@/lib/contacts/telHref";
 import type { RivalClub } from "@/lib/contacts/rivalClubs";
 
 const norm = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
@@ -22,6 +23,37 @@ function clubMatches(c: RivalClub, q: string) {
     norm(c.email ?? "").includes(q) ||
     norm(c.headquarter ?? "").includes(q) ||
     (c.phone ?? "").replace(/\s/g, "").includes(q.replace(/\s/g, ""))
+  );
+}
+
+async function copy(value: string, what: string) {
+  try {
+    await navigator.clipboard.writeText(value);
+    sileo.success({ title: `${what} copiado` });
+  } catch {
+    sileo.error({ title: "No se pudo copiar", description: value });
+  }
+}
+
+function CopyLine({
+  icon,
+  value,
+  what,
+}: Readonly<{ icon: typeof faPhone; value: string; what: string }>) {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-2">
+      <FontAwesomeIcon icon={icon} className="text-xs text-[var(--text-muted)]" />
+      <span className="min-w-0 select-all break-all">{value}</span>
+      <button
+        type="button"
+        onClick={() => copy(value, what)}
+        aria-label={`Copiar ${what.toLowerCase()} de ${value}`}
+        title={`Copiar ${what.toLowerCase()}`}
+        className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-[var(--glass-border)] text-xs text-[var(--text-secondary)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+      >
+        <FontAwesomeIcon icon={faCopy} />
+      </button>
+    </span>
   );
 }
 
@@ -88,21 +120,8 @@ export default function ContactsView({
                 <p className="mt-0.5 text-xs text-[var(--text-muted)]">{c.tournaments.join(" · ")}</p>
               </div>
               <div className="flex min-w-0 flex-col gap-1.5 text-sm lg:items-end">
-                {c.phone ? (
-                  <a href={telHref(c.phone)} className="inline-flex items-center gap-1.5 text-[var(--accent)] hover:underline">
-                    <FontAwesomeIcon icon={faPhone} className="text-xs" />
-                    {c.phone}
-                  </a>
-                ) : null}
-                {c.email ? (
-                  <a
-                    href={`mailto:${c.email}`}
-                    className="inline-flex min-w-0 items-center gap-1.5 break-all text-[var(--accent)] hover:underline"
-                  >
-                    <FontAwesomeIcon icon={faEnvelope} className="text-xs" />
-                    {c.email}
-                  </a>
-                ) : null}
+                {c.phone ? <CopyLine icon={faPhone} value={c.phone} what="Teléfono" /> : null}
+                {c.email ? <CopyLine icon={faEnvelope} value={c.email} what="Correo" /> : null}
                 {c.headquarter ? (
                   <span className="inline-flex items-center gap-1.5 text-[var(--text-muted)]">
                     <FontAwesomeIcon icon={faLocationDot} className="text-xs" />
