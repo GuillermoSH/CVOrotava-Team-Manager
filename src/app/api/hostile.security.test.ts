@@ -122,7 +122,6 @@ const LEVELS: Record<string, Level> = {
   "videos/[id] DELETE": "admin",
 };
 
-// @ts-expect-error import.meta.glob lo resuelve Vite/Vitest; el tsconfig no carga vite/client
 const modules: Record<string, () => Promise<unknown>> = import.meta.glob("/src/app/api/**/route.ts");
 const METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"] as const;
 
