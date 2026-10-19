@@ -6,25 +6,143 @@ import { motion, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRight,
-  faClock,
+  faCalendarPlus,
+  faCarSide,
+  faHouse,
   faLocationDot,
-  faTrophy,
-  faVolleyball,
+  faPlaneDeparture,
 } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";
 import HomeSkeleton from "@/components/skeletons/HomeSkeleton";
 import PageHeader from "@/components/ui/PageHeader";
 import { isQuotaOverdue } from "@/components/payments/quotaDates";
+import {
+  countdownLabel,
+  daysUntil,
+  googleCalendarLink,
+  isMatchPast,
+  matchStart,
+} from "@/lib/matches/schedule";
 
 export type HomeMatch = {
   id: string;
   date: string;
+  time?: string | null;
   opponent: string;
   result?: string | null;
   gender: "male" | "female";
   season: string;
-  venues?: { venue_name: string } | null;
+  venues?: {
+    venue_name: string;
+    location_url?: string | null;
+    location_type?: "home" | "away" | "outside_island";
+  } | null;
 };
+
+const LOCATION_TAG = {
+  home: { icon: faHouse, text: "En casa", className: "text-[var(--color-success)]" },
+  away: { icon: faCarSide, text: "Fuera", className: "text-[var(--color-warning)]" },
+  outside_island: { icon: faPlaneDeparture, text: "Viaje", className: "text-[var(--color-info)]" },
+} as const;
+
+function NextMatchCard({ match, now }: Readonly<{ match: HomeMatch; now: Date }>) {
+  const start = matchStart(match.date, match.time);
+  const days = daysUntil(match.date, now);
+  const tag = match.venues?.location_type ? LOCATION_TAG[match.venues.location_type] : null;
+  const weekday = start
+    .toLocaleDateString("es-ES", { weekday: "short" })
+    .replace(".", "");
+  const month = start.toLocaleDateString("es-ES", { month: "short" }).replace(".", "");
+  const hasTime = Boolean(match.time && /^\d{2}:\d{2}/.test(match.time));
+  const time = hasTime ? match.time!.slice(0, 5) : null;
+  const category = match.gender === "male" ? "Sénior Masculino" : "Sénior Femenino";
+
+  return (
+    <article className="relative flex flex-col gap-5 rounded-2xl border border-[var(--glass-border)] bg-[var(--color-bg-elevated)] p-4 sm:flex-row sm:gap-6 sm:p-5">
+      <div className="flex shrink-0 items-center gap-4 sm:w-28 sm:flex-col sm:items-stretch sm:gap-3">
+        <div className="flex w-20 flex-col items-center rounded-xl bg-[var(--surface-faint)] py-2.5 text-center ring-1 ring-inset ring-[var(--glass-border)] sm:w-full">
+          <span className="text-xs font-medium capitalize text-[var(--text-muted)]">{weekday}</span>
+          <span className="text-4xl font-bold leading-none tabular-nums tracking-tight">
+            {start.getDate()}
+          </span>
+          <span className="mt-0.5 text-xs capitalize text-[var(--text-secondary)]">{month}</span>
+        </div>
+        <div className="flex flex-col sm:items-center">
+          {time ? (
+            <span className="text-2xl font-semibold leading-none tabular-nums sm:text-xl">{time}</span>
+          ) : (
+            <span className="text-sm text-[var(--text-muted)]">Hora por confirmar</span>
+          )}
+          <span className="mt-1 text-sm font-semibold text-[var(--accent)]">
+            {countdownLabel(days)}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col gap-4">
+        <div className="min-w-0">
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-[var(--text-secondary)]">
+            <span>{category}</span>
+            {tag ? (
+              <span className={`inline-flex items-center gap-1.5 font-medium ${tag.className}`}>
+                <FontAwesomeIcon icon={tag.icon} className="text-xs" aria-hidden />
+                {tag.text}
+              </span>
+            ) : null}
+          </p>
+          <h3 className="mt-1 text-2xl font-bold tracking-tight text-balance sm:text-3xl">
+            <Link
+              href={`/matches/${match.id}`}
+              className="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-[var(--accent)]"
+            >
+              {match.opponent}
+            </Link>
+          </h3>
+          <p className="mt-2 flex items-start gap-2 text-sm text-[var(--text-secondary)]">
+            <FontAwesomeIcon
+              icon={faLocationDot}
+              className="mt-0.5 shrink-0 text-[var(--accent)]"
+              aria-hidden
+            />
+            <span>{match.venues?.venue_name || "Pabellón por confirmar"}</span>
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span aria-hidden className="inline-flex h-9 items-center gap-2 rounded-lg bg-[var(--accent)] px-3.5 text-sm font-semibold text-white">
+            Ver partido
+            <FontAwesomeIcon icon={faArrowRight} className="text-xs" aria-hidden />
+          </span>
+          {match.venues?.location_url ? (
+            <a
+              href={match.venues.location_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative z-10 inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--glass-border)] px-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+            >
+              <FontAwesomeIcon icon={faLocationDot} className="text-xs" aria-hidden />
+              Cómo llegar
+            </a>
+          ) : null}
+          <a
+            href={googleCalendarLink({
+              opponent: match.opponent,
+              date: match.date,
+              time: match.time,
+              venue: match.venues?.venue_name,
+            })}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative z-10 inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--glass-border)] px-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          >
+            <FontAwesomeIcon icon={faCalendarPlus} className="text-xs" aria-hidden />
+            Añadir al calendario
+          </a>
+        </div>
+      </div>
+    </article>
+  );
+}
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -56,10 +174,10 @@ export default function HomeView({
 
   const now = new Date();
 
-  const playedMatches = matches.filter((m) => new Date(m.date) < now);
+  const playedMatches = matches.filter((m) => isMatchPast(m.date, m.time, now));
   const upcomingMatches = matches
-    .filter((m) => new Date(m.date) >= now)
-    .sort((a, b) => +new Date(a.date) - +new Date(b.date));
+    .filter((m) => !isMatchPast(m.date, m.time, now))
+    .sort((a, b) => +matchStart(a.date, a.time) - +matchStart(b.date, b.time));
 
   const nextMatch = upcomingMatches[0];
 
@@ -132,42 +250,7 @@ export default function HomeView({
               Próximo partido
             </h2>
             {nextMatch ? (
-              <Link
-                href={`/matches/${nextMatch.id}`}
-                className="group relative block overflow-hidden rounded-2xl border border-[var(--glass-border)] bg-[var(--color-bg-elevated)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-              >
-                <div
-                  className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,color-mix(in_srgb,var(--accent)_18%,transparent),transparent_55%)]"
-                  aria-hidden
-                />
-                <div className="relative flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
-                  <div className="min-w-0">
-                    <p className="text-2xl font-bold tracking-tight sm:text-3xl">
-                      {nextMatch.opponent}
-                    </p>
-                    <p className="mt-2 text-sm capitalize text-[var(--text-secondary)] sm:text-base">
-                      {new Date(nextMatch.date).toLocaleDateString("es-ES", {
-                        weekday: "long",
-                        day: "2-digit",
-                        month: "long",
-                      })}
-                    </p>
-                    <p className="mt-1.5 flex items-center gap-2 text-sm text-[var(--text-muted)]">
-                      <FontAwesomeIcon
-                        icon={faLocationDot}
-                        className="shrink-0 text-[var(--accent)]"
-                      />
-                      <span>
-                        {nextMatch.venues?.venue_name || "Sin pabellón"}
-                      </span>
-                    </p>
-                  </div>
-                  <span className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-[var(--accent)] transition-transform group-hover:translate-x-0.5">
-                    Ver detalles
-                    <FontAwesomeIcon icon={faArrowRight} className="text-xs" />
-                  </span>
-                </div>
-              </Link>
+              <NextMatchCard match={nextMatch} now={now} />
             ) : (
               <div className="rounded-2xl border border-dashed border-[var(--border-dashed)] bg-[var(--surface-faint)] px-5 py-8 text-center">
                 <p className="text-sm text-[var(--text-muted)]">
@@ -249,48 +332,6 @@ export default function HomeView({
                     />
                   </div>
                 </div>
-
-                <dl className="grid grid-cols-3 gap-3 border-t border-[var(--glass-border)] pt-4">
-                  <div>
-                    <dt className="flex items-center gap-1.5 text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--accent)]">
-                      <FontAwesomeIcon
-                        icon={faVolleyball}
-                        className="text-[0.7rem]"
-                        aria-hidden
-                      />
-                      Jugados
-                    </dt>
-                    <dd className="mt-1 text-xl font-bold tabular-nums text-[var(--accent)] sm:text-2xl">
-                      {totalPlayed}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="flex items-center gap-1.5 text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--color-success)]">
-                      <FontAwesomeIcon
-                        icon={faTrophy}
-                        className="text-[0.7rem]"
-                        aria-hidden
-                      />
-                      Victorias
-                    </dt>
-                    <dd className="mt-1 text-xl font-bold tabular-nums text-[var(--color-success)] sm:text-2xl">
-                      {wins}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="flex items-center gap-1.5 text-[0.65rem] font-semibold uppercase tracking-wider text-[var(--color-info)]">
-                      <FontAwesomeIcon
-                        icon={faClock}
-                        className="text-[0.7rem]"
-                        aria-hidden
-                      />
-                      Restantes
-                    </dt>
-                    <dd className="mt-1 text-xl font-bold tabular-nums text-[var(--color-info)] sm:text-2xl">
-                      {totalUpcoming}
-                    </dd>
-                  </div>
-                </dl>
               </div>
             </div>
           </section>

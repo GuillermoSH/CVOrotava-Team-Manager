@@ -21,7 +21,7 @@ export default function HomeSkeleton() {
             <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">
               Próximo partido
             </h2>
-            <Bone className="h-36 rounded-2xl sm:h-40" />
+            <Bone className="h-64 rounded-2xl sm:h-48" />
           </section>
           <section>
             <h2 className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">
@@ -31,11 +31,6 @@ export default function HomeSkeleton() {
               <Bone className="h-20 w-24" />
               <div className="space-y-4">
                 <Bone className="h-1.5 w-full rounded-full" />
-                <div className="grid grid-cols-3 gap-3">
-                  <Bone className="h-12" />
-                  <Bone className="h-12" />
-                  <Bone className="h-12" />
-                </div>
               </div>
             </div>
           </section>
