@@ -1,124 +1,121 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope, faMagnifyingGlass, faPhone } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEnvelope,
+  faLocationDot,
+  faMagnifyingGlass,
+  faPhone,
+} from "@fortawesome/free-solid-svg-icons";
 import PageHeader from "@/components/ui/PageHeader";
-import { telHref, type PlayerContacts, type TeamContacts } from "@/lib/contacts/groupContacts";
-
-const RELATIONSHIP_LABEL: Record<string, string> = {
-  madre: "Madre",
-  padre: "Padre",
-  tutor: "Tutor/a",
-  jugador: "Jugador/a",
-};
+import Select from "@/components/ui/Select";
+import { telHref } from "@/lib/contacts/telHref";
+import type { RivalClub } from "@/lib/contacts/rivalClubs";
 
 const norm = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
-function playerMatches(p: PlayerContacts, q: string) {
-  const digits = q.replace(/\D/g, "");
+function clubMatches(c: RivalClub, q: string) {
   return (
-    norm(p.playerName).includes(q) ||
-    p.contacts.some(
-      (c) =>
-        norm(c.full_name).includes(q) ||
-        norm(c.email ?? "").includes(q) ||
-        (digits.length >= 3 && (c.phone ?? "").replace(/\D/g, "").includes(digits))
-    )
+    norm(c.name).includes(q) ||
+    norm(c.email ?? "").includes(q) ||
+    norm(c.headquarter ?? "").includes(q) ||
+    (c.phone ?? "").replace(/\s/g, "").includes(q.replace(/\s/g, ""))
   );
 }
 
 export default function ContactsView({
-  teams,
+  clubs,
   season,
-}: Readonly<{ teams: TeamContacts[]; season: string }>) {
+  seasons,
+}: Readonly<{ clubs: RivalClub[]; season: string; seasons: string[] }>) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
 
   const visible = useMemo(() => {
     const q = norm(query.trim());
-    if (!q) return teams;
-    return teams
-      .map((t) => ({ ...t, players: t.players.filter((p) => playerMatches(p, q)) }))
-      .filter((t) => t.players.length > 0);
-  }, [teams, query]);
+    return q ? clubs.filter((c) => clubMatches(c, q)) : clubs;
+  }, [clubs, query]);
 
-  const total = teams.reduce((n, t) => n + t.players.length, 0);
+  const withoutContact = clubs.filter((c) => !c.phone && !c.email).length;
 
   return (
     <div className="flex w-full flex-col text-[var(--text-primary)]">
       <PageHeader
         title="Contactos"
-        subtitle={`${total} jugadores con contacto · temporada ${season} · solo visible para administradores`}
+        subtitle={`${clubs.length} clubes rivales en ${season}${
+          withoutContact > 0 ? ` · ${withoutContact} sin datos de contacto` : ""
+        } · datos públicos de la federación`}
       />
 
-      <label className="relative mb-6 block max-w-sm">
-        <span className="sr-only">Buscar jugador o contacto</span>
-        <FontAwesomeIcon
-          icon={faMagnifyingGlass}
-          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-[var(--text-muted)]"
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <Select
+          aria-label="Temporada"
+          size="compact"
+          value={season}
+          onChange={(s) => router.push(`/contacts?season=${encodeURIComponent(s)}`)}
+          options={seasons.map((s) => ({ value: s, label: s }))}
         />
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Buscar jugador, familiar, teléfono o correo…"
-          className="w-full rounded-xl border border-[var(--form-input-border)] bg-[var(--form-input-bg)] py-2.5 pl-10 pr-4 text-sm text-[var(--text-primary)] placeholder:text-[var(--form-placeholder)] outline-none transition-colors focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)]"
-        />
-      </label>
+        <label className="relative block max-w-sm flex-1">
+          <span className="sr-only">Buscar club</span>
+          <FontAwesomeIcon
+            icon={faMagnifyingGlass}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-[var(--text-muted)]"
+          />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar club, correo o teléfono…"
+            className="w-full rounded-xl border border-[var(--form-input-border)] bg-[var(--form-input-bg)] py-2.5 pl-10 pr-4 text-sm text-[var(--text-primary)] placeholder:text-[var(--form-placeholder)] outline-none transition-colors focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)]"
+          />
+        </label>
+      </div>
 
       {visible.length === 0 ? (
         <p className="py-10 text-center text-sm text-[var(--text-muted)]">
-          {teams.length === 0 ? "No hay contactos cargados para esta temporada." : "Sin resultados."}
+          {clubs.length === 0
+            ? "No hay clubes rivales sincronizados para esta temporada."
+            : "Sin resultados."}
         </p>
       ) : (
-        <div className="flex flex-col gap-8">
-          {visible.map((team) => (
-            <section key={team.teamId} className="min-w-0">
-              <header className="mb-1 flex items-baseline justify-between gap-3 border-b border-[var(--glass-border)] pb-2">
-                <h2 className="text-sm font-semibold tracking-tight sm:text-base">{team.teamName}</h2>
-                <span className="text-xs tabular-nums text-[var(--text-muted)]">{team.players.length}</span>
-              </header>
-              <ul className="divide-y divide-[var(--glass-border)]">
-                {team.players.map((p) => (
-                  <li key={p.playerId} className="py-3">
-                    <p className="font-medium">{p.playerName}</p>
-                    <ul className="mt-1.5 flex flex-col gap-1.5">
-                      {p.contacts.map((c) => (
-                        <li
-                          key={c.id}
-                          className="flex flex-col gap-x-4 gap-y-1 text-sm sm:flex-row sm:flex-wrap sm:items-center"
-                        >
-                          <span className="min-w-0 text-[var(--text-secondary)]">
-                            {RELATIONSHIP_LABEL[c.relationship] ?? c.relationship}
-                            {c.relationship !== "jugador" ? ` · ${c.full_name}` : ""}
-                          </span>
-                          {c.phone ? (
-                            <a
-                              href={telHref(c.phone)}
-                              className="inline-flex items-center gap-1.5 text-[var(--accent)] hover:underline"
-                            >
-                              <FontAwesomeIcon icon={faPhone} className="text-xs" />
-                              {c.phone}
-                            </a>
-                          ) : null}
-                          {c.email ? (
-                            <a
-                              href={`mailto:${c.email}`}
-                              className="inline-flex min-w-0 items-center gap-1.5 break-all text-[var(--accent)] hover:underline"
-                            >
-                              <FontAwesomeIcon icon={faEnvelope} className="text-xs" />
-                              {c.email}
-                            </a>
-                          ) : null}
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            </section>
+        <ul className="divide-y divide-[var(--glass-border)] border-y border-[var(--glass-border)]">
+          {visible.map((c) => (
+            <li key={c.id} className="flex flex-col gap-2 py-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0">
+                <p className="font-semibold">{c.name}</p>
+                <p className="mt-0.5 text-xs text-[var(--text-muted)]">{c.tournaments.join(" · ")}</p>
+              </div>
+              <div className="flex min-w-0 flex-col gap-1.5 text-sm lg:items-end">
+                {c.phone ? (
+                  <a href={telHref(c.phone)} className="inline-flex items-center gap-1.5 text-[var(--accent)] hover:underline">
+                    <FontAwesomeIcon icon={faPhone} className="text-xs" />
+                    {c.phone}
+                  </a>
+                ) : null}
+                {c.email ? (
+                  <a
+                    href={`mailto:${c.email}`}
+                    className="inline-flex min-w-0 items-center gap-1.5 break-all text-[var(--accent)] hover:underline"
+                  >
+                    <FontAwesomeIcon icon={faEnvelope} className="text-xs" />
+                    {c.email}
+                  </a>
+                ) : null}
+                {c.headquarter ? (
+                  <span className="inline-flex items-center gap-1.5 text-[var(--text-muted)]">
+                    <FontAwesomeIcon icon={faLocationDot} className="text-xs" />
+                    {c.headquarter}
+                  </span>
+                ) : null}
+                {!c.phone && !c.email ? (
+                  <span className="text-[var(--text-muted)]">Sin datos de contacto en la federación</span>
+                ) : null}
+              </div>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );

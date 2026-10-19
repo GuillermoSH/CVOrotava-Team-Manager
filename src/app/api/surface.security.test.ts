@@ -189,7 +189,9 @@ describe("admin-only UI is also gated on the server", () => {
   it("the contacts page checks admin itself before reading contact data", () => {
     const page = read(join(root, "src/app/(protected)/contacts/page.tsx"));
     expect(page).toContain("requireAdminPage");
-    expect(page.indexOf("requireAdminPage()")).toBeLessThan(page.indexOf("listTeamContacts("));
+    const gate = page.indexOf("requireAdminPage()");
+    expect(gate).toBeLessThan(page.indexOf("listContactSeasons("));
+    expect(gate).toBeLessThan(page.indexOf("listRivalClubs("));
   });
 
   it("the payments detail page for any player lives under the admin layout", () => {
