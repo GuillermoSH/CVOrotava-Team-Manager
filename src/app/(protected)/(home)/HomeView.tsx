@@ -16,6 +16,15 @@ import { useUser } from "@/contexts/UserContext";
 import HomeSkeleton from "@/components/skeletons/HomeSkeleton";
 import PageHeader from "@/components/ui/PageHeader";
 import { isQuotaOverdue } from "@/components/payments/quotaDates";
+import LatestVideos from "@/components/home/LatestVideos";
+import WeekendRoundup from "@/components/home/WeekendRoundup";
+import AchievementsGlance from "@/components/home/AchievementsGlance";
+import AdminPending from "@/components/home/AdminPending";
+import Birthdays from "@/components/home/Birthdays";
+import type { VideoListItem } from "@/lib/videos/constants";
+import type { Achievement } from "@/lib/stats/competitive/achievements";
+import type { WeekendRoundup as Roundup } from "@/lib/home/weekendRoundup";
+import type { AdminPendingData } from "@/lib/home/loadAdminPending.types";
 import {
   countdownLabel,
   daysUntil,
@@ -152,15 +161,28 @@ function NextMatchCard({ match, now }: Readonly<{ match: HomeMatch; now: Date }>
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
+export type HomeExtras = {
+  videos: VideoListItem[];
+  achievements: Achievement[];
+  season: string;
+  gender: string | null;
+  roundup: Roundup | null;
+  /** Solo para admins; el servidor no lo carga para el resto. */
+  adminPending: AdminPendingData | null;
+};
+
 export default function HomeView({
   initialMatches,
   initialPayments,
+  extras,
 }: {
+  extras: HomeExtras;
   initialMatches: HomeMatch[];
   initialPayments: {
     data: {
       user_id?: string | null;
       player_id?: string | null;
+      concept?: string | null;
       amount: string | number;
       status: string;
       due_date?: string | null;
@@ -219,6 +241,9 @@ export default function HomeView({
   const overduePayments = pendingPayments.filter((p) =>
     isQuotaOverdue("pending", p.due_date ?? null)
   );
+  const nextDue = [...pendingPayments]
+    .filter((p) => p.due_date)
+    .sort((a, b) => String(a.due_date).localeCompare(String(b.due_date)))[0];
   const totalPending = pendingPayments.reduce(
     (acc, p) => acc + Number(p.amount),
     0
@@ -406,6 +431,19 @@ export default function HomeView({
                       </span>
                     )}
                   </p>
+                  {!paymentsData.isAdmin && nextDue?.due_date ? (
+                    <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
+                      Próxima cuota:{" "}
+                      <span className="font-medium text-[var(--text-primary)]">
+                        {nextDue.concept ?? "Cuota"} · {Number(nextDue.amount)}€
+                      </span>
+                      , vence el{" "}
+                      {new Date(`${String(nextDue.due_date).slice(0, 10)}T12:00:00`).toLocaleDateString("es-ES", {
+                        day: "numeric",
+                        month: "long",
+                      })}
+                    </p>
+                  ) : null}
                 </div>
                 <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors group-hover:text-[var(--accent)]">
                   Ver detalles
@@ -522,6 +560,38 @@ export default function HomeView({
             </section>
           )}
         </div>
+      </div>
+
+      <div className="mt-10 flex flex-col gap-10">
+        <LatestVideos videos={extras.videos} />
+
+        {extras.roundup || extras.achievements.length > 0 ? (
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-x-10">
+            <div className="lg:col-span-7">
+              {extras.roundup ? <WeekendRoundup roundup={extras.roundup} /> : null}
+            </div>
+            <div className="lg:col-span-5">
+              {extras.gender ? (
+                <AchievementsGlance
+                  achievements={extras.achievements}
+                  season={extras.season}
+                  gender={extras.gender}
+                />
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {user?.isAdmin && extras.adminPending ? (
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-x-10">
+            <div className="lg:col-span-7">
+              <AdminPending data={extras.adminPending} now={now} />
+            </div>
+            <div className="lg:col-span-5">
+              <Birthdays birthdays={extras.adminPending.birthdays} />
+            </div>
+          </div>
+        ) : null}
       </div>
     </motion.div>
   );

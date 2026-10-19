@@ -22,7 +22,7 @@ import { readPref, writePref } from "@/lib/prefs";
 import { fullDate } from "./format";
 import { Meter } from "./ui";
 
-const ICONS: Record<string, IconDefinition> = {
+export const ACHIEVEMENT_ICONS: Record<string, IconDefinition> = {
   racha: faFire,
   barrida: faBroom,
   remontada: faArrowTrendUp,
@@ -35,7 +35,7 @@ const ICONS: Record<string, IconDefinition> = {
   "ano-pasado": faMedal,
 };
 
-const TIER = { 1: "Bronce", 2: "Plata", 3: "Oro" } as const;
+export const TIER_LABEL = { 1: "Bronce", 2: "Plata", 3: "Oro" } as const;
 
 function Row({ a, fresh }: Readonly<{ a: Achievement; fresh: boolean }>) {
   return (
@@ -48,12 +48,12 @@ function Row({ a, fresh }: Readonly<{ a: Achievement; fresh: boolean }>) {
             : "border border-dashed border-[var(--border-dashed)] text-[var(--text-muted)]"
         }`}
       >
-        <FontAwesomeIcon icon={ICONS[a.family] ?? faMedal} />
+        <FontAwesomeIcon icon={ACHIEVEMENT_ICONS[a.family] ?? faMedal} />
       </span>
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className={`font-semibold ${a.unlocked ? "" : "text-[var(--text-secondary)]"}`}>{a.name}</span>
-          {a.tier ? <span className="text-xs text-[var(--text-muted)]">{TIER[a.tier]}</span> : null}
+          {a.tier ? <span className="text-xs text-[var(--text-muted)]">{TIER_LABEL[a.tier]}</span> : null}
           {fresh ? (
             <span className="rounded-md bg-[var(--accent)] px-1.5 py-0.5 text-[0.65rem] font-bold text-white">Nuevo</span>
           ) : null}

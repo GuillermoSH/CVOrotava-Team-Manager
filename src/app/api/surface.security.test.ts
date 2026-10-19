@@ -194,6 +194,14 @@ describe("admin-only UI is also gated on the server", () => {
     expect(gate).toBeLessThan(page.indexOf("listRivalClubs("));
   });
 
+  it("the home page only loads admin pending data (service role, player PII) for admins", () => {
+    const page = read(join(root, "src/app/(protected)/(home)/page.tsx"));
+    expect(page).toMatch(/user\.isAdmin\s*\?\s*loadAdminPending\(/);
+    // Los componentes de cliente de inicio solo importan tipos del módulo con service role.
+    const view = read(join(root, "src/app/(protected)/(home)/HomeView.tsx"));
+    expect(view).not.toMatch(/from "@\/lib\/home\/loadHomeExtras"/);
+  });
+
   it("the payments detail page for any player lives under the admin layout", () => {
     expect(
       read(join(root, "src/app/(protected)/payments/admin/layout.tsx"))

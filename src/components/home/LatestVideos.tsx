@@ -1,0 +1,67 @@
+import Image from "next/image";
+import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight, faPlay } from "@fortawesome/free-solid-svg-icons";
+import { getThumbnailUrl } from "@/lib/youtube";
+import { VIDEO_TYPE_LABELS, type VideoListItem } from "@/lib/videos/constants";
+import { videoRecordedDate } from "@/lib/videos/date";
+import { formatMatchDate } from "@/lib/matches/formatMatchLabel";
+
+export default function LatestVideos({ videos }: Readonly<{ videos: VideoListItem[] }>) {
+  if (videos.length === 0) return null;
+  return (
+    <section>
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+        <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Últimos vídeos</h2>
+        <Link
+          href="/videos"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+        >
+          Ver todos
+          <FontAwesomeIcon icon={faArrowRight} className="text-xs" aria-hidden />
+        </Link>
+      </div>
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-5 lg:grid-cols-4">
+        {videos.map((v) => {
+          const title = v.match ? `vs ${v.match.opponent}` : VIDEO_TYPE_LABELS[v.video_type];
+          return (
+            <li key={v.id} className="min-w-0">
+              <a
+                href={v.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block focus-visible:outline-none"
+              >
+                <span className="relative block aspect-video overflow-hidden rounded-xl bg-[var(--surface-faint)] ring-1 ring-inset ring-[var(--glass-border)] group-focus-visible:ring-2 group-focus-visible:ring-[var(--accent)]">
+                  <Image
+                    src={getThumbnailUrl(v.url, "mq")}
+                    alt=""
+                    fill
+                    sizes="(max-width: 1024px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/35">
+                    <span className="flex size-10 items-center justify-center rounded-full border border-white/25 bg-black/40 text-white backdrop-blur-sm">
+                      <FontAwesomeIcon icon={faPlay} className="ml-0.5 text-sm" aria-hidden />
+                    </span>
+                  </span>
+                  {v.match?.result ? (
+                    <span className="absolute left-2 top-2 rounded-md bg-black/60 px-1.5 py-0.5 text-xs font-bold tabular-nums text-white">
+                      {v.match.result}
+                    </span>
+                  ) : null}
+                </span>
+                <span className="mt-2 block truncate text-sm font-medium group-hover:text-[var(--accent)]">
+                  {title}
+                </span>
+                <span className="block truncate text-xs text-[var(--text-muted)]">
+                  {VIDEO_TYPE_LABELS[v.video_type]} · {formatMatchDate(videoRecordedDate(v))}
+                </span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}

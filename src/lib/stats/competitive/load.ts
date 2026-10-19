@@ -75,7 +75,7 @@ export async function loadSeasonDataUncached(season: string, gender: Gender): Pr
 }
 
 /** Los datos de la federación cambian una vez por semana: caché larga, y la sincronización la invalida con el tag `fed`. */
-const loadSeasonData = unstable_cache(loadSeasonDataUncached, ["fed-season-data"], {
+export const loadSeasonData = unstable_cache(loadSeasonDataUncached, ["fed-season-data"], {
   revalidate: 3600,
   tags: ["fed"],
 });
