@@ -418,12 +418,10 @@ export default function HomeView({
             />
           ) : null}
 
-          {/* Jugador en escritorio: los vídeos ocupan el final de esta columna. */}
-          {!user?.isAdmin ? (
-            <div className="hidden lg:block">
-              <LatestVideos videos={extras.videos} compact />
-            </div>
-          ) : null}
+          {/* Escritorio: los vídeos ocupan el final de esta columna. */}
+          <div className="hidden lg:block">
+            <LatestVideos videos={extras.videos} compact />
+          </div>
         </div>
       </div>
 
@@ -458,13 +456,9 @@ export default function HomeView({
           <WeekendRoundup roundup={extras.roundup} />
         ) : null}
 
-        {user?.isAdmin ? (
+        <div className="lg:hidden">
           <LatestVideos videos={extras.videos} />
-        ) : (
-          <div className="lg:hidden">
-            <LatestVideos videos={extras.videos} />
-          </div>
-        )}
+        </div>
       </div>
     </motion.div>
   );
