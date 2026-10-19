@@ -23,8 +23,8 @@ export async function GET(req: Request) {
       scope: { kind: "current" },
       trigger: "cron",
     });
-    revalidateTag("venues");
-    revalidateTag("fed");
+    revalidateTag("venues", { expire: 0 });
+    revalidateTag("fed", { expire: 0 });
     return NextResponse.json({ ok: true, summary });
   } catch (err) {
     console.error("[cron fed-sync]", err);

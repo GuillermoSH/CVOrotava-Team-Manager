@@ -14,7 +14,7 @@ export async function POST() {
   try {
     const steps = planVenueMerges(await listVenuesAdmin(supabaseAdmin));
     for (const s of steps) await mergeVenues(supabaseAdmin, s.source, s.target);
-    revalidateTag("venues");
+    revalidateTag("venues", { expire: 0 });
     return NextResponse.json({ ok: true, merged: steps.length });
   } catch (err) {
     return NextResponse.json(

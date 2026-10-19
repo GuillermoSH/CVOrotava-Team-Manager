@@ -35,6 +35,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     );
   }
 
-  revalidateTag("venues");
+  revalidateTag("venues", { expire: 0 });
   return NextResponse.json({ ok: true });
 }
