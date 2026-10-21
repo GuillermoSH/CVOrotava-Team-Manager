@@ -56,7 +56,7 @@ function Tile({ a, fresh }: Readonly<{ a: Achievement; fresh: boolean }>) {
       >
         <FontAwesomeIcon icon={ACHIEVEMENT_ICONS[a.family] ?? faMedal} />
       </span>
-      <div className="flex min-w-0 flex-1 flex-col sm:w-full sm:flex-none">
+      <div className="flex min-w-0 flex-1 flex-col sm:w-full">
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:justify-center">
           <span className={`font-semibold ${a.unlocked ? "" : "text-[var(--text-secondary)]"}`}>{a.name}</span>
           {a.tier ? <span className="text-xs text-[var(--text-muted)]">{TIER_LABEL[a.tier]}</span> : null}
@@ -66,7 +66,7 @@ function Tile({ a, fresh }: Readonly<{ a: Achievement; fresh: boolean }>) {
         </p>
         <p className="mt-1 text-sm text-[var(--text-muted)]">{a.description}</p>
         {!a.unlocked && a.progress ? (
-          <div className="mt-3 flex items-center gap-3">
+          <div className="mt-auto flex items-center gap-3 pt-3">
             <Meter className="flex-1" value={(a.progress.value / a.progress.target) * 100} label={`Progreso de ${a.name}`} />
             <span className="text-xs tabular-nums text-[var(--text-muted)]">
               {a.progress.value} de {a.progress.target}
