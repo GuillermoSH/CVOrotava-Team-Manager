@@ -104,6 +104,8 @@ const LEVELS: Record<string, Level> = {
   "matches/[id] DELETE": "admin",
   "payments GET": "memberInactiveOk",
   "payments POST": "admin",
+  "payments/exemptions PUT": "admin",
+  "payments/exemptions DELETE": "admin",
   "payments/[id] PATCH": "admin",
   "payments/[id] DELETE": "admin",
   "seasons GET": "memberInactiveOk",

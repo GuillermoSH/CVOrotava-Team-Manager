@@ -59,19 +59,28 @@ export function toPortalSeasonId(season: string): string {
 }
 
 /**
- * Active senior roster for payments: `players.is_active`, senior team, season.
+ * Active roster for payments: `players.is_active`, season, and either a senior team or a
+ * linked Team Manager account. Juniors/cadetes who play up with the senior squad have a TM
+ * user (`players.user_id`) but keep their own team, so the account is what puts them here.
  * Excludes test names and profiles linked to inactive TM users.
  */
 export async function listActiveSeniorPlayers(opts: {
   season: string;
   gender?: string | null;
+  /**
+   * false = solo equipos sénior. Las asignaciones masivas («Todos») lo usan para no
+   * cobrar a los de base lo que se pone al sénior.
+   */
+  includeLinkedOutsideSenior?: boolean;
 }): Promise<{ data: SeniorPlayerRow[]; error: string | null }> {
   const portalSeason = toPortalSeasonId(opts.season);
+  const gender = opts.gender === "male" || opts.gender === "female" ? opts.gender : null;
 
-  let query = supabaseAdmin
-    .from("players")
-    .select(
-      `
+  const base = () => {
+    let query = supabaseAdmin
+      .from("players")
+      .select(
+        `
       id,
       full_name,
       first_name,
@@ -82,18 +91,28 @@ export async function listActiveSeniorPlayers(opts: {
       team_id,
       teams!inner ( id, category, gender, season, name )
     `
-    )
-    .eq("season", portalSeason)
-    .eq("is_active", true)
-    .eq("teams.category", "senior");
+      )
+      .eq("season", portalSeason)
+      .eq("is_active", true);
+    if (gender) query = query.eq("teams.gender", gender);
+    return query.order("first_name", { ascending: true });
+  };
 
-  if (opts.gender === "male" || opts.gender === "female") {
-    query = query.eq("teams.gender", opts.gender);
-  }
-
-  const { data, error } = await query.order("first_name", { ascending: true });
-
+  const [seniors, withAccount] = await Promise.all([
+    base().eq("teams.category", "senior"),
+    opts.includeLinkedOutsideSenior === false
+      ? Promise.resolve({ data: [] as never[], error: null })
+      : base().not("user_id", "is", null),
+  ]);
+  const error = seniors.error ?? withAccount.error;
   if (error) return { data: [], error: error.message };
+
+  type RosterQueryRow = NonNullable<typeof seniors.data>[number];
+  const unique = new Map<string, RosterQueryRow>();
+  for (const row of [...(seniors.data ?? []), ...(withAccount.data ?? [])]) {
+    unique.set(row.id as string, row);
+  }
+  const data: RosterQueryRow[] = [...unique.values()];
 
   const rows = (data ?? []).map((row) => {
     const teamsRaw = row.teams as
@@ -166,7 +185,8 @@ export async function listActiveSeniorPlayers(opts: {
 }
 
 /**
- * Only UPDATE `players.user_id` on existing senior roster rows (match by name).
+ * Only UPDATE `players.user_id` on existing roster rows (match by exact name, any category:
+ * juniors and cadetes who play up with the senior squad also have a TM account).
  * Never creates players. Only active TM users (`is_active` !== false), role=player.
  * Skips "JUGADOR DE PRUEBAS".
  */
@@ -206,7 +226,6 @@ export async function linkTmUsersToExistingSeniorPlayers(opts: {
     )
     .eq("season", portalSeason)
     .eq("is_active", true)
-    .eq("teams.category", "senior")
     .is("user_id", null);
 
   if (opts.gender === "male" || opts.gender === "female") {
@@ -385,7 +404,6 @@ export async function ensureSeniorPlayerForUser(opts: {
     )
     .eq("season", portalSeason)
     .eq("is_active", true)
-    .eq("teams.category", "senior")
     .eq("teams.gender", gender)
     .is("user_id", null);
 

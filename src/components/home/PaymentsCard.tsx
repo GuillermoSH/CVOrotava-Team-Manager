@@ -7,10 +7,12 @@ type Props = {
   overdueCount: number;
   total: number;
   nextDue: { concept: string | null | undefined; amount: string | number; due_date: string } | null;
+  /** Exento de pagos esta temporada. */
+  exempt?: { reason: string | null } | null;
 };
 
 /** Estado de las cuotas del propio jugador. */
-export default function PaymentsCard({ pendingCount, overdueCount, total, nextDue }: Readonly<Props>) {
+export default function PaymentsCard({ pendingCount, overdueCount, total, nextDue, exempt }: Readonly<Props>) {
   return (
     <section>
       <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">Cuotas</h2>
@@ -23,7 +25,12 @@ export default function PaymentsCard({ pendingCount, overdueCount, total, nextDu
         }`}
       >
         <div className="min-w-0 text-sm leading-relaxed text-[var(--text-secondary)]">
-          {total > 0 ? (
+          {exempt ? (
+            <p>
+              Estás exento de pagos esta temporada
+              {exempt.reason ? <span className="text-[var(--text-muted)]"> ({exempt.reason})</span> : null}.
+            </p>
+          ) : total > 0 ? (
             <p>
               Tienes <strong className="tabular-nums text-[var(--text-primary)]">{pendingCount}</strong> pago
               {pendingCount === 1 ? "" : "s"} sin liquidar por{" "}
@@ -39,7 +46,7 @@ export default function PaymentsCard({ pendingCount, overdueCount, total, nextDu
           ) : (
             <p className="payment-blurb-ok font-medium">¡Perfecto! Estás al día con todos tus pagos.</p>
           )}
-          {nextDue ? (
+          {nextDue && !exempt ? (
             <p className="mt-1.5">
               Próxima cuota:{" "}
               <span className="font-medium text-[var(--text-primary)]">

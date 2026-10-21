@@ -10,7 +10,8 @@ import {
   isQuotaOverdue,
   quotaSeverity,
 } from "@/components/payments/quotaDates";
-import { missingFees, resolveDueDate } from "@/lib/payments/feeSchedule";
+import { feeAudienceFor, missingFees, resolveDueDate } from "@/lib/payments/feeSchedule";
+import { getExemption, listExemptions, type Exemption } from "@/lib/payments/exemptions";
 import { getCurrentSeason, normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 /** Last sign-in via Auth Admin: paginate listUsers instead of N× getUserById. */
@@ -105,6 +106,8 @@ export type AdminOverviewRow = {
   overdueCount: number;
   status: "success" | "warning" | "danger";
   lastSignInAt: string | null;
+  /** Exento de pagos esta temporada: no suma deuda ni recibe cuotas. */
+  exempt?: Exemption;
 };
 
 export type PaymentsSnapshot = {
@@ -115,6 +118,8 @@ export type PaymentsSnapshot = {
   adminOverview?: AdminOverviewRow[];
   /** Options for assign-payment modal. */
   seniorPlayers?: SeniorRosterOption[];
+  /** Detalle o vista propia: el jugador está exento de pagos esta temporada. */
+  exemption?: Exemption | null;
 };
 
 export type GetPaymentsSnapshotOpts = {
@@ -146,15 +151,28 @@ function enrichPaymentRow(row: PaymentRow): PaymentRow {
   };
 }
 
+/** Categoría del equipo de una ficha (decide qué cuotas le tocan). */
+async function categoryOfPlayer(playerId: string): Promise<string | null> {
+  const { data } = await supabaseAdmin
+    .from("players")
+    .select("teams ( category )")
+    .eq("id", playerId)
+    .maybeSingle();
+  const teams = data?.teams as { category: string } | { category: string }[] | null | undefined;
+  const team = Array.isArray(teams) ? teams[0] : teams;
+  return team?.category ?? null;
+}
+
 /** Cuotas del calendario que el jugador aún no tiene registradas (como en el Portal). */
 function expectedRowsFor(
   rows: PaymentRow[],
-  player: { id: string; user_id: string | null },
+  player: { id: string; user_id: string | null; category?: string | null },
   season: string
 ): PaymentRow[] {
   return missingFees(
     rows.filter((r) => r.player_id === player.id || !r.player_id),
-    season
+    season,
+    feeAudienceFor(player.category)
   ).map((fee) => ({
     id: `expected:${player.id}:${fee.fee_code}:${fee.billing_month ?? ""}`,
     user_id: player.user_id,
@@ -178,7 +196,8 @@ function buildAdminOverview(
   roster: SeniorPlayerRow[],
   payments: PaymentRow[],
   authLastSignInAtByUserId: Record<string, string | null>,
-  season: string
+  season: string,
+  exemptions: Map<string, Exemption> = new Map()
 ): AdminOverviewRow[] {
   const pendingByPlayer = new Map<string, number>();
   const overdueByPlayer = new Map<string, number>();
@@ -193,11 +212,28 @@ function buildAdminOverview(
   }
 
   return roster.map((player) => {
+    const exempt = exemptions.get(player.id);
+    if (exempt) {
+      return {
+        player_id: player.id,
+        user_id: player.user_id,
+        player: seniorPlayerDisplayName(player),
+        pendingAmount: 0,
+        overdueCount: 0,
+        status: "success" as const,
+        lastSignInAt: player.user_id ? (authLastSignInAtByUserId[player.user_id] ?? null) : null,
+        exempt,
+      };
+    }
     let pendingAmount = pendingByPlayer.get(player.id) ?? 0;
     let overdueCount = overdueByPlayer.get(player.id) ?? 0;
     // Previstas sin registrar que ya están en aviso o vencidas también se deben.
     const playerRows = payments.filter((p) => p.player_id === player.id);
-    for (const fee of expectedRowsFor(playerRows, player, season)) {
+    for (const fee of expectedRowsFor(
+      playerRows,
+      { id: player.id, user_id: player.user_id, category: player.teams?.category },
+      season
+    )) {
       const severity = quotaSeverity("pending", fee.due_date);
       if (severity === "ok") continue;
       pendingAmount += Number(fee.amount);
@@ -302,6 +338,9 @@ export async function getPaymentsSnapshot(
         .eq("id", resolvedPlayerId)
         .maybeSingle();
       const linkedUserId = (playerRow?.user_id as string | null) ?? null;
+      const playerCategory = await categoryOfPlayer(resolvedPlayerId);
+      const detailSeason = seasonKey ?? getCurrentSeason();
+      const exemption = await getExemption(resolvedPlayerId, detailSeason);
 
       let query = supabaseAdmin
         .from("payments")
@@ -331,13 +370,17 @@ export async function getPaymentsSnapshot(
         body: {
           data: [
             ...rows,
-            ...expectedRowsFor(
-              rows,
-              { id: resolvedPlayerId, user_id: linkedUserId },
-              seasonKey ?? getCurrentSeason()
-            ),
+            // Un exento no recibe cuotas previstas.
+            ...(exemption
+              ? []
+              : expectedRowsFor(
+                  rows,
+                  { id: resolvedPlayerId, user_id: linkedUserId, category: playerCategory },
+                  detailSeason
+                )),
           ],
           isAdmin: true,
+          exemption,
         },
       };
     }
@@ -370,6 +413,7 @@ export async function getPaymentsSnapshot(
 
     const roster = rosterResult.data;
     const playerIds = roster.map((p) => p.id);
+    const exemptions = await listExemptions(seasonKey);
 
     let paymentRows: PaymentRow[] = [];
     if (playerIds.length > 0) {
@@ -399,15 +443,19 @@ export async function getPaymentsSnapshot(
       roster,
       paymentRows,
       authLastSignInAtByUserId,
-      seasonKey
+      seasonKey,
+      exemptions
     );
 
     // Assignees = same roster (already synced); avoid a second full sync.
-    const seniorPlayers: SeniorRosterOption[] = roster.map((p) => ({
-      id: p.id,
-      name: seniorPlayerDisplayName(p),
-      user_id: p.user_id,
-    }));
+    // Los exentos no se ofrecen para asignarles pagos.
+    const seniorPlayers: SeniorRosterOption[] = roster
+      .filter((p) => !exemptions.has(p.id))
+      .map((p) => ({
+        id: p.id,
+        name: seniorPlayerDisplayName(p),
+        user_id: p.user_id,
+      }));
 
     return {
       status: "ok",
@@ -462,16 +510,21 @@ export async function getPaymentsSnapshot(
   });
 
   const ownRows = own.map((row) => ({ ...row, due_date: resolveDueDate(row) }));
-  const ownExpected = ownPlayerId
+  const ownExemption = ownPlayerId
+    ? await getExemption(ownPlayerId, seasonKey ?? getCurrentSeason())
+    : null;
+  // Un exento no debe nada: sus cuotas pendientes ya registradas no se le enseñan como deuda.
+  const visibleOwnRows = ownExemption ? ownRows.filter((r) => r.status !== "pending") : ownRows;
+  const ownExpected = ownPlayerId && !ownExemption
     ? expectedRowsFor(
         ownRows,
-        { id: ownPlayerId, user_id: actor.id },
+        { id: ownPlayerId, user_id: actor.id, category: await categoryOfPlayer(ownPlayerId) },
         seasonKey ?? getCurrentSeason()
       )
     : [];
 
   return {
     status: "ok",
-    body: { data: [...ownRows, ...ownExpected], isAdmin: false },
+    body: { data: [...visibleOwnRows, ...ownExpected], isAdmin: false, exemption: ownExemption },
   };
 }

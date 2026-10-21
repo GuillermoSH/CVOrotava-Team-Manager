@@ -794,3 +794,43 @@ html[data-theme="light"] .match-status-pill--past {
   color: var(--text-muted);
   border-color: var(--glass-border);
 }
+
+/* ── Diálogos de confirmación: entrada/salida en el compositor (opacity + transform) ──
+   `both` deja el estado final aplicado: la capa no se degrada al acabar y no hay salto. */
+@keyframes dialog-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes dialog-backdrop-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes dialog-panel-in {
+  from { opacity: 0; transform: translate3d(0, 10px, 0) scale(0.97); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes dialog-panel-out {
+  from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  to { opacity: 0; transform: translate3d(0, 6px, 0) scale(0.98); }
+}
+.dialog-backdrop[data-state="open"] {
+  animation: dialog-backdrop-in 0.18s ease-out both;
+}
+.dialog-backdrop[data-state="closed"] {
+  animation: dialog-backdrop-out 0.16s ease-in both;
+}
+.dialog-panel[data-state="open"] {
+  animation: dialog-panel-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.dialog-panel[data-state="closed"] {
+  animation: dialog-panel-out 0.16s ease-in both;
+}
+/* «Reducir movimiento»: sin deslizamiento ni zoom, pero se mantiene el fundido (opacity). */
+@media (prefers-reduced-motion: reduce) {
+  .dialog-panel[data-state="open"] {
+    animation: dialog-backdrop-in 0.18s ease-out both;
+  }
+  .dialog-panel[data-state="closed"] {
+    animation: dialog-backdrop-out 0.16s ease-in both;
+  }
+}

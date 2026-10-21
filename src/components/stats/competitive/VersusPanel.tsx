@@ -13,7 +13,9 @@ function SamePoint({ stats }: Readonly<{ stats: CompetitiveStats }>) {
   const { versus, previousCard, card } = stats;
 
   if (!stats.hasPrevious || !previousCard) {
-    return <p className="text-sm text-[var(--text-muted)]">No hay datos de la temporada anterior con los que comparar.</p>;
+    return (
+      <p className="text-sm text-[var(--text-muted)]">No hay datos de la temporada anterior con los que comparar.</p>
+    );
   }
   if (!versus) {
     return (
@@ -79,7 +81,11 @@ function SamePoint({ stats }: Readonly<{ stats: CompetitiveStats }>) {
               }.`}
         </p>
         <div className="mt-3 flex items-center gap-3">
-          <Meter className="flex-1" value={Math.min(100, (versus.pointsNow / goal) * 100)} label="Progreso hacia superar los puntos del año pasado" />
+          <Meter
+            className="flex-1"
+            value={Math.min(100, (versus.pointsNow / goal) * 100)}
+            label="Progreso hacia superar los puntos del año pasado"
+          />
           <span className="text-xs tabular-nums text-[var(--text-muted)]">
             {Math.min(versus.pointsNow, goal)} de {goal}
           </span>
@@ -112,7 +118,8 @@ function Records({ stats }: Readonly<{ stats: CompetitiveStats }>) {
         </thead>
         <tbody className="divide-y divide-[var(--glass-border)]">
           {stats.records.map((r) => {
-            const better = r.previous === null ? null : r.higherIsBetter ? r.current > r.previous : r.current < r.previous;
+            const better =
+              r.previous === null ? null : r.higherIsBetter ? r.current > r.previous : r.current < r.previous;
             const same = r.previous !== null && r.current === r.previous;
             return (
               <tr key={r.key}>
@@ -134,7 +141,11 @@ function Records({ stats }: Readonly<{ stats: CompetitiveStats }>) {
                     </>
                   ) : (
                     <>
-                      <FontAwesomeIcon icon={faArrowDown} className="text-xs text-[color-mix(in_srgb,var(--color-danger)_72%,var(--text-primary))]" aria-hidden />
+                      <FontAwesomeIcon
+                        icon={faArrowDown}
+                        className="text-xs text-[color-mix(in_srgb,var(--color-danger)_72%,var(--text-primary))]"
+                        aria-hidden
+                      />
                       <span className="sr-only">Peor que el año pasado</span>
                     </>
                   )}
@@ -153,26 +164,30 @@ export default function VersusPanel({ stats }: Readonly<{ stats: CompetitiveStat
     return (
       <section>
         <h2 className="mb-2 text-lg font-semibold tracking-tight sm:text-xl">Vs. año pasado</h2>
-        <p className="text-sm text-[var(--text-muted)]">Todavía no hay una liga con nuestro equipo en esta temporada.</p>
+        <p className="text-sm text-[var(--text-muted)]">
+          Todavía no hay una liga con nuestro equipo en esta temporada.
+        </p>
       </section>
     );
   }
 
   return (
     <div className="flex flex-col gap-12">
-      <section aria-labelledby="same-point-title">
-        <h2 id="same-point-title" className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">
-          Mismo punto del año pasado
-        </h2>
-        <SamePoint stats={stats} />
-      </section>
+      <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+        <section aria-labelledby="same-point-title">
+          <h2 id="same-point-title" className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">
+            Mismo punto del año pasado
+          </h2>
+          <SamePoint stats={stats} />
+        </section>
 
-      <section aria-labelledby="records-title">
-        <h2 id="records-title" className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">
-          Récords
-        </h2>
-        <Records stats={stats} />
-      </section>
+        <section aria-labelledby="records-title">
+          <h2 id="records-title" className="mb-4 text-lg font-semibold tracking-tight sm:text-xl">
+            Récords
+          </h2>
+          <Records stats={stats} />
+        </section>
+      </div>
 
       <section aria-labelledby="achievements-title">
         <h2 id="achievements-title" className="text-lg font-semibold tracking-tight sm:text-xl">

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { getPaymentsSnapshot } from "@/lib/payments/getPaymentsSnapshot";
+import { getExemption, listExemptions } from "@/lib/payments/exemptions";
 import {
   listActiveSeniorPlayers,
   resolvePlayerForPaymentWrite,
@@ -92,12 +93,18 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: synced.message }, { status: 400 });
       }
 
+      // «Todos» solo alcanza a los equipos sénior: los de base pagan otras cuotas.
       const roster = await listActiveSeniorPlayers({
         season,
         gender: parsedData.gender,
+        includeLinkedOutsideSenior: false,
       });
       if (roster.error) throw new Error(roster.error);
-      if (roster.data.length === 0) {
+      // Los exentos no reciben asignaciones masivas.
+      const exemptions = await listExemptions(season);
+      const targets = roster.data.filter((player) => !exemptions.has(player.id));
+      const skippedExempt = roster.data.length - targets.length;
+      if (targets.length === 0) {
         return NextResponse.json(
           {
             error:
@@ -109,7 +116,7 @@ export async function POST(req: Request) {
         );
       }
 
-      const bulkPayments = roster.data.map((player) => ({
+      const bulkPayments = targets.map((player) => ({
         player_id: player.id,
         user_id: player.user_id,
         ...cleanData,
@@ -121,7 +128,9 @@ export async function POST(req: Request) {
       if (bulkError) throw new Error(bulkError.message);
 
       return NextResponse.json({
-        message: `Asignado a ${bulkPayments.length} jugadores sénior correctamente`,
+        message:
+          `Asignado a ${bulkPayments.length} jugadores sénior correctamente` +
+          (skippedExempt > 0 ? ` (${skippedExempt} exento${skippedExempt === 1 ? "" : "s"} omitido${skippedExempt === 1 ? "" : "s"})` : ""),
       });
     }
 
@@ -132,6 +141,18 @@ export async function POST(req: Request) {
     });
     if (!resolved.ok) {
       return NextResponse.json({ error: resolved.message }, { status: 400 });
+    }
+
+    const exemption = await getExemption(resolved.player.playerId, season);
+    if (exemption) {
+      return NextResponse.json(
+        {
+          error: `${resolved.player.displayName} está exento de pagos en ${season}${
+            exemption.reason ? ` (${exemption.reason})` : ""
+          }. Quita la exención para asignarle cuotas.`,
+        },
+        { status: 409 }
+      );
     }
 
     const { error: insertError } = await supabaseAdmin.from("payments").insert({

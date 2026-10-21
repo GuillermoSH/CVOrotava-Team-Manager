@@ -7,8 +7,9 @@ import { RATING_WEIGHT } from "@/lib/stats/competitive/card";
 import { ATTRIBUTE_DEFS } from "@/lib/stats/competitive/metrics";
 import { seasonDataFromBundles } from "@/lib/stats/competitive/fromBundles";
 import { FormPanel, NextMatchPanel, PositionPanel, TopRivalPanel } from "./NextMatchPanel";
+import { CardExplainerContent } from "./CardExplainer";
 import LeaguePanel from "./LeaguePanel";
-import RivalsPanel from "./RivalsPanel";
+import RivalsPanel, { RivalsHowItWorks } from "./RivalsPanel";
 import TeamCardPanel from "./TeamCardPanel";
 import VersusPanel from "./VersusPanel";
 import { newlyUnlocked } from "@/lib/stats/competitive/achievementsSeen";
@@ -42,7 +43,8 @@ describe("ficha del equipo", () => {
   });
 
   it("la explicación cuenta de dónde sale cada número, con los datos reales y sin jerga", () => {
-    const out = clean(html(<TeamCardPanel stats={full} />));
+    const card = full.card!;
+    const out = clean(html(<CardExplainerContent teamName="CD Voleypuerto" attributes={card.attributes} />));
     const text = out.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").replaceAll("&amp;", "&");
     expect(text).toContain("La escala de 45 a 99");
     expect(text).toContain("Un 72 significa estar justo en la mitad del grupo");
@@ -129,6 +131,7 @@ describe("rivales", () => {
     expect(out).toContain("A batir");
     expect(out).toContain("Cara a cara");
     expect(out).toContain("Cómo se calcula");
+    expect(html(<RivalsHowItWorks />)).toContain("estrellas");
     expect(out).toContain("Probabilidad de ganar");
     expect(out).toContain("Nos ganó 3-0 el 07/02");
     expect(out).not.toMatch(/rating/i);
@@ -137,14 +140,15 @@ describe("rivales", () => {
   it("rival expandido en móvil muestra su dossier", () => {
     const meet = full.rivals.find((r) => r.name === "MEET MUSIC TOURISM")!;
     const out = clean(html(<RivalsPanel stats={full} selectedId={meet.teamId} onSelect={noop} />));
-    expect(out).toContain("aria-expanded=\"true\"");
+    expect(out).toContain("aria-current=\"true\"");
     expect(out).toContain("7 feb 2026");
   });
 
   it("arranque: rivales nuevos salen limpios, sin rating ni probabilidad inventados", () => {
-    const out = clean(html(<RivalsPanel stats={start} selectedId={null} onSelect={noop} />));
-    expect(out).toContain("Rival nuevo");
-    expect(out).toContain("Sin datos");
+    const nuevo = start.rivals.find((r) => r.isNew)!;
+    const out = clean(html(<RivalsPanel stats={start} selectedId={nuevo.teamId} onSelect={noop} />));
+    expect(out).toContain("Rival nuevo en la liga.");
+    expect(out).toContain("se activan cuando haya jugado 3 partidos");
     expect(out).not.toMatch(/rating|NaN/i);
   });
 });

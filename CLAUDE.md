@@ -15,3 +15,7 @@ Cuando se termina el desarrollo de una tarea (las pequeñas no entran):
 1. Hacer commit(s) con el formato de arriba.
 2. Ejecutar las comprobaciones: `pnpm test`, `npx tsc --noEmit -p .`, `pnpm lint` y el build de producción. Si el usuario tiene `next dev` abierto, no ejecutar `pnpm build` en el repo (comparten `.next`): compilar una copia con `next build` (sin `--turbopack`).
 3. Informar del resultado con honestidad (distinguir los fallos propios de los anteriores) y **pedir el OK explícito del usuario antes de hacer `git push`**. No hacer push sin ese OK.
+
+## Notas de diseño pendientes
+
+- `docs/pagos-exenciones.md`: estado de las exenciones de pago, **migraciones SQL sin aplicar**, impacto en el Portal (comparte base de datos) e ideas de ajustes por mes. Léelo antes de tocar pagos.
