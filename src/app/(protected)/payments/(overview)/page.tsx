@@ -22,6 +22,7 @@ export default async function PaymentsPage() {
           authLastSignInAtByUserId: result.body.authLastSignInAtByUserId,
           adminOverview: result.body.adminOverview,
           seniorPlayers: result.body.seniorPlayers,
+          exemption: result.body.exemption ?? null,
         }
       : { data: [] as Payment[], isAdmin: user.isAdmin };
 

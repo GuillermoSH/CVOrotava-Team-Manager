@@ -103,6 +103,8 @@ describe("GET /api/payments IDOR", () => {
     });
     from.mockImplementation((table: string) => {
       if (table === "players") return playerLookup;
+      // Sin exenciones: la fila de «payments» no debe confundirse con una exención.
+      if (table === "payment_exemptions") return createQueryChain({ data: null, error: null });
       return paymentsChain;
     });
 
@@ -259,5 +261,65 @@ describe("PATCH/DELETE /api/payments/[id]", () => {
     );
     expect(res.status).toBe(403);
     expect(from).not.toHaveBeenCalled();
+  });
+});
+
+describe("exentos de pagos", () => {
+  beforeEach(() => {
+    requireAllowedUser.mockReset();
+    from.mockReset();
+  });
+
+  it("el admin no puede asignar un pago suelto a un exento (409) y no se inserta nada", async () => {
+    requireAllowedUser.mockResolvedValue({ user: ADMIN });
+    const playerChain = createQueryChain({
+      data: { id: "player-1", full_name: "Coordinadora Uno", first_name: "Coordinadora", last_name: "Uno", user_id: null },
+      error: null,
+    });
+    const exemptionChain = createQueryChain({ data: { reason: "Coordinación" }, error: null });
+    const paymentsChain = createQueryChain({ data: null, error: null });
+    from.mockImplementation((table: string) => {
+      if (table === "players") return playerChain;
+      if (table === "payment_exemptions") return exemptionChain;
+      return paymentsChain;
+    });
+
+    const res = await POST(
+      new Request("http://local/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ player_id: "player-1", concept: "Matrícula", amount: 75, status: "pending" }),
+      })
+    );
+    expect(res.status).toBe(409);
+    expect(((await jsonOf(res)).error as string)).toContain("exento");
+    expect(paymentsChain.insert).not.toHaveBeenCalled();
+  });
+
+  it("un jugador exento no ve deuda: sus pendientes se ocultan y no hay cuotas previstas", async () => {
+    requireAllowedUser.mockResolvedValue({ user: PLAYER });
+    const ownPlayerId = "own-player-id";
+    const playerLookup = createQueryChain({ data: { id: ownPlayerId }, error: null });
+    const paymentsChain = createQueryChain({
+      data: [
+        { id: "p1", player_id: ownPlayerId, user_id: PLAYER.id, amount: 75, status: "pending", season: "2026-27" },
+        { id: "p2", player_id: ownPlayerId, user_id: PLAYER.id, amount: 25, status: "paid", season: "2026-27" },
+      ],
+      error: null,
+    });
+    const exemptionChain = createQueryChain({ data: { reason: "Coordinación" }, error: null });
+    from.mockImplementation((table: string) => {
+      if (table === "players") return playerLookup;
+      if (table === "payment_exemptions") return exemptionChain;
+      return paymentsChain;
+    });
+
+    const res = await GET(new Request("http://local/api/payments?season=2026-27"));
+    expect(res.status).toBe(200);
+    const body = await jsonOf(res);
+    expect(body.exemption).toEqual({ reason: "Coordinación" });
+    const rows = body.data as { id: string; status: string; expected?: boolean }[];
+    expect(rows.map((r) => r.id)).toEqual(["p2"]);
+    expect(rows.some((r) => r.expected)).toBe(false);
   });
 });

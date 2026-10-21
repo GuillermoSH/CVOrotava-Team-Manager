@@ -58,6 +58,7 @@ interface AdminOverviewRow {
   overdueCount: number;
   status: "success" | "warning" | "danger";
   lastSignInAt: string | null;
+  exempt?: { reason: string | null };
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -114,12 +115,15 @@ type SnapshotJson = {
   authLastSignInAtByUserId?: Record<string, string | null>;
   adminOverview?: AdminOverviewRow[];
   seniorPlayers?: { id: string; name: string; user_id: string | null }[];
+  /** Vista del propio jugador: exento de pagos esta temporada. */
+  exemption?: { reason: string | null } | null;
 };
 
 function applyPaymentsSnapshot(json: SnapshotJson): {
   payments: Payment[];
   adminOverview: AdminOverviewRow[];
   seniorPlayers: { id: string; name: string; user_id: string | null }[];
+  exemption: { reason: string | null } | null;
 } {
   const seniorPlayers = (json.seniorPlayers ?? []).map((p) => ({
     id: p.id,
@@ -133,6 +137,7 @@ function applyPaymentsSnapshot(json: SnapshotJson): {
         payments: [],
         adminOverview: json.adminOverview,
         seniorPlayers,
+        exemption: null,
       };
     }
 
@@ -171,10 +176,16 @@ function applyPaymentsSnapshot(json: SnapshotJson): {
       payments: [],
       adminOverview: Array.from(playerMap.values()),
       seniorPlayers,
+      exemption: null,
     };
   }
 
-  return { payments: json.data, adminOverview: [], seniorPlayers: [] };
+  return {
+    payments: json.data,
+    adminOverview: [],
+    seniorPlayers: [],
+    exemption: json.exemption ?? null,
+  };
 }
 
 export default function PaymentsView({
@@ -194,6 +205,7 @@ export default function PaymentsView({
     initial.adminOverview
   );
   const [seniorPlayers, setSeniorPlayers] = useState(initial.seniorPlayers);
+  const [exemption, setExemption] = useState(initial.exemption);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -228,6 +240,7 @@ export default function PaymentsView({
       setAdminOverview(parsed.adminOverview);
       setPayments(parsed.payments);
       setSeniorPlayers(parsed.seniorPlayers);
+      setExemption(parsed.exemption);
     } catch (err: unknown) {
       setError((err as Error).message);
     } finally {
@@ -327,6 +340,16 @@ export default function PaymentsView({
           ) : null
         }
       />
+
+      {!user?.isAdmin && exemption ? (
+        <p
+          role="status"
+          className="mb-4 rounded-xl border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 py-2.5 text-sm text-[var(--text-secondary)]"
+        >
+          Estás exento de pagos esta temporada
+          {exemption.reason ? ` (${exemption.reason})` : ""}. No tienes cuotas pendientes.
+        </p>
+      ) : null}
 
       {user && user.isActive === false && !user.isAdmin ? (
         <p
@@ -474,6 +497,15 @@ export default function PaymentsView({
                           </div>
 
                           <div className="flex items-center justify-between gap-4 sm:justify-end sm:gap-6">
+                            {item.exempt ? (
+                              <>
+                                <span className="max-w-[12rem] truncate text-sm text-[var(--text-muted)]">
+                                  {item.exempt.reason ?? "Sin motivo"}
+                                </span>
+                                <span className="badge badge-neutral">Exento</span>
+                              </>
+                            ) : (
+                              <>
                             {item.pendingAmount > 0 ? (
                               <div className="text-right">
                                 <span className="text-lg font-bold tabular-nums text-[var(--accent)]">
@@ -507,6 +539,8 @@ export default function PaymentsView({
                               </span>
                             ) : (
                               <span className="badge badge-success">OK</span>
+                            )}
+                              </>
                             )}
                           </div>
                         </button>

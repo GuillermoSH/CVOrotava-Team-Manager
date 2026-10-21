@@ -193,6 +193,7 @@ export default function HomeView({
       expected?: boolean;
     }[];
     isAdmin: boolean;
+    exemption?: { reason: string | null } | null;
     adminOverview?: {
       player_id: string;
       pendingAmount: number;
@@ -410,6 +411,7 @@ export default function HomeView({
               pendingCount={pendingPayments.length}
               overdueCount={overduePayments.length}
               total={totalPending}
+              exempt={paymentsData.exemption ?? null}
               nextDue={nextDue?.due_date ? { concept: nextDue.concept, amount: nextDue.amount, due_date: String(nextDue.due_date) } : null}
             />
           ) : null}

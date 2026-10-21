@@ -23,6 +23,7 @@ import {
   type OrderedPlayer,
 } from "@/components/payments/playerOrder";
 import QuotaSeasonLayout from "@/components/payments/QuotaSeasonLayout";
+import ExemptionPanel, { type ExemptionState } from "@/components/payments/ExemptionPanel";
 import {
   isQuotaOwed,
   quotaSeverity,
@@ -70,6 +71,7 @@ export default function AdminPlayerPaymentsDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [order, setOrder] = useState<OrderedPlayer[]>([]);
+  const [exemption, setExemption] = useState<ExemptionState>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] =
@@ -104,6 +106,7 @@ export default function AdminPlayerPaymentsDetail() {
       if (!res.ok) throw new Error(json.error || "Error cargando cuotas del jugador");
       const rows = (json.data || []) as Payment[];
       setPayments(rows);
+      setExemption((json.exemption as ExemptionState) ?? null);
       const fromRow = rows.find((p) => p.player_id)?.player_id ?? null;
       setResolvedPlayerId(fromRow || routeId);
 
@@ -254,9 +257,10 @@ export default function AdminPlayerPaymentsDetail() {
   const totalPaid = payments
     .filter((p) => p.status === "paid")
     .reduce((acc, p) => acc + Number(p.amount), 0);
-  const totalPending = payments
-    .filter(isQuotaOwed)
-    .reduce((acc, p) => acc + Number(p.amount), 0);
+  // Un exento no debe nada: sus pendientes registrados no cuentan como deuda.
+  const totalPending = exemption
+    ? 0
+    : payments.filter(isQuotaOwed).reduce((acc, p) => acc + Number(p.amount), 0);
 
   const fixedPlayerId = resolvedPlayerId || routeId;
 
@@ -320,13 +324,26 @@ export default function AdminPlayerPaymentsDetail() {
         actions={
           <button
             type="button"
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={openAddModal}
+            disabled={Boolean(exemption)}
+            title={exemption ? "Exento de pagos: quita la exención para asignarle cuotas" : undefined}
           >
             <FontAwesomeIcon icon={faPlus} /> Añadir pago
           </button>
         }
       />
+
+      {!loading && !error ? (
+        <ExemptionPanel
+          playerId={fixedPlayerId}
+          playerName={playerName}
+          season={getCurrentSeason()}
+          exemption={exemption}
+          pendingCount={payments.filter((p) => p.status === "pending" && !p.expected).length}
+          onChanged={fetchPayments}
+        />
+      ) : null}
 
       {!loading && !error && payments.length > 0 ? (
         <QuotaSeasonLayout
