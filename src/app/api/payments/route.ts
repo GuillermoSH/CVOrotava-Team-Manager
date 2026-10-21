@@ -92,9 +92,11 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: synced.message }, { status: 400 });
       }
 
+      // «Todos» solo alcanza a los equipos sénior: los de base pagan otras cuotas.
       const roster = await listActiveSeniorPlayers({
         season,
         gender: parsedData.gender,
+        includeLinkedOutsideSenior: false,
       });
       if (roster.error) throw new Error(roster.error);
       if (roster.data.length === 0) {

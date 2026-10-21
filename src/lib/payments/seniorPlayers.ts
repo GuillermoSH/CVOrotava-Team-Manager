@@ -67,6 +67,11 @@ export function toPortalSeasonId(season: string): string {
 export async function listActiveSeniorPlayers(opts: {
   season: string;
   gender?: string | null;
+  /**
+   * false = solo equipos sénior. Las asignaciones masivas («Todos») lo usan para no
+   * cobrar a los de base lo que se pone al sénior.
+   */
+  includeLinkedOutsideSenior?: boolean;
 }): Promise<{ data: SeniorPlayerRow[]; error: string | null }> {
   const portalSeason = toPortalSeasonId(opts.season);
   const gender = opts.gender === "male" || opts.gender === "female" ? opts.gender : null;
@@ -95,7 +100,9 @@ export async function listActiveSeniorPlayers(opts: {
 
   const [seniors, withAccount] = await Promise.all([
     base().eq("teams.category", "senior"),
-    base().not("user_id", "is", null),
+    opts.includeLinkedOutsideSenior === false
+      ? Promise.resolve({ data: [] as never[], error: null })
+      : base().not("user_id", "is", null),
   ]);
   const error = seniors.error ?? withAccount.error;
   if (error) return { data: [], error: error.message };
