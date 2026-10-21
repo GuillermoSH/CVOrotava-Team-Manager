@@ -37,12 +37,18 @@ export const ACHIEVEMENT_ICONS: Record<string, IconDefinition> = {
 
 export const TIER_LABEL = { 1: "Bronce", 2: "Plata", 3: "Oro" } as const;
 
-function Row({ a, fresh }: Readonly<{ a: Achievement; fresh: boolean }>) {
+function Tile({ a, fresh }: Readonly<{ a: Achievement; fresh: boolean }>) {
   return (
-    <li className="flex items-start gap-3.5 py-3.5">
+    <li
+      className={`flex gap-3.5 rounded-xl border p-4 sm:flex-col sm:items-center sm:gap-3 sm:p-5 sm:text-center ${
+        a.unlocked
+          ? "border-[color-mix(in_srgb,var(--accent)_30%,var(--glass-border))] bg-[var(--glass-surface)]"
+          : "border-dashed border-[var(--border-dashed)]"
+      }`}
+    >
       <span
         aria-hidden
-        className={`mt-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-full text-sm ${
+        className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full text-base sm:size-14 sm:text-xl ${
           a.unlocked
             ? "bg-[var(--accent-muted)] text-[var(--accent)] ring-1 ring-[color-mix(in_srgb,var(--accent)_38%,transparent)]"
             : "border border-dashed border-[var(--border-dashed)] text-[var(--text-muted)]"
@@ -50,30 +56,32 @@ function Row({ a, fresh }: Readonly<{ a: Achievement; fresh: boolean }>) {
       >
         <FontAwesomeIcon icon={ACHIEVEMENT_ICONS[a.family] ?? faMedal} />
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+      <div className="flex min-w-0 flex-1 flex-col sm:w-full sm:flex-none">
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:justify-center">
           <span className={`font-semibold ${a.unlocked ? "" : "text-[var(--text-secondary)]"}`}>{a.name}</span>
           {a.tier ? <span className="text-xs text-[var(--text-muted)]">{TIER_LABEL[a.tier]}</span> : null}
           {fresh ? (
             <span className="rounded-md bg-[var(--accent)] px-1.5 py-0.5 text-[0.65rem] font-bold text-white">Nuevo</span>
           ) : null}
         </p>
-        <p className="mt-0.5 text-sm text-[var(--text-muted)]">{a.description}</p>
+        <p className="mt-1 text-sm text-[var(--text-muted)]">{a.description}</p>
         {!a.unlocked && a.progress ? (
-          <div className="mt-2 flex max-w-xs items-center gap-3">
+          <div className="mt-3 flex items-center gap-3">
             <Meter className="flex-1" value={(a.progress.value / a.progress.target) * 100} label={`Progreso de ${a.name}`} />
             <span className="text-xs tabular-nums text-[var(--text-muted)]">
               {a.progress.value} de {a.progress.target}
             </span>
           </div>
         ) : null}
+        {a.unlocked && a.unlockedOn ? (
+          <p className="mt-2 text-xs tabular-nums text-[var(--text-muted)] sm:mt-auto sm:pt-2">{fullDate(a.unlockedOn)}</p>
+        ) : null}
       </div>
-      {a.unlocked && a.unlockedOn ? (
-        <p className="shrink-0 pt-1 text-xs tabular-nums text-[var(--text-muted)]">{fullDate(a.unlockedOn)}</p>
-      ) : null}
     </li>
   );
 }
+
+const SHELF = "mt-3 grid grid-cols-[repeat(auto-fill,minmax(min(100%,15rem),1fr))] gap-3";
 
 export default function AchievementsPanel({ stats }: Readonly<{ stats: CompetitiveStats }>) {
   const all = stats.achievements;
@@ -116,9 +124,9 @@ export default function AchievementsPanel({ stats }: Readonly<{ stats: Competiti
       {unlocked.length > 0 ? (
         <div>
           <h3 className="text-sm font-semibold text-[var(--text-secondary)]">Desbloqueados · {unlocked.length}</h3>
-          <ul className="mt-1 divide-y divide-[var(--glass-border)]">
+          <ul className={SHELF}>
             {unlocked.map((a) => (
-              <Row key={a.id} a={a} fresh={fresh.includes(a.id)} />
+              <Tile key={a.id} a={a} fresh={fresh.includes(a.id)} />
             ))}
           </ul>
         </div>
@@ -128,9 +136,9 @@ export default function AchievementsPanel({ stats }: Readonly<{ stats: Competiti
       {locked.length > 0 ? (
         <div>
           <h3 className="text-sm font-semibold text-[var(--text-secondary)]">Por conseguir · {locked.length}</h3>
-          <ul className="mt-1 divide-y divide-[var(--glass-border)]">
+          <ul className={SHELF}>
             {locked.map((a) => (
-              <Row key={a.id} a={a} fresh={false} />
+              <Tile key={a.id} a={a} fresh={false} />
             ))}
           </ul>
         </div>

@@ -30,7 +30,7 @@ const EXIT_FALLBACK_MS = 400;
  * (`scrollbar-gutter`): si el viewport cambiara de ancho, los elementos fijos (menú, fondo
  * ambiental con desenfoques grandes) se repintarían y la ventana parpadearía.
  */
-function DialogLayer({
+export function DialogLayer({
   busy,
   onCancel,
   confirmRef,
