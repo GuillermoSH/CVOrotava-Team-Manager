@@ -178,7 +178,8 @@ export async function listActiveSeniorPlayers(opts: {
 }
 
 /**
- * Only UPDATE `players.user_id` on existing senior roster rows (match by name).
+ * Only UPDATE `players.user_id` on existing roster rows (match by exact name, any category:
+ * juniors and cadetes who play up with the senior squad also have a TM account).
  * Never creates players. Only active TM users (`is_active` !== false), role=player.
  * Skips "JUGADOR DE PRUEBAS".
  */
@@ -218,7 +219,6 @@ export async function linkTmUsersToExistingSeniorPlayers(opts: {
     )
     .eq("season", portalSeason)
     .eq("is_active", true)
-    .eq("teams.category", "senior")
     .is("user_id", null);
 
   if (opts.gender === "male" || opts.gender === "female") {
@@ -397,7 +397,6 @@ export async function ensureSeniorPlayerForUser(opts: {
     )
     .eq("season", portalSeason)
     .eq("is_active", true)
-    .eq("teams.category", "senior")
     .eq("teams.gender", gender)
     .is("user_id", null);
 

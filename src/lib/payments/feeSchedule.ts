@@ -26,8 +26,23 @@ type FeeRowLike = {
 const FIRST_SCHEDULED_YEAR = 2026;
 const ENROLMENT_AMOUNT = 75;
 const SINGLE_PAYMENT_AMOUNT = 90;
+const KIT_AMOUNT = 15;
 const ENROLMENT_MONTH = 9;
 const SINGLE_PAYMENT_MONTH = 12;
+const KIT_MONTH = 12;
+
+/**
+ * Quién paga qué (espeja `season_fee_lines.audience` del Portal): sénior y aficionados,
+ * matrícula + pago único; categorías de base, matrícula + equipación (y mensualidades
+ * que no se prevén).
+ */
+export type FeeAudience = "senior" | "aficionados" | "base";
+
+export function feeAudienceFor(category: string | null | undefined): FeeAudience {
+  if (!category || category === "senior") return "senior";
+  if (category === "aficionados") return "aficionados";
+  return "base";
+}
 
 const MONTH_NAMES = [
   "enero",
@@ -112,7 +127,9 @@ export function feeDueDate(
         ? SINGLE_PAYMENT_MONTH
         : code === "mensualidad"
           ? month
-          : null;
+          : code === "equipacion"
+            ? KIT_MONTH
+            : null;
   if (!target) return null;
   return lastDayOfMonth(target >= 7 ? start : start + 1, target);
 }
@@ -124,10 +141,11 @@ export function resolveDueDate(row: FeeRowLike): string | null {
   return code ? feeDueDate(code, month, row.season) : null;
 }
 
-/** Cuotas que le tocan a un sénior en la temporada y aún no tiene registradas. */
+/** Cuotas que le tocan a un jugador según su audiencia y aún no tiene registradas. */
 export function missingFees(
   rows: FeeRowLike[],
-  season: string
+  season: string,
+  audience: FeeAudience = "senior"
 ): ExpectedFee[] {
   const start = seasonStartYear(season);
   if (!start || start < FIRST_SCHEDULED_YEAR) return [];
@@ -154,7 +172,11 @@ export function missingFees(
 
   push("matricula", null, "Matrícula", ENROLMENT_AMOUNT);
 
-  push("pago_unico", null, "Pago único", SINGLE_PAYMENT_AMOUNT);
+  if (audience === "base") {
+    push("equipacion", null, "Equipación", KIT_AMOUNT);
+  } else {
+    push("pago_unico", null, "Pago único", SINGLE_PAYMENT_AMOUNT);
+  }
 
   return out;
 }

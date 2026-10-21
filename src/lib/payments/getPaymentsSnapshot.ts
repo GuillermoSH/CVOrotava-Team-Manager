@@ -10,7 +10,7 @@ import {
   isQuotaOverdue,
   quotaSeverity,
 } from "@/components/payments/quotaDates";
-import { missingFees, resolveDueDate } from "@/lib/payments/feeSchedule";
+import { feeAudienceFor, missingFees, resolveDueDate } from "@/lib/payments/feeSchedule";
 import { getCurrentSeason, normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 /** Last sign-in via Auth Admin: paginate listUsers instead of N× getUserById. */
@@ -146,15 +146,28 @@ function enrichPaymentRow(row: PaymentRow): PaymentRow {
   };
 }
 
+/** Categoría del equipo de una ficha (decide qué cuotas le tocan). */
+async function categoryOfPlayer(playerId: string): Promise<string | null> {
+  const { data } = await supabaseAdmin
+    .from("players")
+    .select("teams ( category )")
+    .eq("id", playerId)
+    .maybeSingle();
+  const teams = data?.teams as { category: string } | { category: string }[] | null | undefined;
+  const team = Array.isArray(teams) ? teams[0] : teams;
+  return team?.category ?? null;
+}
+
 /** Cuotas del calendario que el jugador aún no tiene registradas (como en el Portal). */
 function expectedRowsFor(
   rows: PaymentRow[],
-  player: { id: string; user_id: string | null },
+  player: { id: string; user_id: string | null; category?: string | null },
   season: string
 ): PaymentRow[] {
   return missingFees(
     rows.filter((r) => r.player_id === player.id || !r.player_id),
-    season
+    season,
+    feeAudienceFor(player.category)
   ).map((fee) => ({
     id: `expected:${player.id}:${fee.fee_code}:${fee.billing_month ?? ""}`,
     user_id: player.user_id,
@@ -197,7 +210,11 @@ function buildAdminOverview(
     let overdueCount = overdueByPlayer.get(player.id) ?? 0;
     // Previstas sin registrar que ya están en aviso o vencidas también se deben.
     const playerRows = payments.filter((p) => p.player_id === player.id);
-    for (const fee of expectedRowsFor(playerRows, player, season)) {
+    for (const fee of expectedRowsFor(
+      playerRows,
+      { id: player.id, user_id: player.user_id, category: player.teams?.category },
+      season
+    )) {
       const severity = quotaSeverity("pending", fee.due_date);
       if (severity === "ok") continue;
       pendingAmount += Number(fee.amount);
@@ -302,6 +319,7 @@ export async function getPaymentsSnapshot(
         .eq("id", resolvedPlayerId)
         .maybeSingle();
       const linkedUserId = (playerRow?.user_id as string | null) ?? null;
+      const playerCategory = await categoryOfPlayer(resolvedPlayerId);
 
       let query = supabaseAdmin
         .from("payments")
@@ -333,7 +351,7 @@ export async function getPaymentsSnapshot(
             ...rows,
             ...expectedRowsFor(
               rows,
-              { id: resolvedPlayerId, user_id: linkedUserId },
+              { id: resolvedPlayerId, user_id: linkedUserId, category: playerCategory },
               seasonKey ?? getCurrentSeason()
             ),
           ],
@@ -465,7 +483,7 @@ export async function getPaymentsSnapshot(
   const ownExpected = ownPlayerId
     ? expectedRowsFor(
         ownRows,
-        { id: ownPlayerId, user_id: actor.id },
+        { id: ownPlayerId, user_id: actor.id, category: await categoryOfPlayer(ownPlayerId) },
         seasonKey ?? getCurrentSeason()
       )
     : [];
