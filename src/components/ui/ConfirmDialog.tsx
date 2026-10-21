@@ -25,8 +25,9 @@ export type ConfirmDialogProps = {
 /**
  * Bloqueo de scroll, Escape y foco inicial. Se monta con el diálogo y se desmonta cuando
  * termina la animación de salida (AnimatePresence), así el scroll no se libera a mitad
- * del fundido. Sin `position: fixed` en body: se compensa el ancho de la barra de
- * desplazamiento para que la página de detrás no se mueva al abrir ni al cerrar.
+ * del fundido. Al quitar el scroll se reserva el hueco de la barra (`scrollbar-gutter`):
+ * si el viewport cambiara de ancho, los elementos fijos (menú, fondo ambiental con
+ * desenfoques grandes) se repintarían y la ventana parpadearía.
  */
 function DialogLayer({
   busy,
@@ -47,13 +48,19 @@ function DialogLayer({
     const html = document.documentElement;
     const { body } = document;
     const prevHtmlOverflow = html.style.overflow;
+    const prevGutter = html.style.scrollbarGutter;
     const prevBodyPaddingRight = body.style.paddingRight;
     const scrollbar = window.innerWidth - html.clientWidth;
 
     html.style.overflow = "hidden";
     if (scrollbar > 0) {
-      const current = Number.parseFloat(getComputedStyle(body).paddingRight) || 0;
-      body.style.paddingRight = `${current + scrollbar}px`;
+      if (CSS.supports("scrollbar-gutter", "stable")) {
+        html.style.scrollbarGutter = "stable";
+      } else {
+        // Sin soporte: compensar el ancho en el body (el viewport sí cambiará).
+        const current = Number.parseFloat(getComputedStyle(body).paddingRight) || 0;
+        body.style.paddingRight = `${current + scrollbar}px`;
+      }
     }
 
     const onKey = (e: KeyboardEvent) => {
@@ -66,6 +73,7 @@ function DialogLayer({
       window.clearTimeout(focusTimer);
       document.removeEventListener("keydown", onKey);
       html.style.overflow = prevHtmlOverflow;
+      html.style.scrollbarGutter = prevGutter;
       body.style.paddingRight = prevBodyPaddingRight;
     };
   }, [confirmRef]);
