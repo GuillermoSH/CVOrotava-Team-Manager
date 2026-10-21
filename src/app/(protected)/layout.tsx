@@ -8,6 +8,7 @@ import {
   PendingMain,
 } from "@/contexts/NavPendingContext";
 import { loadAppUser } from "@/lib/auth/loadAppUser";
+import { resolveDisplayName } from "@/lib/auth/resolveDisplayName";
 import { listSeasons } from "@/lib/seasons/listSeasons";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
@@ -47,7 +48,7 @@ export default async function ProtectedLayout({
   const appUser: NonNullable<AppUser> = {
     id: user.id,
     email: user.email,
-    user_name: user.user_name,
+    user_name: await resolveDisplayName(user),
     gender: user.gender,
     role: toUserRole(user.role),
     isAdmin: user.isAdmin,

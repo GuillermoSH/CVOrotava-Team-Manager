@@ -15,7 +15,10 @@ import {
 import { useUser } from "@/contexts/UserContext";
 import HomeSkeleton from "@/components/skeletons/HomeSkeleton";
 import PageHeader from "@/components/ui/PageHeader";
-import { isQuotaOverdue } from "@/components/payments/quotaDates";
+import {
+  isQuotaOverdue,
+  isQuotaOwed,
+} from "@/components/payments/quotaDates";
 import LatestVideos from "@/components/home/LatestVideos";
 import WeekendRoundup from "@/components/home/WeekendRoundup";
 import AchievementsGlance from "@/components/home/AchievementsGlance";
@@ -187,6 +190,7 @@ export default function HomeView({
       amount: string | number;
       status: string;
       due_date?: string | null;
+      expected?: boolean;
     }[];
     isAdmin: boolean;
     adminOverview?: {
@@ -242,12 +246,12 @@ export default function HomeView({
   if (loading) return <HomeSkeleton />;
 
   const pendingPayments =
-    paymentsData?.data?.filter((p) => p.status === "pending") || [];
+    paymentsData?.data?.filter((p) => isQuotaOwed({ ...p, due_date: p.due_date ?? null, status: p.status as "pending" | "paid" })) || [];
   const overduePayments = pendingPayments.filter((p) =>
     isQuotaOverdue("pending", p.due_date ?? null)
   );
-  const nextDue = [...pendingPayments]
-    .filter((p) => p.due_date)
+  const nextDue = [...(paymentsData?.data ?? [])]
+    .filter((p) => p.status === "pending" && p.due_date)
     .sort((a, b) => String(a.due_date).localeCompare(String(b.due_date)))[0];
   const totalPending = pendingPayments.reduce(
     (acc, p) => acc + Number(p.amount),

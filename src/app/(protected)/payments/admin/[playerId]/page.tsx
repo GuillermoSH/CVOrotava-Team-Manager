@@ -8,6 +8,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
+  faChevronLeft,
+  faChevronRight,
   faTrash,
   faCheck,
   faPlus,
@@ -16,8 +18,15 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import type { PaymentModalInitialData } from "@/components/payments/PaymentModal";
 import PageHeader from "@/components/ui/PageHeader";
+import {
+  readPlayerOrder,
+  type OrderedPlayer,
+} from "@/components/payments/playerOrder";
 import QuotaSeasonLayout from "@/components/payments/QuotaSeasonLayout";
-import { isQuotaOverdue } from "@/components/payments/quotaDates";
+import {
+  isQuotaOwed,
+  quotaSeverity,
+} from "@/components/payments/quotaDates";
 import Tooltip, { TooltipGroup } from "@/components/ui/Tooltip";
 import { useConfirmDialog } from "@/components/ui/useConfirmDialog";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
@@ -39,6 +48,7 @@ interface Payment {
   paid_date: string | null;
   notes: string | null;
   season: string | null;
+  expected?: boolean;
   player_name?: string | null;
   users?: { user_name: string };
 }
@@ -59,10 +69,15 @@ export default function AdminPlayerPaymentsDetail() {
   const [playerName, setPlayerName] = useState("Jugador");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [order, setOrder] = useState<OrderedPlayer[]>([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] =
     useState<PaymentModalInitialData | null>(null);
+
+  useEffect(() => {
+    setOrder(readPlayerOrder());
+  }, []);
 
   useEffect(() => {
     fetchPayments();
@@ -240,10 +255,17 @@ export default function AdminPlayerPaymentsDetail() {
     .filter((p) => p.status === "paid")
     .reduce((acc, p) => acc + Number(p.amount), 0);
   const totalPending = payments
-    .filter((p) => p.status === "pending")
+    .filter(isQuotaOwed)
     .reduce((acc, p) => acc + Number(p.amount), 0);
 
   const fixedPlayerId = resolvedPlayerId || routeId;
+
+  const orderIndex = order.findIndex((p) => p.id === routeId);
+  const prevPlayer = orderIndex > 0 ? order[orderIndex - 1] : null;
+  const nextPlayer =
+    orderIndex >= 0 && orderIndex < order.length - 1
+      ? order[orderIndex + 1]
+      : null;
 
   return (
     <motion.div
@@ -253,14 +275,45 @@ export default function AdminPlayerPaymentsDetail() {
       transition={{ duration: 0.55, ease: EASE }}
     >
       {confirmDialog}
-      <button
-        type="button"
-        onClick={() => router.push("/payments")}
-        className="mb-6 inline-flex w-fit cursor-pointer items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
-      >
-        <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-        Volver a pagos
-      </button>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => router.push("/payments")}
+          className="inline-flex w-fit cursor-pointer items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
+        >
+          <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
+          Volver a pagos
+        </button>
+
+        {prevPlayer || nextPlayer ? (
+          <nav aria-label="Navegar entre jugadores" className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={!prevPlayer}
+              onClick={() =>
+                prevPlayer && router.push(`/payments/admin/${prevPlayer.id}`)
+              }
+              title={prevPlayer?.name}
+              className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <FontAwesomeIcon icon={faChevronLeft} />
+              Anterior
+            </button>
+            <button
+              type="button"
+              disabled={!nextPlayer}
+              onClick={() =>
+                nextPlayer && router.push(`/payments/admin/${nextPlayer.id}`)
+              }
+              title={nextPlayer?.name}
+              className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Siguiente
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
+          </nav>
+        ) : null}
+      </div>
 
       <PageHeader
         title={loading ? "Cuotas" : `Cuotas: ${playerName}`}
@@ -283,7 +336,7 @@ export default function AdminPlayerPaymentsDetail() {
         >
           <ul className="divide-y divide-[var(--glass-border)] border-t border-[var(--glass-border)]">
             {sortedPayments.map((p) => {
-              const overdue = isQuotaOverdue(p.status, p.due_date);
+              const severity = quotaSeverity(p.status, p.due_date);
               return (
                 <li
                   key={p.id}
@@ -295,16 +348,22 @@ export default function AdminPlayerPaymentsDetail() {
                       className={`payment-badge ${
                         p.status === "paid"
                           ? "payment-badge--paid"
-                          : overdue
-                            ? "payment-badge--overdue"
-                            : "payment-badge--pending"
+                          : severity === "critical"
+                            ? "payment-badge--pending"
+                            : severity === "warning"
+                              ? "payment-badge--overdue"
+                              : "payment-badge--expected"
                       }`}
                     >
                       {p.status === "paid"
                         ? "Pagado"
-                        : overdue
+                        : severity === "critical"
                           ? "Atrasada"
-                          : "Pendiente"}
+                          : severity === "warning"
+                            ? "Vence pronto"
+                            : p.expected
+                              ? "Prevista"
+                              : "Pendiente"}
                     </span>
                     <p className="text-base font-semibold text-[var(--text-primary)]">
                       {p.concept}
@@ -329,13 +388,28 @@ export default function AdminPlayerPaymentsDetail() {
                     className={`text-lg font-bold tabular-nums ${
                       p.status === "paid"
                         ? "payment-amount--paid"
-                        : "payment-amount--pending"
+                        : severity === "ok"
+                          ? "text-[var(--text-primary)]"
+                          : "payment-amount--pending"
                     }`}
                   >
                     {p.amount}€
                   </span>
                   <div className="flex items-stretch gap-1.5">
                     <TooltipGroup>
+                      {p.expected ? (
+                        <Tooltip label="Registrar esta cuota">
+                          <button
+                            type="button"
+                            onClick={() => duplicatePayment(p)}
+                            className="payment-action-btn"
+                            aria-label="Registrar esta cuota"
+                          >
+                            <FontAwesomeIcon icon={faPlus} />
+                          </button>
+                        </Tooltip>
+                      ) : (
+                        <>
                       <Tooltip label="Editar cuota">
                         <button
                           type="button"
@@ -378,6 +452,8 @@ export default function AdminPlayerPaymentsDetail() {
                           <FontAwesomeIcon icon={faTrash} />
                         </button>
                       </Tooltip>
+                        </>
+                      )}
                     </TooltipGroup>
                   </div>
                 </div>

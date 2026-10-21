@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
+import { resolveDisplayName } from "@/lib/auth/resolveDisplayName";
 
 export async function GET() {
   const supabase = await supabaseServer();
@@ -25,7 +26,11 @@ export async function GET() {
   return NextResponse.json({
     id: user.id,
     email: user.email,
-    user_name: profile?.user_name ?? user.email,
+    user_name: await resolveDisplayName({
+      id: user.id,
+      isAdmin,
+      user_name: profile?.user_name ?? user.email,
+    }),
     gender: profile?.gender ?? null,
     role: profile?.role ?? null,
     isAdmin,

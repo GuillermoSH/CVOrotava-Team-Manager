@@ -2,6 +2,7 @@ import {
   type QuotaItem,
   formatQuotaDay,
   isQuotaOverdue,
+  isQuotaOwed,
   sortQuotasByDue,
 } from "@/components/payments/quotaDates";
 
@@ -16,11 +17,13 @@ export default function QuotaStatusPanel({
   paid,
   quotas,
 }: QuotaStatusPanelProps) {
+  const real = quotas.filter((q) => !q.expected);
+  const expectedCount = quotas.filter((q) => q.expected && !isQuotaOwed(q)).length;
   const overdueCount = quotas.filter((q) =>
     isQuotaOverdue(q.status, q.due_date)
   ).length;
-  const pendingCount = quotas.filter((q) => q.status === "pending").length;
-  const paidCount = quotas.filter((q) => q.status === "paid").length;
+  const pendingCount = quotas.filter(isQuotaOwed).length;
+  const paidCount = real.filter((q) => q.status === "paid").length;
   const pendingSorted = sortQuotasByDue(
     quotas.filter((q) => q.status === "pending")
   );
@@ -67,11 +70,15 @@ export default function QuotaStatusPanel({
       ) : null}
 
       <p className="text-sm text-[var(--text-secondary)]">
-        {quotas.length} {quotas.length === 1 ? "cuota" : "cuotas"}
+        {quotas.length - expectedCount}{" "}
+        {quotas.length - expectedCount === 1 ? "cuota" : "cuotas"}
         {" · "}
         {pendingCount} pendiente{pendingCount === 1 ? "" : "s"}
         {paidCount > 0
           ? ` · ${paidCount} pagada${paidCount === 1 ? "" : "s"}`
+          : ""}
+        {expectedCount > 0
+          ? ` · ${expectedCount} prevista${expectedCount === 1 ? "" : "s"}`
           : ""}
         {overdueCount > 0 ? (
           <span className="mt-1 block font-medium text-[var(--color-danger)]">
