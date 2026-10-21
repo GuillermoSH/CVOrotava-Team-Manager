@@ -143,7 +143,7 @@ export default function ConfirmDialog({
       <DialogLayer busy={busy} onCancel={onCancel} confirmRef={confirmRef} />
       <div
         data-state={state}
-        className="dialog-backdrop absolute inset-0 bg-black/60"
+        className="dialog-backdrop absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={() => {
           if (!busy) onCancel();
         }}
