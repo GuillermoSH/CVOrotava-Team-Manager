@@ -23,6 +23,57 @@ export type ConfirmDialogProps = {
 };
 
 /**
+ * Bloqueo de scroll, Escape y foco inicial. Se monta con el diálogo y se desmonta cuando
+ * termina la animación de salida (AnimatePresence), así el scroll no se libera a mitad
+ * del fundido. Sin `position: fixed` en body: se compensa el ancho de la barra de
+ * desplazamiento para que la página de detrás no se mueva al abrir ni al cerrar.
+ */
+function DialogLayer({
+  busy,
+  onCancel,
+  confirmRef,
+}: {
+  busy: boolean;
+  onCancel: () => void;
+  confirmRef: React.RefObject<HTMLButtonElement | null>;
+}) {
+  // El último valor sin reinstalar el bloqueo en cada render del padre.
+  const latest = useRef({ busy, onCancel });
+  useEffect(() => {
+    latest.current = { busy, onCancel };
+  });
+
+  useEffect(() => {
+    const html = document.documentElement;
+    const { body } = document;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyPaddingRight = body.style.paddingRight;
+    const scrollbar = window.innerWidth - html.clientWidth;
+
+    html.style.overflow = "hidden";
+    if (scrollbar > 0) {
+      const current = Number.parseFloat(getComputedStyle(body).paddingRight) || 0;
+      body.style.paddingRight = `${current + scrollbar}px`;
+    }
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !latest.current.busy) latest.current.onCancel();
+    };
+    document.addEventListener("keydown", onKey);
+    const focusTimer = window.setTimeout(() => confirmRef.current?.focus(), 40);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", onKey);
+      html.style.overflow = prevHtmlOverflow;
+      body.style.paddingRight = prevBodyPaddingRight;
+    };
+  }, [confirmRef]);
+
+  return null;
+}
+
+/**
  * Diálogo de confirmación del club (sustituye window.confirm).
  * Portal a body + bloqueo de scroll; z-popover encima de otros modales.
  */
@@ -43,49 +94,6 @@ export default function ConfirmDialog({
   const descId = useId();
   const confirmRef = useRef<HTMLButtonElement>(null);
   const mounted = typeof document !== "undefined";
-
-  useEffect(() => {
-    if (!open) return;
-
-    const html = document.documentElement;
-    const { body } = document;
-    const scrollY = window.scrollY;
-    const prevHtmlOverflow = html.style.overflow;
-    const prevBodyOverflow = body.style.overflow;
-    const prevBodyPosition = body.style.position;
-    const prevBodyTop = body.style.top;
-    const prevBodyLeft = body.style.left;
-    const prevBodyRight = body.style.right;
-    const prevBodyWidth = body.style.width;
-
-    html.style.overflow = "hidden";
-    body.style.overflow = "hidden";
-    body.style.position = "fixed";
-    body.style.top = `-${scrollY}px`;
-    body.style.left = "0";
-    body.style.right = "0";
-    body.style.width = "100%";
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !busy) onCancel();
-    };
-    document.addEventListener("keydown", onKey);
-
-    const focusTimer = window.setTimeout(() => confirmRef.current?.focus(), 40);
-
-    return () => {
-      window.clearTimeout(focusTimer);
-      document.removeEventListener("keydown", onKey);
-      html.style.overflow = prevHtmlOverflow;
-      body.style.overflow = prevBodyOverflow;
-      body.style.position = prevBodyPosition;
-      body.style.top = prevBodyTop;
-      body.style.left = prevBodyLeft;
-      body.style.right = prevBodyRight;
-      body.style.width = prevBodyWidth;
-      window.scrollTo(0, scrollY);
-    };
-  }, [open, busy, onCancel]);
 
   const confirmClass =
     tone === "danger"
@@ -122,12 +130,13 @@ export default function ConfirmDialog({
           key="confirm-dialog"
           className="fixed inset-0 z-[var(--z-popover)] flex items-center justify-center overscroll-none p-4"
         >
+          <DialogLayer busy={busy} onCancel={onCancel} confirmRef={confirmRef} />
           <motion.div
             variants={backdropVariants}
             initial={reduceMotion ? false : "hidden"}
             animate="visible"
             exit="hidden"
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60"
             onClick={() => {
               if (!busy) onCancel();
             }}
