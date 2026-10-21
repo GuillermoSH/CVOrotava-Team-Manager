@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
@@ -87,7 +86,8 @@ function DialogLayer({
  * Diálogo de confirmación del club (sustituye window.confirm).
  * Portal a body; z-popover encima de otros modales. La entrada y la salida son animaciones
  * CSS (opacity y transform), que corren en el compositor: no se entrecortan cuando la página
- * se repinta al confirmar (petición, actualización de la lista…).
+ * se repinta al confirmar (petición, actualización de la lista…). Con «reducir movimiento»
+ * solo queda el fundido (ver globals.css).
  */
 export default function ConfirmDialog({
   open,
@@ -101,7 +101,6 @@ export default function ConfirmDialog({
   onCancel,
   onExitComplete,
 }: Readonly<ConfirmDialogProps>) {
-  const reduceMotion = useReducedMotion();
   const titleId = useId();
   const descId = useId();
   const confirmRef = useRef<HTMLButtonElement>(null);
@@ -112,7 +111,7 @@ export default function ConfirmDialog({
   const [exiting, setExiting] = useState(false);
   if (prevOpen !== open) {
     setPrevOpen(open);
-    setExiting(!open && !reduceMotion);
+    setExiting(!open);
   }
   const visible = open || exiting;
 
@@ -131,11 +130,6 @@ export default function ConfirmDialog({
     const t = window.setTimeout(finishExit, EXIT_FALLBACK_MS);
     return () => window.clearTimeout(t);
   }, [exiting, finishExit]);
-
-  // Con «reducir movimiento» no hay salida animada: se avisa en cuanto se cierra.
-  useEffect(() => {
-    if (!open && reduceMotion) exitCallback.current?.();
-  }, [open, reduceMotion]);
 
   const confirmClass =
     tone === "danger"
