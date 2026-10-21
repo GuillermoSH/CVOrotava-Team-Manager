@@ -782,3 +782,15 @@ html[data-theme="light"] .match-status-pill--past {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* Cuota prevista / pendiente aún sin aviso */
+.payment-card--expected {
+  background: var(--surface-faint);
+  border-color: var(--glass-border);
+}
+
+.payment-badge--expected {
+  background: var(--surface-faint);
+  color: var(--text-muted);
+  border-color: var(--glass-border);
+}

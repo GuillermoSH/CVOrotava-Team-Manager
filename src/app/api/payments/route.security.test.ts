@@ -118,7 +118,10 @@ describe("GET /api/payments IDOR", () => {
     const body = await jsonOf(res);
     expect(body.isAdmin).toBe(false);
     expect(body).not.toHaveProperty("authLastSignInAtByUserId");
-    const rows = body.data as { player_id: string; amount: number }[];
+    // Las cuotas previstas del calendario se añaden aparte; solo cuentan las filas reales.
+    const rows = (
+      body.data as { player_id: string; amount: number; expected?: boolean }[]
+    ).filter((r) => !r.expected);
     expect(rows).toHaveLength(1);
     expect(rows[0].player_id).toBe(ownPlayerId);
     expect(rows.some((r) => r.player_id === "other-player")).toBe(false);

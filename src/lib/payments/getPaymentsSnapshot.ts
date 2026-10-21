@@ -6,8 +6,12 @@ import {
   syncTmPlayersToSeniorRoster,
   type SeniorPlayerRow,
 } from "@/lib/payments/seniorPlayers";
-import { isQuotaOverdue } from "@/components/payments/quotaDates";
-import { normalizeSeasonId } from "@/utils/getCurrentSeason";
+import {
+  isQuotaOverdue,
+  quotaSeverity,
+} from "@/components/payments/quotaDates";
+import { missingFees, resolveDueDate } from "@/lib/payments/feeSchedule";
+import { getCurrentSeason, normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 /** Last sign-in via Auth Admin: paginate listUsers instead of N× getUserById. */
 async function authLastSignInByUserIds(userIds: string[]) {
@@ -52,6 +56,8 @@ const PAYMENT_COLUMNS = `
   paid_date,
   notes,
   season,
+  fee_code,
+  billing_month,
   created_at,
   updated_at
 `;
@@ -67,6 +73,10 @@ export type PaymentRow = {
   paid_date: string | null;
   notes: string | null;
   season: string | null;
+  fee_code?: string | null;
+  billing_month?: number | null;
+  /** Cuota prevista por el calendario, aún sin fila en la base de datos. */
+  expected?: boolean;
   created_at: string;
   updated_at: string;
   /** Display name from roster and/or linked TM user. */
@@ -131,14 +141,44 @@ function enrichPaymentRow(row: PaymentRow): PaymentRow {
   const fromUser = row.users?.user_name?.trim() || null;
   return {
     ...row,
+    due_date: resolveDueDate(row),
     player_name: fromPlayer || fromUser || null,
   };
+}
+
+/** Cuotas del calendario que el jugador aún no tiene registradas (como en el Portal). */
+function expectedRowsFor(
+  rows: PaymentRow[],
+  player: { id: string; user_id: string | null },
+  season: string
+): PaymentRow[] {
+  return missingFees(
+    rows.filter((r) => r.player_id === player.id || !r.player_id),
+    season
+  ).map((fee) => ({
+    id: `expected:${player.id}:${fee.fee_code}:${fee.billing_month ?? ""}`,
+    user_id: player.user_id,
+    player_id: player.id,
+    concept: fee.concept,
+    amount: fee.amount,
+    status: "pending",
+    due_date: fee.due_date,
+    paid_date: null,
+    notes: null,
+    season: normalizeSeasonId(season),
+    fee_code: fee.fee_code,
+    billing_month: fee.billing_month,
+    expected: true,
+    created_at: "",
+    updated_at: "",
+  }));
 }
 
 function buildAdminOverview(
   roster: SeniorPlayerRow[],
   payments: PaymentRow[],
-  authLastSignInAtByUserId: Record<string, string | null>
+  authLastSignInAtByUserId: Record<string, string | null>,
+  season: string
 ): AdminOverviewRow[] {
   const pendingByPlayer = new Map<string, number>();
   const overdueByPlayer = new Map<string, number>();
@@ -153,8 +193,16 @@ function buildAdminOverview(
   }
 
   return roster.map((player) => {
-    const pendingAmount = pendingByPlayer.get(player.id) ?? 0;
-    const overdueCount = overdueByPlayer.get(player.id) ?? 0;
+    let pendingAmount = pendingByPlayer.get(player.id) ?? 0;
+    let overdueCount = overdueByPlayer.get(player.id) ?? 0;
+    // Previstas sin registrar que ya están en aviso o vencidas también se deben.
+    const playerRows = payments.filter((p) => p.player_id === player.id);
+    for (const fee of expectedRowsFor(playerRows, player, season)) {
+      const severity = quotaSeverity("pending", fee.due_date);
+      if (severity === "ok") continue;
+      pendingAmount += Number(fee.amount);
+      if (severity === "critical") overdueCount += 1;
+    }
     let status: AdminOverviewRow["status"] = "success";
     if (overdueCount > 0 || pendingAmount >= 100) status = "danger";
     else if (pendingAmount > 0) status = "warning";
@@ -275,10 +323,20 @@ export async function getPaymentsSnapshot(
       const { data: payments, error } = await query;
       if (error) return { status: "error", message: error.message };
 
+      const rows = ((payments ?? []) as unknown as PaymentRow[]).map(
+        enrichPaymentRow
+      );
       return {
         status: "ok",
         body: {
-          data: ((payments ?? []) as unknown as PaymentRow[]).map(enrichPaymentRow),
+          data: [
+            ...rows,
+            ...expectedRowsFor(
+              rows,
+              { id: resolvedPlayerId, user_id: linkedUserId },
+              seasonKey ?? getCurrentSeason()
+            ),
+          ],
           isAdmin: true,
         },
       };
@@ -340,7 +398,8 @@ export async function getPaymentsSnapshot(
     const adminOverview = buildAdminOverview(
       roster,
       paymentRows,
-      authLastSignInAtByUserId
+      authLastSignInAtByUserId,
+      seasonKey
     );
 
     // Assignees = same roster (already synced); avoid a second full sync.
@@ -402,8 +461,17 @@ export async function getPaymentsSnapshot(
     return false;
   });
 
+  const ownRows = own.map((row) => ({ ...row, due_date: resolveDueDate(row) }));
+  const ownExpected = ownPlayerId
+    ? expectedRowsFor(
+        ownRows,
+        { id: ownPlayerId, user_id: actor.id },
+        seasonKey ?? getCurrentSeason()
+      )
+    : [];
+
   return {
     status: "ok",
-    body: { data: own, isAdmin: false },
+    body: { data: [...ownRows, ...ownExpected], isAdmin: false },
   };
 }

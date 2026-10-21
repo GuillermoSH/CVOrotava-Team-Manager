@@ -2,7 +2,7 @@ import {
   type QuotaItem,
   formatQuotaDay,
   formatQuotaMonth,
-  isQuotaOverdue,
+  quotaSeverity,
   sortQuotasByDue,
 } from "@/components/payments/quotaDates";
 
@@ -43,19 +43,25 @@ export default function QuotaMonthBoard({ quotas }: QuotaMonthBoardProps) {
           ) : null}
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-[repeat(auto-fit,_minmax(9.5rem,_1fr))]">
             {group.items.map((q) => {
-              const overdue = isQuotaOverdue(q.status, q.due_date);
+              const severity = quotaSeverity(q.status, q.due_date);
               const tone =
                 q.status === "paid"
                   ? "payment-card payment-card--paid"
-                  : overdue
-                    ? "payment-card payment-card--overdue"
-                    : "payment-card payment-card--pending";
+                  : severity === "critical"
+                    ? "payment-card payment-card--pending"
+                    : severity === "warning"
+                      ? "payment-card payment-card--overdue"
+                      : "payment-card payment-card--expected";
               const statusLabel =
                 q.status === "paid"
                   ? "Pagado"
-                  : overdue
+                  : severity === "critical"
                     ? "Atrasada"
-                    : "Pendiente";
+                    : severity === "warning"
+                      ? "Vence pronto"
+                      : q.expected
+                        ? "Prevista"
+                        : "Pendiente";
 
               return (
                 <li key={q.id} className={`rounded-xl px-3 py-3 ${tone}`}>
@@ -66,7 +72,9 @@ export default function QuotaMonthBoard({ quotas }: QuotaMonthBoardProps) {
                     className={`mt-1 text-xl font-bold tabular-nums ${
                       q.status === "paid"
                         ? "payment-amount--paid"
-                        : "payment-amount--pending"
+                        : severity === "ok"
+                          ? "text-[var(--text-primary)]"
+                          : "payment-amount--pending"
                     }`}
                   >
                     {q.amount}€

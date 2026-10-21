@@ -16,10 +16,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import PageHeader from "@/components/ui/PageHeader";
 import QuotaSeasonLayout from "@/components/payments/QuotaSeasonLayout";
-import { isQuotaOverdue } from "@/components/payments/quotaDates";
+import {
+  isQuotaOverdue,
+  isQuotaOwed,
+} from "@/components/payments/quotaDates";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import { useSeasons } from "@/contexts/SeasonContext";
+import { PLAYER_ORDER_KEY } from "@/components/payments/playerOrder";
 
 const PaymentModal = dynamic(
   () => import("@/components/payments/PaymentModal"),
@@ -39,6 +43,7 @@ export interface Payment {
   paid_date: string | null;
   notes: string | null;
   season: string | null;
+  expected?: boolean;
   created_at: string;
   updated_at: string;
   player_name?: string | null;
@@ -247,7 +252,7 @@ export default function PaymentsView({
     .filter((p) => p.status === "paid")
     .reduce((acc, p) => acc + Number(p.amount), 0);
   const totalPending = payments
-    .filter((p) => p.status === "pending")
+    .filter(isQuotaOwed)
     .reduce((acc, p) => acc + Number(p.amount), 0);
 
   const sortedAdminOverview = useMemo(() => {
@@ -431,9 +436,23 @@ export default function PaymentsView({
                       <li key={item.player_id}>
                         <button
                           type="button"
-                          onClick={() =>
-                            router.push(`/payments/admin/${item.player_id}`)
-                          }
+                          onClick={() => {
+                            // Orden visible, para navegar al anterior/siguiente en el detalle.
+                            try {
+                              sessionStorage.setItem(
+                                PLAYER_ORDER_KEY,
+                                JSON.stringify(
+                                  sortedAdminOverview.map((r) => ({
+                                    id: r.player_id,
+                                    name: r.player,
+                                  }))
+                                )
+                              );
+                            } catch {
+                              /* sin almacenamiento: el detalle no mostrará navegación */
+                            }
+                            router.push(`/payments/admin/${item.player_id}`);
+                          }}
                           className="group flex w-full cursor-pointer flex-col gap-3 py-4 text-left transition-colors hover:bg-[var(--surface-faint)] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--accent)] sm:flex-row sm:items-center sm:gap-4"
                         >
                           <div className="flex min-w-0 flex-1 items-center gap-3">
