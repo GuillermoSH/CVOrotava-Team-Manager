@@ -33,7 +33,7 @@ export default function LatestVideos({
         }
       >
         {videos.slice(0, 3).map((v, i) => {
-          const title = videoTitle(v, videoRecordedDate(v));
+          const title = videoTitle(v);
           return (
             <li key={v.id} className={`min-w-0 ${i === 2 && !compact ? "max-sm:hidden" : ""}`}>
               <a

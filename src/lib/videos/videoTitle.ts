@@ -13,12 +13,7 @@ export function isUsefulYoutubeTitle(title: string | null | undefined): title is
 }
 
 const GENDER_ABBR = { male: "S.M.", female: "S.F." } as const;
-
-/** `YYYY-MM-DD` (o con hora) → `24-10-2026`. */
-export function formatTitleDate(date: string): string {
-  const [year, month, day] = date.slice(0, 10).split("-");
-  return `${day}-${month}-${year}`;
-}
+const GENDER_LABEL = { male: "Masculino", female: "Femenino" } as const;
 
 const VENUE_KIND_PREFIX =
   /^(?:pabell[oó]n(?:es)?|pab\.?|polideportivo|polid\.?|pol\.?|mpal\.?|municipal)\s+(?:(?:de|del|la|las|los|el)\s+)?/i;
@@ -30,6 +25,7 @@ export function shortVenueName(name: string): string {
   return short || name.trim();
 }
 
+/** Pabellón del partido, sin el tipo de instalación (la relación llega como objeto o lista). */
 function venueOf(match: VideoMatchSummary | null | undefined): string | null {
   const venues = match?.venues;
   const venue = Array.isArray(venues) ? venues[0] : venues;
@@ -44,32 +40,26 @@ type TitledVideo = {
 };
 
 /**
- * Título que se muestra de un vídeo:
- *  - enlazado a un partido, el completo y compacto:
- *    «Partido de Liga S.M. vs La Palma Voleyball 24-10-2026 Quiquirá»
- *    (S.M./S.F. = Senior masculino/femenino; fecha del partido; pabellón sin «Pabellón»);
+ * Título corto que se muestra de un vídeo:
+ *  - enlazado a un partido: «S.M. vs La Palma Volleyball» (S.M./S.F. = Senior masculino/femenino);
  *  - si no, el título de YouTube cuando es útil;
- *  - si no, el tipo, el equipo y la fecha de grabación («Entrenamiento S.M. 05-03-2026»).
+ *  - si no, el tipo y el equipo («Entrenamiento S.M.»).
+ * El detalle (tipo, género, pabellón) va en la descripción: ver `videoDetails`.
  * `youtubeTitle` es opcional: las vistas que no lo consultan pasan solo el vídeo.
  */
-export function videoTitle(
-  video: TitledVideo,
-  recordedDate: string,
-  youtubeTitle?: string | null
-): string {
-  const base = `${VIDEO_TYPE_LABELS[video.video_type]} ${GENDER_ABBR[video.gender]}`;
-
-  if (video.match?.opponent) {
-    return [
-      base,
-      `vs ${video.match.opponent}`,
-      formatTitleDate(video.match.date || recordedDate),
-      venueOf(video.match),
-    ]
-      .filter(Boolean)
-      .join(" ");
-  }
-
+export function videoTitle(video: TitledVideo, youtubeTitle?: string | null): string {
+  const team = GENDER_ABBR[video.gender];
+  if (video.match?.opponent) return `${team} vs ${video.match.opponent}`;
   if (isUsefulYoutubeTitle(youtubeTitle)) return youtubeTitle.trim();
-  return `${base} ${formatTitleDate(recordedDate)}`;
+  return `${VIDEO_TYPE_LABELS[video.video_type]} ${team}`;
+}
+
+/**
+ * Descripción de un vídeo: tipo, género y, si el partido lo tiene, el pabellón.
+ * «Partido de Liga · Masculino · Quiquirá»
+ */
+export function videoDetails(video: TitledVideo): string {
+  return [VIDEO_TYPE_LABELS[video.video_type], GENDER_LABEL[video.gender], venueOf(video.match)]
+    .filter(Boolean)
+    .join(" · ");
 }

@@ -12,7 +12,7 @@ import {
   type VideoMatchSummary,
 } from "@/lib/videos/constants";
 import { videoRecordedDate } from "@/lib/videos/date";
-import { videoTitle } from "@/lib/videos/videoTitle";
+import { videoDetails, videoTitle } from "@/lib/videos/videoTitle";
 import { formatMatchDate } from "@/lib/matches/formatMatchLabel";
 
 export type Video = {
@@ -64,16 +64,13 @@ export default function VideoCard({
     }
   }, [video.url, linked]);
 
-  const recordedDate = videoRecordedDate(video);
-  const displayTitle = videoTitle(video, recordedDate, youtubeTitle);
+  const displayTitle = videoTitle(video, youtubeTitle);
   const loadingTitle = !linked && youtubeTitle === undefined;
 
-  const subtitle = formatMatchDate(recordedDate);
+  const subtitle = formatMatchDate(videoRecordedDate(video));
 
-  const meta = [
-    VIDEO_TYPE_LABELS[video.video_type],
-    video.gender === "male" ? "Masculino" : "Femenino",
-  ].join(" · ");
+  // Tipo, género y pabellón: el título solo lleva el equipo y el rival.
+  const meta = videoDetails(video);
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[var(--glass-border)] bg-[var(--glass-surface)] transition-[border-color,box-shadow,transform] duration-200 hover:border-[var(--glass-border-hover)] hover:shadow-[var(--shadow-card-hover)] sm:hover:-translate-y-0.5">

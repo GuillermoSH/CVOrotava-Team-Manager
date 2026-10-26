@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatTitleDate, isUsefulYoutubeTitle, shortVenueName, videoTitle } from "./videoTitle";
+import { isUsefulYoutubeTitle, shortVenueName, videoDetails, videoTitle } from "./videoTitle";
 
 describe("isUsefulYoutubeTitle", () => {
   it("acepta un título normal", () => {
@@ -12,13 +12,6 @@ describe("isUsefulYoutubeTitle", () => {
     expect(isUsefulYoutubeTitle("Orotava vs [Equipo contrario]")).toBe(false);
     expect(isUsefulYoutubeTitle("vs equipo contrario")).toBe(false);
     expect(isUsefulYoutubeTitle("Partido [FECHA]")).toBe(false);
-  });
-});
-
-describe("formatTitleDate", () => {
-  it("pone día-mes-año", () => {
-    expect(formatTitleDate("2026-10-24")).toBe("24-10-2026");
-    expect(formatTitleDate("2026-03-05T18:00:00+00:00")).toBe("05-03-2026");
   });
 });
 
@@ -39,52 +32,58 @@ describe("shortVenueName", () => {
 describe("videoTitle", () => {
   const league = { video_type: "league_match" as const, gender: "male" as const };
   const match = {
-    opponent: "La Palma Voleyball",
+    opponent: "La Palma Volleyball",
     date: "2026-10-24",
     result: "3-1",
     venues: { venue_name: "Pabellón Quiquirá" },
   };
 
-  it("un vídeo de partido lleva tipo, equipo, rival, fecha y pabellón", () => {
-    expect(videoTitle({ ...league, match }, "2026-10-25", "Otro título")).toBe(
-      "Partido de Liga S.M. vs La Palma Voleyball 24-10-2026 Quiquirá"
+  it("un vídeo de partido se titula con el equipo y el rival", () => {
+    expect(videoTitle({ ...league, match }, "Otro título")).toBe("S.M. vs La Palma Volleyball");
+    expect(videoTitle({ video_type: "friendly_match", gender: "female", match })).toBe(
+      "S.F. vs La Palma Volleyball"
     );
-  });
-
-  it("femenino y amistoso", () => {
-    expect(
-      videoTitle({ video_type: "friendly_match", gender: "female", match }, "2026-10-25")
-    ).toBe("Partido Amistoso S.F. vs La Palma Voleyball 24-10-2026 Quiquirá");
-  });
-
-  it("sin pabellón omite ese tramo; con la relación como lista funciona igual", () => {
-    expect(videoTitle({ ...league, match: { ...match, venues: null } }, "2026-10-25")).toBe(
-      "Partido de Liga S.M. vs La Palma Voleyball 24-10-2026"
-    );
-    expect(
-      videoTitle(
-        { ...league, match: { ...match, venues: [{ venue_name: "Pabellón Quiquirá" }] } },
-        "2026-10-25"
-      )
-    ).toBe("Partido de Liga S.M. vs La Palma Voleyball 24-10-2026 Quiquirá");
-    expect(
-      videoTitle({ ...league, match: { ...match, venues: { venue_name: "  " } } }, "2026-10-25")
-    ).toBe("Partido de Liga S.M. vs La Palma Voleyball 24-10-2026");
   });
 
   it("sin partido usa el título de YouTube si es útil", () => {
-    expect(videoTitle(league, "2026-10-12", "  Final de liga  ")).toBe("Final de liga");
+    expect(videoTitle(league, "  Final de liga  ")).toBe("Final de liga");
   });
 
-  it("con una plantilla sin rellenar o sin título cae al tipo, equipo y fecha", () => {
-    expect(videoTitle(league, "2026-10-12", "Orotava vs [Equipo contrario]")).toBe(
-      "Partido de Liga S.M. 12-10-2026"
+  it("con una plantilla sin rellenar o sin título cae al tipo y el equipo", () => {
+    expect(videoTitle(league, "Orotava vs [Equipo contrario]")).toBe("Partido de Liga S.M.");
+    expect(videoTitle({ video_type: "training", gender: "female" })).toBe("Entrenamiento S.F.");
+    expect(videoTitle({ video_type: "friendly_match", gender: "male" }, null)).toBe(
+      "Partido Amistoso S.M."
     );
-    expect(videoTitle({ video_type: "training", gender: "female" }, "2026-03-05")).toBe(
-      "Entrenamiento S.F. 05-03-2026"
-    );
-    expect(videoTitle({ video_type: "friendly_match", gender: "male" }, "2026-03-05", null)).toBe(
-      "Partido Amistoso S.M. 05-03-2026"
-    );
+  });
+});
+
+describe("videoDetails", () => {
+  const league = { video_type: "league_match" as const, gender: "male" as const };
+
+  it("lleva tipo, género y pabellón del partido", () => {
+    expect(
+      videoDetails({
+        ...league,
+        match: { opponent: "X", date: "2026-10-24", result: null, venues: { venue_name: "Pabellón Quiquirá" } },
+      })
+    ).toBe("Partido de Liga · Masculino · Quiquirá");
+  });
+
+  it("acepta el pabellón como lista y omite lo que falta", () => {
+    expect(
+      videoDetails({
+        video_type: "friendly_match",
+        gender: "female",
+        match: { opponent: "X", date: "2026-10-24", result: null, venues: [{ venue_name: "Pab. Galeón" }] },
+      })
+    ).toBe("Partido Amistoso · Femenino · Galeón");
+    expect(
+      videoDetails({
+        ...league,
+        match: { opponent: "X", date: "2026-10-24", result: null, venues: null },
+      })
+    ).toBe("Partido de Liga · Masculino");
+    expect(videoDetails({ video_type: "training", gender: "male" })).toBe("Entrenamiento · Masculino");
   });
 });
