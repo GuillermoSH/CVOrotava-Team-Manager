@@ -18,4 +18,4 @@ Cuando se termina el desarrollo de una tarea (las pequeñas no entran):
 
 ## Notas de diseño pendientes
 
-- `docs/pagos-exenciones.md`: estado de las exenciones de pago, **migraciones SQL sin aplicar**, impacto en el Portal (comparte base de datos) e ideas de ajustes por mes. Léelo antes de tocar pagos.
+- `docs/pagos-exenciones.md`: estado de las exenciones de pago (migraciones aplicadas, implementadas en Manager y Portal, contrato común y dónde se editan) e ideas de ajustes por mes. Léelo antes de tocar pagos.
