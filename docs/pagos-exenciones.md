@@ -14,14 +14,14 @@ Un jugador puede estar **exento de pagos en una temporada**, con un motivo opcio
 
 Código: `src/lib/payments/exemptions.ts`, `src/lib/payments/getPaymentsSnapshot.ts`, `src/app/api/payments/route.ts`, `src/app/api/payments/exemptions/route.ts`, `src/components/payments/ExemptionPanel.tsx`.
 
-## 2. SQL pendiente de aplicar en Supabase
+## 2. Migraciones en Supabase
 
-**No aplicado a fecha 2026-10-21.** Hay que ejecutarlo a mano (no hay acceso a la base de datos desde las sesiones de Claude):
+**Aplicadas** (comprobado el 2026-10-26: la tabla `payment_exemptions` y las columnas de contacto de `fed_clubs` existen en la base de datos):
 
 - `supabase/migrations/20261021120000_payment_exemptions.sql`  ← exenciones
-- `supabase/migrations/20261019120000_fed_clubs_contact.sql`  ← contacto de clubes rivales (confirmar si ya se aplicó; sin ella `/contacts` da error)
+- `supabase/migrations/20261019120000_fed_clubs_contact.sql`  ← contacto de clubes rivales
 
-Después de aplicar la segunda, lanzar una sincronización con la federación para rellenar teléfonos y correos.
+Si la segunda se aplicó después de la última sincronización con la federación, lanzar una para rellenar teléfonos y correos.
 
 ## 3. Decisiones tomadas (confirmadas por el usuario)
 
@@ -31,18 +31,17 @@ Después de aplicar la segunda, lanzar una sincronización con la federación pa
 - **Solo jugadores**: los pagos cuelgan de `player_id`; un usuario sin ficha no recibe cuotas.
 - Los pendientes ya registrados de un exento **se conservan pero no cuentan**.
 
-## 4. Impacto en el Portal (pendiente de implementar allí)
+## 4. Portal (implementado el 2026-10-26, commit `5924aa7` en `CVOrotava-Portal`)
 
-Team Manager y el Portal **comparten la misma base de datos de Supabase** (`players`, `payments`, calendario de cuotas `season_fee_lines`…). Por tanto la exención afecta a los dos y **hay que implementarla bien en el Portal**; si no, el Portal seguirá tratando como deudores a los exentos.
+Team Manager y el Portal **comparten la misma base de datos de Supabase**, así que la exención afecta a los dos. **Contrato común:** «exento = existe una fila `(player_id, season)` en `payment_exemptions`».
 
-No se ha visto el código del Portal desde este repo. Cosas a revisar allí:
+En el Portal:
 
-- ¿Genera o muestra cuotas previstas (matrícula, pago único, equipación) a las familias? Debe saltarse a los exentos de la temporada.
-- ¿Calcula deuda, atrasos o envía recordatorios por correo? No deben contar para un exento.
-- ¿Permite asignar cuotas masivas o sueltas? Debe excluirlos o avisar.
-- **Permisos:** `payment_exemptions` está cerrada a `authenticated`. Si el Portal lee con el JWT del usuario (no con service role) necesita una política propia o una vista/función segura. Cuidado: el motivo puede ser sensible; las familias no deberían leer el de otros jugadores.
-- **Contrato común:** «exento = existe una fila `(player_id, season)` en `payment_exemptions`».
-- **Idea para no duplicar lógica:** una función SQL `is_payment_exempt(player_id, season)` (o una vista) usada por los dos repos.
+- **Lectura:** con service role (la tabla sigue cerrada a `authenticated`, el motivo no es legible por las familias). Caché corta con el tag de pagos para que lo marcado desde Team Manager llegue pronto.
+- **Reglas:** un exento no tiene obligaciones, deuda ni avisos por correo, no sale en la lista de morosos de WhatsApp ni en la matriz de pagos, y cuenta como matrícula resuelta. Sus cobros ya anotados siguen sumando en el inicio.
+- **Cobros:** registrar un cobro (suelto o en bloque) a un exento se rechaza hasta quitarle la exención.
+- **Dónde se edita:** Team Manager, en el detalle del jugador de pagos (`ExemptionPanel`); Portal, en la ficha del jugador (sección «Exención de pagos», solo admin; el manager la ve). Las dos escriben en la misma tabla.
+- **Decisión:** no se creó la función SQL `is_payment_exempt`; el contrato de arriba basta mientras cada repo lea la tabla con service role.
 
 ## 5. Ideas futuras (no implementadas, solo apuntadas)
 
@@ -62,6 +61,5 @@ Preguntas abiertas: ¿ajuste por mes o por rango de meses?, ¿quién puede aprob
 
 ## 6. Para la próxima sesión
 
-1. Confirmar con el usuario que las migraciones están aplicadas y probar el flujo de exenciones en pantalla.
-2. Decidir cómo se implementa la exención en el Portal (ver sección 4) y si se centraliza en una función SQL.
-3. Si se aborda, diseñar los ajustes por mes (sección 5) antes de tocar código.
+1. Probar el flujo de exenciones en pantalla en los dos repos (marcar, ver que desaparece de deuda y matriz, intentar cobrar, quitar).
+2. Si se aborda, diseñar los ajustes por mes (sección 5) antes de tocar código.
