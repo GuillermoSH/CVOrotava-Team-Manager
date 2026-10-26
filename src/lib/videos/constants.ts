@@ -4,7 +4,7 @@ export const VIDEO_LIST_COLUMNS =
 
 /** Select with joined match summary for library grid. */
 export const VIDEO_LIST_WITH_MATCH =
-  "id, url, created_at, recorded_at, video_type, season, gender, match_id, matches(opponent, date, result)";
+  "id, url, created_at, recorded_at, video_type, season, gender, match_id, matches(opponent, date, result, venues(venue_name))";
 
 export const DEFAULT_VIDEO_PAGE_SIZE = 12;
 
@@ -39,6 +39,8 @@ export type VideoMatchSummary = {
   opponent: string;
   date: string;
   result: string | null;
+  /** Pabellón del partido (la relación llega como objeto, o lista de uno según la consulta). */
+  venues?: { venue_name: string | null } | { venue_name: string | null }[] | null;
 };
 
 export type VideoListItem = {

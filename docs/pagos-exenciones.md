@@ -29,7 +29,7 @@ Si la segunda se aplicó después de la última sincronización con la federaci�
 - **Con motivo libre**: sirve también para favores puntuales a un jugador, no solo cargos.
 - **Tabla propia**, sin tocar `players` (se comparte con el Portal).
 - **Solo jugadores**: los pagos cuelgan de `player_id`; un usuario sin ficha no recibe cuotas.
-- Los pendientes ya registrados de un exento **se conservan pero no cuentan**.
+- Los pendientes ya registrados de un exento **no cuentan como deuda**. Se pueden quitar a mano: casilla al marcar la exención, o botón «Quitar pendientes» en su detalle (borra solo los pendientes de esa temporada, nunca los cobrados). Si quedan restos, el «Por hacer» del inicio avisa («N exentos con pagos pendientes»). Se descartó un cron que los borre solo: es irreversible y una exención marcada por error borraría cuotas reales.
 
 ## 4. Portal (implementado el 2026-10-26, commit `5924aa7` en `CVOrotava-Portal`)
 

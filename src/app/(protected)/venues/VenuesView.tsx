@@ -8,6 +8,8 @@ import {
   faCheck,
   faCodeMerge,
   faMagnifyingGlass,
+  faPlus,
+  faTrash,
   faWandMagicSparkles,
 } from "@fortawesome/free-solid-svg-icons";
 import PageHeader from "@/components/ui/PageHeader";
@@ -24,6 +26,11 @@ const LOCATION_LABEL: Record<LocationType, string> = {
 };
 
 type Tab = "pending" | "all";
+
+const EMPTY_FORM = { venue_name: "", team_name: "", location_type: "home" as LocationType };
+
+const FIELD_CLASS =
+  "w-full rounded-xl border border-[var(--form-input-border)] bg-[var(--form-input-bg)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--form-placeholder)] outline-none transition-colors focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)]";
 
 async function call(url: string, method: string, body?: unknown) {
   const res = await fetch(url, {
@@ -50,6 +57,8 @@ export default function VenuesView({ initialVenues }: Readonly<{ initialVenues: 
   const pendingCount = venues.filter((v) => v.needs_review).length;
   const [tab, setTab] = useState<Tab>(pendingCount > 0 ? "pending" : "all");
   const [mergeTarget, setMergeTarget] = useState<Record<string, string>>({});
+  const [creating, setCreating] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
 
   const suggestedMerges = useMemo(() => planVenueMerges(venues), [venues]);
 
@@ -109,6 +118,37 @@ export default function VenuesView({ initialVenues }: Readonly<{ initialVenues: 
     return run(v.id, () => call(`/api/venues/${v.id}/merge`, "POST", { into }), `Fusionado en ${intoName}`);
   };
 
+  const createVenue = () =>
+    run(
+      "new",
+      async () => {
+        await call("/api/venues", "POST", form);
+        setCreating(false);
+        setForm(EMPTY_FORM);
+        setTab("all");
+      },
+      `${form.venue_name.trim()} creado`
+    );
+
+  const remove = async (v: AdminVenue) => {
+    const ok = await ask({
+      title: "Eliminar pabellón",
+      description: (
+        <>
+          Se eliminará <span className="font-medium text-[var(--text-primary)]">«{v.venue_name}»</span>
+          , que no tiene partidos.
+          {v.aliases.length > 0
+            ? " Si la federación lo vuelve a publicar, reaparecerá como pendiente de revisar."
+            : ""}
+        </>
+      ),
+      confirmLabel: "Eliminar",
+      tone: "danger",
+    });
+    if (!ok) return;
+    return run(v.id, () => call(`/api/venues/${v.id}`, "DELETE"), `${v.venue_name} eliminado`);
+  };
+
   const applySuggestions = async () => {
     const n = suggestedMerges.length;
     const ok = await ask({
@@ -142,19 +182,90 @@ export default function VenuesView({ initialVenues }: Readonly<{ initialVenues: 
           </>
         }
         actions={
-          suggestedMerges.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {suggestedMerges.length > 0 ? (
+              <button
+                type="button"
+                className="btn-primary flex items-center gap-2"
+                disabled={busy !== null}
+                onClick={applySuggestions}
+              >
+                <FontAwesomeIcon icon={faWandMagicSparkles} />
+                Aplicar {suggestedMerges.length} fusiones sugeridas
+              </button>
+            ) : null}
             <button
               type="button"
-              className="btn-primary flex items-center gap-2"
+              className="btn-secondary flex items-center gap-2"
               disabled={busy !== null}
-              onClick={applySuggestions}
+              onClick={() => setCreating((open) => !open)}
             >
-              <FontAwesomeIcon icon={faWandMagicSparkles} />
-              Aplicar {suggestedMerges.length} fusiones sugeridas
+              <FontAwesomeIcon icon={faPlus} />
+              Nuevo pabellón
             </button>
-          ) : null
+          </div>
         }
       />
+
+      {creating && (
+        <form
+          className="mb-5 grid gap-3 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface)] p-4 sm:grid-cols-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void createVenue();
+          }}
+        >
+          <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--text-secondary)]">
+            Nombre del pabellón
+            <input
+              className={FIELD_CLASS}
+              value={form.venue_name}
+              maxLength={120}
+              required
+              placeholder="Pabellón Quiquirá"
+              onChange={(e) => setForm((f) => ({ ...f, venue_name: e.target.value }))}
+            />
+          </label>
+          <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--text-secondary)]">
+            Equipo o club local
+            <input
+              className={FIELD_CLASS}
+              value={form.team_name}
+              maxLength={120}
+              required
+              placeholder="CV Orotava"
+              onChange={(e) => setForm((f) => ({ ...f, team_name: e.target.value }))}
+            />
+          </label>
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
+            <SegmentedControl
+              aria-label="Tipo del pabellón nuevo"
+              value={form.location_type}
+              onChange={(location_type) => setForm((f) => ({ ...f, location_type }))}
+              options={(Object.keys(LOCATION_LABEL) as LocationType[]).map((t) => ({
+                value: t,
+                label: LOCATION_LABEL[t],
+              }))}
+            />
+          </div>
+          <div className="flex gap-2 sm:col-span-2">
+            <button type="submit" className="btn-primary" disabled={busy !== null}>
+              Crear pabellón
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              disabled={busy !== null}
+              onClick={() => {
+                setCreating(false);
+                setForm(EMPTY_FORM);
+              }}
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      )}
 
       <p className="mb-4 text-sm text-[var(--text-muted)]">
         La federación publica el mismo pabellón con varios nombres. Fusiona los duplicados y
@@ -269,6 +380,18 @@ export default function VenuesView({ initialVenues }: Readonly<{ initialVenues: 
                     placeholder="Fusionar con…"
                     disabled={busy !== null}
                   />
+                  {v.matches_count === 0 && (
+                    <button
+                      type="button"
+                      disabled={busy !== null}
+                      onClick={() => remove(v)}
+                      aria-label={`Eliminar ${v.venue_name}`}
+                      className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--glass-border)] px-3 text-xs font-medium text-[var(--color-danger)] hover:bg-[var(--glass-surface)] disabled:opacity-50"
+                    >
+                      <FontAwesomeIcon icon={faTrash} className="text-[0.7rem]" />
+                      Eliminar
+                    </button>
+                  )}
                   {mergeTarget[v.id] && (
                     <button
                       type="button"

@@ -35,6 +35,7 @@ export default function ExemptionPanel({
   const [editing, setEditing] = useState(false);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
+  const [clearOnMark, setClearOnMark] = useState(false);
 
   async function call(method: "PUT" | "DELETE") {
     setBusy(true);
@@ -44,7 +45,12 @@ export default function ExemptionPanel({
           ? await fetch("/api/payments/exemptions", {
               method,
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ player_id: playerId, season, reason: reason.trim() || null }),
+              body: JSON.stringify({
+                player_id: playerId,
+                season,
+                reason: reason.trim() || null,
+                clear_pending: clearOnMark && pendingCount > 0,
+              }),
             })
           : await fetch(
               `/api/payments/exemptions?player_id=${encodeURIComponent(playerId)}&season=${encodeURIComponent(season)}`,
@@ -52,12 +58,49 @@ export default function ExemptionPanel({
             );
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error || "No se pudo guardar la exención");
-      sileo.success({ title: method === "PUT" ? "Marcado como exento" : "Exención quitada" });
+      sileo.success({
+        title: method === "PUT" ? "Marcado como exento" : "Exención quitada",
+        description: json.removed > 0 ? `${json.removed} pago${json.removed === 1 ? "" : "s"} pendiente${json.removed === 1 ? "" : "s"} quitado${json.removed === 1 ? "" : "s"}` : undefined,
+      });
+      if (json.warning) sileo.warning({ title: "Exención guardada", description: json.warning });
       setEditing(false);
       setReason("");
+      setClearOnMark(false);
       onChanged();
     } catch (err: unknown) {
       sileo.error({ title: "No se pudo guardar", description: (err as Error).message });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function clearPending() {
+    const ok = await ask({
+      title: "Quitar pagos pendientes",
+      description: (
+        <>
+          Se borrarán los {pendingCount} pago{pendingCount === 1 ? "" : "s"} pendiente{pendingCount === 1 ? "" : "s"} de{" "}
+          <span className="font-medium text-[var(--text-primary)]">{playerName}</span> en {season}. Los pagos ya cobrados no se
+          tocan. Esta acción no se puede deshacer.
+        </>
+      ),
+      confirmLabel: "Quitar pendientes",
+      tone: "danger",
+    });
+    if (!ok) return;
+    setBusy(true);
+    try {
+      const res = await fetch("/api/payments/exemptions/clear-pending", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ player_id: playerId, season }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || "No se pudieron quitar los pagos pendientes");
+      sileo.success({ title: "Pagos pendientes quitados" });
+      onChanged();
+    } catch (err: unknown) {
+      sileo.error({ title: "No se pudo quitar", description: (err as Error).message });
     } finally {
       setBusy(false);
     }
@@ -91,19 +134,31 @@ export default function ExemptionPanel({
             <p className="mt-0.5 text-xs text-[var(--text-muted)]">
               No recibe cuotas previstas ni asignaciones.
               {pendingCount > 0
-                ? ` Tiene ${pendingCount} pago${pendingCount === 1 ? "" : "s"} pendiente${pendingCount === 1 ? "" : "s"} registrado${pendingCount === 1 ? "" : "s"}: no cuenta${pendingCount === 1 ? "" : "n"} como deuda.`
+                ? ` Tiene ${pendingCount} pago${pendingCount === 1 ? "" : "s"} pendiente${pendingCount === 1 ? "" : "s"} registrado${pendingCount === 1 ? "" : "s"}: no cuenta${pendingCount === 1 ? "" : "n"} como deuda, pero puedes quitarlo${pendingCount === 1 ? "" : "s"}.`
                 : ""}
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={remove}
-          disabled={busy}
-          className="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[var(--glass-border)] px-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:opacity-50"
-        >
-          Quitar exención
-        </button>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {pendingCount > 0 ? (
+            <button
+              type="button"
+              onClick={clearPending}
+              disabled={busy}
+              className="inline-flex h-9 cursor-pointer items-center justify-center rounded-lg border border-[var(--glass-border)] px-3 text-sm font-medium text-[var(--color-danger)] transition-colors hover:border-[var(--color-danger)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:opacity-50"
+            >
+              Quitar pendientes
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={remove}
+            disabled={busy}
+            className="inline-flex h-9 cursor-pointer items-center justify-center rounded-lg border border-[var(--glass-border)] px-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:opacity-50"
+          >
+            Quitar exención
+          </button>
+        </div>
       </section>
     );
   }
@@ -131,7 +186,8 @@ export default function ExemptionPanel({
       }}
       className="mb-5 flex flex-col gap-3 rounded-xl border border-[var(--glass-border)] bg-[var(--surface-faint)] p-4 sm:flex-row sm:items-end"
     >
-      <label className="block min-w-0 flex-1 text-sm">
+      <div className="min-w-0 flex-1">
+      <label className="block text-sm">
         <span className="font-medium">Motivo de la exención en {season}</span>
         <input
           type="text"
@@ -149,12 +205,28 @@ export default function ExemptionPanel({
           ))}
         </datalist>
       </label>
+        {pendingCount > 0 ? (
+          <label className="mt-2.5 flex cursor-pointer items-start gap-2 text-xs text-[var(--text-secondary)]">
+            <input
+              type="checkbox"
+              checked={clearOnMark}
+              onChange={(e) => setClearOnMark(e.target.checked)}
+              className="mt-0.5"
+            />
+            <span>
+              Quitar también sus {pendingCount} pago{pendingCount === 1 ? "" : "s"} pendiente{pendingCount === 1 ? "" : "s"}{" "}
+              (se borran; los pagos ya cobrados no se tocan)
+            </span>
+          </label>
+        ) : null}
+      </div>
       <div className="flex gap-2">
         <button
           type="button"
           onClick={() => {
             setEditing(false);
             setReason("");
+            setClearOnMark(false);
           }}
           disabled={busy}
           className="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg border border-[var(--glass-border)] px-3.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] disabled:opacity-50"

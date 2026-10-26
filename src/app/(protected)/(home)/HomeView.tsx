@@ -29,6 +29,7 @@ import type { VideoListItem } from "@/lib/videos/constants";
 import type { Achievement } from "@/lib/stats/competitive/achievements";
 import type { WeekendRoundup as Roundup } from "@/lib/home/weekendRoundup";
 import type { AdminPendingData } from "@/lib/home/loadAdminPending.types";
+import { playedMatchesWithoutVideo } from "@/lib/home/adminPending";
 import {
   countdownLabel,
   daysUntil,
@@ -43,6 +44,7 @@ export type HomeMatch = {
   time?: string | null;
   opponent: string;
   result?: string | null;
+  video_url?: string | null;
   gender: "male" | "female";
   season: string;
   venues?: {
@@ -225,6 +227,7 @@ export default function HomeView({
   }).length;
 
   const pendingMatches = playedMatches.filter((m) => !m.result);
+  const unfilmedMatches = playedMatchesWithoutVideo(matches, now);
 
   const playedWithResult = playedMatches.filter((m) => m.result).length;
 
@@ -404,6 +407,7 @@ export default function HomeView({
                 opponent: m.opponent,
                 date: m.date,
               }))}
+              matchesWithoutVideo={unfilmedMatches}
               now={now}
             />
           ) : paymentsData && !paymentsData.isAdmin ? (

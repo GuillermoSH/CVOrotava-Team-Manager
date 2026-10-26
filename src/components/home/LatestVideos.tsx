@@ -5,6 +5,7 @@ import { faArrowRight, faPlay } from "@fortawesome/free-solid-svg-icons";
 import { getThumbnailUrl } from "@/lib/youtube";
 import { VIDEO_TYPE_LABELS, type VideoListItem } from "@/lib/videos/constants";
 import { videoRecordedDate } from "@/lib/videos/date";
+import { videoTitle } from "@/lib/videos/videoTitle";
 import { formatMatchDate } from "@/lib/matches/formatMatchLabel";
 
 export default function LatestVideos({
@@ -32,7 +33,7 @@ export default function LatestVideos({
         }
       >
         {videos.slice(0, 3).map((v, i) => {
-          const title = v.match ? `vs ${v.match.opponent}` : VIDEO_TYPE_LABELS[v.video_type];
+          const title = videoTitle(v);
           return (
             <li key={v.id} className={`min-w-0 ${i === 2 && !compact ? "max-sm:hidden" : ""}`}>
               <a
@@ -61,6 +62,7 @@ export default function LatestVideos({
                   ) : null}
                 </span>
                 <span
+                  title={title}
                   className={`mt-2 block truncate font-medium group-hover:text-[var(--accent)] ${compact ? "text-xs" : "text-sm"}`}
                 >
                   {title}
