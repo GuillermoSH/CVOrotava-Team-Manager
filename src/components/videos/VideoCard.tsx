@@ -12,6 +12,7 @@ import {
   type VideoMatchSummary,
 } from "@/lib/videos/constants";
 import { videoRecordedDate } from "@/lib/videos/date";
+import { videoTitle } from "@/lib/videos/videoTitle";
 import { formatMatchDate } from "@/lib/matches/formatMatchLabel";
 
 export type Video = {
@@ -52,21 +53,22 @@ export default function VideoCard({
   onEdit,
   eager = false,
 }: Readonly<VideoCardProps>) {
-  const [youtubeTitle, setYoutubeTitle] = useState("");
+  // undefined = consultando; null = YouTube no dio título (sin clave o error).
+  const [youtubeTitle, setYoutubeTitle] = useState<string | null | undefined>(undefined);
   const linked = video.match;
   const resultChip = linked ? parseResult(linked.result) : null;
 
   useEffect(() => {
     if (!linked && video.url) {
-      getYoutubeTitle(video.url).then((t) => setYoutubeTitle(t || "Vídeo"));
+      getYoutubeTitle(video.url).then(setYoutubeTitle);
     }
   }, [video.url, linked]);
 
-  const displayTitle = linked
-    ? `vs ${linked.opponent}`
-    : youtubeTitle || "Vídeo";
+  const recordedDate = videoRecordedDate(video);
+  const displayTitle = videoTitle(video, recordedDate, youtubeTitle);
+  const loadingTitle = !linked && youtubeTitle === undefined;
 
-  const subtitle = formatMatchDate(videoRecordedDate(video));
+  const subtitle = formatMatchDate(recordedDate);
 
   const meta = [
     VIDEO_TYPE_LABELS[video.video_type],
@@ -117,7 +119,7 @@ export default function VideoCard({
 
       <div className="flex flex-1 flex-col gap-1.5 p-3.5">
         <h2 className="line-clamp-2 text-sm font-medium leading-snug text-[var(--text-primary)]">
-          {!linked && !youtubeTitle ? (
+          {loadingTitle ? (
             <span className="inline-block h-3.5 w-3/4 animate-pulse rounded bg-[var(--surface-faint)]" />
           ) : (
             displayTitle
