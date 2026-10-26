@@ -62,6 +62,7 @@ export default function LatestVideos({
                   ) : null}
                 </span>
                 <span
+                  title={title}
                   className={`mt-2 block truncate font-medium group-hover:text-[var(--accent)] ${compact ? "text-xs" : "text-sm"}`}
                 >
                   {title}
