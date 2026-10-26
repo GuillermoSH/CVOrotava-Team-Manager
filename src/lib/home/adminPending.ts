@@ -1,3 +1,5 @@
+import { isMatchPast } from "@/lib/matches/schedule";
+
 export type PlayerDocsRow = {
   id: string;
   full_name: string;
@@ -60,4 +62,23 @@ export function upcomingBirthdays(players: BirthdayRow[], today: string, windowD
     });
   }
   return out.sort((a, b) => a.daysAway - b.daysAway || a.name.localeCompare(b.name, "es"));
+}
+
+export type MatchVideoRow = {
+  id: string;
+  opponent: string;
+  date: string;
+  time?: string | null;
+  /** Se mantiene al enlazar o quitar un vídeo del partido (syncVideoForMatch). */
+  video_url?: string | null;
+};
+
+export type MatchWithoutVideo = { id: string; opponent: string; date: string };
+
+/** Partidos ya jugados sin vídeo enlazado, del más reciente al más antiguo. */
+export function playedMatchesWithoutVideo(matches: readonly MatchVideoRow[], now: Date): MatchWithoutVideo[] {
+  return matches
+    .filter((m) => isMatchPast(m.date, m.time, now) && !m.video_url?.trim())
+    .map(({ id, opponent, date }) => ({ id, opponent, date }))
+    .sort((a, b) => b.date.localeCompare(a.date));
 }

@@ -7,6 +7,32 @@ const LISTED = 3;
 const SYNC_STALE_DAYS = 8;
 
 export type TodoMatch = { id: string; opponent: string; date: string };
+
+/** Lista corta de partidos enlazada a su ficha (para completar el resultado o el vídeo). */
+function MatchList({ matches }: Readonly<{ matches: TodoMatch[] }>) {
+  return (
+    <ul className="mt-1 flex flex-col gap-0.5">
+      {matches.slice(0, LISTED).map((m) => (
+        <li key={m.id}>
+          <Link
+            href={`/matches/${m.id}?edit=1`}
+            className="text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+          >
+            vs {m.opponent}
+            <span className="text-[var(--text-muted)]">
+              {" "}
+              ·{" "}
+              {new Date(m.date).toLocaleDateString("es-ES", { day: "2-digit", month: "short" })}
+            </span>
+          </Link>
+        </li>
+      ))}
+      {matches.length > LISTED ? (
+        <li className="text-[var(--text-muted)]">y {matches.length - LISTED} más</li>
+      ) : null}
+    </ul>
+  );
+}
 export type TodoPayments = { usersInDebt: number; totalPending: number; usersOverdue: number };
 
 type Todo = {
@@ -34,11 +60,13 @@ export default function AdminPending({
   data,
   payments,
   matchesWithoutResult,
+  matchesWithoutVideo,
   now,
 }: Readonly<{
   data: AdminPendingData;
   payments: TodoPayments | null;
   matchesWithoutResult: TodoMatch[];
+  matchesWithoutVideo: TodoMatch[];
   now: Date;
 }>) {
   const sync = syncLabel(data.lastSync.finishedAt, now);
@@ -63,29 +91,15 @@ export default function AdminPending({
       key: "results",
       count: matchesWithoutResult.length,
       title: `${matchesWithoutResult.length} ${plural(matchesWithoutResult.length, "partido sin resultado", "partidos sin resultado")}`,
-      detail: (
-        <ul className="mt-1 flex flex-col gap-0.5">
-          {matchesWithoutResult.slice(0, LISTED).map((m) => (
-            <li key={m.id}>
-              <Link
-                href={`/matches/${m.id}?edit=1`}
-                className="text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-              >
-                vs {m.opponent}
-                <span className="text-[var(--text-muted)]">
-                  {" "}
-                  ·{" "}
-                  {new Date(m.date).toLocaleDateString("es-ES", { day: "2-digit", month: "short" })}
-                </span>
-              </Link>
-            </li>
-          ))}
-          {matchesWithoutResult.length > LISTED ? (
-            <li className="text-[var(--text-muted)]">y {matchesWithoutResult.length - LISTED} más</li>
-          ) : null}
-        </ul>
-      ),
+      detail: <MatchList matches={matchesWithoutResult} />,
       clear: "resultados",
+    },
+    {
+      key: "videos",
+      count: matchesWithoutVideo.length,
+      title: `${matchesWithoutVideo.length} ${plural(matchesWithoutVideo.length, "partido jugado sin vídeo", "partidos jugados sin vídeo")}`,
+      detail: <MatchList matches={matchesWithoutVideo} />,
+      clear: "vídeos",
     },
     {
       key: "docs",

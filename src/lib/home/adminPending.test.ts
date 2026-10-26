@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pendingDocs, upcomingBirthdays } from "./adminPending";
+import { pendingDocs, playedMatchesWithoutVideo, upcomingBirthdays } from "./adminPending";
 
 const base = { license_completed: true, registration_papers_received: true, photo_consent: true };
 
@@ -42,5 +42,39 @@ describe("upcomingBirthdays", () => {
   it("el 29 de febrero se celebra el 1 de marzo en años no bisiestos", () => {
     const out = upcomingBirthdays([{ id: "1", full_name: "Bisiesto", birth_date: "2008-02-29" }], "2027-02-25");
     expect(out[0]).toMatchObject({ daysAway: 4, date: "2027-03-01" });
+  });
+});
+
+describe("playedMatchesWithoutVideo", () => {
+  const now = new Date(2026, 9, 26, 12, 0); // 26 oct 2026, 12:00
+
+  const m = (id: string, date: string, video_url?: string | null, time = "10:00") => ({
+    id,
+    opponent: `Rival ${id}`,
+    date,
+    time,
+    video_url,
+  });
+
+  it("lista los jugados sin vídeo, del más reciente al más antiguo", () => {
+    const out = playedMatchesWithoutVideo(
+      [m("a", "2026-10-04"), m("b", "2026-10-18"), m("c", "2026-10-11")],
+      now
+    );
+    expect(out.map((x) => x.id)).toEqual(["b", "c", "a"]);
+    expect(out[0]).toEqual({ id: "b", opponent: "Rival b", date: "2026-10-18" });
+  });
+
+  it("omite los que ya tienen vídeo, incluidos los de URL solo con espacios", () => {
+    const out = playedMatchesWithoutVideo(
+      [m("a", "2026-10-04", "https://youtu.be/x"), m("b", "2026-10-11", "  "), m("c", "2026-10-18", null)],
+      now
+    );
+    expect(out.map((x) => x.id)).toEqual(["c", "b"]);
+  });
+
+  it("omite los partidos que aún no se han jugado", () => {
+    const out = playedMatchesWithoutVideo([m("f", "2026-11-01"), m("hoy", "2026-10-26", null, "20:00")], now);
+    expect(out).toEqual([]);
   });
 });
