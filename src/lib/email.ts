@@ -15,7 +15,16 @@ const SEND_CONCURRENCY = 2;
 function getResend() {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL;
-  if (!apiKey || !from) return null;
+  if (!apiKey || !from) {
+    const missing = [
+      !apiKey && "RESEND_API_KEY",
+      !from && "RESEND_FROM_EMAIL",
+    ].filter(Boolean);
+    console.error(
+      `Resend no configurado (falta ${missing.join(", ")}): no se envía el aviso de vídeo`
+    );
+    return null;
+  }
   return { resend: new Resend(apiKey), from: formatClubFrom(from) };
 }
 
@@ -65,13 +74,13 @@ export async function sendNewVideoEmail({
   match?: VideoEmailMatchInput | null;
 }) {
   const unique = [...new Set(to.map((e) => e.trim().toLowerCase()).filter(Boolean))];
-  if (!unique.length) return;
-
-  const client = getResend();
-  if (!client) {
-    console.warn("Resend no configurado: se omite el aviso de vídeo");
+  if (!unique.length) {
+    console.warn("Aviso de vídeo sin destinatarios elegibles: no se envía nada");
     return;
   }
+
+  const client = getResend();
+  if (!client) return;
 
   const copy = buildNewVideoEmailCopy({
     videoType: video_type,
