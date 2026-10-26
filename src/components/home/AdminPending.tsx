@@ -126,6 +126,33 @@ export default function AdminPending({
       clear: "invitados",
     },
     {
+      key: "exempt",
+      count: data.exemptWithPending.length,
+      title: `${data.exemptWithPending.length} ${plural(data.exemptWithPending.length, "exento con pagos pendientes", "exentos con pagos pendientes")}`,
+      detail: (
+        <ul className="mt-1 flex flex-col gap-0.5">
+          {data.exemptWithPending.slice(0, LISTED).map((e) => (
+            <li key={e.playerId}>
+              <Link
+                href={`/payments/admin/${e.playerId}`}
+                className="text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              >
+                {e.name}
+                <span className="text-[var(--text-muted)]">
+                  {" "}
+                  · {e.count} {plural(e.count, "pendiente", "pendientes")}
+                </span>
+              </Link>
+            </li>
+          ))}
+          {data.exemptWithPending.length > LISTED ? (
+            <li className="text-[var(--text-muted)]">y {data.exemptWithPending.length - LISTED} más</li>
+          ) : null}
+        </ul>
+      ),
+      clear: "exenciones",
+    },
+    {
       key: "venues",
       count: data.venuesToReview,
       title: `${data.venuesToReview} ${plural(data.venuesToReview, "pabellón por revisar", "pabellones por revisar")}`,

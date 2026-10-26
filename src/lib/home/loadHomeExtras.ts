@@ -3,6 +3,9 @@ import { listVideos, type VideoListItem } from "@/lib/videos/listVideos";
 import { listAllowedEmails } from "@/lib/access/listAllowedEmails";
 import { isRegisteredAccess } from "@/lib/auth/allowedEmails";
 import { getLastFedSync } from "@/lib/fed/lastSync";
+import { listExemptions } from "@/lib/payments/exemptions";
+import { exemptWithPending, type ExemptWithPending } from "@/lib/payments/exemptPending";
+import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 import { loadSeasonData } from "@/lib/stats/competitive/load";
 import { todayInCanarias } from "@/lib/stats/competitive/seasons";
 import type { Gender } from "@/lib/stats/competitive/types";
@@ -22,13 +25,32 @@ export async function loadWeekendRoundup(season: string, gender: Gender): Promis
   return data ? buildWeekendRoundup(data, todayInCanarias()) : null;
 }
 
+/** Exentos de la temporada con pagos pendientes registrados (restos que conviene limpiar). */
+async function loadExemptWithPending(season: string): Promise<ExemptWithPending[]> {
+  const exemptions = await listExemptions(season);
+  if (exemptions.size === 0) return [];
+
+  const [playersRes, pendingRes] = await Promise.all([
+    supabaseAdmin.from("players").select("id, full_name, user_id").in("id", [...exemptions.keys()]),
+    supabaseAdmin
+      .from("payments")
+      .select("player_id, user_id")
+      .eq("status", "pending")
+      .eq("season", normalizeSeasonId(season)),
+  ]);
+  if (playersRes.error) throw new Error(`players: ${playersRes.error.message}`);
+  if (pendingRes.error) throw new Error(`payments: ${pendingRes.error.message}`);
+
+  return exemptWithPending(playersRes.data ?? [], pendingRes.data ?? []);
+}
+
 /**
  * Pendientes del admin. «Jugadores» son los dados de alta en la app: los que tienen
  * cuenta enlazada (`players.user_id`) y están activos esta temporada.
  * Solo para admins: el llamador debe haber comprobado `isAdmin`.
  */
 export async function loadAdminPending(season: string): Promise<AdminPendingData> {
-  const [playersRes, allowed, venuesRes, lastSync] = await Promise.all([
+  const [playersRes, allowed, venuesRes, lastSync, exemptPending] = await Promise.all([
     supabaseAdmin
       .from("players")
       .select("id, full_name, birth_date, license_completed, registration_papers_received, photo_consent")
@@ -38,6 +60,11 @@ export async function loadAdminPending(season: string): Promise<AdminPendingData
     listAllowedEmails(),
     supabaseAdmin.from("venues").select("id", { count: "exact", head: true }).eq("needs_review", true),
     getLastFedSync(),
+    // Un fallo aquí no debe esconder el resto de pendientes del admin.
+    loadExemptWithPending(season).catch((err) => {
+      console.error("home exempt pending failed:", err);
+      return [] as ExemptWithPending[];
+    }),
   ]);
   if (playersRes.error) throw new Error(`players: ${playersRes.error.message}`);
   if (venuesRes.error) throw new Error(`venues: ${venuesRes.error.message}`);
@@ -50,6 +77,7 @@ export async function loadAdminPending(season: string): Promise<AdminPendingData
     birthdays: upcomingBirthdays(players, todayInCanarias()),
     invited: { count: invited.length, emails: invited.slice(0, 5) },
     venuesToReview: venuesRes.count ?? 0,
+    exemptWithPending: exemptPending,
     lastSync,
   };
 }

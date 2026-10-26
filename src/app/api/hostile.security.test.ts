@@ -106,6 +106,7 @@ const LEVELS: Record<string, Level> = {
   "payments POST": "admin",
   "payments/exemptions PUT": "admin",
   "payments/exemptions DELETE": "admin",
+  "payments/exemptions/clear-pending POST": "admin",
   "payments/[id] PATCH": "admin",
   "payments/[id] DELETE": "admin",
   "seasons GET": "memberInactiveOk",

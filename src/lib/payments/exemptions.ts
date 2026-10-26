@@ -88,3 +88,40 @@ export async function removeExemption(
   if (error && !isMissingTableError(error)) return { ok: false, message: error.message };
   return { ok: true };
 }
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Borra los pagos pendientes de un jugador en una temporada: los que cuelgan de su
+ * `player_id` y los antiguos que solo llevan su `user_id`. No toca los pagados.
+ * El llamador debe haber comprobado que el jugador está exento esa temporada.
+ */
+export async function clearPendingPayments(
+  playerId: string,
+  season: string
+): Promise<{ ok: true; removed: number } | { ok: false; message: string }> {
+  const { data: player, error: playerError } = await supabaseAdmin
+    .from("players")
+    .select("user_id")
+    .eq("id", playerId)
+    .maybeSingle();
+  if (playerError) return { ok: false, message: playerError.message };
+  if (!player) return { ok: false, message: "Jugador no encontrado." };
+
+  let query = supabaseAdmin
+    .from("payments")
+    .delete({ count: "exact" })
+    .eq("status", "pending")
+    .eq("season", normalizeSeasonId(season));
+
+  // Solo se interpolan UUID validados en el filtro `.or()`.
+  const userId = typeof player.user_id === "string" && UUID.test(player.user_id) ? player.user_id : null;
+  query =
+    userId && UUID.test(playerId)
+      ? query.or(`player_id.eq.${playerId},and(player_id.is.null,user_id.eq.${userId})`)
+      : query.eq("player_id", playerId);
+
+  const { error, count } = await query;
+  if (error) return { ok: false, message: error.message };
+  return { ok: true, removed: count ?? 0 };
+}

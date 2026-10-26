@@ -30,6 +30,7 @@ const mutating: Array<{ file: string; methods: string[] }> = [
   { file: "src/app/api/users/route.ts", methods: ["GET", "PATCH"] },
   { file: "src/app/api/allowed-emails/route.ts", methods: ["GET", "POST", "PATCH", "DELETE"] },
   { file: "src/app/api/fed/sync/route.ts", methods: ["POST"] },
+  { file: "src/app/api/payments/exemptions/clear-pending/route.ts", methods: ["POST"] },
   { file: "src/app/api/venues/route.ts", methods: ["POST"] },
   { file: "src/app/api/venues/[id]/route.ts", methods: ["PATCH", "DELETE"] },
   { file: "src/app/api/venues/[id]/merge/route.ts", methods: ["POST"] },
