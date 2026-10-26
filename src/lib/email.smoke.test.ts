@@ -72,7 +72,7 @@ describe("sendNewVideoEmail (humo con Resend real, red simulada)", () => {
 
   it("no envía nada si Resend no está configurado", async () => {
     vi.stubEnv("RESEND_API_KEY", "");
-    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     await sendNewVideoEmail({
       to: ["a@club.com"],
@@ -82,6 +82,25 @@ describe("sendNewVideoEmail (humo con Resend real, red simulada)", () => {
     });
 
     expect(fetchMock).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("RESEND_API_KEY")
+    );
+  });
+
+  it("avisa en el log cuando no hay destinatarios", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    await sendNewVideoEmail({
+      to: [],
+      video_type: "training",
+      url: "https://youtu.be/xyz",
+      gender: "male",
+    });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("sin destinatarios")
+    );
   });
 
   it("un error de Resend se registra y no tumba el envío", async () => {
