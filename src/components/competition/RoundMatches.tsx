@@ -27,7 +27,8 @@ function knownBefore(match: CompetitionMatch, all: CompetitionMatch[]): Competit
   return all.filter((m) => (m.date !== null && match.date !== null ? m.date < match.date : m.id !== match.id));
 }
 
-const action = "cursor-pointer font-semibold hover:underline";
+const action =
+  "inline-flex min-h-9 cursor-pointer items-center rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 font-semibold transition-colors hover:bg-[var(--glass-surface)]";
 
 function MatchRow({
   match,
@@ -95,13 +96,13 @@ function MatchRow({
       </div>
 
       {played && match.sets.length > 0 ? (
-        <p className="mt-1.5 text-center text-xs tabular-nums text-[var(--text-muted)]">
+        <p className="mt-1.5 text-xs tabular-nums text-[var(--text-muted)]">
           {match.sets.map((s) => `${s.home}-${s.away}`).join(" · ")}
         </p>
       ) : null}
 
       {canScout || match.reportUrl ? (
-        <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs">
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
           {canScout ? (
             <button
               type="button"

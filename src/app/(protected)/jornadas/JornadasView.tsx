@@ -78,7 +78,7 @@ export default function JornadasView({
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl">
+    <div className="w-full">
       <PageHeader
         title="Jornadas"
         subtitle={`${GENDER_LABEL[gender]} · temporada ${season}`}
@@ -99,7 +99,7 @@ export default function JornadasView({
           Todavía no hay datos de la federación para esta temporada. Se cargan con la sincronización semanal.
         </p>
       ) : (
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-6">
           {groups.length > 1 ? (
             <SegmentedControl
               aria-label="Grupo"
@@ -110,73 +110,73 @@ export default function JornadasView({
           ) : null}
 
           {groups.length === 1 || !group.hasOurs ? (
-            <p className="-mt-4 text-xs text-[var(--text-muted)]">
+            <p className="-mt-3 text-xs text-[var(--text-muted)]">
               {group.hasOurs ? prettyTeamName(group.name) : `${prettyTeamName(group.name)} · no juega el club`}
             </p>
           ) : null}
 
-          <section aria-labelledby="round-title">
-            <div className="mb-3 flex items-center gap-2">
-              <button
-                type="button"
-                className={navButton}
-                aria-label="Jornada anterior"
-                disabled={roundIdx <= 0}
-                onClick={() => setRound(roundIdx - 1)}
-              >
-                <FontAwesomeIcon icon={faChevronLeft} />
-              </button>
+          <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_28rem]">
+            <section aria-labelledby="round-title" className="min-w-0">
+              <div className="mb-3 flex items-end justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 id="round-title" className="truncate text-lg font-semibold tracking-tight">
+                    {round ? round.label : "Sin jornadas"}
+                  </h2>
+                  {round && roundDates(round) ? (
+                    <p className="text-xs text-[var(--text-muted)]">{roundDates(round)}</p>
+                  ) : null}
+                </div>
 
-              <div className="min-w-0 flex-1 text-center">
-                <h2 id="round-title" className="truncate text-lg font-semibold tracking-tight">
-                  {round ? round.label : "Sin jornadas"}
-                </h2>
-                {round && roundDates(round) ? (
-                  <p className="text-xs text-[var(--text-muted)]">{roundDates(round)}</p>
-                ) : null}
+                <div className="flex shrink-0 items-center gap-2">
+                  {group.rounds.length > 1 ? (
+                    <select
+                      aria-label="Ir a jornada"
+                      value={roundIdx}
+                      onChange={(e) => setRound(Number(e.target.value))}
+                      className="h-9 max-w-[9rem] cursor-pointer rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 text-sm text-[var(--text-primary)]"
+                    >
+                      {group.rounds.map((r, i) => (
+                        <option key={r.id ?? "none"} value={i}>
+                          {r.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : null}
+                  <button
+                    type="button"
+                    className={navButton}
+                    aria-label="Jornada anterior"
+                    disabled={roundIdx <= 0}
+                    onClick={() => setRound(roundIdx - 1)}
+                  >
+                    <FontAwesomeIcon icon={faChevronLeft} />
+                  </button>
+                  <button
+                    type="button"
+                    className={navButton}
+                    aria-label="Jornada siguiente"
+                    disabled={roundIdx >= group.rounds.length - 1}
+                    onClick={() => setRound(roundIdx + 1)}
+                  >
+                    <FontAwesomeIcon icon={faChevronRight} />
+                  </button>
+                </div>
               </div>
 
-              <button
-                type="button"
-                className={navButton}
-                aria-label="Jornada siguiente"
-                disabled={roundIdx >= group.rounds.length - 1}
-                onClick={() => setRound(roundIdx + 1)}
-              >
-                <FontAwesomeIcon icon={faChevronRight} />
-              </button>
-            </div>
-
-            {group.rounds.length > 1 ? (
-              <label className="mb-3 flex items-center justify-center gap-2 text-xs text-[var(--text-muted)]">
-                Ir a
-                <select
-                  value={roundIdx}
-                  onChange={(e) => setRound(Number(e.target.value))}
-                  className="h-9 cursor-pointer rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 text-sm text-[var(--text-primary)]"
-                >
-                  {group.rounds.map((r, i) => (
-                    <option key={r.id ?? "none"} value={i}>
-                      {r.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
-
-            {round ? (
-              <RoundMatches matches={round.matches} teams={competition.teams} groupMatches={groupMatches} />
-            ) : null}
-          </section>
-
-          {group.standings ? (
-            <section aria-labelledby="standings-title">
-              <h2 id="standings-title" className="mb-3 text-lg font-semibold tracking-tight">
-                Clasificación
-              </h2>
-              <GroupStandings groupName={group.name} standings={group.standings} teams={competition.teams} />
+              {round ? (
+                <RoundMatches matches={round.matches} teams={competition.teams} groupMatches={groupMatches} />
+              ) : null}
             </section>
-          ) : null}
+
+            {group.standings ? (
+              <section aria-labelledby="standings-title" className="min-w-0">
+                <h2 id="standings-title" className="mb-3 text-lg font-semibold tracking-tight">
+                  Clasificación
+                </h2>
+                <GroupStandings groupName={group.name} standings={group.standings} teams={competition.teams} />
+              </section>
+            ) : null}
+          </div>
         </div>
       )}
     </div>
