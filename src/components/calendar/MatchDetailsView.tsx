@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -15,14 +14,14 @@ import {
   faLocationDot,
   faPenToSquare,
   faPlaneDeparture,
-  faPlay,
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";
 import type { MatchFormValues } from "@/components/calendar/MatchModal";
 import type { Match } from "@/components/calendar/MatchCard";
 import { matchToModalInitialValues } from "@/lib/matchFormValues";
-import { getThumbnailUrl, getYouTubeId } from "@/lib/youtube";
+import { getYouTubeId } from "@/lib/youtube";
+import VideoThumb from "@/components/videos/VideoThumb";
 
 const MatchModal = dynamic(() => import("@/components/calendar/MatchModal"), {
   ssr: false,
@@ -103,11 +102,9 @@ export default function MatchDetailsView({
     (a, b) => a.set_number - b.set_number
   );
 
-  const youtubeId = match.video_url ? getYouTubeId(match.video_url) : null;
-  const thumbUrl =
-    match.video_url && youtubeId
-      ? getThumbnailUrl(match.video_url, "max")
-      : "";
+  const hasYoutubeThumb = Boolean(
+    match.video_url && getYouTubeId(match.video_url)
+  );
 
   const genderLabel =
     match.gender === "male" ? "Sénior Masculino" : "Sénior Femenino";
@@ -154,12 +151,20 @@ export default function MatchDetailsView({
         : "text-[var(--text-muted)]";
 
   const refreshMatch = async () => {
-    const res = await fetch(`/api/matches/${match.id}`, { cache: "no-store" });
-    if (res.ok) {
-      const data = (await res.json()) as MatchDetail;
-      setMatch(data);
+    try {
+      const res = await fetch(`/api/matches/${match.id}`, { cache: "no-store" });
+      if (res.ok) {
+        const data = (await res.json()) as MatchDetail;
+        setMatch(data);
+      }
+    } catch {
+      /* keep current match when offline / network fails */
     }
-    router.refresh();
+    try {
+      router.refresh();
+    } catch {
+      /* soft nav refresh may fail offline */
+    }
   };
 
   const hasExtras =
@@ -317,29 +322,22 @@ export default function MatchDetailsView({
                     <h2 className="mb-4 text-lg font-semibold tracking-tight">
                       Vídeo
                     </h2>
-                    {thumbUrl ? (
+                    {hasYoutubeThumb && match.video_url ? (
                       <a
                         href={match.video_url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group relative block aspect-video w-full overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                       >
-                        <Image
-                          src={thumbUrl}
+                        <VideoThumb
+                          url={match.video_url}
                           alt={`Vídeo del partido contra ${match.opponent}`}
-                          fill
-                          loading="eager"
-                          className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                          size="max"
+                          eager
                           sizes="(max-width: 1024px) 100vw, 55vw"
+                          className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                          playClassName="flex h-12 w-12 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm"
                         />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/25 transition-colors group-hover:bg-black/35">
-                          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm">
-                            <FontAwesomeIcon
-                              icon={faPlay}
-                              className="ml-0.5 text-sm"
-                            />
-                          </span>
-                        </div>
                       </a>
                     ) : (
                       <a

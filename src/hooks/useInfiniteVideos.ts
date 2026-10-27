@@ -70,7 +70,7 @@ export function useInfiniteVideos(
       mountedRef.current = true;
       return;
     }
-    setVideos([]);
+    // Keep previous list until a successful fetch (offline resilience).
     setPage(1);
     setHasMore(true);
     skipFirstFetchRef.current = false;
@@ -83,7 +83,7 @@ export function useInfiniteVideos(
     }
 
     const fetchVideos = async () => {
-      if (!hasMore) return;
+      if (!hasMore && page > 1) return;
 
       setLoading(true);
 
@@ -112,6 +112,7 @@ export function useInfiniteVideos(
         if (data.length < limit) setHasMore(false);
       } catch (error) {
         console.error("Error cargando videos:", error);
+        // Keep current videos; stop paging so we don't spam failed requests.
         setHasMore(false);
       } finally {
         setLoading(false);

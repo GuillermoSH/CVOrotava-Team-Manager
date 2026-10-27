@@ -1,12 +1,13 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight, faPlay } from "@fortawesome/free-solid-svg-icons";
-import { getThumbnailUrl } from "@/lib/youtube";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { VIDEO_TYPE_LABELS, type VideoListItem } from "@/lib/videos/constants";
 import { videoRecordedDate } from "@/lib/videos/date";
 import { videoTitle } from "@/lib/videos/videoTitle";
 import { formatMatchDate } from "@/lib/matches/formatMatchLabel";
+import VideoThumb from "@/components/videos/VideoThumb";
 
 export default function LatestVideos({
   videos,
@@ -43,18 +44,13 @@ export default function LatestVideos({
                 className="group block focus-visible:outline-none"
               >
                 <span className="relative block aspect-video overflow-hidden rounded-xl bg-[var(--surface-faint)] ring-1 ring-inset ring-[var(--glass-border)] group-focus-visible:ring-2 group-focus-visible:ring-[var(--accent)]">
-                  <Image
-                    src={getThumbnailUrl(v.url, "mq")}
+                  <VideoThumb
+                    url={v.url}
                     alt=""
-                    fill
+                    size="mq"
                     sizes="(max-width: 640px) 50vw, 240px"
-                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                    playClassName={`flex items-center justify-center rounded-full border border-white/25 bg-black/40 text-white backdrop-blur-sm ${compact ? "size-7" : "size-9"}`}
                   />
-                  <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/35">
-                    <span className={`flex items-center justify-center rounded-full border border-white/25 bg-black/40 text-white backdrop-blur-sm ${compact ? "size-7" : "size-9"}`}>
-                      <FontAwesomeIcon icon={faPlay} className="ml-0.5 text-sm" aria-hidden />
-                    </span>
-                  </span>
                   {v.match?.result ? (
                     <span className="absolute left-2 top-2 rounded-md bg-black/60 px-1.5 py-0.5 text-xs font-bold tabular-nums text-white">
                       {v.match.result}

@@ -76,7 +76,11 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/auth/") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
-    pathname.startsWith("/assets");
+    pathname.startsWith("/assets") ||
+    // PWA installability: SW + manifest must load without a session.
+    pathname === "/sw.js" ||
+    pathname === "/manifest.webmanifest" ||
+    pathname.endsWith(".webmanifest");
 
   if (!user && !isPublicPath) {
     const loginUrl = request.nextUrl.clone();
@@ -180,6 +184,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Skip static assets and PWA entrypoints (sw.js / webmanifest) — auth would break installability.
+    "/((?!_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|webmanifest)$).*)",
   ],
 };

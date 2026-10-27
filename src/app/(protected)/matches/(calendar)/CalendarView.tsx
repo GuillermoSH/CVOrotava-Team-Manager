@@ -123,7 +123,12 @@ export default function CalendarView({
       setMatches(data);
     } catch (err) {
       console.error(err);
-      setError("No se pudo cargar el calendario.");
+      // Keep last good list (soft offline); only warn if we have nothing to show.
+      setError(
+        matches.length > 0
+          ? "Sin conexión — mostrando el último calendario cargado."
+          : "No se pudo cargar el calendario."
+      );
     } finally {
       setLoading(false);
     }

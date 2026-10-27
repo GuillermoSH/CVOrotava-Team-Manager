@@ -23,7 +23,9 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useSidebarCollapsed } from "@/lib/layout/sidebarCollapsed";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import ClubLogo from "@/components/brand/ClubLogo";
+import OfflineBanner from "@/components/pwa/OfflineBanner";
 import { APP_NAV_ITEMS, type AppNavItem } from "@/components/layout/navItems";
+import { clearOfflineCaches } from "@/lib/pwa/offlineCache";
 
 /** Fondo del elemento activo: tinte de marca con borde fino, claramente distinto del hover. */
 const ACTIVE_PILL =
@@ -525,6 +527,7 @@ export default function AppShell() {
 
   const handleLogout = async () => {
     try {
+      await clearOfflineCaches();
       await fetch("/api/auth/logout", { method: "POST" });
       router.push("/login");
     } catch (err) {
@@ -563,6 +566,7 @@ export default function AppShell() {
 
   return (
     <>
+      <OfflineBanner />
       {/* ── Desktop sidebar ── */}
       <aside
         className="fixed inset-y-0 left-0 z-[var(--z-navbar)] hidden w-[var(--sidebar-width)] flex-col border-r border-[var(--glass-border)] bg-[color-mix(in_srgb,var(--color-bg)_94%,transparent)] backdrop-blur-xl transition-[width] duration-200 ease-out motion-reduce:transition-none md:flex"

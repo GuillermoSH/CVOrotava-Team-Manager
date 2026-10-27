@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { getThumbnailUrl, getYoutubeTitle } from "@/lib/youtube";
+import { getYoutubeTitle } from "@/lib/youtube";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlay, faPenToSquare } from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 import {
   VIDEO_TYPE_LABELS,
   type VideoType,
@@ -14,6 +13,8 @@ import {
 import { videoRecordedDate } from "@/lib/videos/date";
 import { videoDetails, videoTitle } from "@/lib/videos/videoTitle";
 import { formatMatchDate } from "@/lib/matches/formatMatchLabel";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import VideoThumb from "@/components/videos/VideoThumb";
 
 export type Video = {
   id: string;
@@ -53,19 +54,27 @@ export default function VideoCard({
   onEdit,
   eager = false,
 }: Readonly<VideoCardProps>) {
+  const online = useOnlineStatus();
   // undefined = consultando; null = YouTube no dio título (sin clave o error).
   const [youtubeTitle, setYoutubeTitle] = useState<string | null | undefined>(undefined);
   const linked = video.match;
   const resultChip = linked ? parseResult(linked.result) : null;
 
   useEffect(() => {
-    if (!linked && video.url) {
-      getYoutubeTitle(video.url).then(setYoutubeTitle);
-    }
-  }, [video.url, linked]);
+    if (linked || !video.url || !online) return;
+    let cancelled = false;
+    getYoutubeTitle(video.url).then((title) => {
+      if (!cancelled) setYoutubeTitle(title);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [video.url, linked, online]);
 
-  const displayTitle = videoTitle(video, youtubeTitle);
-  const loadingTitle = !linked && youtubeTitle === undefined;
+  // Offline: never wait on YouTube titles; use match/type fallbacks.
+  const titleSource = !online && !linked ? null : youtubeTitle;
+  const displayTitle = videoTitle(video, titleSource);
+  const loadingTitle = !linked && online && youtubeTitle === undefined;
 
   const subtitle = formatMatchDate(videoRecordedDate(video));
 
@@ -80,20 +89,13 @@ export default function VideoCard({
         rel="noopener noreferrer"
         className="relative block aspect-video overflow-hidden bg-[var(--color-bg)] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--accent)]"
       >
-        <Image
-          src={getThumbnailUrl(video.url, "max")}
+        <VideoThumb
+          url={video.url}
           alt={displayTitle}
-          fill
-          loading={eager ? "eager" : "lazy"}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+          size="max"
+          eager={eager}
+          playClassName="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/35 text-white backdrop-blur-sm md:scale-90 md:opacity-0 md:transition-all md:duration-200 md:group-hover:scale-100 md:group-hover:opacity-100"
         />
-
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/55 via-black/15 to-transparent md:from-transparent md:group-hover:from-black/45 md:group-hover:via-black/15">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/35 text-white backdrop-blur-sm md:scale-90 md:opacity-0 md:transition-all md:duration-200 md:group-hover:scale-100 md:group-hover:opacity-100">
-            <FontAwesomeIcon icon={faPlay} className="ml-0.5 text-sm" />
-          </span>
-        </div>
 
         <span className="absolute bottom-2 left-2 rounded-md border border-white/15 bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/95 backdrop-blur-sm">
           {VIDEO_TYPE_LABELS[video.video_type]}

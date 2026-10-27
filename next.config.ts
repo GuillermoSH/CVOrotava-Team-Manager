@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Isolate verify builds from a running `next dev` (.next): CVO_DIST_DIR=.next-verify
+  distDir: process.env.CVO_DIST_DIR || ".next",
   images: {
     remotePatterns: [
       {

@@ -79,3 +79,48 @@ magick([
   `PNG32:${appleOut}`,
 ]);
 console.log("wrote", appleOut);
+
+const blanco512 = join(OUT_LOGO, "logo_blanco_512.webp");
+const OUT_ICONS = join(ROOT, "public/icons");
+const icon192Out = join(OUT_ICONS, "icon-192.png");
+const icon512Out = join(OUT_ICONS, "icon-512.png");
+
+mkdirSync(OUT_ICONS, { recursive: true });
+
+magick([
+  blanco256,
+  "-resize",
+  "144x144",
+  "(",
+  "-size",
+  "192x192",
+  "xc:#141418",
+  ")",
+  "+swap",
+  "-gravity",
+  "center",
+  "-compose",
+  "over",
+  "-composite",
+  `PNG32:${icon192Out}`,
+]);
+console.log("wrote", icon192Out);
+
+magick([
+  blanco512,
+  "-resize",
+  "384x384",
+  "(",
+  "-size",
+  "512x512",
+  "xc:#141418",
+  ")",
+  "+swap",
+  "-gravity",
+  "center",
+  "-compose",
+  "over",
+  "-composite",
+  `PNG32:${icon512Out}`,
+]);
+console.log("wrote", icon512Out);

@@ -143,6 +143,9 @@ export default function StatsView({
         fetch(qs ? `/api/stats?${qs}` : "/api/stats"),
         f.season && f.gender ? fetch(`/api/stats/competitive?${qs}`) : Promise.resolve(null),
       ]);
+      if (!statsRes.ok) {
+        throw new Error("No se pudieron cargar las estadísticas");
+      }
       const data = await statsRes.json();
       setMatches(data.matches || []);
       if (compRes) {
@@ -153,7 +156,12 @@ export default function StatsView({
       }
       setSelectedRival(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al cargar las estadísticas");
+      // Keep last good matches/competitive when offline or request fails.
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Error al cargar las estadísticas"
+      );
     } finally {
       setLoading(false);
     }
