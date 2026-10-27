@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { syncVideoForMatch } from "@/lib/videos/syncVideoForMatch";
+import { notifyNewVideo } from "@/lib/videos/notifyNewVideo";
 import { getMatchById } from "@/lib/matches/getMatchById";
 import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
@@ -11,6 +12,27 @@ type MatchSetInput = { team_score: number; opponent_score: number };
 
 /** Partidos enlazados con la federación: solo estos campos son nuestros. */
 const FED_EDITABLE = ["opponent", "video_url", "notes"] as const;
+
+/** Avisa al equipo (en segundo plano) si el formulario lo pidió y el vídeo era nuevo en la biblioteca. */
+function notifyIfCreated(
+  created: boolean,
+  notify: unknown,
+  match: { id: string; video_url: string | null; season: string; gender: "male" | "female" },
+  excludeEmail: string | null | undefined
+) {
+  if (!created || notify !== true || !match.video_url) return;
+  const url = match.video_url;
+  after(() =>
+    notifyNewVideo({
+      video_type: "league_match",
+      url,
+      gender: match.gender,
+      season: match.season,
+      matchId: match.id,
+      excludeEmail,
+    })
+  );
+}
 
 async function getFedMatchId(id: string): Promise<number | null> {
   const { data } = await supabaseAdmin
@@ -73,12 +95,13 @@ export async function PUT(
         .single();
       if (fedErr) return NextResponse.json({ error: fedErr.message }, { status: 400 });
 
-      await syncVideoForMatch({
+      const { created } = await syncVideoForMatch({
         matchId: id,
         videoUrl: updatedFed.video_url,
         season: updatedFed.season,
         gender: updatedFed.gender,
       });
+      notifyIfCreated(created, body.notify_team, updatedFed, auth.user.email);
       return NextResponse.json(updatedFed, { status: 200 });
     }
 
@@ -126,13 +149,14 @@ export async function PUT(
       }
     }
 
-    await syncVideoForMatch({
+    const { created } = await syncVideoForMatch({
       matchId: id,
       videoUrl: updatedMatch.video_url,
       season: updatedMatch.season,
       gender: updatedMatch.gender,
       recordedAt: updatedMatch.date,
     });
+    notifyIfCreated(created, body.notify_team, updatedMatch, auth.user.email);
 
     return NextResponse.json(updatedMatch, { status: 200 });
   } catch (err) {

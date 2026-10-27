@@ -53,13 +53,14 @@ describe("syncVideoForMatch", () => {
       .mockReturnValueOnce(insertChain)
       .mockReturnValueOnce(matchChain);
 
-    await syncVideoForMatch({
+    const result = await syncVideoForMatch({
       matchId: "match-1",
       videoUrl: "https://youtube.com/watch?v=abc",
       season: "2025-26",
       gender: "male",
     });
 
+    expect(result).toEqual({ created: true });
     expect(insertChain.insert).toHaveBeenCalledWith(
       expect.objectContaining({
         url: "https://youtube.com/watch?v=abc",
@@ -67,6 +68,28 @@ describe("syncVideoForMatch", () => {
         video_type: "league_match",
       })
     );
+  });
+
+  it("no marca created si el vídeo ya estaba en la biblioteca", async () => {
+    const clearChain = chain({ error: null });
+    const selectChain = chain({ data: { id: "v1" }, error: null });
+    const updateChain = chain({ error: null });
+    const matchChain = chain({ error: null });
+
+    from
+      .mockReturnValueOnce(clearChain)
+      .mockReturnValueOnce(selectChain)
+      .mockReturnValueOnce(updateChain)
+      .mockReturnValueOnce(matchChain);
+
+    const result = await syncVideoForMatch({
+      matchId: "match-1",
+      videoUrl: "https://youtube.com/watch?v=abc",
+      season: "2025-26",
+      gender: "male",
+    });
+
+    expect(result).toEqual({ created: false });
   });
 });
 

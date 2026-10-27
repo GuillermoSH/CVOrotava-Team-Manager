@@ -25,13 +25,17 @@ async function clearVideosForMatch(matchId: string): Promise<void> {
   }
 }
 
-/** Sync videos ↔ matches when saving a match with (or without) a video URL. */
+/**
+ * Sync videos ↔ matches when saving a match with (or without) a video URL.
+ * `created` es true cuando la URL no existía en la biblioteca y se ha dado de alta ahora.
+ */
 export async function syncVideoForMatch(
   params: SyncVideoForMatchParams
-): Promise<void> {
+): Promise<{ created: boolean }> {
   const url =
     typeof params.videoUrl === "string" ? params.videoUrl.trim() : "";
   const videoType = params.videoType ?? "league_match";
+  const none = { created: false };
 
   if (!url) {
     await clearVideosForMatch(params.matchId);
@@ -43,7 +47,7 @@ export async function syncVideoForMatch(
     if (error) {
       console.error("[syncVideoForMatch] clear match video_url:", error.message);
     }
-    return;
+    return none;
   }
 
   // Release match_id from any other video that held this match
@@ -57,7 +61,7 @@ export async function syncVideoForMatch(
 
   if (selectError) {
     console.error("[syncVideoForMatch] select by url:", selectError.message);
-    return;
+    return none;
   }
 
   const videoPayload = {
@@ -69,6 +73,7 @@ export async function syncVideoForMatch(
     ...(params.recordedAt ? { recorded_at: params.recordedAt } : {}),
   };
 
+  let created = false;
   if (byUrl) {
     const { error: updateError } = await supabaseAdmin
       .from("videos")
@@ -77,7 +82,7 @@ export async function syncVideoForMatch(
 
     if (updateError) {
       console.error("[syncVideoForMatch] update video:", updateError.message);
-      return;
+      return none;
     }
   } else {
     const { error: insertError } = await supabaseAdmin
@@ -95,7 +100,9 @@ export async function syncVideoForMatch(
       }
     } else if (insertError) {
       console.error("[syncVideoForMatch] insert:", insertError.message);
-      return;
+      return none;
+    } else {
+      created = true;
     }
   }
 
@@ -107,6 +114,7 @@ export async function syncVideoForMatch(
   if (matchError) {
     console.error("[syncVideoForMatch] update match video_url:", matchError.message);
   }
+  return { created };
 }
 
 export type LinkVideoToMatchParams = {
