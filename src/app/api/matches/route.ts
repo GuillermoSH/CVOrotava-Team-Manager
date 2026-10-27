@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { supabaseServer } from "@/lib/supabase/server";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { syncVideoForMatch } from "@/lib/videos/syncVideoForMatch";
+import { notifyNewVideo } from "@/lib/videos/notifyNewVideo";
 import { listMatches } from "@/lib/matches/listMatches";
 import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 import { z } from "zod";
@@ -26,6 +27,8 @@ const matchSchema = z.object({
       })
     )
     .optional(),
+  /** Avisar al equipo si el vídeo del partido es nuevo en la biblioteca. */
+  notify_team: z.boolean().optional(),
 });
 
 export async function GET(req: Request) {
@@ -102,7 +105,7 @@ export async function POST(req: Request) {
             );
         }
 
-        const { match_sets, ...match } = parsed.data;
+        const { match_sets, notify_team, ...match } = parsed.data;
 
         // Limpiar nulos
         const matchData = {
@@ -137,13 +140,26 @@ export async function POST(req: Request) {
             }
         }
 
-        await syncVideoForMatch({
+        const { created } = await syncVideoForMatch({
             matchId: data.id,
             videoUrl: data.video_url,
             season: data.season,
             gender: data.gender,
             recordedAt: data.date,
         });
+
+        if (created && notify_team && data.video_url) {
+            after(() =>
+                notifyNewVideo({
+                    video_type: "league_match",
+                    url: data.video_url,
+                    gender: data.gender,
+                    season: data.season,
+                    matchId: data.id,
+                    excludeEmail: auth.user.email,
+                })
+            );
+        }
 
         return NextResponse.json(
             { message: "Partido creado con éxito", data },

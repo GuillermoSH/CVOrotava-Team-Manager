@@ -61,6 +61,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
   const [loadingVenues, setLoadingVenues] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedVideoId, setSelectedVideoId] = useState("");
+  const [notifyTeam, setNotifyTeam] = useState(true);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const { register, control, handleSubmit, setValue, formState: { errors, isSubmitting }, reset } = useForm<MatchFormValues>({
@@ -84,6 +85,9 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
 
   const season = useWatch({ control, name: "season" });
   const gender = useWatch({ control, name: "gender" });
+  const videoUrl = useWatch({ control, name: "video_url" });
+  /** Solo tiene sentido avisar si se añade o cambia el vídeo respecto al guardado. */
+  const videoChanged = Boolean(videoUrl?.trim()) && videoUrl?.trim() !== (initialData?.video_url ?? "").trim();
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -110,6 +114,7 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
       }
       setMessage(null);
       setIsDeleting(false);
+      setNotifyTeam(true);
     }
   }, [isOpen, initialData, reset, user, venues]);
 
@@ -170,14 +175,16 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
       computedResult = `${team}-${opp}`;
     }
 
+    const notify = videoChanged && notifyTeam;
     const payload = fromFed
-      ? { opponent: data.opponent, video_url: data.video_url, notes: data.notes }
+      ? { opponent: data.opponent, video_url: data.video_url, notes: data.notes, notify_team: notify }
       : {
           ...data,
           result:
             data.match_sets && data.match_sets.length > 0
               ? computedResult
               : data.result?.trim() || null,
+          notify_team: notify,
         };
 
     try {
@@ -370,6 +377,24 @@ export default function MatchModal({ isOpen, onClose, onSuccess, initialData }: 
                     }}
                   />
                   <FormInput label="URL del vídeo" name="video_url" register={register("video_url")} error={errors.video_url} placeholder="https://youtube.com/... o elige arriba" />
+                  {videoChanged && (
+                    <label className="flex cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 py-3">
+                      <input
+                        type="checkbox"
+                        className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]"
+                        checked={notifyTeam}
+                        onChange={(e) => setNotifyTeam(e.target.checked)}
+                      />
+                      <span>
+                        <span className="block text-sm font-medium text-[var(--text-primary)]">
+                          Avisar al equipo por email
+                        </span>
+                        <span className="mt-0.5 block text-xs text-[var(--text-muted)]">
+                          Solo si el vídeo es nuevo en la biblioteca. Si ya estaba subido, no se envía nada.
+                        </span>
+                      </span>
+                    </label>
+                  )}
                   <FormInput label="Notas externas" name="notes" register={register("notes")} error={errors.notes} placeholder="Alguna lesión, retraso..." />
                 </div>
 
