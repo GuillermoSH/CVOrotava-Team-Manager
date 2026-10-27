@@ -14,6 +14,7 @@ import {
   faArrowDownWideShort,
   faArrowUpWideShort,
 } from "@fortawesome/free-solid-svg-icons";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import PageHeader from "@/components/ui/PageHeader";
 import QuotaSeasonLayout from "@/components/payments/QuotaSeasonLayout";
 import {
@@ -198,6 +199,7 @@ export default function PaymentsView({
   const { user } = useUser();
   const router = useRouter();
   const reduceMotion = useReducedMotion();
+  const online = useOnlineStatus();
 
   const initial = applyPaymentsSnapshot(initialSnapshot);
   const [payments, setPayments] = useState<Payment[]>(initial.payments);
@@ -340,6 +342,15 @@ export default function PaymentsView({
           ) : null
         }
       />
+
+      {!online ? (
+        <p
+          role="status"
+          className="mb-4 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_40%,transparent)] bg-[var(--color-warning-muted)] px-3 py-2.5 text-sm text-[var(--text-primary)]"
+        >
+          Pagos requiere conexión. Los importes no se cachean en modo desconectado.
+        </p>
+      ) : null}
 
       {!user?.isAdmin && exemption ? (
         <p

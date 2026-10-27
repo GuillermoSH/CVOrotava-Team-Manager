@@ -1,0 +1,43 @@
+/** Clears soft-offline Cache Storage entries and asks the SW to drop its cvo-* caches. */
+export async function clearOfflineCaches(): Promise<void> {
+  if (typeof window === "undefined") return;
+
+  try {
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys
+          .filter((key) => key.startsWith("cvo-"))
+          .map((key) => caches.delete(key))
+      );
+    }
+  } catch {
+    /* best-effort */
+  }
+
+  try {
+    if (!("serviceWorker" in navigator)) return;
+    const reg = await navigator.serviceWorker.getRegistration();
+    reg?.active?.postMessage("CLEAR_OFFLINE_CACHES");
+  } catch {
+    /* best-effort */
+  }
+}
+
+const OWNER_KEY = "cvo-offline-owner";
+
+/**
+ * Las cachés guardan datos de un usuario concreto: si entra otra persona en el mismo
+ * dispositivo (sin haber cerrado sesión, p. ej. por sesión caducada), se vacían.
+ */
+export async function syncOfflineCacheOwner(userId: string): Promise<void> {
+  if (typeof window === "undefined") return;
+  try {
+    const previous = window.localStorage.getItem(OWNER_KEY);
+    if (previous === userId) return;
+    if (previous !== null) await clearOfflineCaches();
+    window.localStorage.setItem(OWNER_KEY, userId);
+  } catch {
+    /* best-effort */
+  }
+}

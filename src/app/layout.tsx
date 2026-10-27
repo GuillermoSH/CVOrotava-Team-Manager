@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import AppToaster from "@/components/ui/AppToaster";
+import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -13,6 +14,16 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "CVOrotava Manager",
   description: "Plataforma privada para ver partidos, entrenamientos y más!",
+  applicationName: "CV Manager",
+  appleWebApp: {
+    capable: true,
+    title: "CV Manager",
+    statusBarStyle: "black",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0d0d0f",
 };
 
 const themeInit = `
@@ -49,6 +60,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <AppToaster />
+          <ServiceWorkerRegister />
         </ThemeProvider>
       </body>
     </html>
