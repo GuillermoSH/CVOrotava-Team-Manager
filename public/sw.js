@@ -1,12 +1,22 @@
 /* Soft-offline SW: network-first for player docs/APIs; cache-first for static. */
 
-const SHELL_CACHE = "cvo-shell-v1";
-const API_CACHE = "cvo-api-v1";
-const STATIC_CACHE = "cvo-static-v1";
+const SHELL_CACHE = "cvo-shell-v2";
+const API_CACHE = "cvo-api-v2";
+const STATIC_CACHE = "cvo-static-v2";
 const ALL_CACHES = [SHELL_CACHE, API_CACHE, STATIC_CACHE];
+const OFFLINE_URL = "/offline.html";
+
+/** Tope de entradas por caché: al pasarlo se descartan las más antiguas. */
+const MAX_ENTRIES = { [SHELL_CACHE]: 40, [API_CACHE]: 60, [STATIC_CACHE]: 150 };
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(self.skipWaiting());
+  event.waitUntil(
+    (async () => {
+      const cache = await caches.open(SHELL_CACHE);
+      await cache.add(OFFLINE_URL);
+      await self.skipWaiting();
+    })()
+  );
 });
 
 self.addEventListener("activate", (event) => {
@@ -66,12 +76,28 @@ function shouldBypass(request, url) {
   return false;
 }
 
+async function trimCache(cache, cacheName) {
+  const keys = await cache.keys();
+  const extra = keys.length - MAX_ENTRIES[cacheName];
+  for (let i = 0; i < extra; i += 1) await cache.delete(keys[i]);
+}
+
+/**
+ * Solo se guarda una respuesta propia y directa: una redirección (p. ej. a /login con
+ * la sesión caducada) acabaría pisando los datos buenos con la página de login.
+ */
+function isCacheable(response) {
+  if (!response.ok || response.redirected || response.type !== "basic") return false;
+  return !new URL(response.url).pathname.startsWith("/login");
+}
+
 async function networkFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
   try {
     const response = await fetch(request);
-    if (response.ok) {
+    if (isCacheable(response)) {
       await cache.put(request, response.clone());
+      await trimCache(cache, cacheName);
     }
     return response;
   } catch {
@@ -88,6 +114,7 @@ async function cacheFirst(request, cacheName) {
   const response = await fetch(request);
   if (response.ok) {
     await cache.put(request, response.clone());
+    await trimCache(cache, cacheName);
   }
   return response;
 }
@@ -126,10 +153,8 @@ self.addEventListener("fetch", (event) => {
         const cached = await cache.match(request);
         if (cached) return cached;
         if (isNavigate) {
-          return new Response("Sin conexión. Vuelve a intentarlo cuando tengas red.", {
-            status: 503,
-            headers: { "Content-Type": "text/plain; charset=utf-8" },
-          });
+          const offline = await cache.match(OFFLINE_URL);
+          if (offline) return offline;
         }
         return Response.error();
       })

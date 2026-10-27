@@ -124,3 +124,25 @@ magick([
   `PNG32:${icon512Out}`,
 ]);
 console.log("wrote", icon512Out);
+
+// Maskable: el logo ocupa ~56 % del lienzo para quedar dentro de la zona segura (círculo del 80 %).
+const iconMaskableOut = join(OUT_ICONS, "icon-maskable-512.png");
+
+magick([
+  blanco512,
+  "-resize",
+  "288x288",
+  "(",
+  "-size",
+  "512x512",
+  "xc:#141418",
+  ")",
+  "+swap",
+  "-gravity",
+  "center",
+  "-compose",
+  "over",
+  "-composite",
+  `PNG32:${iconMaskableOut}`,
+]);
+console.log("wrote", iconMaskableOut);

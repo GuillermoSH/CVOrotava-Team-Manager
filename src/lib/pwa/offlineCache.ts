@@ -23,3 +23,21 @@ export async function clearOfflineCaches(): Promise<void> {
     /* best-effort */
   }
 }
+
+const OWNER_KEY = "cvo-offline-owner";
+
+/**
+ * Las cachés guardan datos de un usuario concreto: si entra otra persona en el mismo
+ * dispositivo (sin haber cerrado sesión, p. ej. por sesión caducada), se vacían.
+ */
+export async function syncOfflineCacheOwner(userId: string): Promise<void> {
+  if (typeof window === "undefined") return;
+  try {
+    const previous = window.localStorage.getItem(OWNER_KEY);
+    if (previous === userId) return;
+    if (previous !== null) await clearOfflineCaches();
+    window.localStorage.setItem(OWNER_KEY, userId);
+  } catch {
+    /* best-effort */
+  }
+}

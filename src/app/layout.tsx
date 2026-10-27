@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: "CV Manager",
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "black",
   },
 };
 

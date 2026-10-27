@@ -25,7 +25,7 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 import ClubLogo from "@/components/brand/ClubLogo";
 import OfflineBanner from "@/components/pwa/OfflineBanner";
 import { APP_NAV_ITEMS, type AppNavItem } from "@/components/layout/navItems";
-import { clearOfflineCaches } from "@/lib/pwa/offlineCache";
+import { clearOfflineCaches, syncOfflineCacheOwner } from "@/lib/pwa/offlineCache";
 
 /** Fondo del elemento activo: tinte de marca con borde fino, claramente distinto del hover. */
 const ACTIVE_PILL =
@@ -523,6 +523,11 @@ export default function AppShell() {
   const router = useRouter();
   const { markPending, isActive } = useNavPending();
   const { user } = useUser();
+  const userId = user?.id;
+
+  useEffect(() => {
+    if (userId) void syncOfflineCacheOwner(userId);
+  }, [userId]);
   const [collapsed, toggleCollapsed] = useSidebarCollapsed();
 
   const handleLogout = async () => {

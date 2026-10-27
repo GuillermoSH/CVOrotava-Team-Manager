@@ -79,6 +79,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/assets") ||
     // PWA installability: SW + manifest must load without a session.
     pathname === "/sw.js" ||
+    pathname === "/offline.html" ||
     pathname === "/manifest.webmanifest" ||
     pathname.endsWith(".webmanifest");
 
@@ -185,6 +186,6 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     // Skip static assets and PWA entrypoints (sw.js / webmanifest) — auth would break installability.
-    "/((?!_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|webmanifest)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sw\\.js|offline\\.html|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|webmanifest)$).*)",
   ],
 };
