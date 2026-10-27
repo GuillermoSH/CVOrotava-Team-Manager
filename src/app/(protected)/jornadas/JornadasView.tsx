@@ -50,6 +50,8 @@ export default function JornadasView({
   const group = groups.find((g) => g.id === groupId) ?? defaultGroup(groups);
   const roundIdx = group ? Math.min(roundByGroup[group.id] ?? group.currentRound, group.rounds.length - 1) : 0;
   const round = group?.rounds[roundIdx];
+  // El scout de un partido usa los resultados de todo el grupo, no solo de la jornada.
+  const groupMatches = group?.rounds.flatMap((r) => r.matches) ?? [];
 
   const go = (next: { season?: string; gender?: string }) => {
     const qs = new URLSearchParams({ season: next.season ?? season });
@@ -162,7 +164,9 @@ export default function JornadasView({
               </label>
             ) : null}
 
-            {round ? <RoundMatches matches={round.matches} teams={competition.teams} /> : null}
+            {round ? (
+              <RoundMatches matches={round.matches} teams={competition.teams} groupMatches={groupMatches} />
+            ) : null}
           </section>
 
           {group.standings ? (
