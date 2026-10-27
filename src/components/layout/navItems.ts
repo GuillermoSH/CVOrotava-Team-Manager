@@ -3,6 +3,7 @@ import {
   faCalendarDays,
   faVideo,
   faChartSimple,
+  faListOl,
   faMoneyBill,
   faUsers,
   faLocationDot,
@@ -29,6 +30,7 @@ export const APP_NAV_ITEMS: AppNavItem[] = [
   { name: "Inicio", href: "/", icon: faHome },
   { name: "Calendario", href: "/matches", icon: faCalendarDays, shortName: "Partidos" },
   { name: "Videos", href: "/videos", icon: faVideo },
+  { name: "Jornadas", href: "/jornadas", icon: faListOl, bottomNav: false },
   { name: "Estadísticas", href: "/stats", icon: faChartSimple, bottomNav: false },
   { name: "Pagos", href: "/payments", icon: faMoneyBill },
   {
