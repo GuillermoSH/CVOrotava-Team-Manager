@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { prettyTeamName } from "@/lib/fed/linkPlan";
 import type { CompetitionMatch, CompetitionTeam } from "@/lib/competition/build";
 import { shortDate } from "@/components/stats/competitive/format";
@@ -14,6 +15,8 @@ function teamName(teams: Record<number, CompetitionTeam>, id: number | null): st
 }
 
 function MatchRow({ match, teams }: Readonly<{ match: CompetitionMatch; teams: Record<number, CompetitionTeam> }>) {
+  const [showReport, setShowReport] = useState(false);
+  const reportHref = `/api/fed/report/${match.id}`;
   const played = match.status === "played";
   const homeWon = played && (match.homeSets ?? 0) > (match.awaySets ?? 0);
   const awayWon = played && (match.awaySets ?? 0) > (match.homeSets ?? 0);
@@ -64,16 +67,35 @@ function MatchRow({ match, teams }: Readonly<{ match: CompetitionMatch; teams: R
         <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-muted)]">
           <span className="tabular-nums">{match.sets.map((s) => `${s.home}-${s.away}`).join(" · ")}</span>
           {match.reportUrl ? (
-            <a
-              href={match.reportUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-[var(--accent)] hover:underline"
-            >
-              Acta
-            </a>
+            <span className="flex items-center gap-3">
+              <button
+                type="button"
+                aria-expanded={showReport}
+                onClick={() => setShowReport((v) => !v)}
+                className="cursor-pointer font-semibold text-[var(--accent)] hover:underline"
+              >
+                {showReport ? "Ocultar acta" : "Ver acta"}
+              </button>
+              <a
+                href={reportHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[var(--text-secondary)] hover:underline"
+              >
+                Abrir PDF
+              </a>
+            </span>
           ) : null}
         </div>
+      ) : null}
+
+      {showReport && match.reportUrl ? (
+        <iframe
+          src={reportHref}
+          title={`Acta del partido ${teamName(teams, match.homeId)} contra ${teamName(teams, match.awayId)}`}
+          loading="lazy"
+          className="mt-3 h-[70vh] w-full rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)]"
+        />
       ) : null}
     </li>
   );

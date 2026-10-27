@@ -94,6 +94,7 @@ const LEVELS: Record<string, Level> = {
   "auth/callback GET": "public",
   "auth/logout POST": "public",
   "cron/fed-sync GET": "secret",
+  "fed/report/[matchId] GET": "member",
   "fed/sync GET": "member",
   "fed/sync POST": "admin",
   "match_sets POST": "admin",
