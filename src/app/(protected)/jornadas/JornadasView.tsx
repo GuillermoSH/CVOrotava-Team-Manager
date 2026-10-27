@@ -31,12 +31,14 @@ const navButton =
 
 export default function JornadasView({
   competition,
+  loadFailed = false,
   seasons,
   season,
   gender,
   canPickGender,
 }: Readonly<{
   competition: Competition | null;
+  loadFailed?: boolean;
   seasons: string[];
   season: string;
   gender: Gender;
@@ -95,8 +97,10 @@ export default function JornadasView({
       />
 
       {!competition || !group ? (
-        <p className="mt-6 text-sm text-[var(--text-muted)]">
-          Todavía no hay datos de la federación para esta temporada. Se cargan con la sincronización semanal.
+        <p role={loadFailed ? "alert" : undefined} className="mt-6 text-sm text-[var(--text-muted)]">
+          {loadFailed
+            ? "No se han podido cargar las jornadas. Recarga la página en unos segundos; si sigue igual, avisa a un administrador."
+            : "Todavía no hay datos de la federación para esta temporada. Se cargan con la sincronización semanal."}
         </p>
       ) : (
         <div className="flex flex-col gap-6">

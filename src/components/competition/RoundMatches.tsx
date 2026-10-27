@@ -28,7 +28,7 @@ function knownBefore(match: CompetitionMatch, all: CompetitionMatch[]): Competit
 }
 
 const action =
-  "inline-flex min-h-9 cursor-pointer items-center rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 font-semibold transition-colors hover:bg-[var(--glass-surface)]";
+  "inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 font-semibold transition-colors hover:bg-[var(--glass-surface)]";
 
 function MatchRow({
   match,

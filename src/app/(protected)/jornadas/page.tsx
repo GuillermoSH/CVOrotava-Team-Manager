@@ -16,18 +16,22 @@ export default async function JornadasPage({ searchParams }: Readonly<{ searchPa
   const requested = params.season ? normalizeSeasonId(params.season) : null;
   const season = requested && /^\d{4}-\d{2}$/.test(requested) ? requested : getCurrentSeason();
 
-  const [seasons, competition] = await Promise.all([
+  const [seasons, { competition, loadFailed }] = await Promise.all([
     listCompetitionSeasons(),
-    getCompetition(season, gender).catch((err) => {
-      console.error("getCompetition failed:", err);
-      return null;
-    }),
+    getCompetition(season, gender).then(
+      (competition) => ({ competition, loadFailed: false }),
+      (err) => {
+        console.error("getCompetition failed:", err);
+        return { competition: null, loadFailed: true };
+      }
+    ),
   ]);
 
   return (
     <JornadasView
       key={`${season}-${gender}`}
       competition={competition}
+      loadFailed={loadFailed}
       seasons={seasons.includes(season) ? seasons : [season, ...seasons]}
       season={season}
       gender={gender}
