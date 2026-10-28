@@ -61,8 +61,11 @@ describe("jornadas con una temporada real completa", () => {
     const out = clean(
       renderToStaticMarkup(<RoundMatches matches={round.matches} teams={comp.teams} groupMatches={all} />)
     );
-    expect(out).toContain(" – ");
+    // Marcador por equipo: sets ganados en negrita para el que gana, y los puntos de cada set
+    expect(out).toMatch(/font-bold[^>]*>3</);
+    expect(out).toMatch(/\d{1,2}<\/span><span class="w-5 text-right/);
     expect(out).toContain("Scout");
+    expect(out).toMatch(/<h3[^>]*>(Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo) \d+ de /);
   });
 
   it("el panel de scout de cualquier partido jugado no produce NaN ni undefined", () => {

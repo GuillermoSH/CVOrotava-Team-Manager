@@ -1,6 +1,7 @@
 import JornadasView from "./JornadasView";
 import { requireAppUser } from "@/lib/auth/loadAppUser";
 import { getCompetition, listCompetitionSeasons } from "@/lib/competition/load";
+import { todayInCanarias } from "@/lib/stats/competitive/seasons";
 import { getCurrentSeason, normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 type SearchParams = Promise<{ season?: string; gender?: string }>;
@@ -36,6 +37,7 @@ export default async function JornadasPage({ searchParams }: Readonly<{ searchPa
       season={season}
       gender={gender}
       canPickGender={canPickGender}
+      today={todayInCanarias()}
     />
   );
 }

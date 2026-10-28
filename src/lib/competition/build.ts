@@ -231,3 +231,29 @@ export function groupLabel(name: string): string {
     .map((w, i) => (i > 0 && LOWER_WORDS.has(w) ? w : w.charAt(0).toLocaleUpperCase("es") + w.slice(1)))
     .join(" ");
 }
+
+/** Partidos de una jornada agrupados por día, en el orden en que llegan (los sin fecha, al final). */
+export function groupByDay(matches: CompetitionMatch[]): { date: string | null; matches: CompetitionMatch[] }[] {
+  const days: { date: string | null; matches: CompetitionMatch[] }[] = [];
+  for (const m of matches) {
+    const day = days.find((d) => d.date === m.date);
+    if (day) day.matches.push(m);
+    else days.push({ date: m.date, matches: [m] });
+  }
+  return days.sort((a, b) => (a.date ?? "9999").localeCompare(b.date ?? "9999"));
+}
+
+/** Etiqueta corta de una jornada para la tira de números: solo si la federación la nombra con un número. */
+export function roundChip(label: string): string | null {
+  const text = label.trim();
+  return /^\d+$/.test(text) ? text : null;
+}
+
+/** Próximo partido nuestro aún por jugar (con fecha igual o posterior a hoy), el más cercano. */
+export function nextOurMatch(matches: CompetitionMatch[], today: string): CompetitionMatch | null {
+  return (
+    matches
+      .filter((m) => m.ours && m.status === "scheduled" && m.date !== null && m.date >= today)
+      .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? "") || (a.time ?? "").localeCompare(b.time ?? ""))[0] ?? null
+  );
+}
