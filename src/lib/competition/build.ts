@@ -212,3 +212,22 @@ export function buildCompetition(input: CompetitionInput, today: string): Compet
 
   return { season: input.season, gender: input.gender, groups, teams };
 }
+
+/** La federación nombra las jornadas con solo el número («2»): se enseña como «Jornada 2». */
+export function roundTitle(label: string): string {
+  const text = label.trim();
+  return /^\d+$/.test(text) ? `Jornada ${text}` : text;
+}
+
+const LOWER_WORDS = new Set(["de", "del"]);
+
+/** «GRUPO LAS PALMAS» → «Grupo Las Palmas» (la federación escribe los grupos en mayúsculas). */
+export function groupLabel(name: string): string {
+  return name
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLocaleLowerCase("es")
+    .split(" ")
+    .map((w, i) => (i > 0 && LOWER_WORDS.has(w) ? w : w.charAt(0).toLocaleUpperCase("es") + w.slice(1)))
+    .join(" ");
+}

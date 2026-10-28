@@ -10,8 +10,14 @@ import SegmentedControl from "@/components/ui/SegmentedControl";
 import GroupStandings from "@/components/competition/GroupStandings";
 import RoundMatches from "@/components/competition/RoundMatches";
 import { shortDate } from "@/components/stats/competitive/format";
-import { prettyTeamName } from "@/lib/fed/linkPlan";
-import type { Competition, CompetitionGroup, CompetitionRound, Gender } from "@/lib/competition/build";
+import {
+  groupLabel,
+  roundTitle,
+  type Competition,
+  type CompetitionGroup,
+  type CompetitionRound,
+  type Gender,
+} from "@/lib/competition/build";
 
 const GENDER_LABEL: Record<Gender, string> = { male: "Masculino", female: "Femenino" };
 
@@ -108,23 +114,24 @@ export default function JornadasView({
             <SegmentedControl
               aria-label="Grupo"
               value={String(group.id)}
-              options={groups.map((g) => ({ value: String(g.id), label: prettyTeamName(g.name) }))}
+              options={groups.map((g) => ({ value: String(g.id), label: groupLabel(g.name) }))}
+              className="self-start"
               onChange={(v) => setGroupId(Number(v))}
             />
           ) : null}
 
           {groups.length === 1 || !group.hasOurs ? (
             <p className="-mt-3 text-xs text-[var(--text-muted)]">
-              {group.hasOurs ? prettyTeamName(group.name) : `${prettyTeamName(group.name)} · no juega el club`}
+              {group.hasOurs ? groupLabel(group.name) : `${groupLabel(group.name)} · no juega el club`}
             </p>
           ) : null}
 
-          <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_28rem]">
+          <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,46rem)_28rem]">
             <section aria-labelledby="round-title" className="min-w-0">
               <div className="mb-3 flex items-end justify-between gap-3">
                 <div className="min-w-0">
                   <h2 id="round-title" className="truncate text-lg font-semibold tracking-tight">
-                    {round ? round.label : "Sin jornadas"}
+                    {round ? roundTitle(round.label) : "Sin jornadas"}
                   </h2>
                   {round && roundDates(round) ? (
                     <p className="text-xs text-[var(--text-muted)]">{roundDates(round)}</p>
@@ -141,7 +148,7 @@ export default function JornadasView({
                     >
                       {group.rounds.map((r, i) => (
                         <option key={r.id ?? "none"} value={i}>
-                          {r.label}
+                          {roundTitle(r.label)}
                         </option>
                       ))}
                     </select>

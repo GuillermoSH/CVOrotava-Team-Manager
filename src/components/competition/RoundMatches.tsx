@@ -63,7 +63,7 @@ function MatchRow({
 
   const side = (id: number | null, won: boolean, align: "left" | "right") => (
     <span
-      className={`min-w-0 flex-1 truncate ${align === "right" ? "text-right" : "text-left"} ${
+      className={`min-w-0 truncate ${align === "right" ? "text-right" : "text-left"} ${
         won ? "font-semibold text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
       }`}
     >
@@ -84,19 +84,19 @@ function MatchRow({
         ) : null}
       </div>
 
-      <div className="flex items-center gap-3 text-sm">
-        {side(match.homeId, homeWon, "left")}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-sm">
+        {side(match.homeId, homeWon, "right")}
         <span
           className="w-14 shrink-0 text-center font-bold tabular-nums text-[var(--text-primary)]"
           aria-label={played ? `Resultado ${match.homeSets} a ${match.awaySets}` : "Sin jugar"}
         >
           {played ? `${match.homeSets} – ${match.awaySets}` : "vs"}
         </span>
-        {side(match.awayId, awayWon, "right")}
+        {side(match.awayId, awayWon, "left")}
       </div>
 
       {played && match.sets.length > 0 ? (
-        <p className="mt-1.5 text-xs tabular-nums text-[var(--text-muted)]">
+        <p className="mt-1.5 text-center text-xs tabular-nums text-[var(--text-muted)]">
           {match.sets.map((s) => `${s.home}-${s.away}`).join(" · ")}
         </p>
       ) : null}

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { buildCompetition, matchStatus, pickCurrentRound, type CompetitionInput } from "./build";
+import {
+  buildCompetition,
+  groupLabel,
+  matchStatus,
+  pickCurrentRound,
+  roundTitle,
+  type CompetitionInput,
+} from "./build";
 
 type M = CompetitionInput["matches"][number];
 
@@ -203,5 +210,30 @@ describe("pickCurrentRound", () => {
       round(3, [{ status: "scheduled", date: "2026-11-01" }]),
     ];
     expect(pickCurrentRound(rounds, "2026-10-20")).toBe(2);
+  });
+});
+
+describe("roundTitle", () => {
+  it("la federación da solo el número: se enseña como «Jornada N»", () => {
+    expect(roundTitle("2")).toBe("Jornada 2");
+    expect(roundTitle(" 12 ")).toBe("Jornada 12");
+  });
+
+  it("deja tal cual los nombres que ya son texto", () => {
+    expect(roundTitle("Cuartos de final")).toBe("Cuartos de final");
+    expect(roundTitle("Jornada 3")).toBe("Jornada 3");
+  });
+});
+
+describe("groupLabel", () => {
+  it("pasa los grupos en mayúsculas a título, sin perder «Las»", () => {
+    expect(groupLabel("GRUPO LAS PALMAS")).toBe("Grupo Las Palmas");
+    expect(groupLabel("GRUPO TENERIFE")).toBe("Grupo Tenerife");
+    expect(groupLabel("FASE FINAL")).toBe("Fase Final");
+  });
+
+  it("mantiene en minúscula «de» y «del», y limpia espacios", () => {
+    expect(groupLabel("  Fase  de ASCENSO ")).toBe("Fase de Ascenso");
+    expect(groupLabel("COPA DEL GOBIERNO")).toBe("Copa del Gobierno");
   });
 });

@@ -4,7 +4,7 @@ import { prettyTeamName } from "@/lib/fed/linkPlan";
 import type { CompetitionStanding, CompetitionTeam } from "@/lib/competition/build";
 
 const th = "px-2 py-2 text-xs font-semibold text-[var(--text-muted)]";
-const td = "px-2 py-2.5 text-right tabular-nums";
+const td = "whitespace-nowrap px-2 py-2.5 text-right tabular-nums";
 
 export default function GroupStandings({
   groupName,
