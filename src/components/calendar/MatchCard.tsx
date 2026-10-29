@@ -12,6 +12,7 @@ import {
   faPenToSquare,
   faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
+import { ourMatchHref } from "@/lib/competition/links";
 import type { Match } from "./MatchCard.types";
 
 export type { Match } from "./MatchCard.types";
@@ -91,7 +92,7 @@ export default function MatchCard({
     <article className="h-full rounded-2xl border border-[var(--glass-border)] bg-[var(--color-bg-elevated)] transition-colors hover:border-[var(--glass-border-hover)]">
       <div className="flex h-full gap-3 p-3.5">
         <Link
-          href={`/matches/${match.id}`}
+          href={ourMatchHref(match)}
           className="flex w-14 shrink-0 flex-col items-center justify-center self-stretch rounded-xl bg-[var(--surface-faint)] py-2 text-center transition-colors hover:bg-[var(--accent-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           aria-label={`${weekday} ${dayNum}, ${formattedTime}. Abrir ficha vs ${match.opponent}`}
         >
@@ -111,7 +112,7 @@ export default function MatchCard({
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                 <Link
-                  href={`/matches/${match.id}`}
+                  href={ourMatchHref(match)}
                   className="truncate text-base font-semibold tracking-tight text-[var(--text-primary)] transition-colors hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                 >
                   {match.opponent}
@@ -169,7 +170,7 @@ export default function MatchCard({
 
           <div className="flex flex-wrap items-center gap-1.5">
             <Link
-              href={`/matches/${match.id}`}
+              href={ourMatchHref(match)}
               className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[var(--accent-muted)] px-2.5 text-xs font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--accent)] hover:text-white"
             >
               Ver detalles

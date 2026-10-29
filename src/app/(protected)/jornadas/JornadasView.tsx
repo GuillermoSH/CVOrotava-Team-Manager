@@ -45,6 +45,8 @@ export default function JornadasView({
   gender,
   canPickGender,
   today,
+  initialGroupId,
+  initialRound,
 }: Readonly<{
   competition: Competition | null;
   loadFailed?: boolean;
@@ -54,16 +56,23 @@ export default function JornadasView({
   canPickGender: boolean;
   /** YYYY-MM-DD en hora de Canarias, calculado en el servidor. */
   today: string;
+  /** Grupo y jornada (desde 1) con los que se abre, p. ej. al volver desde el detalle de un partido. */
+  initialGroupId?: number;
+  initialRound?: number;
 }>) {
   const router = useRouter();
   const groups = competition?.groups ?? [];
-  const [groupId, setGroupId] = useState<number | null>(defaultGroup(groups)?.id ?? null);
-  const [roundByGroup, setRoundByGroup] = useState<Record<number, number>>({});
+  const startGroup = groups.find((g) => g.id === initialGroupId) ?? defaultGroup(groups);
+  const [groupId, setGroupId] = useState<number | null>(startGroup?.id ?? null);
+  const [roundByGroup, setRoundByGroup] = useState<Record<number, number>>(
+    startGroup && initialRound && initialRound >= 1 && initialRound <= startGroup.rounds.length
+      ? { [startGroup.id]: initialRound - 1 }
+      : {}
+  );
 
   const group = groups.find((g) => g.id === groupId) ?? defaultGroup(groups);
   const roundIdx = group ? Math.min(roundByGroup[group.id] ?? group.currentRound, group.rounds.length - 1) : 0;
   const round = group?.rounds[roundIdx];
-  // El scout de un partido usa los resultados de todo el grupo, no solo de la jornada.
   const groupMatches = group?.rounds.flatMap((r) => r.matches) ?? [];
 
   const go = (next: { season?: string; gender?: string }) => {
@@ -192,7 +201,7 @@ export default function JornadasView({
               ) : null}
             </div>
 
-            {round ? <RoundMatches matches={round.matches} teams={competition.teams} groupMatches={groupMatches} /> : null}
+            {round ? <RoundMatches matches={round.matches} teams={competition.teams} /> : null}
           </section>
 
           {group.standings ? (

@@ -7,6 +7,7 @@ import { scoutMatch } from "@/lib/competition/scout";
 import MatchScoutPanel from "./MatchScoutPanel";
 import RoundMatches from "./RoundMatches";
 import GroupStandings from "./GroupStandings";
+import MatchDetailView from "@/app/(protected)/jornadas/partido/[id]/MatchDetailView";
 
 /** Temporada completa real (2025-26 masculina) → misma forma que lee el cargador. */
 function inputFrom(bundles: FedTournamentBundle[], season: string): CompetitionInput {
@@ -59,12 +60,13 @@ describe("jornadas con una temporada real completa", () => {
   it("una jornada entera se pinta con resultados y sets", () => {
     const round = group.rounds.find((r) => r.matches.some((m) => m.status === "played"))!;
     const out = clean(
-      renderToStaticMarkup(<RoundMatches matches={round.matches} teams={comp.teams} groupMatches={all} />)
+      renderToStaticMarkup(<RoundMatches matches={round.matches} teams={comp.teams} />)
     );
     // Marcador por equipo: sets ganados en negrita para el que gana, y los puntos de cada set
     expect(out).toMatch(/font-bold[^>]*>3</);
     expect(out).toMatch(/\d{1,2}<\/span><span class="w-5 text-right/);
-    expect(out).toContain("Scout");
+    // Cada partido abre su detalle
+    expect(out).toContain("/jornadas/partido/");
     expect(out).toMatch(/<h3[^>]*>(Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo) \d+ de /);
   });
 
@@ -94,5 +96,47 @@ describe("jornadas con una temporada real completa", () => {
     const out = renderToStaticMarkup(<MatchScoutPanel scout={scout} homeId={ids[0]} awayId={ids[1]} teams={comp.teams} />);
     expect(out).toContain("Todavía no hay partidos jugados");
     expect(out).not.toContain("Ganados / jugados");
+  });
+});
+
+describe("detalle de un partido", () => {
+  const props = (m: CompetitionMatch, ours: { id: string; video_url: string | null; notes: string | null } | null, isAdmin: boolean) => ({
+    match: m,
+    teams: comp.teams,
+    groupMatches: all,
+    groupName: group.name,
+    roundLabel: "12",
+    backHref: "/jornadas?season=2025-26",
+    ours,
+    isAdmin,
+  });
+
+  it("un partido jugado abre en el resumen con sus sets, el enlace de vuelta y el PDF", () => {
+    const m = playedMatches.find((x) => x.sets.length >= 3 && x.reportUrl)!;
+    const out = clean(renderToStaticMarkup(<MatchDetailView {...props(m, null, false)} />));
+    expect(out).toContain("Puntos de cada set");
+    expect(out).toContain("Total de puntos");
+    expect(out).toContain("Jornada 12");
+    expect(out).toContain('href="/jornadas?season=2025-26"');
+    expect(out).toContain(`/api/fed/report/${m.id}`);
+    expect(out).not.toContain("Editar partido");
+  });
+
+  it("si es nuestro y eres admin ofrece editarlo, y enseña notas y vídeo", () => {
+    const m = playedMatches.find((x) => x.ours)!;
+    const out = clean(
+      renderToStaticMarkup(<MatchDetailView {...props(m, { id: "abc", video_url: "https://youtube.com/watch?v=1", notes: "Ojo al saque" }, true)} />)
+    );
+    expect(out).toContain('href="/matches/abc?edit=1"');
+    expect(out).toContain("Ojo al saque");
+    expect(out).toContain("Vídeo");
+  });
+
+  it("un partido por jugar abre directamente en el scout", () => {
+    const base = playedMatches[0];
+    const pending = { ...base, status: "scheduled" as const, homeSets: null, awaySets: null, sets: [] };
+    const out = clean(renderToStaticMarkup(<MatchDetailView {...props(pending, null, false)} />));
+    expect(out).toContain("Ganados / jugados");
+    expect(out).not.toContain("Total de puntos");
   });
 });

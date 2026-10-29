@@ -154,7 +154,7 @@ export default function MatchScoutPanel({
       </div>
 
       <section aria-label="Duelo directo">
-        <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Duelo directo</h4>
+        <h4 className="mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Duelo directo</h4>
         {scout.headToHead.played === 0 ? (
           <p className="text-[var(--text-muted)]">No se han enfrentado todavía esta temporada.</p>
         ) : (
@@ -175,7 +175,7 @@ export default function MatchScoutPanel({
       </section>
 
       <section aria-label="Rivales comunes">
-        <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+        <h4 className="mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">
           Rivales comunes
         </h4>
         {scout.common.length === 0 ? (

@@ -257,3 +257,12 @@ export function scoutMatch(matches: CompetitionMatch[], homeId: number, awayId: 
     lowSample: home.played < 3 || away.played < 3,
   };
 }
+
+/**
+ * Partidos que se conocían antes de uno: en uno ya jugado, solo los anteriores a él
+ * (así el scout enseña lo que se sabía antes del partido); en uno pendiente, todos.
+ */
+export function matchesKnownBefore(match: CompetitionMatch, all: CompetitionMatch[]): CompetitionMatch[] {
+  if (match.status !== "played") return all;
+  return all.filter((m) => (m.date !== null && match.date !== null ? m.date < match.date : m.id !== match.id));
+}
