@@ -21,3 +21,6 @@ export function jornadaHref(opts: { season: string; gender: Gender; groupId: num
   });
   return `/jornadas?${qs}`;
 }
+
+/** Ficha de un equipo de la competición (de cualquier club). */
+export const teamHref = (fedTeamId: number): string => `/jornadas/equipo/${fedTeamId}`;

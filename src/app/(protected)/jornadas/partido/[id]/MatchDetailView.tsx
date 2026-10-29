@@ -11,6 +11,7 @@ import type { MatchReport } from "@/lib/competition/report";
 import { longDate } from "@/components/stats/competitive/format";
 import { prettyTeamName } from "@/lib/fed/linkPlan";
 import { groupLabel, roundTitle, type CompetitionMatch, type CompetitionTeam } from "@/lib/competition/build";
+import { teamHref } from "@/lib/competition/links";
 import { matchesKnownBefore, scoutMatch } from "@/lib/competition/scout";
 
 type Teams = Record<number, CompetitionTeam>;
@@ -127,11 +128,11 @@ export default function MatchDetailView({
           {home} contra {away}
         </h1>
         <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-4 sm:gap-x-8">
-          <p className={`text-right text-lg leading-tight sm:text-2xl ${played && (match.homeSets ?? 0) > (match.awaySets ?? 0) ? "font-bold" : "font-medium text-[var(--text-secondary)]"}`}>{home}</p>
+          <p className={`text-right text-lg leading-tight sm:text-2xl ${played && (match.homeSets ?? 0) > (match.awaySets ?? 0) ? "font-bold" : "font-medium text-[var(--text-secondary)]"}`}>{match.homeId !== null && teams[match.homeId] ? <Link href={teamHref(match.homeId)} className="hover:underline">{home}</Link> : home}</p>
           <p className="text-center text-3xl font-bold tabular-nums sm:text-4xl" aria-label={played ? `Resultado ${match.homeSets} a ${match.awaySets}` : "Sin jugar"}>
             {played ? `${match.homeSets} – ${match.awaySets}` : "vs"}
           </p>
-          <p className={`text-left text-lg leading-tight sm:text-2xl ${played && (match.awaySets ?? 0) > (match.homeSets ?? 0) ? "font-bold" : "font-medium text-[var(--text-secondary)]"}`}>{away}</p>
+          <p className={`text-left text-lg leading-tight sm:text-2xl ${played && (match.awaySets ?? 0) > (match.homeSets ?? 0) ? "font-bold" : "font-medium text-[var(--text-secondary)]"}`}>{match.awayId !== null && teams[match.awayId] ? <Link href={teamHref(match.awayId)} className="hover:underline">{away}</Link> : away}</p>
         </div>
         <p className="mt-3 text-center text-sm text-[var(--text-muted)]">
           {when}

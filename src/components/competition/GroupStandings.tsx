@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { prettyTeamName } from "@/lib/fed/linkPlan";
+import { teamHref } from "@/lib/competition/links";
 import type { CompetitionTeam } from "@/lib/competition/build";
 import type { StandingRow } from "@/lib/competition/digest";
 
@@ -79,7 +81,13 @@ export default function GroupStandings({
                   <Movement value={s.movement} />
                 </td>
                 <td className="max-w-[13rem] truncate px-2 py-2.5 text-left">
-                  {team ? prettyTeamName(team.name) : `Equipo ${s.teamId}`}
+                  {team ? (
+                    <Link href={teamHref(team.id)} className="hover:underline">
+                      {prettyTeamName(team.name)}
+                    </Link>
+                  ) : (
+                    `Equipo ${s.teamId}`
+                  )}
                 </td>
                 <td className={td}>{s.played}</td>
                 <td className={td}>{s.won}</td>
