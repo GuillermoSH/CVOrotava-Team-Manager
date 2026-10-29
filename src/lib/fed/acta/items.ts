@@ -18,9 +18,12 @@ export async function readActaItems(pdf: Uint8Array): Promise<ActaItem[]> {
     const content = await page.getTextContent();
     const items: ActaItem[] = [];
     for (const item of content.items) {
-      if (!("str" in item) || item.str.trim() === "") continue;
+      // Algún acta trae el carácter nulo dentro de un texto y Postgres no lo admite en text ni en jsonb
+      if (!("str" in item)) continue;
+      const str = item.str.replaceAll("\u0000", "");
+      if (str.trim() === "") continue;
       items.push({
-        s: item.str,
+        s: str,
         x: Math.round(item.transform[4] * 10) / 10,
         y: Math.round((viewport.height - item.transform[5]) * 10) / 10,
       });
