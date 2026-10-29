@@ -3,6 +3,7 @@ import { getCurrentSeason } from "@/utils/getCurrentSeason";
 import { FCVB_MANAGER_ID, leveradeGet } from "./client";
 import { syncClubContacts, type ClubContactSummary } from "./clubContacts";
 import { linkOurMatches, type LinkSummary } from "./linkMatches";
+import { processPendingReports, type ReportsSummary } from "./acta/process";
 import {
   FIRST_SYNCED_SEASON,
   TOURNAMENT_INCLUDES,
@@ -34,6 +35,8 @@ export type FedSyncSummary = {
   link?: LinkSummary;
   /** Contacto de los clubes rivales (email, teléfono, sede). */
   clubContacts?: ClubContactSummary;
+  /** Actas en PDF leídas en esta pasada. */
+  reports?: ReportsSummary;
 };
 
 type Candidate = { id: string; name: string };
@@ -76,6 +79,10 @@ async function discoverCandidates(minSeason: string): Promise<Candidate[]> {
 }
 
 const CHUNK = 500;
+
+/** Actas que se leen como mucho en cada sincronización, y el tiempo que se les dedica (la función dura 300 s). */
+const REPORTS_PER_RUN = 80;
+const REPORTS_BUDGET_MS = 150_000;
 
 async function upsertChunks(
   supabase: SupabaseClient,
@@ -272,6 +279,18 @@ export async function syncFed(opts: {
         );
       } catch (err) {
         log(`→ contactos de clubes omitidos: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
+    if (!dryRun) {
+      // Secundario como los contactos: si falla (p. ej. migración sin aplicar) no invalida lo sincronizado.
+      // Se limita en número y en tiempo para no agotar la función; lo que quede entra en la siguiente pasada.
+      try {
+        summary.reports = await processPendingReports({ supabase, limit: REPORTS_PER_RUN, budgetMs: REPORTS_BUDGET_MS, log });
+        const r = summary.reports;
+        log(`→ actas: ${r.processed} leídas (${r.ok} ok, ${r.review} a revisar, ${r.failed} fallidas, ${r.retry} a reintentar), ${r.remaining} pendientes`);
+      } catch (err) {
+        log(`→ actas omitidas: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
 
