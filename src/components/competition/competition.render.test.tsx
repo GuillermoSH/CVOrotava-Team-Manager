@@ -110,6 +110,7 @@ describe("detalle de un partido", () => {
     roundLabel: "12",
     backHref: "/jornadas?season=2025-26",
     ours,
+    report: null,
     isAdmin,
   });
 

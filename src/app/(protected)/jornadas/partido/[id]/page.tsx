@@ -3,6 +3,7 @@ import MatchDetailView from "./MatchDetailView";
 import { requireAppUser } from "@/lib/auth/loadAppUser";
 import { getFedMatchContext } from "@/lib/competition/load";
 import { jornadaHref } from "@/lib/competition/links";
+import { getMatchReport } from "@/lib/competition/loadReport";
 
 export default async function FedMatchPage({ params }: Readonly<{ params: Promise<{ id: string }> }>) {
   const user = await requireAppUser();
@@ -13,6 +14,9 @@ export default async function FedMatchPage({ params }: Readonly<{ params: Promis
   if (!ctx) notFound();
   // Cada usuario ve solo el género que le toca; sin género asignado se ven los dos.
   if (user.gender && user.gender !== ctx.gender) notFound();
+
+  // El acta solo existe de partidos jugados; si falla su lectura, el resto de la página sigue
+  const report = ctx.match.status === "played" ? await getMatchReport(ctx.match.id).catch(() => null) : null;
 
   const roundIndex = ctx.group.rounds.findIndex((r) => r.id === ctx.round.id) + 1;
   const teamIds = new Set([ctx.match.homeId, ctx.match.awayId, ...ctx.group.teamIds]);
@@ -29,6 +33,7 @@ export default async function FedMatchPage({ params }: Readonly<{ params: Promis
       roundLabel={ctx.round.label}
       backHref={jornadaHref({ season: ctx.season, gender: ctx.gender, groupId: ctx.group.id, roundIndex })}
       ours={ctx.ours}
+      report={report}
       isAdmin={user.isAdmin}
     />
   );

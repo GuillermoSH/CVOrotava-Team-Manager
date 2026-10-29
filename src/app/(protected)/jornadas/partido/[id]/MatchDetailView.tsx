@@ -6,13 +6,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import MatchScoutPanel from "@/components/competition/MatchScoutPanel";
+import MatchReportPanel from "@/components/competition/MatchReportPanel";
+import type { MatchReport } from "@/lib/competition/report";
 import { longDate } from "@/components/stats/competitive/format";
 import { prettyTeamName } from "@/lib/fed/linkPlan";
 import { groupLabel, roundTitle, type CompetitionMatch, type CompetitionTeam } from "@/lib/competition/build";
 import { matchesKnownBefore, scoutMatch } from "@/lib/competition/scout";
 
 type Teams = Record<number, CompetitionTeam>;
-type Tab = "resumen" | "scout" | "video";
+type Tab = "resumen" | "acta" | "scout" | "video";
 
 const STATUS_LABEL: Partial<Record<CompetitionMatch["status"], string>> = {
   postponed: "Aplazado",
@@ -80,6 +82,7 @@ export default function MatchDetailView({
   roundLabel,
   backHref,
   ours,
+  report,
   isAdmin,
 }: Readonly<{
   match: CompetitionMatch;
@@ -89,6 +92,7 @@ export default function MatchDetailView({
   roundLabel: string;
   backHref: string;
   ours: { id: string; video_url: string | null; notes: string | null } | null;
+  report: MatchReport | null;
   isAdmin: boolean;
 }>) {
   const played = match.status === "played";
@@ -103,6 +107,7 @@ export default function MatchDetailView({
   const when = [match.date ? longDate(match.date) : "Fecha por confirmar", match.time, match.venue].filter(Boolean).join(" · ");
   const options: { value: Tab; label: string }[] = [
     { value: "resumen", label: "Resumen" },
+    ...(report ? [{ value: "acta" as const, label: "Datos del acta" }] : []),
     ...(canScout ? [{ value: "scout" as const, label: "Scout" }] : []),
     ...(hasVideo ? [{ value: "video" as const, label: "Vídeo" }] : []),
   ];
@@ -178,6 +183,8 @@ export default function MatchDetailView({
           ) : null}
         </div>
       ) : null}
+
+      {tab === "acta" && report ? <MatchReportPanel report={report} home={home} away={away} /> : null}
 
       {tab === "scout" && scout && match.homeId !== null && match.awayId !== null ? (
         <div className="max-w-2xl">
