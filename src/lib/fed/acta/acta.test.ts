@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { normalizeTeam, parseActa } from "./parse";
-import { actaStatus, compareWithFed, validateActa, type FedMatchForActa } from "./validate";
+import { actaStatus, compareWithFed, reconcileActa, validateActa, type FedMatchForActa } from "./validate";
 import type { ActaData, ActaItem } from "./types";
 import { ACTA_PARSER_VERSION } from "./types";
 import a145743000 from "./__fixtures__/145743000.json";
@@ -264,5 +264,110 @@ describe("actaStatus", () => {
     expect(actaStatus([])).toBe("ok");
     expect(actaStatus([{ level: "warning", code: "x", message: "" }])).toBe("review");
     expect(actaStatus([{ level: "warning", code: "x", message: "" }, { level: "error", code: "y", message: "" }])).toBe("failed");
+  });
+});
+
+describe("reconcileActa: lo que el acta trae mal y se puede corregir", () => {
+  const { data } = read(a145743000);
+  const fed: FedMatchForActa = {
+    homeName: "CV SAN ROQUE",
+    awayName: "DOS 19 ARINAGA",
+    homeSets: 3,
+    awaySets: 2,
+    sets: [
+      { home: 22, away: 25 },
+      { home: 20, away: 25 },
+      { home: 25, away: 22 },
+      { home: 25, away: 22 },
+      { home: 18, away: 16 },
+    ],
+  };
+
+  it("un acta sin nada que corregir sale igual y sin avisos", () => {
+    const out = reconcileActa(data, fed);
+    expect(out.issues).toEqual([]);
+    expect(out.data).toEqual(data);
+  });
+
+  it("no modifica el acta original", () => {
+    const broken = structuredClone(data);
+    broken.sets[0].summary.B.points = 25;
+    reconcileActa(broken, fed);
+    expect(broken.sets[0].summary.B.points).toBe(25);
+  });
+
+  it("el cuadro de resultado del acta con un empate imposible se arregla con los puntos de la federación", () => {
+    const broken = structuredClone(data);
+    // Como en las actas con el cuadro mal rellenado: los dos equipos con los mismos puntos
+    broken.sets[0].summary.B.points = 25;
+    broken.sets[0].summary.A.points = 25;
+    broken.totals.A.setsWon = 0;
+    broken.totals.B.setsWon = 0;
+    const out = reconcileActa(broken, fed);
+    expect(out.issues.map((i) => i.code)).toEqual(["fed-points-used"]);
+    expect(out.issues[0].level).toBe("warning");
+    expect(out.data.sets[0].summary.B.points).toBe(22);
+    expect(out.data.sets[0].summary.A.points).toBe(25);
+    expect(out.data.totals.B.setsWon).toBe(3);
+    expect(out.data.totals.A.setsWon).toBe(2);
+    // Con los puntos oficiales, las jugadas de los paneles cuadran y el acta queda para revisar, no fallida
+    const issues = [...out.issues, ...validateActa(out.data), ...compareWithFed(out.data, fed).issues];
+    expect(actaStatus(issues)).toBe("review");
+    expect(issues.some((i) => i.code === "set-tie" || i.code === "fed-set-points")).toBe(false);
+  });
+
+  it("si los equipos no se reconocen por nombre, no se tocan los puntos", () => {
+    const broken = structuredClone(data);
+    broken.sets[0].summary.B.points = 25;
+    const out = reconcileActa(broken, { ...fed, homeName: "OTRO", awayName: "EQUIPO" });
+    expect(out.issues).toEqual([]);
+    expect(out.data.sets[0].summary.B.points).toBe(25);
+  });
+
+  it("jugadas que no caben ni con los puntos de la federación siguen fallando", () => {
+    const broken = structuredClone(data);
+    broken.sets[0].summary.B.points = 25;
+    broken.sets[0].summary.A.points = 25;
+    broken.sets[0].B.timeouts[0].score = { own: 24, opp: 24 };
+    const out = reconcileActa(broken, fed);
+    expect(actaStatus([...validateActa(out.data)])).toBe("failed");
+  });
+
+  it("un set con los marcadores anotados como rival:propios se lee dándoles la vuelta", () => {
+    const flipped = structuredClone(data);
+    const set = flipped.sets[0];
+    for (const s of ["A", "B"] as const) {
+      for (const t of set[s].timeouts) t.score = { own: t.score.opp, opp: t.score.own };
+      for (const x of set[s].substitutions) {
+        x.scoreIn = { own: x.scoreIn.opp, opp: x.scoreIn.own };
+        if (x.scoreBack) x.scoreBack = { own: x.scoreBack.opp, opp: x.scoreBack.own };
+      }
+    }
+    expect(validateActa(flipped).some((i) => i.code === "score-range")).toBe(true);
+
+    const out = reconcileActa(flipped, fed);
+    expect(out.issues.map((i) => i.code)).toEqual(["score-order"]);
+    expect(out.data.sets[0]).toEqual(data.sets[0]);
+    expect(validateActa(out.data).some((i) => i.code === "score-range")).toBe(false);
+  });
+
+  it("marcadores mezclados en un set: solo se da la vuelta a los que no caben", () => {
+    const mixed = structuredClone(data);
+    const set = mixed.sets[0]; // final B 22 - A 25
+    const t = set.B.timeouts[0]; // 21:23 de B
+    t.score = { own: 23, opp: 21 };
+    expect(validateActa(mixed).some((i) => i.code === "score-range")).toBe(true);
+
+    const out = reconcileActa(mixed, fed);
+    expect(out.issues.map((i) => i.code)).toEqual(["score-order"]);
+    expect(out.data.sets[0].B.timeouts[0].score).toEqual({ own: 21, opp: 23 });
+    // El resto de marcadores del set, que ya cabían, se quedan como estaban
+    expect(out.data.sets[0].B.timeouts[1]).toEqual(data.sets[0].B.timeouts[1]);
+    expect(out.data.sets[0].A).toEqual(data.sets[0].A);
+  });
+
+  it("un set que ya cuadra no se toca", () => {
+    const out = reconcileActa(data, fed);
+    expect(out.data.sets.map((s) => s.A.timeouts)).toEqual(data.sets.map((s) => s.A.timeouts));
   });
 });

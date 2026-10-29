@@ -10,7 +10,7 @@
  */
 
 /** Versión del extractor: se guarda con cada acta para poder reprocesar las de una versión antigua. */
-export const ACTA_PARSER_VERSION = 1;
+export const ACTA_PARSER_VERSION = 2;
 
 /** Un texto del PDF con su posición (origen arriba a la izquierda, en puntos). */
 export type ActaItem = { s: string; x: number; y: number };

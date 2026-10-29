@@ -1,5 +1,5 @@
 import { normalizeTeam } from "./parse";
-import type { ActaData, ActaIssue, Side } from "./types";
+import type { ActaData, ActaIssue, ActaScore, ActaSet, ActaSetSide, Side } from "./types";
 
 /**
  * Comprobaciones de un acta ya extraída. Dos niveles:
@@ -19,6 +19,38 @@ const minutesBetween = (a: string | null, b: string | null): number | null => {
 };
 
 const issue = (level: ActaIssue["level"], code: string, message: string): ActaIssue => ({ level, code, message });
+
+type SetEvent = { what: string; sc: ActaScore };
+
+/** Los marcadores en que un equipo pidió tiempo muerto o sustituyó dentro de un set. */
+const eventsOf = (side: ActaSetSide): SetEvent[] => [
+  ...side.timeouts.map((t) => ({ what: "tiempo muerto", sc: t.score })),
+  ...side.substitutions.flatMap((x) => [
+    { what: "sustitución", sc: x.scoreIn },
+    ...(x.scoreBack ? [{ what: "vuelta del titular", sc: x.scoreBack }] : []),
+  ]),
+];
+
+/**
+ * Un set con un equipo a cero y jugadas anotadas en el panel es un set otorgado por el comité: el
+ * panel es el juego real y el resultado, el administrativo, así que no se contrastan.
+ */
+const isAwarded = (set: ActaSet): boolean =>
+  Math.min(set.summary.A.points, set.summary.B.points) === 0 && (["A", "B"] as Side[]).some((s) => eventsOf(set[s]).length > 0);
+
+/** Eventos de un set que se pasan de los puntos finales de su equipo; con `flip`, leyendo el marcador al revés. */
+function outOfRange(set: ActaSet, flip = false): SetEvent[] {
+  const bad: SetEvent[] = [];
+  for (const s of ["A", "B"] as Side[]) {
+    const own = set.summary[s].points;
+    const opp = set.summary[s === "A" ? "B" : "A"].points;
+    for (const e of eventsOf(set[s])) {
+      const [a, b] = flip ? [e.sc.opp, e.sc.own] : [e.sc.own, e.sc.opp];
+      if (a > own || b > opp) bad.push(e);
+    }
+  }
+  return bad;
+}
 
 export function validateActa(data: ActaData): ActaIssue[] {
   const out: ActaIssue[] = [];
@@ -91,22 +123,14 @@ export function validateActa(data: ActaData): ActaIssue[] {
     // (si la lectura confundiera «propios:rival» con «rival:propios», esto saltaría casi siempre).
     // Un set con un equipo a cero y jugadas anotadas en el panel es un set otorgado por el comité: el
     // panel es el juego real y el resultado, el administrativo, así que no se contrastan.
-    const hasEvents = sides.some((x) => set[x].timeouts.length + set[x].substitutions.length > 0);
-    const awarded = Math.min(a, b) === 0 && hasEvents;
+    const awarded = isAwarded(set);
     if (awarded) {
       out.push(issue("warning", "set-awarded", `Set ${set.number}: resultado ${a}-${b} con jugadas anotadas en el panel (¿set otorgado por el comité?).`));
     }
     for (const s of awarded ? [] : sides) {
       const own = set.summary[s].points;
       const opp = set.summary[s === "A" ? "B" : "A"].points;
-      const events = [
-        ...set[s].timeouts.map((t) => ({ what: "tiempo muerto", sc: t.score })),
-        ...set[s].substitutions.flatMap((x) => [
-          { what: "sustitución", sc: x.scoreIn },
-          ...(x.scoreBack ? [{ what: "vuelta del titular", sc: x.scoreBack }] : []),
-        ]),
-      ];
-      for (const e of events) {
+      for (const e of eventsOf(set[s])) {
         if (e.sc.own > own || e.sc.opp > opp) {
           out.push(issue("error", "score-range", `Set ${set.number}, equipo ${s}: ${e.what} en ${e.sc.own}:${e.sc.opp} con un final de ${own}-${opp}.`));
         }
@@ -176,17 +200,93 @@ export type FedComparison = {
   issues: ActaIssue[];
 };
 
-/** Contrasta el acta con el partido de la federación: equipos, sets ganados y puntos de cada set. */
-export function compareWithFed(data: ActaData, fed: FedMatchForActa): FedComparison {
-  const issues: ActaIssue[] = [];
+/** Qué equipo del acta es el local de la federación según los nombres; null si no coinciden. */
+function homeSideByName(data: ActaData, fed: FedMatchForActa): Side | null {
   const nA = normalizeTeam(data.teams.A);
   const nB = normalizeTeam(data.teams.B);
   const nHome = normalizeTeam(fed.homeName);
   const nAway = normalizeTeam(fed.awayName);
+  if (nA === nHome && nB === nAway) return "A";
+  if (nB === nHome && nA === nAway) return "B";
+  return null;
+}
 
-  let homeSide: Side | null = null;
-  if (nA === nHome && nB === nAway) homeSide = "A";
-  else if (nB === nHome && nA === nAway) homeSide = "B";
+/**
+ * Arregla lo que el acta trae mal y la federación o el propio acta permiten corregir, y lo deja anotado
+ * como aviso (el acta queda para revisar, no como dato limpio). Devuelve una copia; no toca la original.
+ *  - Puntos de un set: si el cuadro de resultado del acta no coincide con la federación y los equipos
+ *    se reconocen por nombre, mandan los de la federación (es el resultado oficial). Las jugadas de los
+ *    paneles se validan después contra ellos: si tampoco cuadran, el acta sigue fallando.
+ *  - Marcadores de un set: algunas actas anotan los marcadores como «rival:propios», a veces mezclados con
+ *    «propios:rival» dentro de un mismo set. Los que con la lectura normal se pasan del final y al revés
+ *    caben se les da la vuelta (el set entero si así cuadra todo).
+ */
+export function reconcileActa(data: ActaData, fed: FedMatchForActa): { data: ActaData; issues: ActaIssue[] } {
+  const fixed = structuredClone(data);
+  const issues: ActaIssue[] = [];
+
+  const home = homeSideByName(fixed, fed);
+  if (home && fed.sets.length > 0 && fed.sets.length === fixed.sets.length) {
+    const away: Side = home === "A" ? "B" : "A";
+    let changed = false;
+    fed.sets.forEach((f, i) => {
+      const set = fixed.sets[i];
+      const h = set.summary[home].points;
+      const a = set.summary[away].points;
+      if (h === f.home && a === f.away) return;
+      issues.push(
+        issue("warning", "fed-points-used", `Set ${set.number}: el cuadro de resultado del acta dice ${h}-${a} y la federación ${f.home}-${f.away}; se usan los de la federación.`)
+      );
+      set.summary[home].points = f.home;
+      set.summary[away].points = f.away;
+      changed = true;
+    });
+    if (changed) {
+      const won: Record<Side, number> = { A: 0, B: 0 };
+      for (const set of fixed.sets) {
+        if (set.summary.A.points > set.summary.B.points) won.A++;
+        else if (set.summary.B.points > set.summary.A.points) won.B++;
+      }
+      fixed.totals.A.setsWon = won.A;
+      fixed.totals.B.setsWon = won.B;
+    }
+  }
+
+  const swap = (sc: ActaScore) => {
+    [sc.own, sc.opp] = [sc.opp, sc.own];
+  };
+  for (const set of fixed.sets) {
+    if (isAwarded(set) || outOfRange(set).length === 0) continue;
+    if (outOfRange(set, true).length === 0) {
+      // Todo el set está anotado al revés
+      for (const s of ["A", "B"] as Side[]) for (const e of eventsOf(set[s])) swap(e.sc);
+      issues.push(issue("warning", "score-order", `Set ${set.number}: los marcadores de tiempos muertos y sustituciones están anotados como rival:propios; se les ha dado la vuelta.`));
+      continue;
+    }
+    // Marcadores mezclados en un mismo set: se da la vuelta solo a los que no caben y sí caben al revés
+    let flipped = 0;
+    for (const s of ["A", "B"] as Side[]) {
+      const own = set.summary[s].points;
+      const opp = set.summary[s === "A" ? "B" : "A"].points;
+      for (const e of eventsOf(set[s])) {
+        if ((e.sc.own > own || e.sc.opp > opp) && e.sc.opp <= own && e.sc.own <= opp) {
+          swap(e.sc);
+          flipped++;
+        }
+      }
+    }
+    if (flipped > 0) {
+      issues.push(issue("warning", "score-order", `Set ${set.number}: ${flipped} marcadores de tiempos muertos o sustituciones no caben en el final del set y sí al revés; se les ha dado la vuelta.`));
+    }
+  }
+
+  return { data: fixed, issues };
+}
+
+/** Contrasta el acta con el partido de la federación: equipos, sets ganados y puntos de cada set. */
+export function compareWithFed(data: ActaData, fed: FedMatchForActa): FedComparison {
+  const issues: ActaIssue[] = [];
+  let homeSide = homeSideByName(data, fed);
 
   // Los puntos de cada set deciden cuando los nombres no coinciden
   const matches = (home: Side): boolean =>

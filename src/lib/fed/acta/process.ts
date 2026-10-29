@@ -4,7 +4,7 @@ import { readActaItems } from "./items";
 import { parseActa } from "./parse";
 import { RETRY_CODES, failedReportRow, reportRows, saveReport, type ReportRows, type ReportStatus } from "./store";
 import { ACTA_PARSER_VERSION, type ActaIssue, type ActaItem } from "./types";
-import { actaStatus, compareWithFed, validateActa, type FedMatchForActa } from "./validate";
+import { actaStatus, compareWithFed, reconcileActa, validateActa, type FedMatchForActa } from "./validate";
 
 /**
  * De los partidos terminados de la federación con acta, los que aún no tienen acta leída (o la tienen
@@ -61,14 +61,16 @@ export async function processMatch(match: PendingMatch, deps: ProcessDeps = defa
     return { matchId: match.id, status: "failed", issues: parsed.issues, rows: null, failed: failedReportRow(match.id, parsed.issues) };
   }
 
-  const cmp = compareWithFed(parsed.data, match);
-  const issues = [...parsed.issues, ...validateActa(parsed.data), ...cmp.issues];
+  const fixed = reconcileActa(parsed.data, match);
+  const data = fixed.data;
+  const cmp = compareWithFed(data, match);
+  const issues = [...parsed.issues, ...fixed.issues, ...validateActa(data), ...cmp.issues];
   const status = actaStatus(issues);
   if (cmp.homeSide === null || status === "failed") {
     // No coincide con el partido o no se fía de la lectura: se anota y no se guardan datos
     return { matchId: match.id, status: "failed", issues, rows: null, failed: failedReportRow(match.id, issues) };
   }
-  return { matchId: match.id, status, issues, rows: reportRows(match.id, parsed.data, cmp.homeSide, status, issues), failed: null };
+  return { matchId: match.id, status, issues, rows: reportRows(match.id, data, cmp.homeSide, status, issues), failed: null };
 }
 
 // ─── Selección de pendientes ───────────────────────────────────
