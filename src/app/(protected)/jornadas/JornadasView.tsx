@@ -6,9 +6,12 @@ import FilterBar, { type FilterConfig } from "@/components/ui/FilterBar";
 import PageHeader from "@/components/ui/PageHeader";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import GroupStandings from "@/components/competition/GroupStandings";
+import PositionRace from "@/components/competition/PositionRace";
+import RoundDigest from "@/components/competition/RoundDigest";
 import RoundMatches from "@/components/competition/RoundMatches";
 import { longDate, shortDate } from "@/components/stats/competitive/format";
 import { prettyTeamName } from "@/lib/fed/linkPlan";
+import { positionsByRound, roundDigest, standingsAfterRound } from "@/lib/competition/digest";
 import {
   groupLabel,
   nextOurMatch,
@@ -74,6 +77,11 @@ export default function JornadasView({
   const roundIdx = group ? Math.min(roundByGroup[group.id] ?? group.currentRound, group.rounds.length - 1) : 0;
   const round = group?.rounds[roundIdx];
   const groupMatches = group?.rounds.flatMap((r) => r.matches) ?? [];
+  // Resumen de la jornada elegida: la tabla tal como queda tras ella y lo más destacado.
+  const table = group && group.standings !== null ? standingsAfterRound(group, roundIdx) : null;
+  const highlights = group ? roundDigest(group, roundIdx) : [];
+  const race = group ? positionsByRound(group) : [];
+  const ourTeamId = group ? (group.teamIds.find((id) => competition?.teams[id]?.isOurs) ?? null) : null;
 
   const go = (next: { season?: string; gender?: string }) => {
     const qs = new URLSearchParams({ season: next.season ?? season });
@@ -201,20 +209,35 @@ export default function JornadasView({
               ) : null}
             </div>
 
+            <RoundDigest highlights={highlights} teams={competition.teams} />
+
             {round ? <RoundMatches matches={round.matches} teams={competition.teams} /> : null}
           </section>
 
-          {group.standings ? (
-            <aside aria-labelledby="standings-title" className="min-w-0 xl:sticky xl:top-6">
-              <div className="mb-3 flex items-baseline justify-between gap-3">
-                <h2 id="standings-title" className="text-xl font-semibold tracking-tight">
-                  Clasificación
-                </h2>
-                <p className="text-sm text-[var(--text-muted)]">
-                  {groupLabel(group.name)} · {group.teamIds.length} equipos
-                </p>
+          {table ? (
+            <aside aria-labelledby="standings-title" className="flex min-w-0 flex-col gap-8 xl:sticky xl:top-6">
+              <div>
+                <div className="mb-3 flex items-baseline justify-between gap-3">
+                  <h2 id="standings-title" className="text-xl font-semibold tracking-tight">
+                    Clasificación
+                  </h2>
+                  <p className="text-sm text-[var(--text-muted)]">
+                    Tras la {round ? roundTitle(round.label).toLocaleLowerCase("es") : "jornada"}
+                  </p>
+                </div>
+                <GroupStandings groupName={group.name} standings={table} teams={competition.teams} />
               </div>
-              <GroupStandings groupName={group.name} standings={group.standings} teams={competition.teams} />
+
+              {race.length >= 2 ? (
+                <div>
+                  <h2 className="mb-3 text-xl font-semibold tracking-tight">Carrera de posiciones</h2>
+                  <PositionRace
+                    rounds={race}
+                    teams={group.teamIds.filter((id) => competition.teams[id]).map((id) => ({ id, name: competition.teams[id].name }))}
+                    ourId={ourTeamId}
+                  />
+                </div>
+              ) : null}
             </aside>
           ) : null}
         </div>

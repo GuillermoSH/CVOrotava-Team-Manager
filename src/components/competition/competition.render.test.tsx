@@ -7,6 +7,8 @@ import { scoutMatch } from "@/lib/competition/scout";
 import MatchScoutPanel from "./MatchScoutPanel";
 import RoundMatches from "./RoundMatches";
 import GroupStandings from "./GroupStandings";
+import RoundDigest from "./RoundDigest";
+import { positionsByRound, roundDigest, standingsAfterRound } from "@/lib/competition/digest";
 import MatchDetailView from "@/app/(protected)/jornadas/partido/[id]/MatchDetailView";
 
 /** Temporada completa real (2025-26 masculina) → misma forma que lee el cargador. */
@@ -52,7 +54,7 @@ describe("jornadas con una temporada real completa", () => {
   });
 
   it("la clasificación se pinta con nuestros equipos resaltados", () => {
-    const out = clean(renderToStaticMarkup(<GroupStandings groupName={group.name} standings={group.standings!} teams={comp.teams} />));
+    const out = clean(renderToStaticMarkup(<GroupStandings groupName={group.name} standings={standingsAfterRound(group, group.rounds.length - 1)} teams={comp.teams} />));
     expect(out).toContain("<table");
     expect(out).toContain("accent-muted");
   });
@@ -138,5 +140,37 @@ describe("detalle de un partido", () => {
     const out = clean(renderToStaticMarkup(<MatchDetailView {...props(pending, null, false)} />));
     expect(out).toContain("Ganados / jugados");
     expect(out).not.toContain("Total de puntos");
+  });
+});
+
+describe("resumen de jornada con una temporada real", () => {
+  const mid = Math.floor(group.rounds.length / 2);
+
+  it("la clasificación tras una jornada enseña lo que se ha movido cada equipo", () => {
+    const rows = standingsAfterRound(group, mid);
+    expect(rows.some((r) => r.movement !== null && r.movement !== 0)).toBe(true);
+    const out = clean(renderToStaticMarkup(<GroupStandings groupName={group.name} standings={rows} teams={comp.teams} />));
+    expect(out).toMatch(/[▲▼]\d/);
+    expect(out).toContain('aria-label="Sube');
+  });
+
+  it("lo destacado de cada jornada se escribe sin NaN ni undefined", () => {
+    let withHighlights = 0;
+    group.rounds.forEach((_, i) => {
+      const h = roundDigest(group, i);
+      if (h.length > 0) withHighlights++;
+      clean(renderToStaticMarkup(<RoundDigest highlights={h} teams={comp.teams} />));
+    });
+    expect(withHighlights).toBeGreaterThan(10);
+  });
+
+  it("una jornada sin nada destacable no pinta el bloque", () => {
+    expect(renderToStaticMarkup(<RoundDigest highlights={[]} teams={comp.teams} />)).toBe("");
+  });
+
+  it("la carrera de posiciones trae una entrada por jornada jugada, con todos los equipos", () => {
+    const race = positionsByRound(group);
+    expect(race.length).toBeGreaterThan(10);
+    expect(Object.keys(race[0].positions)).toHaveLength(group.teamIds.length);
   });
 });
