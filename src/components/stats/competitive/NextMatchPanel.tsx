@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { prettyTeamName } from "@/lib/fed/linkPlan";
 import type { CompetitiveStats } from "@/lib/stats/competitive/build";
 import { FormPips, Meter, Stars, TagChip } from "./ui";
@@ -8,8 +9,8 @@ import { ordinal, percent, whenLabel } from "./format";
 /** Puesto en liga: la historia principal del Resumen. */
 export function PositionPanel({
   stats,
-  onOpenLeague,
-}: Readonly<{ stats: CompetitiveStats; onOpenLeague: () => void }>) {
+  leagueHref,
+}: Readonly<{ stats: CompetitiveStats; /** Dónde está la clasificación completa: en Jornadas. */ leagueHref: string }>) {
   if (!stats.hasLeague || !stats.group) {
     return (
       <section aria-labelledby="position-title">
@@ -52,13 +53,12 @@ export function PositionPanel({
         {points} pts · {wins}V {losses}D
         {played > 0 ? ` · ${played} jugados` : ""}
       </p>
-      <button
-        type="button"
-        onClick={onOpenLeague}
-        className="mt-3 text-sm font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+      <Link
+        href={leagueHref}
+        className="mt-3 inline-block text-sm font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
       >
         Ver tabla completa
-      </button>
+      </Link>
     </section>
   );
 }

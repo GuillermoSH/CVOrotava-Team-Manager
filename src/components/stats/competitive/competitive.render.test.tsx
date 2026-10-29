@@ -8,7 +8,6 @@ import { ATTRIBUTE_DEFS } from "@/lib/stats/competitive/metrics";
 import { seasonDataFromBundles } from "@/lib/stats/competitive/fromBundles";
 import { FormPanel, NextMatchPanel, PositionPanel, TopRivalPanel } from "./NextMatchPanel";
 import { CardExplainerContent } from "./CardExplainer";
-import LeaguePanel from "./LeaguePanel";
 import RivalsPanel, { RivalsHowItWorks } from "./RivalsPanel";
 import TeamCardPanel from "./TeamCardPanel";
 import VersusPanel from "./VersusPanel";
@@ -84,16 +83,18 @@ describe("ficha del equipo", () => {
 
 describe("clasificación en resumen", () => {
   it("muestra puesto, puntos y enlace a la tabla", () => {
-    const out = clean(html(<PositionPanel stats={full} onOpenLeague={noop} />));
+    const out = clean(html(<PositionPanel stats={full} leagueHref="/jornadas?season=2025-26" />));
     expect(out).toContain("Clasificación");
     expect(out).toContain("5.º");
     expect(out).toContain("de 12");
     expect(out).toContain("34 pts · 10V 12D");
     expect(out).toContain("Ver tabla completa");
+    // La tabla completa y la carrera de posiciones están en Jornadas
+    expect(out).toContain('href="/jornadas?season=2025-26"');
   });
 
   it("arranque sin partidos jugados: avisa en vez de inventar puesto", () => {
-    const out = clean(html(<PositionPanel stats={start} onOpenLeague={noop} />));
+    const out = clean(html(<PositionPanel stats={start} leagueHref="/jornadas?season=2026-27" />));
     expect(out).toContain("Sin partidos aún");
   });
 });
@@ -150,24 +151,6 @@ describe("rivales", () => {
     expect(out).toContain("Rival nuevo en la liga.");
     expect(out).toContain("se activan cuando haya jugado 3 partidos");
     expect(out).not.toMatch(/rating|NaN/i);
-  });
-});
-
-describe("liga", () => {
-  it("clasificación completa con nuestra fila y la carrera de posiciones", () => {
-    const out = clean(html(<LeaguePanel stats={full} />));
-    expect(out).toContain("Liga Oro · 12 equipos");
-    expect(out.indexOf("CDV San Roque")).toBeLessThan(out.indexOf("CD Voleypuerto"));
-    expect(out).toContain("63"); // puntos del líder
-    expect(out).not.toMatch(/rating|1500/i); // sin jerga de Elo en la tabla
-    expect(out).toContain("Carrera de posiciones");
-    expect(out).toMatch(/ahora 5\.º; mejor puesto \d\.º/);
-  });
-
-  it("arranque: sin partidos avisa en lugar de dibujar un gráfico vacío", () => {
-    const out = clean(html(<LeaguePanel stats={start} />));
-    expect(out).toContain("todavía sin partidos jugados");
-    expect(out).toContain("Aparece cuando se juegue la primera jornada");
   });
 });
 

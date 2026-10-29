@@ -47,14 +47,10 @@ type Filters = {
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-type Tab = "resumen" | "rivales" | "liga" | "versus";
+type Tab = "resumen" | "rivales" | "versus";
 type Scope = "liga" | "todas";
 const TAB_PREF_KEY = "cvorotava-stats-tab";
 
-const LeaguePanel = dynamic(() => import("@/components/stats/competitive/LeaguePanel"), {
-  ssr: false,
-  loading: () => <div className="h-64" aria-hidden />,
-});
 const VersusPanel = dynamic(() => import("@/components/stats/competitive/VersusPanel"), {
   ssr: false,
   loading: () => <div className="h-64" aria-hidden />,
@@ -103,9 +99,14 @@ export default function StatsView({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = usePref<Tab>(TAB_PREF_KEY, (raw) =>
-    raw === "rivales" || raw === "liga" || raw === "versus" ? raw : "resumen"
+    raw === "rivales" || raw === "versus" ? raw : "resumen"
   );
   const [scope, setScope] = useState<Scope>("liga");
+  // La clasificación y la carrera de posiciones viven en Jornadas.
+  const leagueHref = `/jornadas?${new URLSearchParams({
+    ...(filters.season ? { season: filters.season } : {}),
+    ...(filters.gender ? { gender: filters.gender } : {}),
+  })}`;
   const [selectedRival, setSelectedRival] = useState<number | null>(null);
 
   const openRival = (teamId: number) => {
@@ -467,7 +468,6 @@ export default function StatsView({
           options={[
             { value: "resumen", label: "Resumen" },
             { value: "rivales", label: "Rivales" },
-            { value: "liga", label: "Liga" },
             { value: "versus", label: "Comparar" },
           ]}
         />
@@ -494,8 +494,7 @@ export default function StatsView({
             <RivalsPanel stats={competitive} selectedId={selectedRival} onSelect={setSelectedRival} />
           ) : null
         )
-      ) : tab === "liga" ? (
-        competitiveBlock(competitive ? <LeaguePanel stats={competitive} /> : null)
+
       ) : tab === "versus" ? (
         competitiveBlock(competitive ? <VersusPanel stats={competitive} /> : null)
       ) : (
@@ -507,7 +506,7 @@ export default function StatsView({
                   <TeamCardPanel stats={competitive} />
                 </div>
                 <div className="order-1 flex flex-col gap-9 lg:order-2">
-                  <PositionPanel stats={competitive} onOpenLeague={() => setTab("liga")} />
+                  <PositionPanel stats={competitive} leagueHref={leagueHref} />
                   <NextMatchPanel stats={competitive} onOpenRival={openRival} />
                   <FormPanel stats={competitive} />
                   {competitive.rivals[0] ? (
