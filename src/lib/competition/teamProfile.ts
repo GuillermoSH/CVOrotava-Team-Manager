@@ -1,4 +1,5 @@
 import type { CompetitionMatch } from "./build";
+import { buildNameResolver } from "./playerNames";
 import type { MatchReport, ReportScore, ReportSet, ReportSetSide, ReportSide } from "./report";
 
 /**
@@ -182,9 +183,15 @@ export function buildTeamProfile(teamId: number, matches: ProfileMatch[]): TeamP
     first: ratio(firstN, firstSets),
   };
 
+  // Un mismo jugador puede venir escrito de formas distintas entre actas (nombre y apellido al revés, un apellido de menos…)
+  const resolveName = buildNameResolver(withReport.map((pm) => pm.report!.players[sideOf(pm.match)].map((p) => p.name)));
+
   // Cambios
-  const rosterName = (v: SetView, n: number | null): string | null =>
-    n === null ? null : (v.match.report!.players[v.mine].find((p) => p.number === n)?.name ?? null);
+  const rosterName = (v: SetView, n: number | null): string | null => {
+    if (n === null) return null;
+    const raw = v.match.report!.players[v.mine].find((p) => p.number === n)?.name;
+    return raw ? resolveName(raw) : null;
+  };
   const sPhase: PhaseCounts = { early: 0, mid: 0, late: 0 };
   const byPosition = Array<number>(6).fill(0);
   let subsTotal = 0;
@@ -242,7 +249,7 @@ export function buildTeamProfile(teamId: number, matches: ProfileMatch[]): TeamP
   for (const pm of withReport) {
     const mine = sideOf(pm.match);
     for (const p of pm.report!.players[mine]) {
-      const cur = person(p.name);
+      const cur = person(resolveName(p.name));
       cur.numbers.set(p.number, (cur.numbers.get(p.number) ?? 0) + 1);
       cur.libero ||= p.libero;
       cur.matches.add(pm.match.id);

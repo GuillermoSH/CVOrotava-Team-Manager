@@ -194,4 +194,19 @@ describe("buildTeamProfile: detalle de las actas", () => {
     expect(q.players.find((x) => x.name === "VISIT 1")?.starts).toBe(1);
     expect(q.players.find((x) => x.name === "LOCAL 1")).toBeUndefined();
   });
+
+  it("un jugador escrito de otra forma en otra acta (nombre y apellido al revés) no sale duplicado", () => {
+    const a = report([set(1, 25, 20, { lineup: [1, 2, 3, 4, 5, 6] })]);
+    const b = report([set(1, 25, 20, { lineup: [1, 2, 3, 4, 5, 6] })], {
+      players: { home: [1, 2, 3, 4, 5, 6, 7].map((n) => ({ number: n, name: n === 1 ? "1 LOCAL" : `LOCAL ${n}`, libero: n === 7 })), away: [] },
+    });
+    const p = buildTeamProfile(T, [
+      { match: match(1, T, R, [[25, 20]]), report: a },
+      { match: match(2, T, R, [[25, 20]]), report: a },
+      { match: match(3, T, R, [[25, 20]]), report: b },
+    ]);
+    const ones = p.players.filter((x) => x.name.includes("LOCAL") && x.number === 1);
+    expect(ones).toHaveLength(1);
+    expect(ones[0]).toMatchObject({ name: "LOCAL 1", matches: 3, starts: 3 });
+  });
 });
