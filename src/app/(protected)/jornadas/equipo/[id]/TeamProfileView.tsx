@@ -7,7 +7,7 @@ import { prettyTeamName } from "@/lib/fed/linkPlan";
 import { groupLabel, roundTitle } from "@/lib/competition/build";
 import { fedMatchHref } from "@/lib/competition/links";
 import type { TeamContext } from "@/lib/competition/loadTeam";
-import type { PhaseCounts, Ratio } from "@/lib/competition/teamProfile";
+import type { PhaseCounts, ProfileFlow, Ratio } from "@/lib/competition/teamProfile";
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
 
@@ -39,6 +39,15 @@ function Facts({ items }: Readonly<{ items: [string, string][] }>) {
         </div>
       ))}
     </dl>
+  );
+}
+
+function runLine(r: ProfileFlow["bestRunFor"]): ReactNode {
+  if (!r) return "–";
+  return (
+    <Link href={fedMatchHref(r.matchId)} className="underline">
+      {r.length} seguidas (set {r.set}, de {r.from.own}-{r.from.opp} a {r.to.own}-{r.to.opp})
+    </Link>
   );
 }
 
@@ -94,6 +103,37 @@ export default function TeamProfileView({ ctx }: Readonly<{ ctx: TeamContext }>)
 
       {!noDetail ? (
         <>
+          {p.flow.sets > 0 ? (
+            <Section
+              id="t-flow"
+              title="Juego punto a punto"
+              note={`Sobre ${p.flow.sets} sets con el marcador jugada a jugada leído (de ${p.timeouts.sets} con acta). Las jugadas en que el equipo saca son «con su saque»; las demás son «al recibir».`}
+            >
+              <dl className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
+                {(
+                  [
+                    ["Gana la jugada con su saque", frac(p.flow.serve)],
+                    ["Gana la jugada al recibir (cambio de saque)", frac(p.flow.receive)],
+                    ["Racha media más larga por set", `${dec(p.flow.avgRunFor)} a favor · ${dec(p.flow.avgRunAgainst)} en contra`],
+                    ["Cambios de líder por set", dec(p.flow.avgLeadChanges)],
+                    ["Remontadas (sets ganados yendo 5 abajo)", frac(p.flow.comebacks)],
+                    ["Ventajas perdidas (sets perdidos yendo 5 arriba)", frac(p.flow.blownLeads)],
+                    ["Finales apretados ganados (20-20)", frac(p.flow.closeFinishes)],
+                    ["Gana la jugada siguiente a su tiempo muerto", frac(p.flow.afterTimeout.nextPoint)],
+                    ["Corta una racha rival de 3 o más con el tiempo muerto", frac(p.flow.afterTimeout.stopsRun)],
+                    ["Su mejor racha", runLine(p.flow.bestRunFor)],
+                    ["La peor racha que ha sufrido", runLine(p.flow.worstRunAgainst)],
+                  ] as [string, ReactNode][]
+                ).map(([k, v]) => (
+                  <div key={k} className="flex items-baseline justify-between gap-4 border-b border-[var(--glass-border)] py-1.5">
+                    <dt className="text-[var(--text-secondary)]">{k}</dt>
+                    <dd className="text-right font-semibold tabular-nums">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Section>
+          ) : null}
+
           <Section id="t-timeouts" title="Tiempos muertos" note={`Sobre ${p.timeouts.sets} sets con acta. El marcador es el del propio equipo contra el rival.`}>
             <Facts
               items={[

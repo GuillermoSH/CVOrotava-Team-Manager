@@ -10,7 +10,7 @@
  */
 
 /** Versión del extractor: se guarda con cada acta para poder reprocesar las de una versión antigua. */
-export const ACTA_PARSER_VERSION = 2;
+export const ACTA_PARSER_VERSION = 3;
 
 /** Un texto del PDF con su posición (origen arriba a la izquierda, en puntos). */
 export type ActaItem = { s: string; x: number; y: number };
@@ -61,6 +61,12 @@ export type ActaSetSide = {
   startsServing: boolean | null;
 };
 
+/** Rondas de saque de un equipo en un set: su marcador propio al acabar cada turno de saque; el último es su final. */
+export type ServiceCells = { first: boolean; ends: number[]; final: number };
+
+/** Quién ganó cada jugada de un set, reconstruido de las rondas de saque de los dos equipos. */
+export type ActaRallies = { first: Side; winners: Side[] };
+
 export type ActaSet = {
   number: number;
   /** HH:MM. */
@@ -69,6 +75,10 @@ export type ActaSet = {
   durationMin: number | null;
   A: ActaSetSide;
   B: ActaSetSide;
+  /** Rondas de saque leídas de cada panel (null si no se leen); el marcador jugada a jugada sale de ellas. */
+  service: { A: ServiceCells | null; B: ServiceCells | null };
+  /** Marcador jugada a jugada; null si las rondas de saque de los dos equipos no encajan con el resultado. */
+  rallies: ActaRallies | null;
   /** Del cuadro de resultado: tiempos muertos y sustituciones contadas por el acta y puntos. */
   summary: {
     A: { timeouts: number; substitutions: number; points: number };

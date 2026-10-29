@@ -24,8 +24,13 @@ export type ReportSetSide = {
   substitutions: ReportSubstitution[];
 };
 
+/** Marcador jugada a jugada: quién saca primero y quién gana cada jugada, en orden. */
+export type ReportRallies = { first: ReportSide; winners: ReportSide[] };
+
 export type ReportSet = {
   number: number;
+  /** null si las rondas de saque del acta no encajan con el resultado (o es un acta de antes de leerlas). */
+  rallies: ReportRallies | null;
   start: string | null;
   end: string | null;
   durationMin: number | null;
@@ -68,6 +73,14 @@ const strOrNull = (v: unknown): string | null => (typeof v === "string" && v !==
 const hhmm = (v: unknown): string | null => (typeof v === "string" && v !== "" ? v.slice(0, 5) : null);
 const bySeq = <T extends Record<string, unknown>>(a: T, b: T) => num(a.seq) - num(b.seq);
 
+/** «L:LLVL…» (quién saca primero y quién gana cada jugada; L local, V visitante) → datos; null si no hay o no es válido. */
+export function parseRallies(raw: unknown): ReportRallies | null {
+  const m = typeof raw === "string" ? /^([LV]):([LV]+)$/.exec(raw) : null;
+  if (!m) return null;
+  const side = (c: string): ReportSide => (c === "L" ? "home" : "away");
+  return { first: side(m[1]), winners: [...m[2]].map(side) };
+}
+
 /** De las filas de las tablas al acta lista para pintar; null si el acta no se pudo leer. */
 export function buildMatchReport(rows: ReportRowsInput): MatchReport | null {
   const r = rows.report;
@@ -98,7 +111,7 @@ export function buildMatchReport(rows: ReportRowsInput): MatchReport | null {
             scoreBack: x.back_own === null || x.back_own === undefined ? null : { own: num(x.back_own), opp: num(x.back_opp) },
           })),
       });
-      return { number: n, start: hhmm(s.start_time), end: hhmm(s.end_time), durationMin: numOrNull(s.duration_min), home: side("home"), away: side("away") };
+      return { number: n, rallies: parseRallies(s.rallies), start: hhmm(s.start_time), end: hhmm(s.end_time), durationMin: numOrNull(s.duration_min), home: side("home"), away: side("away") };
     });
 
   const list = <T,>(w: ReportSide, items: Record<string, unknown>[], f: (x: Record<string, unknown>) => T): T[] => items.filter((x) => x.side === w).map(f);

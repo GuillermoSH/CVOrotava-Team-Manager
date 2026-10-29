@@ -22,7 +22,7 @@ const rows = (status: "ok" | "review" | "failed" = "ok"): ReportRowsInput => ({
   },
   sets: [
     { set_number: 2, start_time: "17:30:00", end_time: "17:58:00", duration_min: 28, home_points: 20, away_points: 25, home_timeouts: 0, away_timeouts: 1, home_subs: 0, away_subs: 0, home_lineup: [], away_lineup: [], home_serves_first: null, away_serves_first: null },
-    { set_number: 1, start_time: "17:00:00", end_time: "17:28:00", duration_min: 28, home_points: 25, away_points: 22, home_timeouts: 2, away_timeouts: 0, home_subs: 3, away_subs: 0, home_lineup: [7, 2, 24, 95, 99, 4], away_lineup: [1, 0, 3, 4, 5, 6], home_serves_first: true, away_serves_first: false },
+    { set_number: 1, start_time: "17:00:00", end_time: "17:28:00", duration_min: 28, home_points: 25, away_points: 22, home_timeouts: 2, away_timeouts: 0, home_subs: 3, away_subs: 0, home_lineup: [7, 2, 24, 95, 99, 4], away_lineup: [1, 0, 3, 4, 5, 6], home_serves_first: true, away_serves_first: false, rallies: "L:LLLVVLVLLVLVLLLVVLLVLLVLV" },
   ],
   timeouts: [
     { match_id: 1, set_number: 1, side: "home", seq: 2, own_points: 18, opp_points: 20 },
@@ -100,5 +100,18 @@ describe("panel de datos del acta", () => {
     const out = render("review");
     expect(out).toContain("irregularidades");
     expect(out).toContain("Equipo B: el acta no trae la plantilla.");
+  });
+
+  it("con el marcador jugada a jugada pinta el gráfico, sus marcas y las rachas del set", () => {
+    const r = rows("ok");
+    // Tiempo muerto del local con 3-1, un marcador por el que sí pasa el desarrollo del set
+    r.timeouts.push({ match_id: 1, set_number: 1, side: "home", seq: 3, own_points: 3, opp_points: 1 });
+    const out = renderToStaticMarkup(<MatchReportPanel report={buildMatchReport(r)!} home="CV San Roque" away="Dos 19 Arinaga" />).replace(/<!-- -->/g, "");
+    expect(out).toContain("Desarrollo del set 1");
+    expect(out).toContain("Tiempo muerto de CV San Roque");
+    expect(out).toContain("Mejor racha de CV San Roque");
+    expect(out).toContain("Cambios de líder");
+    // El set 2 no tiene rondas de saque legibles: no se pinta nada
+    expect(out).not.toContain("Desarrollo del set 2");
   });
 });

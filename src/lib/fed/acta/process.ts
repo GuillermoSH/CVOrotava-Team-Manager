@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { isTrustedReportUrl } from "../reportUrl";
 import { readActaItems } from "./items";
 import { parseActa } from "./parse";
+import { attachRallies } from "./points";
 import { RETRY_CODES, failedReportRow, reportRows, saveReport, type ReportRows, type ReportStatus } from "./store";
 import { ACTA_PARSER_VERSION, type ActaIssue, type ActaItem } from "./types";
 import { actaStatus, compareWithFed, reconcileActa, validateActa, type FedMatchForActa } from "./validate";
@@ -62,7 +63,7 @@ export async function processMatch(match: PendingMatch, deps: ProcessDeps = defa
   }
 
   const fixed = reconcileActa(parsed.data, match);
-  const data = fixed.data;
+  const data = attachRallies(fixed.data);
   const cmp = compareWithFed(data, match);
   const issues = [...parsed.issues, ...fixed.issues, ...validateActa(data), ...cmp.issues];
   const status = actaStatus(issues);

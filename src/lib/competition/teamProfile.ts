@@ -1,5 +1,6 @@
 import type { CompetitionMatch } from "./build";
 import { buildNameResolver } from "./playerNames";
+import { afterTimeout, flowOf, type Run } from "./rallies";
 import type { MatchReport, ReportScore, ReportSet, ReportSetSide, ReportSide } from "./report";
 
 /**
@@ -63,6 +64,27 @@ export type ProfileLineups = {
   startsServing: Ratio;
 };
 
+export type ProfileFlow = {
+  /** Sets con el marcador jugada a jugada leído, de los que tienen acta. */
+  sets: number;
+  /** Jugadas ganadas con su saque y jugadas ganadas al recibir (cambio de saque). */
+  serve: Ratio;
+  receive: Ratio;
+  /** Racha media más larga por set, a favor y en contra, y las más largas de la temporada. */
+  avgRunFor: number | null;
+  avgRunAgainst: number | null;
+  bestRunFor: (Run & { matchId: number; set: number }) | null;
+  worstRunAgainst: (Run & { matchId: number; set: number }) | null;
+  avgLeadChanges: number | null;
+  /** Sets ganados de los que llegó a ir perdiendo por 5 o más; sets perdidos de los que llegó a ir ganando por 5 o más. */
+  comebacks: Ratio;
+  blownLeads: Ratio;
+  /** Sets ganados de los que llegaron a un final apretado (20-20 o 10-10 en el quinto). */
+  closeFinishes: Ratio;
+  /** Tras un tiempo muerto propio: gana la siguiente jugada; y, si el rival llevaba 3 o más seguidas, corta la racha. */
+  afterTimeout: { nextPoint: Ratio; stopsRun: Ratio };
+};
+
 export type ProfilePlayer = { name: string; number: number; libero: boolean; starts: number; subIns: number; matches: number };
 
 export type ProfileSets = {
@@ -88,6 +110,7 @@ export type TeamProfile = {
   timeouts: ProfileTimeouts;
   substitutions: ProfileSubstitutions;
   lineups: ProfileLineups;
+  flow: ProfileFlow;
   players: ProfilePlayer[];
   coaches: string[];
   sanctions: { W: number; P: number; E: number; D: number };
@@ -239,6 +262,48 @@ export function buildTeamProfile(teamId: number, matches: ProfileMatch[]): TeamP
     startsServing: ratio(serving.filter((v) => v.me.startsServing).length, serving.length),
   };
 
+  // Marcador jugada a jugada (solo de los sets cuyas rondas de saque encajaron)
+  const withFlow = views.map((v) => ({ v, flow: flowOf(v.set, v.mine) })).filter((x): x is { v: SetView; flow: NonNullable<ReturnType<typeof flowOf>> } => x.flow !== null);
+  const sum = (a: Ratio, b: Ratio): Ratio => ratio(a.n + b.n, a.of + b.of);
+  let serve = ratio(0, 0);
+  let receive = ratio(0, 0);
+  let comebacks = ratio(0, 0);
+  let blown = ratio(0, 0);
+  let closes = ratio(0, 0);
+  let tNext = ratio(0, 0);
+  let tStops = ratio(0, 0);
+  let bestRunFor: ProfileFlow["bestRunFor"] = null;
+  let worstRunAgainst: ProfileFlow["worstRunAgainst"] = null;
+  for (const { v, flow } of withFlow) {
+    serve = sum(serve, ratio(flow.serve.won, flow.serve.of));
+    receive = sum(receive, ratio(flow.receive.won, flow.receive.of));
+    if (flow.maxDeficit >= 5) comebacks = sum(comebacks, ratio(flow.won ? 1 : 0, 1));
+    if (flow.maxLead >= 5) blown = sum(blown, ratio(flow.won ? 0 : 1, 1));
+    if (flow.closeFinish) closes = sum(closes, ratio(flow.won ? 1 : 0, 1));
+    if (flow.runFor && (!bestRunFor || flow.runFor.length > bestRunFor.length)) bestRunFor = { ...flow.runFor, matchId: v.match.match.id, set: v.set.number };
+    if (flow.runAgainst && (!worstRunAgainst || flow.runAgainst.length > worstRunAgainst.length)) worstRunAgainst = { ...flow.runAgainst, matchId: v.match.match.id, set: v.set.number };
+    for (const t of v.me.timeouts) {
+      const after = afterTimeout(v.set.rallies!, v.mine, flow, t);
+      if (!after) continue;
+      tNext = sum(tNext, ratio(after.nextWon ? 1 : 0, 1));
+      if (after.rivalRun >= 3) tStops = sum(tStops, ratio(after.nextWon ? 1 : 0, 1));
+    }
+  }
+  const flowSummary: ProfileFlow = {
+    sets: withFlow.length,
+    serve,
+    receive,
+    avgRunFor: avg(withFlow.map((x) => x.flow.runFor?.length ?? 0)),
+    avgRunAgainst: avg(withFlow.map((x) => x.flow.runAgainst?.length ?? 0)),
+    bestRunFor,
+    worstRunAgainst,
+    avgLeadChanges: avg(withFlow.map((x) => x.flow.leadChanges)),
+    comebacks,
+    blownLeads: blown,
+    closeFinishes: closes,
+    afterTimeout: { nextPoint: tNext, stopsRun: tStops },
+  };
+
   // Plantilla: quién sale de inicio y quién entra desde el banquillo (por nombre, el dorsal puede repetirse entre equipos)
   const people = new Map<string, { name: string; numbers: Map<number, number>; libero: boolean; starts: number; subIns: number; matches: Set<number> }>();
   const person = (name: string) => {
@@ -303,6 +368,7 @@ export function buildTeamProfile(teamId: number, matches: ProfileMatch[]): TeamP
     timeouts,
     substitutions,
     lineups,
+    flow: flowSummary,
     players,
     coaches: [...coaches].sort((a, b) => b[1] - a[1]).map(([name]) => name),
     sanctions,

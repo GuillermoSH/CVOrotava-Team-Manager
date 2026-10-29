@@ -80,6 +80,8 @@ export function reportRows(matchId: number, data: ActaData, homeSide: Side, stat
     away_lineup: s[awaySide].lineup,
     home_serves_first: s[homeSide].startsServing,
     away_serves_first: s[awaySide].startsServing,
+    // «L:LLVL…»: quién saca primero y quién gana cada jugada (L local, V visitante)
+    rallies: s.rallies ? `${s.rallies.first === homeSide ? "L" : "V"}:${s.rallies.winners.map((w) => (w === homeSide ? "L" : "V")).join("")}` : null,
   }));
 
   const timeouts: Record<string, unknown>[] = [];

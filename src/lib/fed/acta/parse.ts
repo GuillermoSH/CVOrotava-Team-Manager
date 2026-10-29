@@ -15,6 +15,8 @@ import {
   type ActaTimeout,
   type Side,
 } from "./types";
+import { colOf, isInt, ROT_LEFT, ROT_RIGHT, ROT_TOL, within, type Panel } from "./layout";
+import { readServiceCells } from "./points";
 
 /**
  * Extractor puro del acta: recibe los textos del PDF con su posición y devuelve los datos.
@@ -28,8 +30,6 @@ import {
 
 // ─── Utilidades ────────────────────────────────────────────────
 
-const within = (v: number, lo: number, hi: number) => v >= lo && v <= hi;
-const isInt = (s: string) => /^\d+$/.test(s.trim());
 const clean = (s: string) => s.replace(/\s+/g, " ").trim();
 
 function scoreOf(s: string): ActaScore | null {
@@ -91,38 +91,6 @@ function attachByNearestY<T extends { y: number }>(anchors: T[], fragments: Acta
 
 // ─── Plantilla ─────────────────────────────────────────────────
 
-/** Columnas del campo (posiciones I a VI) respecto al «Inicio:» de su panel: la del equipo de la izquierda y la de la derecha. */
-const ROT_LEFT = [-108, -90, -70, -53, -34, -16];
-const ROT_RIGHT = [39, 58, 75, 93, 112, 132];
-const ROT_TOL = 9;
-
-const colOf = (x: number, x0: number, offsets: number[]): number => {
-  let best = -1;
-  let bestGap = Infinity;
-  offsets.forEach((off, i) => {
-    const gap = Math.abs(x - (x0 + off));
-    if (gap < bestGap) {
-      best = i;
-      bestGap = gap;
-    }
-  });
-  return bestGap <= ROT_TOL ? best : -1;
-};
-
-type Panel = {
-  set: number;
-  x0: number;
-  y0: number;
-  start: string | null;
-  end: string | null;
-  /**
-   * Quién hay en la rejilla de la izquierda y quién en la de la derecha. Las letras A y B que
-   * rotulan cada rejilla cambian de un set a otro, así que el equipo se identifica por su nombre.
-   */
-  left: { name: string; startsServing: boolean | null };
-  right: { name: string; startsServing: boolean | null };
-};
-
 // ─── Cabecera ──────────────────────────────────────────────────
 
 function parseHeader(items: ActaItem[]) {
@@ -165,7 +133,7 @@ function parseHeader(items: ActaItem[]) {
 
 // ─── Paneles de set ────────────────────────────────────────────
 
-function findPanels(items: ActaItem[], issues: ActaIssue[]): Panel[] {
+export function findPanels(items: ActaItem[], issues: ActaIssue[]): Panel[] {
   const inicios = items.filter((i) => i.s.startsWith("Inicio:")).sort((a, b) => a.y - b.y || a.x - b.x);
   if (inicios.length === 0) return [];
 
@@ -535,6 +503,8 @@ export function parseActa(items: ActaItem[]): ActaParseResult {
         durationMin: sum.durationMin,
         A: none(),
         B: none(),
+        service: { A: null, B: null },
+        rallies: null,
         summary: {
           A: { timeouts: pa.timeouts, substitutions: pa.substitutions, points: pa.points },
           B: { timeouts: pb.timeouts, substitutions: pb.substitutions, points: pb.points },
@@ -560,6 +530,8 @@ export function parseActa(items: ActaItem[]): ActaParseResult {
       durationMin: sum.durationMin,
       A: bySide.A,
       B: bySide.B,
+      service: { [sides.left]: readServiceCells(items, panel, "left"), [sides.right]: readServiceCells(items, panel, "right") } as ActaSet["service"],
+      rallies: null,
       summary: {
         A: { timeouts: a.timeouts, substitutions: a.substitutions, points: a.points },
         B: { timeouts: b.timeouts, substitutions: b.substitutions, points: b.points },

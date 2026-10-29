@@ -18,6 +18,7 @@ const side = (o: Partial<ReportSetSide> = {}): ReportSetSide => ({
 
 const set = (number: number, home: number, away: number, h: Partial<ReportSetSide> = {}, a: Partial<ReportSetSide> = {}, durationMin = 25): ReportSet => ({
   number,
+  rallies: null,
   start: null,
   end: null,
   durationMin,

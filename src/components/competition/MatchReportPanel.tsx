@@ -1,7 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { MatchReport, ReportScore, ReportSetSide, ReportSide } from "@/lib/competition/report";
+import type { MatchReport, ReportScore, ReportSet, ReportSetSide, ReportSide } from "@/lib/competition/report";
+import { setFlow } from "@/lib/competition/rallies";
+import SetFlowChart from "./SetFlowChart";
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
 const SANCTION: Record<"W" | "P" | "E" | "D", string> = { W: "Amonestación", P: "Penalización", E: "Expulsión", D: "Descalificación" };
@@ -91,6 +93,31 @@ function Roster({ title, players, staff }: Readonly<{ title: string; players: Ma
           ))}
         </ul>
       ) : null}
+    </div>
+  );
+}
+
+const runText = (r: { length: number; from: ReportScore; to: ReportScore } | null, who: string): string =>
+  r ? `${who}: ${r.length} seguidas (de ${r.from.own}-${r.from.opp} a ${r.to.own}-${r.to.opp})` : "";
+
+function SetFlow({ set, home, away }: Readonly<{ set: ReportSet; home: string; away: string }>) {
+  if (!set.rallies) return null;
+  const f = setFlow(set.rallies, "home", set.number);
+  const pct = (r: { won: number; of: number }) => (r.of === 0 ? "–" : `${Math.round((r.won / r.of) * 100)} %`);
+  const away2 = setFlow(set.rallies, "away", set.number);
+  return (
+    <div className="mt-4 flex flex-col gap-3">
+      <SetFlowChart set={set} home={home} away={away} />
+      <ul className="flex flex-col gap-0.5 text-sm text-[var(--text-secondary)]">
+        <li>{runText(f.runFor, `Mejor racha de ${home}`)}</li>
+        <li>{runText(away2.runFor, `Mejor racha de ${away}`)}</li>
+        <li>
+          Cambios de líder: {f.leadChanges}. Mayor ventaja de {home}: {f.maxLead}; de {away}: {f.maxDeficit}.
+        </li>
+        <li>
+          Gana el saque (cambio de saque) {home} {pct(f.receive)}, {away} {pct(away2.receive)}. Puntos con su saque: {home} {pct(f.serve)}, {away} {pct(away2.serve)}.
+        </li>
+      </ul>
     </div>
   );
 }
@@ -201,6 +228,7 @@ export default function MatchReportPanel({ report, home, away }: Readonly<{ repo
                 Set {s.number} · {s.home.points}-{s.away.points}
                 {s.start ? <span className="ml-2 font-normal text-[var(--text-muted)]">{s.start}{s.end ? ` – ${s.end}` : ""}</span> : null}
               </summary>
+              <SetFlow set={s} home={home} away={away} />
               <div className="mt-4 grid gap-6 md:grid-cols-2">
                 {(["home", "away"] as const).map((w) => (
                   <div key={w}>
