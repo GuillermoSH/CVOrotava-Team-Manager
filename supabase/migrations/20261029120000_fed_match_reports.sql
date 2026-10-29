@@ -141,17 +141,39 @@ create table if not exists public.fed_report_sanctions (
 -- ─────────────────────────────────────────────────────────────
 -- 5. Acceso: solo service_role
 -- ─────────────────────────────────────────────────────────────
-do $do$
-declare
-  t text;
-begin
-  foreach t in array array[
-    'fed_match_reports', 'fed_report_sets', 'fed_report_timeouts', 'fed_report_substitutions',
-    'fed_report_players', 'fed_report_staff', 'fed_report_referees', 'fed_report_sanctions'
-  ]
-  loop
-    execute format('alter table public.%I enable row level security', t);
-    execute format('revoke all on public.%I from anon, authenticated', t);
-  end loop;
-end;
-$do$;
+-- RLS activado y sin ninguna política: un JWT de cliente (anon o authenticated) no puede leer ni
+-- escribir nada. Se quitan además los permisos de tabla a esos dos roles y se dan expresamente al
+-- service_role, que es el que usan el sincronizador y las lecturas del servidor (y que salta RLS).
+-- No hay secuencias: todas las claves vienen de la federación.
+
+alter table public.fed_match_reports enable row level security;
+revoke all on public.fed_match_reports from anon, authenticated;
+grant select, insert, update, delete on public.fed_match_reports to service_role;
+
+alter table public.fed_report_sets enable row level security;
+revoke all on public.fed_report_sets from anon, authenticated;
+grant select, insert, update, delete on public.fed_report_sets to service_role;
+
+alter table public.fed_report_timeouts enable row level security;
+revoke all on public.fed_report_timeouts from anon, authenticated;
+grant select, insert, update, delete on public.fed_report_timeouts to service_role;
+
+alter table public.fed_report_substitutions enable row level security;
+revoke all on public.fed_report_substitutions from anon, authenticated;
+grant select, insert, update, delete on public.fed_report_substitutions to service_role;
+
+alter table public.fed_report_players enable row level security;
+revoke all on public.fed_report_players from anon, authenticated;
+grant select, insert, update, delete on public.fed_report_players to service_role;
+
+alter table public.fed_report_staff enable row level security;
+revoke all on public.fed_report_staff from anon, authenticated;
+grant select, insert, update, delete on public.fed_report_staff to service_role;
+
+alter table public.fed_report_referees enable row level security;
+revoke all on public.fed_report_referees from anon, authenticated;
+grant select, insert, update, delete on public.fed_report_referees to service_role;
+
+alter table public.fed_report_sanctions enable row level security;
+revoke all on public.fed_report_sanctions from anon, authenticated;
+grant select, insert, update, delete on public.fed_report_sanctions to service_role;
