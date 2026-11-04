@@ -421,8 +421,8 @@ export default function PaymentsView({
           {user?.isAdmin ? (
             <section>
               {adminOverview.length > 0 && (
-                <div className="mb-6 grid gap-x-10 gap-y-4 border-b border-[var(--glass-border)] pb-6 sm:grid-cols-[auto_auto_auto_auto] sm:justify-start sm:gap-x-16">
-                  <div>
+                <div className="mb-6 grid grid-cols-3 gap-x-6 gap-y-5 border-b border-[var(--glass-border)] pb-6 lg:grid-cols-[auto_auto_auto_auto] lg:justify-start lg:gap-x-16">
+                  <div className="col-span-3 lg:col-span-1">
                     <p className="text-sm text-[var(--text-muted)]">
                       Pendiente de cobro · {filters.season}
                     </p>
@@ -451,7 +451,7 @@ export default function PaymentsView({
                 </div>
               )}
 
-              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex shrink-0 flex-wrap items-center gap-3">
                   <SegmentedControl
                     aria-label="Filtrar por estado"
@@ -468,7 +468,7 @@ export default function PaymentsView({
                   />
                 </div>
                 {adminOverview.length > 0 && (
-                  <div className="flex w-full flex-col gap-2 sm:max-w-none sm:flex-row sm:items-center sm:justify-end">
+                  <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto lg:justify-end">
                     <span className="text-xs font-medium text-[var(--text-muted)]">
                       Ordenar
                     </span>
@@ -571,7 +571,7 @@ export default function PaymentsView({
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between gap-4 sm:justify-end sm:gap-6">
+                          <div className="flex items-center justify-between gap-4 pl-[3.25rem] sm:justify-end sm:gap-6 sm:pl-0">
                             {item.exempt ? (
                               <>
                                 <span className="max-w-[12rem] truncate text-sm text-[var(--text-muted)]">
