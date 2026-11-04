@@ -45,6 +45,8 @@ describe("aviso de beta", () => {
     expect(out).toContain('role="note"');
     expect(out).toContain("Beta");
     expect(out).toContain("irá cambiando de forma poco a poco");
+    // Icono de probeta
+    expect(out).toContain('data-icon="vial"');
   });
 });
 
@@ -89,9 +91,8 @@ describe("la ficha del equipo", () => {
     profile: profile(),
   };
 
-  it("lleva el aviso de beta y las claves antes del detalle", () => {
+  it("lleva las claves antes del detalle", () => {
     const out = clean(renderToStaticMarkup(<TeamProfileView ctx={ctx} />));
-    expect(out).toContain("Beta");
     const brief = out.indexOf("Claves para el partido contra");
     const detail = out.indexOf('id="t-record"');
     expect(brief).toBeGreaterThan(-1);

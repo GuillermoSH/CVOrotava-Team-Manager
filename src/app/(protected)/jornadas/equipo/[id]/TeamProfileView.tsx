@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
-import BetaNotice from "@/components/competition/BetaNotice";
 import TeamBrief from "@/components/competition/TeamBrief";
 import { longDate } from "@/components/stats/competitive/format";
 import { prettyTeamName } from "@/lib/fed/linkPlan";
@@ -65,7 +64,6 @@ export default function TeamProfileView({ ctx }: Readonly<{ ctx: TeamContext }>)
   return (
     <div className="flex w-full max-w-[56rem] flex-col gap-10">
       <div>
-        <BetaNotice />
         <Link href="/jornadas" className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] max-md:min-h-11">
           <FontAwesomeIcon icon={faChevronLeft} className="text-xs" />
           Jornadas

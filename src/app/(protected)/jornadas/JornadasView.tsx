@@ -6,7 +6,6 @@ import FilterBar, { type FilterConfig } from "@/components/ui/FilterBar";
 import PageHeader from "@/components/ui/PageHeader";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import GroupStandings from "@/components/competition/GroupStandings";
-import BetaNotice from "@/components/competition/BetaNotice";
 import PositionRace from "@/components/competition/PositionRace";
 import RoundDigest from "@/components/competition/RoundDigest";
 import RoundMatches from "@/components/competition/RoundMatches";
@@ -122,7 +121,6 @@ export default function JornadasView({
   return (
     <div className="w-full max-w-[80rem]">
       <PageHeader title="Jornadas" subtitle={subtitle} />
-      <BetaNotice />
 
       <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-3">
         <FilterBar

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import SegmentedControl from "@/components/ui/SegmentedControl";
-import BetaNotice from "@/components/competition/BetaNotice";
 import MatchScoutPanel from "@/components/competition/MatchScoutPanel";
 import MatchReportPanel from "@/components/competition/MatchReportPanel";
 import type { MatchReport } from "@/lib/competition/report";
@@ -116,7 +115,6 @@ export default function MatchDetailView({
 
   return (
     <div className="w-full max-w-[56rem]">
-      <BetaNotice />
       <Link
         href={backHref}
         className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] max-md:min-h-11"
