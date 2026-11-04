@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import InfoDialog from "@/components/ui/InfoDialog";
+import { teamHref } from "@/lib/competition/links";
 import { prettyTeamName } from "@/lib/fed/linkPlan";
 import type { CompetitiveStats } from "@/lib/stats/competitive/build";
 import type { RivalEntry } from "@/lib/stats/competitive/rivals";
@@ -39,6 +41,12 @@ function Dossier({ rival, today }: Readonly<{ rival: RivalEntry; today: string }
             : "Sin partidos jugados esta temporada"}
         </p>
         <p className="mt-3 max-w-prose text-[var(--text-secondary)]">{rival.reason}</p>
+        <Link
+          href={teamHref(rival.teamId)}
+          className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-[var(--accent)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+        >
+          Ver ficha del equipo →
+        </Link>
       </header>
 
       <div className="grid gap-8 sm:grid-cols-2 sm:gap-10">

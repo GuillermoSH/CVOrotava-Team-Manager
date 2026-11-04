@@ -37,9 +37,11 @@ import {
   isMatchPast,
   matchStart,
 } from "@/lib/matches/schedule";
+import { ourMatchHref } from "@/lib/competition/links";
 
 export type HomeMatch = {
   id: string;
+  fed_match_id?: number | null;
   date: string;
   time?: string | null;
   opponent: string;
@@ -110,7 +112,7 @@ function NextMatchCard({ match, now }: Readonly<{ match: HomeMatch; now: Date }>
           </p>
           <h3 className="mt-1 text-2xl font-bold tracking-tight text-balance @lg:text-3xl">
             <Link
-              href={`/matches/${match.id}`}
+              href={ourMatchHref(match)}
               className="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-[var(--accent)]"
             >
               {match.opponent}
