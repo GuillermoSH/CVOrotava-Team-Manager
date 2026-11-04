@@ -465,7 +465,7 @@ export default function PaymentsView({
                             }
                             router.push(`/payments/admin/${item.player_id}`);
                           }}
-                          className="group flex w-full cursor-pointer flex-col gap-3 py-4 text-left transition-colors hover:bg-[var(--surface-faint)] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--accent)] sm:flex-row sm:items-center sm:gap-4"
+                          className="group flex w-full cursor-pointer flex-row items-center gap-3 py-4 text-left transition-colors hover:bg-[var(--surface-faint)] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--accent)] sm:gap-4"
                         >
                           <div className="flex min-w-0 flex-1 items-center gap-3">
                             <div
@@ -485,10 +485,10 @@ export default function PaymentsView({
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between gap-4 pl-[3.25rem] sm:justify-end sm:gap-6 sm:pl-0">
+                          <div className="flex shrink-0 flex-col items-end gap-1.5 sm:flex-row sm:items-center sm:gap-6">
                             {item.exempt ? (
                               <>
-                                <span className="max-w-[12rem] truncate text-sm text-[var(--text-muted)]">
+                                <span className="max-w-[8rem] truncate text-sm text-[var(--text-muted)] sm:max-w-[12rem]">
                                   {item.exempt.reason ?? "Sin motivo"}
                                 </span>
                                 <span className="badge badge-neutral">Exento</span>
