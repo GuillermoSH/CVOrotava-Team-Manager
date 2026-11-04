@@ -9,10 +9,6 @@ import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlus,
-  faArrowDownAZ,
-  faArrowUpZA,
-  faArrowDownWideShort,
-  faArrowUpWideShort,
 } from "@fortawesome/free-solid-svg-icons";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import PageHeader from "@/components/ui/PageHeader";
@@ -70,19 +66,6 @@ type AdminFilter = "all" | "debt" | "ok" | "exempt";
 
 function defaultSortDir(field: AdminSortField): AdminSortDir {
   return field === "name" ? "asc" : "desc";
-}
-
-function sortDirLabel(field: AdminSortField, dir: AdminSortDir): string {
-  if (field === "name") return dir === "asc" ? "A → Z" : "Z → A";
-  if (field === "debt") {
-    return dir === "desc" ? "Mayor primero" : "Menor primero";
-  }
-  return dir === "desc" ? "Crítico primero" : "Al día primero";
-}
-
-function sortDirIcon(field: AdminSortField, dir: AdminSortDir) {
-  if (field === "name") return dir === "asc" ? faArrowDownAZ : faArrowUpZA;
-  return dir === "desc" ? faArrowDownWideShort : faArrowUpWideShort;
 }
 
 function playerInitials(name: string): string {
@@ -451,63 +434,36 @@ export default function PaymentsView({
                 </div>
               )}
 
-              <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex shrink-0 flex-wrap items-center gap-3">
-                  <SegmentedControl
-                    aria-label="Filtrar por estado"
-                    value={adminFilter}
-                    onChange={setAdminFilter}
-                    options={[
-                      { value: "all", label: "Todos" },
-                      { value: "debt", label: "Con deuda" },
-                      { value: "ok", label: "Al día" },
-                      ...(summary.exempt > 0
-                        ? [{ value: "exempt" as const, label: "Exentos" }]
-                        : []),
-                    ]}
-                  />
-                </div>
-                {adminOverview.length > 0 && (
-                  <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto lg:justify-end">
-                    <span className="text-xs font-medium text-[var(--text-muted)]">
-                      Ordenar
-                    </span>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <SegmentedControl
-                        aria-label="Criterio de orden"
-                        value={adminSortField}
-                        onChange={(field) => {
-                          if (field === adminSortField) {
-                            setAdminSortDir((d) =>
-                              d === "asc" ? "desc" : "asc"
-                            );
-                            return;
-                          }
-                          setAdminSortField(field);
-                          setAdminSortDir(defaultSortDir(field));
-                        }}
-                        options={[
-                          { value: "debt", label: "Deuda" },
-                          { value: "name", label: "Nombre" },
-                          { value: "status", label: "Estado" },
-                        ]}
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setAdminSortDir((d) => (d === "asc" ? "desc" : "asc"))
-                        }
-                        aria-label={`Invertir orden: ${sortDirLabel(adminSortField, adminSortDir)}`}
-                        className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-                      >
-                        <FontAwesomeIcon
-                          icon={sortDirIcon(adminSortField, adminSortDir)}
-                        />
-                        {sortDirLabel(adminSortField, adminSortDir)}
-                      </button>
-                    </div>
-                  </div>
-                )}
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+                <SegmentedControl
+                  aria-label="Filtrar por estado"
+                  value={adminFilter}
+                  onChange={setAdminFilter}
+                  options={[
+                    { value: "all", label: "Todos" },
+                    { value: "debt", label: "Con deuda" },
+                    { value: "ok", label: "Al día" },
+                    ...(summary.exempt > 0
+                      ? [{ value: "exempt" as const, label: "Exentos" }]
+                      : []),
+                  ]}
+                />
+                <label className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+                  Ordenar por
+                  <select
+                    value={adminSortField}
+                    onChange={(e) => {
+                      const field = e.target.value as AdminSortField;
+                      setAdminSortField(field);
+                      setAdminSortDir(defaultSortDir(field));
+                    }}
+                    className="h-9 cursor-pointer rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-2.5 text-sm font-semibold text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                  >
+                    <option value="debt">Deuda</option>
+                    <option value="name">Nombre</option>
+                    <option value="status">Estado</option>
+                  </select>
+                </label>
               </div>
 
               {adminOverview.length === 0 ? (
