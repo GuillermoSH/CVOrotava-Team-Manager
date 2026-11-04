@@ -140,21 +140,13 @@ export default function StatsView({
       if (f.season) params.set("season", f.season);
       if (f.gender) params.set("gender", f.gender);
       const qs = params.toString();
-      const [statsRes, compRes] = await Promise.all([
-        fetch(qs ? `/api/stats?${qs}` : "/api/stats"),
-        f.season && f.gender ? fetch(`/api/stats/competitive?${qs}`) : Promise.resolve(null),
-      ]);
+      const statsRes = await fetch(qs ? `/api/stats?${qs}` : "/api/stats");
       if (!statsRes.ok) {
         throw new Error("No se pudieron cargar las estadísticas");
       }
       const data = await statsRes.json();
       setMatches(data.matches || []);
-      if (compRes) {
-        if (!compRes.ok) throw new Error("No se pudieron cargar las estadísticas competitivas");
-        setCompetitive((await compRes.json()) as CompetitiveStats);
-      } else {
-        setCompetitive(null);
-      }
+      setCompetitive((data.competitive ?? null) as CompetitiveStats | null);
       setSelectedRival(null);
     } catch (err) {
       // Keep last good matches/competitive when offline or request fails.
