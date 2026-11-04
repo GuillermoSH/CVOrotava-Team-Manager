@@ -237,19 +237,24 @@ export async function linkTmUsersToExistingSeniorPlayers(opts: {
 
   const available = [...(unlinkedPlayers ?? [])];
   let linked = 0;
+  // Sin fichas por enlazar no hay nada que hacer: es el caso habitual en cada carga de pagos.
+  if (available.length === 0 || (users ?? []).length === 0) return { ok: true, linked };
+
+  // Qué usuarios ya tienen ficha: una sola consulta en vez de una por usuario.
+  const { data: alreadyRows, error: alreadyError } = await supabaseAdmin
+    .from("players")
+    .select("user_id")
+    .in(
+      "user_id",
+      (users ?? []).map((u) => u.id as string)
+    );
+  if (alreadyError) return { ok: false, message: alreadyError.message };
+  const alreadyLinked = new Set((alreadyRows ?? []).map((r) => r.user_id as string));
 
   for (const user of users ?? []) {
     const name = (user.user_name as string | null) ?? "";
     if (isExcludedTestPlayerName(name)) continue;
-
-    // Already linked somewhere?
-    const { data: already, error: alreadyError } = await supabaseAdmin
-      .from("players")
-      .select("id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    if (alreadyError) return { ok: false, message: alreadyError.message };
-    if (already) continue;
+    if (alreadyLinked.has(user.id as string)) continue;
 
     const targetNorm = normalizePersonName(name);
     const matchIndexes = available

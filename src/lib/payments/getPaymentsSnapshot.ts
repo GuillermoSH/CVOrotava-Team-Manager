@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import type { AllowedUser } from "@/lib/auth/require-allowed-user";
 import {
@@ -14,35 +15,28 @@ import { feeAudienceFor, missingFees, resolveDueDate } from "@/lib/payments/feeS
 import { getExemption, listExemptions, type Exemption } from "@/lib/payments/exemptions";
 import { getCurrentSeason, normalizeSeasonId } from "@/utils/getCurrentSeason";
 
-/** Last sign-in via Auth Admin: paginate listUsers instead of N× getUserById. */
-async function authLastSignInByUserIds(userIds: string[]) {
-  const needed = new Set(userIds.filter(Boolean));
-  const out: Record<string, string | null> = {};
-  if (needed.size === 0) return out;
-
-  let page = 1;
-  const perPage = 1000;
-
-  while (true) {
-    const { data, error } = await supabaseAdmin.auth.admin.listUsers({
-      page,
-      perPage,
-    });
-    if (error || !data?.users?.length) break;
-
-    for (const u of data.users) {
-      if (needed.has(u.id)) {
-        out[u.id] = u.last_sign_in_at ?? null;
-        needed.delete(u.id);
-      }
+/** Último acceso de todas las cuentas (Auth Admin pagina listUsers: caro y casi inmutable, cache de 5 min). */
+const loadAllLastSignIns = unstable_cache(
+  async (): Promise<Record<string, string | null>> => {
+    const out: Record<string, string | null> = {};
+    const perPage = 1000;
+    for (let page = 1; ; page += 1) {
+      const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+      if (error || !data?.users?.length) break;
+      for (const u of data.users) out[u.id] = u.last_sign_in_at ?? null;
+      if (data.users.length < perPage) break;
     }
+    return out;
+  },
+  ["auth-last-sign-ins"],
+  { revalidate: 300 }
+);
 
-    if (needed.size === 0) break;
-    if (data.users.length < perPage) break;
-    page += 1;
-  }
-
-  for (const id of needed) out[id] = null;
+async function authLastSignInByUserIds(userIds: string[]) {
+  const out: Record<string, string | null> = {};
+  if (userIds.length === 0) return out;
+  const all = await loadAllLastSignIns();
+  for (const id of userIds) if (id) out[id] = all[id] ?? null;
   return out;
 }
 
@@ -411,31 +405,35 @@ export async function getPaymentsSnapshot(
 
     const roster = rosterResult.data;
     const playerIds = roster.map((p) => p.id);
-    const exemptions = await listExemptions(seasonKey);
-
-    let paymentRows: PaymentRow[] = [];
-    if (playerIds.length > 0) {
-      const { data: payments, error } = await supabaseAdmin
-        .from("payments")
-        .select(
-          `${PAYMENT_COLUMNS.trim()}, users ( user_name, gender ), players ( id, full_name, first_name, last_name, user_id )`
-        )
-        .in("player_id", playerIds)
-        .eq("season", seasonKey)
-        .order("due_date", { ascending: true, nullsFirst: false });
-
-      if (error) return { status: "error", message: error.message };
-      paymentRows = ((payments ?? []) as unknown as PaymentRow[]).map(
-        enrichPaymentRow
-      );
-    }
-
     const linkedUserIds = roster
       .map((p) => p.user_id)
       .filter((id): id is string => Boolean(id));
-    const authLastSignInAtByUserId = adminOverviewLite
-      ? {}
-      : await authLastSignInByUserIds(linkedUserIds);
+    const rosterById = new Map(roster.map((p) => [p.id, p]));
+
+    // Exenciones, pagos y último acceso no dependen entre sí: en paralelo.
+    // Los pagos van sin embeds (users/players por fila): el nombre sale del roster ya cargado.
+    const [exemptions, paymentsRes, authLastSignInAtByUserId] = await Promise.all([
+      listExemptions(seasonKey),
+      playerIds.length > 0
+        ? supabaseAdmin
+            .from("payments")
+            .select(PAYMENT_COLUMNS)
+            .in("player_id", playerIds)
+            .eq("season", seasonKey)
+            .order("due_date", { ascending: true, nullsFirst: false })
+        : Promise.resolve({ data: [] as unknown[], error: null }),
+      adminOverviewLite ? Promise.resolve({} as Record<string, string | null>) : authLastSignInByUserIds(linkedUserIds),
+    ]);
+    if (paymentsRes.error) return { status: "error", message: paymentsRes.error.message };
+    const paymentRows = ((paymentsRes.data ?? []) as unknown as PaymentRow[]).map((row) => {
+      const p = row.player_id ? rosterById.get(row.player_id) : undefined;
+      return enrichPaymentRow({
+        ...row,
+        players: p
+          ? { id: p.id, full_name: p.full_name, first_name: p.first_name, last_name: p.last_name, user_id: p.user_id }
+          : null,
+      });
+    });
 
     const adminOverview = buildAdminOverview(
       roster,
