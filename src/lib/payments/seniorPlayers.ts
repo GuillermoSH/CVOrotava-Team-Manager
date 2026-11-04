@@ -9,6 +9,8 @@ export type SeniorPlayerRow = {
   season: string;
   is_active: boolean;
   team_id: string | null;
+  pays_as_senior?: boolean;
+  pays_extended_monthly?: boolean;
   teams: { id: string; category: string; gender: string; season: string; name: string } | null;
 };
 
@@ -89,6 +91,8 @@ export async function listActiveSeniorPlayers(opts: {
       season,
       is_active,
       team_id,
+      pays_as_senior,
+      pays_extended_monthly,
       teams!inner ( id, category, gender, season, name )
     `
       )
@@ -129,6 +133,8 @@ export async function listActiveSeniorPlayers(opts: {
       season: row.season as string,
       is_active: Boolean(row.is_active),
       team_id: (row.team_id as string | null) ?? null,
+      pays_as_senior: Boolean(row.pays_as_senior),
+      pays_extended_monthly: Boolean(row.pays_extended_monthly),
       teams,
     } satisfies SeniorPlayerRow;
   });

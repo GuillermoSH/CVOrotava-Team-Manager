@@ -11,7 +11,8 @@ import {
   isQuotaOverdue,
   quotaSeverity,
 } from "@/components/payments/quotaDates";
-import { feeAudienceFor, missingFees, resolveDueDate } from "@/lib/payments/feeSchedule";
+import { resolveDueDate } from "@/lib/payments/feeSchedule";
+import { expectedFees, listSeasonFeeLines, payerAudience, type SeasonFeeLine } from "@/lib/payments/feeLines";
 import { getExemption, listExemptions, type Exemption } from "@/lib/payments/exemptions";
 import { getCurrentSeason, normalizeSeasonId } from "@/utils/getCurrentSeason";
 
@@ -145,31 +146,45 @@ function enrichPaymentRow(row: PaymentRow): PaymentRow {
   };
 }
 
-/** Usuario enlazado y categoría del equipo de una ficha, en una sola consulta (la categoría decide qué cuotas le tocan). */
-async function playerLinkAndCategory(
+type FeeProfile = {
+  category?: string | null;
+  pays_as_senior?: boolean | null;
+  pays_extended_monthly?: boolean | null;
+};
+
+/** Ficha de un jugador para el cobro: usuario enlazado, categoría del equipo y si paga como sénior o cuota ampliada. */
+async function playerFeeProfile(
   playerId: string
-): Promise<{ userId: string | null; category: string | null }> {
+): Promise<{ userId: string | null } & Required<{ [K in keyof FeeProfile]: NonNullable<FeeProfile[K]> | null }>> {
   const { data } = await supabaseAdmin
     .from("players")
-    .select("user_id, teams ( category )")
+    .select("user_id, pays_as_senior, pays_extended_monthly, teams ( category )")
     .eq("id", playerId)
     .maybeSingle();
   const teams = data?.teams as { category: string } | { category: string }[] | null | undefined;
   const team = Array.isArray(teams) ? teams[0] : teams;
-  return { userId: (data?.user_id as string | null | undefined) ?? null, category: team?.category ?? null };
+  return {
+    userId: (data?.user_id as string | null | undefined) ?? null,
+    category: team?.category ?? null,
+    pays_as_senior: Boolean(data?.pays_as_senior),
+    pays_extended_monthly: Boolean(data?.pays_extended_monthly),
+  };
 }
 
-/** Cuotas del calendario que el jugador aún no tiene registradas (como en el Portal). */
+/** Cuotas de la tarifa de la temporada que al jugador aún le faltan por pagar (como en el Portal). */
 function expectedRowsFor(
   rows: PaymentRow[],
-  player: { id: string; user_id: string | null; category?: string | null },
-  season: string
+  player: { id: string; user_id: string | null } & FeeProfile,
+  season: string,
+  lines: readonly SeasonFeeLine[]
 ): PaymentRow[] {
-  return missingFees(
-    rows.filter((r) => r.player_id === player.id || !r.player_id),
+  return expectedFees({
+    lines,
+    rows: rows.filter((r) => r.player_id === player.id || !r.player_id),
     season,
-    feeAudienceFor(player.category)
-  ).map((fee) => ({
+    audience: payerAudience(player.category, Boolean(player.pays_as_senior)),
+    paysExtendedMonthly: Boolean(player.pays_extended_monthly),
+  }).map((fee) => ({
     id: `expected:${player.id}:${fee.fee_code}:${fee.billing_month ?? ""}`,
     user_id: player.user_id,
     player_id: player.id,
@@ -178,7 +193,7 @@ function expectedRowsFor(
     status: "pending",
     due_date: fee.due_date,
     paid_date: null,
-    notes: null,
+    notes: fee.amount < fee.total ? `Faltan ${fee.amount} € de ${fee.total} €` : null,
     season: normalizeSeasonId(season),
     fee_code: fee.fee_code,
     billing_month: fee.billing_month,
@@ -193,7 +208,8 @@ function buildAdminOverview(
   payments: PaymentRow[],
   authLastSignInAtByUserId: Record<string, string | null>,
   season: string,
-  exemptions: Map<string, Exemption> = new Map()
+  exemptions: Map<string, Exemption> = new Map(),
+  lines: readonly SeasonFeeLine[] = []
 ): AdminOverviewRow[] {
   const pendingByPlayer = new Map<string, number>();
   const overdueByPlayer = new Map<string, number>();
@@ -227,8 +243,15 @@ function buildAdminOverview(
     const playerRows = payments.filter((p) => p.player_id === player.id);
     for (const fee of expectedRowsFor(
       playerRows,
-      { id: player.id, user_id: player.user_id, category: player.teams?.category },
-      season
+      {
+        id: player.id,
+        user_id: player.user_id,
+        category: player.teams?.category,
+        pays_as_senior: player.pays_as_senior,
+        pays_extended_monthly: player.pays_extended_monthly,
+      },
+      season,
+      lines
     )) {
       const severity = quotaSeverity("pending", fee.due_date);
       if (severity === "ok") continue;
@@ -329,10 +352,12 @@ export async function getPaymentsSnapshot(
 
       // Ficha (usuario enlazado + categoría) y exención no dependen entre sí: en paralelo.
       const detailSeason = seasonKey ?? getCurrentSeason();
-      const [{ userId: linkedUserId, category: playerCategory }, exemption] = await Promise.all([
-        playerLinkAndCategory(resolvedPlayerId),
+      const [profile, exemption, feeLines] = await Promise.all([
+        playerFeeProfile(resolvedPlayerId),
         getExemption(resolvedPlayerId, detailSeason),
+        listSeasonFeeLines(detailSeason),
       ]);
+      const linkedUserId = profile.userId;
 
       let query = supabaseAdmin
         .from("payments")
@@ -367,8 +392,9 @@ export async function getPaymentsSnapshot(
               ? []
               : expectedRowsFor(
                   rows,
-                  { id: resolvedPlayerId, user_id: linkedUserId, category: playerCategory },
-                  detailSeason
+                  { ...profile, id: resolvedPlayerId, user_id: linkedUserId },
+                  detailSeason,
+                  feeLines
                 )),
           ],
           isAdmin: true,
@@ -412,7 +438,7 @@ export async function getPaymentsSnapshot(
 
     // Exenciones, pagos y último acceso no dependen entre sí: en paralelo.
     // Los pagos van sin embeds (users/players por fila): el nombre sale del roster ya cargado.
-    const [exemptions, paymentsRes, authLastSignInAtByUserId] = await Promise.all([
+    const [exemptions, paymentsRes, authLastSignInAtByUserId, feeLines] = await Promise.all([
       listExemptions(seasonKey),
       playerIds.length > 0
         ? supabaseAdmin
@@ -423,6 +449,7 @@ export async function getPaymentsSnapshot(
             .order("due_date", { ascending: true, nullsFirst: false })
         : Promise.resolve({ data: [] as unknown[], error: null }),
       adminOverviewLite ? Promise.resolve({} as Record<string, string | null>) : authLastSignInByUserIds(linkedUserIds),
+      listSeasonFeeLines(seasonKey),
     ]);
     if (paymentsRes.error) return { status: "error", message: paymentsRes.error.message };
     const paymentRows = ((paymentsRes.data ?? []) as unknown as PaymentRow[]).map((row) => {
@@ -440,7 +467,8 @@ export async function getPaymentsSnapshot(
       paymentRows,
       authLastSignInAtByUserId,
       seasonKey,
-      exemptions
+      exemptions,
+      feeLines
     );
 
     // Assignees = same roster (already synced); avoid a second full sync.
@@ -489,12 +517,21 @@ export async function getPaymentsSnapshot(
     query = query.eq("user_id", actor.id);
   }
 
-  if (seasonKey) query = query.eq("season", seasonKey);
+  // Viendo la temporada actual el jugador ve también lo que dejó pendiente en las pasadas;
+  // si pide otra temporada concreta, solo esa.
+  const currentSeason = getCurrentSeason();
+  const viewingCurrent = !seasonKey || seasonKey === normalizeSeasonId(currentSeason);
+  if (seasonKey && !viewingCurrent) query = query.eq("season", seasonKey);
 
   const { data: payments, error } = await query;
   if (error) return { status: "error", message: error.message };
 
-  const own = ((payments ?? []) as PaymentRow[]).filter((p) => {
+  const inScope = (p: PaymentRow) =>
+    !viewingCurrent ||
+    p.status === "pending" ||
+    (p.season ? normalizeSeasonId(p.season) : currentSeason) === normalizeSeasonId(currentSeason);
+
+  const own = ((payments ?? []) as PaymentRow[]).filter(inScope).filter((p) => {
     if (p.player_id && ownPlayerId && p.player_id === ownPlayerId) return true;
     if (p.user_id === actor.id && !p.player_id) return true;
     if (!ownPlayerId && p.user_id === actor.id) return true;
@@ -503,14 +540,15 @@ export async function getPaymentsSnapshot(
 
   const ownRows = own.map((row) => ({ ...row, due_date: resolveDueDate(row) }));
   const ownSeason = seasonKey ?? getCurrentSeason();
-  const [ownExemption, ownLink] = await Promise.all([
+  const [ownExemption, ownLink, ownLines] = await Promise.all([
     ownPlayerId ? getExemption(ownPlayerId, ownSeason) : Promise.resolve(null),
-    ownPlayerId ? playerLinkAndCategory(ownPlayerId) : Promise.resolve(null),
+    ownPlayerId ? playerFeeProfile(ownPlayerId) : Promise.resolve(null),
+    listSeasonFeeLines(ownSeason),
   ]);
   // Un exento no debe nada: sus cuotas pendientes ya registradas no se le enseñan como deuda.
   const visibleOwnRows = ownExemption ? ownRows.filter((r) => r.status !== "pending") : ownRows;
   const ownExpected = ownPlayerId && !ownExemption
-    ? expectedRowsFor(ownRows, { id: ownPlayerId, user_id: actor.id, category: ownLink?.category ?? null }, ownSeason)
+    ? expectedRowsFor(ownRows, { ...(ownLink ?? {}), id: ownPlayerId, user_id: actor.id }, ownSeason, ownLines)
     : [];
 
   return {
