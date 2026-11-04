@@ -10,7 +10,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "fed:sync": "tsx --env-file=.env.local scripts/fed-sync.ts"
+    "fed:sync": "tsx --env-file=.env.local scripts/fed-sync.ts",
+    "fed:actas": "tsx --env-file=.env.local scripts/fed-actas.ts"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.3.1",
@@ -25,6 +26,7 @@
     "@tsparticles/slim": "^4.4.0",
     "framer-motion": "^12.43.0",
     "next": "16.4.3",
+    "pdfjs-dist": "^6.4.299",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-hook-form": "~7.71.2",

@@ -20,19 +20,24 @@ export type AppNavItem = {
   /** Only shown to club admins. */
   adminOnly?: boolean;
   /**
-   * Incluir en la barra inferior móvil.
-   * Default: true si no es adminOnly. Stats va al menú «Más» para dejar ≤4 tabs.
+   * Incluir en la barra inferior móvil (igual para todos los roles: cuatro pestañas y «Más»).
+   * Default: true si no es adminOnly. Lo que no cabe va a la hoja «Más».
    */
   bottomNav?: boolean;
 };
 
+/**
+ * Orden de lectura: lo de cada semana primero (inicio, partidos, jornadas de la liga, vídeos) y,
+ * después, lo que se mira de vez en cuando (estadísticas del club, pagos). En el móvil las cuatro
+ * primeras son pestañas y el resto, con la gestión del admin, va en «Más».
+ */
 export const APP_NAV_ITEMS: AppNavItem[] = [
   { name: "Inicio", href: "/", icon: faHome },
   { name: "Calendario", href: "/matches", icon: faCalendarDays, shortName: "Partidos" },
+  { name: "Jornadas", href: "/jornadas", icon: faListOl },
   { name: "Videos", href: "/videos", icon: faVideo },
-  { name: "Jornadas", href: "/jornadas", icon: faListOl, bottomNav: false },
   { name: "Estadísticas", href: "/stats", icon: faChartSimple, bottomNav: false },
-  { name: "Pagos", href: "/payments", icon: faMoneyBill },
+  { name: "Pagos", href: "/payments", icon: faMoneyBill, bottomNav: false },
   {
     name: "Pabellones",
     href: "/venues",

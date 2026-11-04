@@ -2,8 +2,7 @@
 
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { prettyTeamName } from "@/lib/fed/linkPlan";
-import type { CompetitiveStats } from "@/lib/stats/competitive/build";
-import { ordinal } from "./format";
+import { ordinal } from "@/components/stats/competitive/format";
 
 type Row = Record<string, number>;
 
@@ -18,7 +17,7 @@ function RaceTooltip({
   label?: number;
   payload?: { dataKey?: string; value?: number }[];
   names: Record<string, string>;
-  oursKey: string;
+  oursKey: string | null;
 }) {
   if (!active || !payload?.length) return null;
   const rows = payload
@@ -43,23 +42,35 @@ function RaceTooltip({
   );
 }
 
-/** Puesto de cada equipo tras cada jornada: nosotros en rojo, el resto atenuados. */
-export default function PositionRace({ stats }: Readonly<{ stats: CompetitiveStats }>) {
-  const rounds = stats.positionsByRound;
-  const ourId = stats.ourTeam?.id;
-  if (rounds.length === 0 || ourId === undefined) return null;
+/**
+ * Puesto de cada equipo tras cada jornada. Si el club juega en el grupo, su línea va en el color
+ * de la marca y las demás atenuadas.
+ */
+export default function PositionRace({
+  rounds,
+  teams,
+  ourId,
+}: Readonly<{
+  rounds: { round: number; positions: Record<number, number> }[];
+  teams: { id: number; name: string }[];
+  ourId: number | null;
+}>) {
+  if (rounds.length < 2) return null;
 
-  const teams = stats.standings;
   const key = (id: number) => `t${id}`;
-  const names = Object.fromEntries(teams.map((t) => [key(t.teamId), t.name]));
+  const names = Object.fromEntries(teams.map((t) => [key(t.id), t.name]));
   const data: Row[] = rounds.map((r) => ({
     round: r.round,
-    ...Object.fromEntries(teams.map((t) => [key(t.teamId), r.positions[t.teamId]])),
+    ...Object.fromEntries(teams.map((t) => [key(t.id), r.positions[t.id]])),
   }));
 
-  const ours = rounds.map((r) => r.positions[ourId]);
-  const best = Math.min(...ours);
-  const summary = `Empezamos ${ordinal(ours[0])}, ahora ${ordinal(ours[ours.length - 1])}; mejor puesto ${ordinal(best)}.`;
+  let summary = "Evolución del puesto de cada equipo, jornada a jornada.";
+  if (ourId !== null) {
+    const ours = rounds.map((r) => r.positions[ourId]).filter((p): p is number => typeof p === "number");
+    if (ours.length > 0) {
+      summary = `Empezamos ${ordinal(ours[0])}, ahora ${ordinal(ours[ours.length - 1])}; mejor puesto ${ordinal(Math.min(...ours))}.`;
+    }
+  }
 
   return (
     <figure>
@@ -86,13 +97,13 @@ export default function PositionRace({ stats }: Readonly<{ stats: CompetitiveSta
               tickLine={false}
               width={30}
             />
-            <Tooltip content={<RaceTooltip names={names} oursKey={key(ourId)} />} />
+            <Tooltip content={<RaceTooltip names={names} oursKey={ourId !== null ? key(ourId) : null} />} />
             {teams
-              .filter((t) => t.teamId !== ourId)
+              .filter((t) => t.id !== ourId)
               .map((t) => (
                 <Line
-                  key={t.teamId}
-                  dataKey={key(t.teamId)}
+                  key={t.id}
+                  dataKey={key(t.id)}
                   stroke="var(--text-muted)"
                   strokeOpacity={0.35}
                   strokeWidth={1.5}
@@ -101,14 +112,16 @@ export default function PositionRace({ stats }: Readonly<{ stats: CompetitiveSta
                   isAnimationActive={false}
                 />
               ))}
-            <Line
-              dataKey={key(ourId)}
-              stroke="var(--accent)"
-              strokeWidth={3}
-              dot={{ r: 3, fill: "var(--accent)", strokeWidth: 0 }}
-              activeDot={{ r: 5 }}
-              isAnimationActive={false}
-            />
+            {ourId !== null ? (
+              <Line
+                dataKey={key(ourId)}
+                stroke="var(--accent)"
+                strokeWidth={3}
+                dot={{ r: 3, fill: "var(--accent)", strokeWidth: 0 }}
+                activeDot={{ r: 5 }}
+                isAnimationActive={false}
+              />
+            ) : null}
           </LineChart>
         </ResponsiveContainer>
       </div>

@@ -4,6 +4,7 @@ import {
   commonOpponents,
   headToHead,
   isCloseSet,
+  matchesKnownBefore,
   outcomesOf,
   scoutMatch,
   scoutTeam,
@@ -185,5 +186,19 @@ describe("scoutMatch", () => {
       played(2, 3, [3, 0], "2026-10-02", [[25, 21], [25, 20], [25, 20]]),
     ];
     expect(scoutMatch(parejos, 1, 2).favoured).toBeNull();
+  });
+});
+
+describe("matchesKnownBefore", () => {
+  it("de un partido ya jugado solo cuenta lo anterior a su fecha", () => {
+    const target = league[2]; // 2026-10-17
+    const known = matchesKnownBefore(target, league);
+    expect(known.every((m) => (m.date ?? "") < "2026-10-17")).toBe(true);
+    expect(known).not.toContain(target);
+  });
+
+  it("de un partido pendiente cuenta todo", () => {
+    const pending = league[league.length - 1];
+    expect(matchesKnownBefore(pending, league)).toHaveLength(league.length);
   });
 });

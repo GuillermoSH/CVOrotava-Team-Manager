@@ -3,7 +3,15 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { fetchAll } from "@/lib/supabase/fetchAll";
 import { getCurrentSeason } from "@/utils/getCurrentSeason";
 import { todayInCanarias } from "@/lib/stats/competitive/seasons";
-import { buildCompetition, type Competition, type CompetitionInput, type Gender } from "./build";
+import {
+  buildCompetition,
+  type Competition,
+  type CompetitionGroup,
+  type CompetitionInput,
+  type CompetitionMatch,
+  type CompetitionRound,
+  type Gender,
+} from "./build";
 
 type MatchRow = Omit<CompetitionInput["matches"][number], "facility_name" | "sets"> & {
   fed_facilities: { name: string } | { name: string }[] | null;
@@ -93,3 +101,58 @@ export const listCompetitionSeasons = unstable_cache(
   ["fed-competition-seasons"],
   { revalidate: 3600, tags: ["fed"] }
 );
+
+export type FedMatchContext = {
+  season: string;
+  gender: Gender;
+  competition: Competition;
+  group: CompetitionGroup;
+  round: CompetitionRound;
+  match: CompetitionMatch;
+  /** Nuestro partido enlazado a este de la federación (notas y vídeo son nuestros). */
+  ours: { id: string; video_url: string | null; notes: string | null } | null;
+};
+
+/** Un partido de la federación con su competición, su grupo y su jornada; null si no existe. */
+export async function getFedMatchContext(
+  fedMatchId: number,
+  today: string = todayInCanarias()
+): Promise<FedMatchContext | null> {
+  const { data: row, error } = await supabaseAdmin
+    .from("fed_matches")
+    .select("id, group_id, tournament_id")
+    .eq("id", fedMatchId)
+    .maybeSingle();
+  if (error) throw new Error(`fed_matches: ${error.message}`);
+  if (!row) return null;
+
+  const [tournament, group] = await Promise.all([
+    supabaseAdmin.from("fed_tournaments").select("season").eq("id", row.tournament_id).maybeSingle(),
+    supabaseAdmin.from("fed_groups").select("gender").eq("id", row.group_id).maybeSingle(),
+  ]);
+  const season = tournament.data?.season as string | undefined;
+  const gender = group.data?.gender as Gender | undefined;
+  if (!season || (gender !== "male" && gender !== "female")) return null;
+
+  const competition = await getCompetition(season, gender, today);
+  const grp = competition?.groups.find((g) => g.id === row.group_id);
+  const round = grp?.rounds.find((r) => r.matches.some((m) => m.id === fedMatchId));
+  const match = round?.matches.find((m) => m.id === fedMatchId);
+  if (!competition || !grp || !round || !match) return null;
+
+  const { data: ours } = await supabaseAdmin
+    .from("matches")
+    .select("id, video_url, notes")
+    .eq("fed_match_id", fedMatchId)
+    .maybeSingle();
+
+  return {
+    season,
+    gender,
+    competition,
+    group: grp,
+    round,
+    match,
+    ours: ours ? { id: ours.id as string, video_url: (ours.video_url as string | null) ?? null, notes: (ours.notes as string | null) ?? null } : null,
+  };
+}

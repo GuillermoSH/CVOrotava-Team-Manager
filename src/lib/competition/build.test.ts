@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { buildCompetition, matchStatus, pickCurrentRound, type CompetitionInput } from "./build";
+import {
+  buildCompetition,
+  groupByDay,
+  groupLabel,
+  matchStatus,
+  nextOurMatch,
+  pickCurrentRound,
+  roundChip,
+  roundTitle,
+  type CompetitionInput,
+} from "./build";
 
 type M = CompetitionInput["matches"][number];
 
@@ -203,5 +213,69 @@ describe("pickCurrentRound", () => {
       round(3, [{ status: "scheduled", date: "2026-11-01" }]),
     ];
     expect(pickCurrentRound(rounds, "2026-10-20")).toBe(2);
+  });
+});
+
+describe("roundTitle", () => {
+  it("la federación da solo el número: se enseña como «Jornada N»", () => {
+    expect(roundTitle("2")).toBe("Jornada 2");
+    expect(roundTitle(" 12 ")).toBe("Jornada 12");
+  });
+
+  it("deja tal cual los nombres que ya son texto", () => {
+    expect(roundTitle("Cuartos de final")).toBe("Cuartos de final");
+    expect(roundTitle("Jornada 3")).toBe("Jornada 3");
+  });
+});
+
+describe("groupLabel", () => {
+  it("pasa los grupos en mayúsculas a título, sin perder «Las»", () => {
+    expect(groupLabel("GRUPO LAS PALMAS")).toBe("Grupo Las Palmas");
+    expect(groupLabel("GRUPO TENERIFE")).toBe("Grupo Tenerife");
+    expect(groupLabel("FASE FINAL")).toBe("Fase Final");
+  });
+
+  it("mantiene en minúscula «de» y «del», y limpia espacios", () => {
+    expect(groupLabel("  Fase  de ASCENSO ")).toBe("Fase de Ascenso");
+    expect(groupLabel("COPA DEL GOBIERNO")).toBe("Copa del Gobierno");
+  });
+});
+
+describe("groupByDay", () => {
+  const m = (id: number, date: string | null, time: string | null) =>
+    ({ id, date, time, ours: false, status: "scheduled" }) as unknown as import("./build").CompetitionMatch;
+
+  it("agrupa por fecha, ordena los días y deja los partidos sin fecha al final", () => {
+    const days = groupByDay([m(1, "2026-11-01", "17:00"), m(2, null, null), m(3, "2026-10-31", "15:00"), m(4, "2026-11-01", "12:00")]);
+    expect(days.map((d) => d.date)).toEqual(["2026-10-31", "2026-11-01", null]);
+    expect(days[1].matches.map((x) => x.id)).toEqual([1, 4]);
+  });
+
+  it("sin partidos no devuelve días", () => {
+    expect(groupByDay([])).toEqual([]);
+  });
+});
+
+describe("roundChip", () => {
+  it("solo las jornadas numeradas entran en la tira", () => {
+    expect(roundChip("7")).toBe("7");
+    expect(roundChip(" 12 ")).toBe("12");
+    expect(roundChip("Cuartos de final")).toBeNull();
+    expect(roundChip("Jornada 3")).toBeNull();
+  });
+});
+
+describe("nextOurMatch", () => {
+  const ours = (id: number, date: string, time: string, status = "scheduled") =>
+    ({ id, date, time, ours: true, status }) as unknown as import("./build").CompetitionMatch;
+
+  it("el más cercano de los nuestros que quedan por jugar", () => {
+    const next = nextOurMatch([ours(1, "2026-11-08", "12:00"), ours(2, "2026-11-01", "17:00"), ours(3, "2026-10-20", "12:00", "played")], "2026-10-28");
+    expect(next?.id).toBe(2);
+  });
+
+  it("ignora los de otros equipos, los ya pasados y los jugados", () => {
+    const other = { id: 9, date: "2026-11-01", time: "10:00", ours: false, status: "scheduled" } as unknown as import("./build").CompetitionMatch;
+    expect(nextOurMatch([other, ours(1, "2026-10-01", "12:00")], "2026-10-28")).toBeNull();
   });
 });
