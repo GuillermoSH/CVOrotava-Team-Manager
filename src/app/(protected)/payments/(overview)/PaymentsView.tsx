@@ -378,7 +378,7 @@ export default function PaymentsView({
           {user?.isAdmin ? (
             <section>
               {adminOverview.length > 0 && (
-                <div className="mb-6 grid grid-cols-3 gap-x-6 gap-y-5 border-b border-[var(--glass-border)] pb-6 lg:grid-cols-[auto_auto_auto_auto] lg:justify-start lg:gap-x-16">
+                <div className="mb-6 grid grid-cols-3 gap-x-6 gap-y-5 pb-6 lg:grid-cols-[auto_auto_auto_auto] lg:justify-start lg:gap-x-16">
                   <div className="col-span-3 lg:col-span-1">
                     <p className="text-sm text-[var(--text-muted)]">
                       Pendiente de cobro · {filters.season}
@@ -408,7 +408,7 @@ export default function PaymentsView({
                 </div>
               )}
 
-              <div className="mb-3">
+              <div className="mb-3 flex justify-end">
                 <SegmentedControl
                   aria-label="Filtrar por estado"
                   value={adminFilter}
