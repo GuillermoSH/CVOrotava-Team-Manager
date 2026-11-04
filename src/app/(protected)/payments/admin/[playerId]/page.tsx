@@ -30,7 +30,7 @@ import {
 } from "@/components/payments/quotaDates";
 import Tooltip, { TooltipGroup } from "@/components/ui/Tooltip";
 import { useConfirmDialog } from "@/components/ui/useConfirmDialog";
-import { getCurrentSeason } from "@/utils/getCurrentSeason";
+import { getCurrentSeason, normalizeSeasonId } from "@/utils/getCurrentSeason";
 import { sileo } from "sileo";
 
 const PaymentModal = dynamic(
@@ -237,14 +237,35 @@ export default function AdminPlayerPaymentsDetail() {
     return `${day}/${month}/${year}`;
   };
 
-  const sortedPayments = useMemo(() => {
+  const currentSeason = normalizeSeasonId(getCurrentSeason());
+
+  /** Temporada actual aparte y las anteriores de más reciente a más antigua. */
+  const { currentPayments, pastSeasons } = useMemo(() => {
     const byDue = (a: Payment, b: Payment) =>
       (a.due_date ?? "").localeCompare(b.due_date ?? "");
-    return [
-      ...payments.filter((p) => p.status === "pending").sort(byDue),
-      ...payments.filter((p) => p.status === "paid").sort(byDue),
+    const sortItems = (items: Payment[]) => [
+      ...items.filter((p) => p.status === "pending").sort(byDue),
+      ...items.filter((p) => p.status === "paid").sort(byDue),
     ];
-  }, [payments]);
+    const bySeason = new Map<string, Payment[]>();
+    for (const p of payments) {
+      const key = p.season ? normalizeSeasonId(p.season) : currentSeason;
+      bySeason.set(key, [...(bySeason.get(key) ?? []), p]);
+    }
+    const past = [...bySeason.entries()]
+      .filter(([season]) => season !== currentSeason)
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([season, items]) => ({
+        season,
+        items: sortItems(items),
+        pending: items.filter(isQuotaOwed).reduce((acc, p) => acc + Number(p.amount), 0),
+        paid: items.filter((p) => p.status === "paid").reduce((acc, p) => acc + Number(p.amount), 0),
+      }));
+    return {
+      currentPayments: sortItems(bySeason.get(currentSeason) ?? []),
+      pastSeasons: past,
+    };
+  }, [payments, currentSeason]);
 
   if (!user?.isAdmin) {
     return (
@@ -254,13 +275,13 @@ export default function AdminPlayerPaymentsDetail() {
     );
   }
 
-  const totalPaid = payments
+  const totalPaid = currentPayments
     .filter((p) => p.status === "paid")
     .reduce((acc, p) => acc + Number(p.amount), 0);
   // Un exento no debe nada: sus pendientes registrados no cuentan como deuda.
   const totalPending = exemption
     ? 0
-    : payments.filter(isQuotaOwed).reduce((acc, p) => acc + Number(p.amount), 0);
+    : currentPayments.filter(isQuotaOwed).reduce((acc, p) => acc + Number(p.amount), 0);
 
   const fixedPlayerId = resolvedPlayerId || routeId;
 
@@ -271,88 +292,9 @@ export default function AdminPlayerPaymentsDetail() {
       ? order[orderIndex + 1]
       : null;
 
-  return (
-    <motion.div
-      className="flex w-full flex-col text-[var(--text-primary)]"
-      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, ease: EASE }}
-    >
-      {confirmDialog}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={() => router.push("/payments")}
-          className="inline-flex w-fit cursor-pointer items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
-        >
-          <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-          Volver a pagos
-        </button>
-
-        {prevPlayer || nextPlayer ? (
-          <nav aria-label="Navegar entre jugadores" className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={!prevPlayer}
-              onClick={() =>
-                prevPlayer && router.push(`/payments/admin/${prevPlayer.id}`)
-              }
-              title={prevPlayer?.name}
-              className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <FontAwesomeIcon icon={faChevronLeft} />
-              Anterior
-            </button>
-            <button
-              type="button"
-              disabled={!nextPlayer}
-              onClick={() =>
-                nextPlayer && router.push(`/payments/admin/${nextPlayer.id}`)
-              }
-              title={nextPlayer?.name}
-              className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Siguiente
-              <FontAwesomeIcon icon={faChevronRight} />
-            </button>
-          </nav>
-        ) : null}
-      </div>
-
-      <PageHeader
-        title={loading ? "Cuotas" : `Cuotas: ${playerName}`}
-        actions={
-          <button
-            type="button"
-            className="btn-primary flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={openAddModal}
-            disabled={Boolean(exemption)}
-            title={exemption ? "Exento de pagos: quita la exención para asignarle cuotas" : undefined}
-          >
-            <FontAwesomeIcon icon={faPlus} /> Añadir pago
-          </button>
-        }
-      />
-
-      {!loading && !error ? (
-        <ExemptionPanel
-          playerId={fixedPlayerId}
-          playerName={playerName}
-          season={getCurrentSeason()}
-          exemption={exemption}
-          pendingCount={payments.filter((p) => p.status === "pending" && !p.expected).length}
-          onChanged={fetchPayments}
-        />
-      ) : null}
-
-      {!loading && !error && payments.length > 0 ? (
-        <QuotaSeasonLayout
-          pending={totalPending}
-          paid={totalPaid}
-          quotas={payments}
-        >
+  const renderList = (items: Payment[]) => (
           <ul className="divide-y divide-[var(--glass-border)] border-t border-[var(--glass-border)]">
-            {sortedPayments.map((p) => {
+            {items.map((p) => {
               const severity = quotaSeverity(p.status, p.due_date);
               return (
                 <li
@@ -478,7 +420,129 @@ export default function AdminPlayerPaymentsDetail() {
               );
             })}
           </ul>
+  );
+
+  return (
+    <motion.div
+      className="flex w-full flex-col text-[var(--text-primary)]"
+      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, ease: EASE }}
+    >
+      {confirmDialog}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => router.push("/payments")}
+          className="inline-flex w-fit cursor-pointer items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
+        >
+          <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
+          Volver a pagos
+        </button>
+
+        {prevPlayer || nextPlayer ? (
+          <nav aria-label="Navegar entre jugadores" className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={!prevPlayer}
+              onClick={() =>
+                prevPlayer && router.push(`/payments/admin/${prevPlayer.id}`)
+              }
+              title={prevPlayer?.name}
+              className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <FontAwesomeIcon icon={faChevronLeft} />
+              Anterior
+            </button>
+            <button
+              type="button"
+              disabled={!nextPlayer}
+              onClick={() =>
+                nextPlayer && router.push(`/payments/admin/${nextPlayer.id}`)
+              }
+              title={nextPlayer?.name}
+              className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Siguiente
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
+          </nav>
+        ) : null}
+      </div>
+
+      <PageHeader
+        title={loading ? "Cuotas" : `Cuotas: ${playerName}`}
+        actions={
+          <button
+            type="button"
+            className="btn-primary flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={openAddModal}
+            disabled={Boolean(exemption)}
+            title={exemption ? "Exento de pagos: quita la exención para asignarle cuotas" : undefined}
+          >
+            <FontAwesomeIcon icon={faPlus} /> Añadir pago
+          </button>
+        }
+      />
+
+      {!loading && !error ? (
+        <ExemptionPanel
+          playerId={fixedPlayerId}
+          playerName={playerName}
+          season={getCurrentSeason()}
+          exemption={exemption}
+          pendingCount={payments.filter((p) => p.status === "pending" && !p.expected).length}
+          onChanged={fetchPayments}
+        />
+      ) : null}
+
+      {!loading && !error && payments.length > 0 ? (
+        <div className="flex flex-col gap-10">
+        <section aria-labelledby="season-current">
+        <h2 id="season-current" className="mb-4 text-lg font-semibold tracking-tight">
+          Temporada {currentSeason}
+        </h2>
+        {currentPayments.length === 0 ? (
+          <p className="py-4 text-sm text-[var(--text-muted)]">
+            Sin cuotas en esta temporada.
+          </p>
+        ) : (
+        <QuotaSeasonLayout
+          pending={totalPending}
+          paid={totalPaid}
+          quotas={currentPayments}
+        >
+          {renderList(currentPayments)}
         </QuotaSeasonLayout>
+        )}
+        </section>
+
+        {pastSeasons.map((past) => (
+          <details
+            key={past.season}
+            open={past.pending > 0}
+            className="group border-t border-[var(--glass-border)] pt-4"
+          >
+            <summary className="flex cursor-pointer list-none flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-1">
+              <h2 className="text-base font-semibold tracking-tight">
+                Temporada {past.season}
+              </h2>
+              <span className="text-sm text-[var(--text-muted)]">
+                {past.pending > 0 ? (
+                  <span className="font-semibold text-[var(--color-danger)]">
+                    {past.pending}€ pendiente
+                  </span>
+                ) : (
+                  "Sin pendientes"
+                )}
+                {" · "}
+                {past.paid}€ pagado
+              </span>
+            </summary>
+            <div className="mt-3">{renderList(past.items)}</div>
+          </details>
+        ))}
+        </div>
       ) : (
         <section>
           {loading ? (
