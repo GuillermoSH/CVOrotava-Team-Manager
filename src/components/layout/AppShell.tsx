@@ -547,11 +547,8 @@ export default function AppShell() {
     }
     return true;
   });
-  // Admin: Estadísticas en la barra y Pagos dentro de «Más», junto al resto de la gestión.
-  const bottomNavItems = navItems.filter((item) => {
-    if (item.adminOnly) return false;
-    return user?.isAdmin ? item.href !== "/payments" : item.bottomNav !== false;
-  });
+  // Barra inferior móvil: la misma para todos (cuatro pestañas); lo demás, en «Más».
+  const bottomNavItems = navItems.filter((item) => !item.adminOnly && item.bottomNav !== false);
   // Hoja «Más» de la barra inferior: lo que no cabe en la barra, y aparte la gestión (admin).
   const moreItems = navItems.filter(
     (item) => !item.adminOnly && !bottomNavItems.includes(item)
@@ -680,7 +677,7 @@ export default function AppShell() {
               onNavigate={markPending}
             />
           ))}
-          {/* Con una sola sección extra (jugadores: solo Estadísticas) «Más» sobra: va directa. */}
+          {/* Con una sola sección extra (p. ej. quien solo ve Pagos) «Más» sobra: va directa. */}
           {moreItems.length + adminItems.length === 1 ? (
             <BottomNavLink
               item={moreItems[0] ?? adminItems[0]}
@@ -689,8 +686,8 @@ export default function AppShell() {
             />
           ) : (
             <MoreTab
-              items={user?.isAdmin ? [] : moreItems}
-              adminItems={user?.isAdmin ? [...moreItems, ...adminItems] : adminItems}
+              items={user?.isAdmin ? moreItems.filter((item) => item.href !== "/payments") : moreItems}
+              adminItems={user?.isAdmin ? [...moreItems.filter((item) => item.href === "/payments"), ...adminItems] : adminItems}
               isActive={isActive}
               onNavigate={markPending}
             />
