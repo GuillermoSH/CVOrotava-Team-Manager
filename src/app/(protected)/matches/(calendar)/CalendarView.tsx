@@ -141,13 +141,13 @@ export default function CalendarView({
     );
   }, [user?.gender]);
 
-  const skipFilterFetchRef = useRef(true);
+  // Filtros de la última carga (el modo estricto de React repite los efectos en desarrollo).
+  const fetchedKeyRef = useRef(`${filters.season}|${filters.gender}`);
   useEffect(() => {
     if (!filters.season || !filters.gender) return;
-    if (skipFilterFetchRef.current) {
-      skipFilterFetchRef.current = false;
-      return;
-    }
+    const key = `${filters.season}|${filters.gender}`;
+    if (fetchedKeyRef.current === key) return;
+    fetchedKeyRef.current = key;
     void fetchMatches(filters.season, filters.gender);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch when season/gender change only
   }, [filters.season, filters.gender]);

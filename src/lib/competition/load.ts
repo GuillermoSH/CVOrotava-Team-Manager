@@ -102,6 +102,28 @@ export const listCompetitionSeasons = unstable_cache(
   { revalidate: 3600, tags: ["fed"] }
 );
 
+type NameOrArr<T> = T | T[] | null;
+const one = <T,>(v: NameOrArr<T>): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
+
+/** Temporada, género y grupo de un partido de la federación, en una sola consulta (cacheada: solo cambia al sincronizar). */
+const lookupMatchWhere = unstable_cache(
+  async (fedMatchId: number): Promise<{ season: string; gender: Gender; groupId: number } | null> => {
+    const { data, error } = await supabaseAdmin
+      .from("fed_matches")
+      .select("group_id, fed_tournaments(season), fed_groups(gender)")
+      .eq("id", fedMatchId)
+      .maybeSingle();
+    if (error) throw new Error(`fed_matches: ${error.message}`);
+    if (!data) return null;
+    const season = one(data.fed_tournaments as NameOrArr<{ season: string }>)?.season;
+    const gender = one(data.fed_groups as NameOrArr<{ gender: string }>)?.gender;
+    if (!season || (gender !== "male" && gender !== "female")) return null;
+    return { season, gender, groupId: data.group_id as number };
+  },
+  ["fed-match-where"],
+  { revalidate: 3600, tags: ["fed"] }
+);
+
 export type FedMatchContext = {
   season: string;
   gender: Gender;
@@ -118,24 +140,12 @@ export async function getFedMatchContext(
   fedMatchId: number,
   today: string = todayInCanarias()
 ): Promise<FedMatchContext | null> {
-  const { data: row, error } = await supabaseAdmin
-    .from("fed_matches")
-    .select("id, group_id, tournament_id")
-    .eq("id", fedMatchId)
-    .maybeSingle();
-  if (error) throw new Error(`fed_matches: ${error.message}`);
-  if (!row) return null;
-
-  const [tournament, group] = await Promise.all([
-    supabaseAdmin.from("fed_tournaments").select("season").eq("id", row.tournament_id).maybeSingle(),
-    supabaseAdmin.from("fed_groups").select("gender").eq("id", row.group_id).maybeSingle(),
-  ]);
-  const season = tournament.data?.season as string | undefined;
-  const gender = group.data?.gender as Gender | undefined;
-  if (!season || (gender !== "male" && gender !== "female")) return null;
+  const where = await lookupMatchWhere(fedMatchId);
+  if (!where) return null;
+  const { season, gender, groupId } = where;
 
   const competition = await getCompetition(season, gender, today);
-  const grp = competition?.groups.find((g) => g.id === row.group_id);
+  const grp = competition?.groups.find((g) => g.id === groupId);
   const round = grp?.rounds.find((r) => r.matches.some((m) => m.id === fedMatchId));
   const match = round?.matches.find((m) => m.id === fedMatchId);
   if (!competition || !grp || !round || !match) return null;

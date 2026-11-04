@@ -140,21 +140,13 @@ export default function StatsView({
       if (f.season) params.set("season", f.season);
       if (f.gender) params.set("gender", f.gender);
       const qs = params.toString();
-      const [statsRes, compRes] = await Promise.all([
-        fetch(qs ? `/api/stats?${qs}` : "/api/stats"),
-        f.season && f.gender ? fetch(`/api/stats/competitive?${qs}`) : Promise.resolve(null),
-      ]);
+      const statsRes = await fetch(qs ? `/api/stats?${qs}` : "/api/stats");
       if (!statsRes.ok) {
         throw new Error("No se pudieron cargar las estadísticas");
       }
       const data = await statsRes.json();
       setMatches(data.matches || []);
-      if (compRes) {
-        if (!compRes.ok) throw new Error("No se pudieron cargar las estadísticas competitivas");
-        setCompetitive((await compRes.json()) as CompetitiveStats);
-      } else {
-        setCompetitive(null);
-      }
+      setCompetitive((data.competitive ?? null) as CompetitiveStats | null);
       setSelectedRival(null);
     } catch (err) {
       // Keep last good matches/competitive when offline or request fails.
@@ -170,12 +162,12 @@ export default function StatsView({
 
   // Solo saltar el primer paint (datos SSR). Comparar con initialFilters fallaba al
   // volver a temporada/género por defecto: el estado ya era de otro filtro.
-  const skipFilterFetchRef = useRef(true);
+  // Filtros de la última carga (el modo estricto de React repite los efectos en desarrollo).
+  const fetchedKeyRef = useRef(`${filters.season}|${filters.gender}`);
   useEffect(() => {
-    if (skipFilterFetchRef.current) {
-      skipFilterFetchRef.current = false;
-      return;
-    }
+    const key = `${filters.season}|${filters.gender}`;
+    if (fetchedKeyRef.current === key) return;
+    fetchedKeyRef.current = key;
     void loadAll(filters);
   }, [filters, loadAll]);
 
