@@ -14,6 +14,7 @@ import { videoRecordedDate } from "@/lib/videos/date";
 import { videoDetails, videoTitle } from "@/lib/videos/videoTitle";
 import { formatMatchDate } from "@/lib/matches/formatMatchLabel";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { ourMatchHref } from "@/lib/competition/links";
 import VideoThumb from "@/components/videos/VideoThumb";
 
 export type Video = {
@@ -132,7 +133,7 @@ export default function VideoCard({
         </p>
         {video.match_id && (
           <Link
-            href={`/matches/${video.match_id}`}
+            href={ourMatchHref({ id: video.match_id, fed_match_id: video.match?.fed_match_id })}
             className="mt-auto text-xs font-medium text-[var(--accent)] hover:underline"
           >
             Ver partido →
