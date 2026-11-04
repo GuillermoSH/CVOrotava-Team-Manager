@@ -162,12 +162,12 @@ export default function StatsView({
 
   // Solo saltar el primer paint (datos SSR). Comparar con initialFilters fallaba al
   // volver a temporada/género por defecto: el estado ya era de otro filtro.
-  const skipFilterFetchRef = useRef(true);
+  // Filtros de la última carga (el modo estricto de React repite los efectos en desarrollo).
+  const fetchedKeyRef = useRef(`${filters.season}|${filters.gender}`);
   useEffect(() => {
-    if (skipFilterFetchRef.current) {
-      skipFilterFetchRef.current = false;
-      return;
-    }
+    const key = `${filters.season}|${filters.gender}`;
+    if (fetchedKeyRef.current === key) return;
+    fetchedKeyRef.current = key;
     void loadAll(filters);
   }, [filters, loadAll]);
 

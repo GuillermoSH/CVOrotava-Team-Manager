@@ -252,16 +252,17 @@ export default function PaymentsView({
 
   // Solo saltar el primer fetch con usuario (datos SSR). Comparar con initialFilters
   // dejaba datos viejos al volver a temporada/género por defecto.
-  const skipFilterFetchRef = useRef(true);
+  // Se compara con los filtros de la última carga (no con un «primera vez»): el modo estricto de
+  // React ejecuta los efectos dos veces en desarrollo y volvía a pedir lo que ya venía del servidor.
+  const fetchedKeyRef = useRef(`${initialFilters.season}|${initialFilters.gender}`);
   useEffect(() => {
     if (!user) return;
-    if (skipFilterFetchRef.current) {
-      skipFilterFetchRef.current = false;
-      return;
-    }
+    const key = `${filters.season}|${filters.gender}`;
+    if (fetchedKeyRef.current === key) return;
+    fetchedKeyRef.current = key;
     void fetchPayments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, filters]);
+  }, [user, filters.season, filters.gender]);
 
   const totalPaid = payments
     .filter((p) => p.status === "paid")
