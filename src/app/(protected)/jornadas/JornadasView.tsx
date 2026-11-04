@@ -215,7 +215,7 @@ export default function JornadasView({
           </section>
 
           {table ? (
-            <aside aria-labelledby="standings-title" className="flex min-w-0 flex-col gap-8 xl:sticky xl:top-6">
+            <aside aria-labelledby="standings-title" className="flex min-w-0 flex-col gap-8 xl:sticky xl:top-20">
               <div>
                 <div className="mb-3 flex items-baseline justify-between gap-3">
                   <h2 id="standings-title" className="text-xl font-semibold tracking-tight">
