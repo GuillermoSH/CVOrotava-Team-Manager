@@ -2,10 +2,13 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+import BetaNotice from "@/components/competition/BetaNotice";
+import TeamBrief from "@/components/competition/TeamBrief";
 import { longDate } from "@/components/stats/competitive/format";
 import { prettyTeamName } from "@/lib/fed/linkPlan";
 import { groupLabel, roundTitle } from "@/lib/competition/build";
 import { fedMatchHref } from "@/lib/competition/links";
+import { buildTeamBrief } from "@/lib/competition/teamBrief";
 import type { TeamContext } from "@/lib/competition/loadTeam";
 import type { PhaseCounts, ProfileFlow, Ratio } from "@/lib/competition/teamProfile";
 
@@ -57,10 +60,12 @@ export default function TeamProfileView({ ctx }: Readonly<{ ctx: TeamContext }>)
   const teamName = (id: number | null) => (id !== null && teams[id] ? prettyTeamName(teams[id].name) : "Por determinar");
   const noDetail = p.withReport === 0;
   const first = groups[0];
+  const brief = buildTeamBrief(p, matches, teams);
 
   return (
     <div className="flex w-full max-w-[56rem] flex-col gap-10">
       <div>
+        <BetaNotice />
         <Link href="/jornadas" className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] max-md:min-h-11">
           <FontAwesomeIcon icon={faChevronLeft} className="text-xs" />
           Jornadas
@@ -82,6 +87,8 @@ export default function TeamProfileView({ ctx }: Readonly<{ ctx: TeamContext }>)
           </p>
         ) : null}
       </div>
+
+      <TeamBrief brief={brief} name={name} />
 
       {p.played > 0 ? (
         <Section id="t-record" title="Resultados">
