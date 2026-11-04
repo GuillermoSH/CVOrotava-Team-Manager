@@ -22,6 +22,7 @@ export default async function HomePage() {
       gender: user.gender,
       season,
       order: "asc",
+      lean: true,
     }),
     getPaymentsSnapshot({
       actor: user,

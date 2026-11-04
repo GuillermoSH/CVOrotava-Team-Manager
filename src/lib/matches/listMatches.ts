@@ -4,6 +4,8 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
 export type ListMatchesOpts = {
+  /** Columnas mínimas para Inicio (sin notes ni match_sets). */
+  lean?: boolean;
   gender?: string | null;
   season?: string | null;
   order?: "asc" | "desc";
@@ -30,6 +32,20 @@ const MATCH_LIST_SELECT = `
   match_sets(id, set_number, team_score, opponent_score)
 `;
 
+/** Inicio solo pinta próximo partido y últimos resultados: sin notas ni sets, que pesan en toda la temporada. */
+const MATCH_HOME_SELECT = `
+  id,
+  date,
+  time,
+  opponent,
+  season,
+  result,
+  video_url,
+  gender,
+  fed_match_id,
+  venues(venue_name, location_type, location_url)
+`;
+
 /** Only interpolate validated UUIDs into PostgREST `.or()` filters. */
 function safeForMatchId(raw: string): string | null {
   const parsed = z.string().uuid().safeParse(raw);
@@ -45,13 +61,14 @@ const listMatchesCached = cache(
     hasResult: string,
     withoutVideo: string,
     forMatchId: string,
-    opponent: string
+    opponent: string,
+    lean: string
   ) => {
     const ascending = order === "asc";
 
     let query = supabaseAdmin
       .from("matches")
-      .select(MATCH_LIST_SELECT)
+      .select(lean === "1" ? MATCH_HOME_SELECT : MATCH_LIST_SELECT)
       .order("date", { ascending })
       .order("time", { ascending });
 
@@ -89,6 +106,7 @@ export async function listMatches(opts: ListMatchesOpts = {}) {
     opts.hasResult ? "1" : "0",
     opts.withoutVideo ? "1" : "0",
     opts.forMatchId ?? "",
-    opts.opponent ?? ""
+    opts.opponent ?? "",
+    opts.lean ? "1" : "0"
   );
 }
