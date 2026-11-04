@@ -66,6 +66,7 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 type AdminSortField = "name" | "debt" | "status";
 type AdminSortDir = "asc" | "desc";
+type AdminFilter = "all" | "debt" | "ok" | "exempt";
 
 function defaultSortDir(field: AdminSortField): AdminSortDir {
   return field === "name" ? "asc" : "desc";
@@ -220,8 +221,9 @@ export default function PaymentsView({
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [adminSortField, setAdminSortField] =
-    useState<AdminSortField>("name");
-  const [adminSortDir, setAdminSortDir] = useState<AdminSortDir>("asc");
+    useState<AdminSortField>("debt");
+  const [adminSortDir, setAdminSortDir] = useState<AdminSortDir>("desc");
+  const [adminFilter, setAdminFilter] = useState<AdminFilter>("all");
 
   const fetchPayments = async () => {
     try {
@@ -292,6 +294,30 @@ export default function PaymentsView({
         return rows;
     }
   }, [adminOverview, adminSortField, adminSortDir]);
+
+  const summary = useMemo(() => {
+    const exempt = adminOverview.filter((r) => r.exempt).length;
+    const withDebt = adminOverview.filter((r) => !r.exempt && r.pendingAmount > 0);
+    return {
+      pending: withDebt.reduce((a, r) => a + r.pendingAmount, 0),
+      overdueFees: withDebt.reduce((a, r) => a + r.overdueCount, 0),
+      overduePlayers: withDebt.filter((r) => r.overdueCount > 0).length,
+      withDebt: withDebt.length,
+      upToDate: adminOverview.length - exempt - withDebt.length,
+      exempt,
+    };
+  }, [adminOverview]);
+
+  const visibleAdminOverview = useMemo(
+    () =>
+      sortedAdminOverview.filter((r) => {
+        if (adminFilter === "exempt") return Boolean(r.exempt);
+        if (adminFilter === "debt") return !r.exempt && r.pendingAmount > 0;
+        if (adminFilter === "ok") return !r.exempt && r.pendingAmount <= 0;
+        return true;
+      }),
+    [sortedAdminOverview, adminFilter]
+  );
 
   const filterConfigs: FilterConfig[] = [
     {
@@ -394,20 +420,52 @@ export default function PaymentsView({
         <>
           {user?.isAdmin ? (
             <section>
-              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold tracking-tight sm:text-xl">
-                    Jugadores sénior
-                  </h2>
-                  {adminOverview.length > 0 && (
-                    <p className="mt-1 text-sm text-[var(--text-muted)]">
-                      {sortedAdminOverview.length}{" "}
-                      {sortedAdminOverview.length === 1
-                        ? "jugador"
-                        : "jugadores"}{" "}
-                      · pulsa una fila para el detalle
+              {adminOverview.length > 0 && (
+                <div className="mb-6 grid gap-x-10 gap-y-4 border-b border-[var(--glass-border)] pb-6 sm:grid-cols-[auto_auto_auto_auto] sm:justify-start sm:gap-x-16">
+                  <div>
+                    <p className="text-sm text-[var(--text-muted)]">
+                      Pendiente de cobro · {filters.season}
                     </p>
-                  )}
+                    <p className="mt-1 text-4xl font-bold tabular-nums tracking-tight">
+                      {summary.pending}
+                      <span className="ml-0.5 text-xl font-semibold text-[var(--text-muted)]">€</span>
+                    </p>
+                    <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                      {summary.overdueFees > 0
+                        ? `${summary.overdueFees} ${summary.overdueFees === 1 ? "cuota atrasada" : "cuotas atrasadas"} de ${summary.overduePlayers} ${summary.overduePlayers === 1 ? "jugador" : "jugadores"}`
+                        : "Nada atrasado"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[var(--text-muted)]">Con deuda</p>
+                    <p className="mt-1 text-2xl font-semibold tabular-nums">{summary.withDebt}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[var(--text-muted)]">Al día</p>
+                    <p className="mt-1 text-2xl font-semibold tabular-nums">{summary.upToDate}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[var(--text-muted)]">Exentos</p>
+                    <p className="mt-1 text-2xl font-semibold tabular-nums">{summary.exempt}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex shrink-0 flex-wrap items-center gap-3">
+                  <SegmentedControl
+                    aria-label="Filtrar por estado"
+                    value={adminFilter}
+                    onChange={setAdminFilter}
+                    options={[
+                      { value: "all", label: "Todos" },
+                      { value: "debt", label: "Con deuda" },
+                      { value: "ok", label: "Al día" },
+                      ...(summary.exempt > 0
+                        ? [{ value: "exempt" as const, label: "Exentos" }]
+                        : []),
+                    ]}
+                  />
                 </div>
                 {adminOverview.length > 0 && (
                   <div className="flex w-full flex-col gap-2 sm:max-w-none sm:flex-row sm:items-center sm:justify-end">
@@ -429,8 +487,8 @@ export default function PaymentsView({
                           setAdminSortDir(defaultSortDir(field));
                         }}
                         options={[
-                          { value: "name", label: "Nombre" },
                           { value: "debt", label: "Deuda" },
+                          { value: "name", label: "Nombre" },
                           { value: "status", label: "Estado" },
                         ]}
                       />
@@ -458,8 +516,13 @@ export default function PaymentsView({
                   {filters.gender ? " / género" : ""}.
                 </p>
               ) : (
+                visibleAdminOverview.length === 0 ? (
+                  <p className="py-10 text-sm text-[var(--text-muted)]">
+                    Ningún jugador con este filtro.
+                  </p>
+                ) : (
                 <ul className="divide-y divide-[var(--glass-border)] border-t border-[var(--glass-border)]">
-                  {sortedAdminOverview.map((item) => {
+                  {visibleAdminOverview.map((item) => {
                     const avatarTone =
                       item.status === "danger"
                         ? "player-avatar-tint--danger"
@@ -477,7 +540,7 @@ export default function PaymentsView({
                               sessionStorage.setItem(
                                 PLAYER_ORDER_KEY,
                                 JSON.stringify(
-                                  sortedAdminOverview.map((r) => ({
+                                  visibleAdminOverview.map((r) => ({
                                     id: r.player_id,
                                     name: r.player,
                                   }))
@@ -549,9 +612,7 @@ export default function PaymentsView({
                                     ? "Crítico"
                                     : "Aviso"}
                               </span>
-                            ) : (
-                              <span className="badge badge-success">OK</span>
-                            )}
+                            ) : null}
                               </>
                             )}
                           </div>
@@ -560,6 +621,7 @@ export default function PaymentsView({
                     );
                   })}
                 </ul>
+                )
               )}
             </section>
           ) : payments.length === 0 ? (
