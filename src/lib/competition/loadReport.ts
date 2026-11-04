@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { fetchAll } from "@/lib/supabase/fetchAll";
 import { buildMatchReport, type MatchReport, type ReportRowsInput } from "./report";
@@ -27,14 +28,13 @@ const group = (rows: Row[]): Map<number, Row[]> => {
   return out;
 };
 
-/** Las actas de varios partidos a la vez; los que no tienen acta leída (o fallida) no salen en el mapa. */
-export async function getMatchReports(matchIds: number[]): Promise<Map<number, MatchReport>> {
-  const ids = [...new Set(matchIds)];
+/** Lee y construye las actas (sin caché). Devuelve pares [id, acta] para poder serializarlo. */
+async function loadMatchReportsUncached(ids: number[]): Promise<[number, MatchReport][]> {
   const out = new Map<number, MatchReport>();
-  if (ids.length === 0) return out;
+  if (ids.length === 0) return [];
 
   const reports = (await rowsFor("fed_match_reports", ids)).filter((r) => r.status === "ok" || r.status === "review");
-  if (reports.length === 0) return out;
+  if (reports.length === 0) return [];
   const readable = reports.map((r) => Number(r.match_id));
   const [sets, timeouts, substitutions, players, staff, referees, sanctions] = (await Promise.all(CHILD_TABLES.map((t) => rowsFor(t, readable)))).map(group);
 
@@ -53,7 +53,20 @@ export async function getMatchReports(matchIds: number[]): Promise<Map<number, M
     const built = buildMatchReport(input);
     if (built) out.set(id, built);
   }
-  return out;
+  return [...out];
+}
+
+/** Las actas cambian solo al sincronizar con la federación, que invalida el tag `fed`. */
+const loadMatchReportsCached = unstable_cache(loadMatchReportsUncached, ["fed-match-reports"], {
+  revalidate: 3600,
+  tags: ["fed"],
+});
+
+/** Las actas de varios partidos a la vez; los que no tienen acta leída (o fallida) no salen en el mapa. */
+export async function getMatchReports(matchIds: number[]): Promise<Map<number, MatchReport>> {
+  // Ordenados para que la misma lista dé siempre la misma clave de caché.
+  const ids = [...new Set(matchIds)].sort((a, b) => a - b);
+  return new Map(await loadMatchReportsCached(ids));
 }
 
 /** Lee el acta de un partido; null si no hay o no se pudo leer (las fallidas no traen datos). */
