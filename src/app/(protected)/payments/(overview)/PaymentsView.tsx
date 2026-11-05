@@ -9,18 +9,16 @@ import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlus,
-  faArrowDownAZ,
-  faArrowUpZA,
-  faArrowDownWideShort,
-  faArrowUpWideShort,
 } from "@fortawesome/free-solid-svg-icons";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import PageHeader from "@/components/ui/PageHeader";
 import QuotaSeasonLayout from "@/components/payments/QuotaSeasonLayout";
 import {
+  formatQuotaDay,
   isQuotaOverdue,
   isQuotaOwed,
 } from "@/components/payments/quotaDates";
+import { getCurrentSeason, normalizeSeasonId } from "@/utils/getCurrentSeason";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import { useSeasons } from "@/contexts/SeasonContext";
@@ -64,25 +62,7 @@ interface AdminOverviewRow {
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-type AdminSortField = "name" | "debt" | "status";
-type AdminSortDir = "asc" | "desc";
-
-function defaultSortDir(field: AdminSortField): AdminSortDir {
-  return field === "name" ? "asc" : "desc";
-}
-
-function sortDirLabel(field: AdminSortField, dir: AdminSortDir): string {
-  if (field === "name") return dir === "asc" ? "A → Z" : "Z → A";
-  if (field === "debt") {
-    return dir === "desc" ? "Mayor primero" : "Menor primero";
-  }
-  return dir === "desc" ? "Crítico primero" : "Al día primero";
-}
-
-function sortDirIcon(field: AdminSortField, dir: AdminSortDir) {
-  if (field === "name") return dir === "asc" ? faArrowDownAZ : faArrowUpZA;
-  return dir === "desc" ? faArrowDownWideShort : faArrowUpWideShort;
-}
+type AdminFilter = "all" | "debt" | "ok" | "exempt";
 
 function playerInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -90,12 +70,6 @@ function playerInitials(name: string): string {
     return `${parts[0]![0]}${parts[parts.length - 1]![0]}`.toUpperCase();
   }
   return name.slice(0, 2).toUpperCase() || "?";
-}
-
-function statusRank(s: AdminOverviewRow["status"]): number {
-  if (s === "danger") return 2;
-  if (s === "warning") return 1;
-  return 0;
 }
 
 function formatLastSignInLabel(iso: string | null | undefined): string {
@@ -219,9 +193,7 @@ export default function PaymentsView({
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [adminSortField, setAdminSortField] =
-    useState<AdminSortField>("name");
-  const [adminSortDir, setAdminSortDir] = useState<AdminSortDir>("asc");
+  const [adminFilter, setAdminFilter] = useState<AdminFilter>("all");
 
   const fetchPayments = async () => {
     try {
@@ -264,34 +236,55 @@ export default function PaymentsView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, filters.season, filters.gender]);
 
-  const totalPaid = payments
+  // El jugador ve la temporada elegida (por defecto la actual) y, aparte, lo que dejó pendiente en otras.
+  const viewSeason = normalizeSeasonId(filters.season ?? getCurrentSeason());
+  const seasonOf = (p: Payment) => (p.season ? normalizeSeasonId(p.season) : viewSeason);
+  const seasonPayments = payments.filter((p) => seasonOf(p) === viewSeason);
+  const carriedPending = payments
+    .filter((p) => seasonOf(p) !== viewSeason && p.status === "pending" && !p.expected)
+    .sort((a, b) => (a.due_date ?? "").localeCompare(b.due_date ?? ""));
+  const carriedTotal = carriedPending.reduce((acc, p) => acc + Number(p.amount), 0);
+  const totalPaid = seasonPayments
     .filter((p) => p.status === "paid")
     .reduce((acc, p) => acc + Number(p.amount), 0);
-  const totalPending = payments
+  const totalPending = seasonPayments
     .filter(isQuotaOwed)
     .reduce((acc, p) => acc + Number(p.amount), 0);
 
-  const sortedAdminOverview = useMemo(() => {
-    const rows = [...adminOverview];
-    const byName = (a: AdminOverviewRow, b: AdminOverviewRow) =>
-      a.player.localeCompare(b.player, "es", { sensitivity: "base" });
-    const dir = adminSortDir === "asc" ? 1 : -1;
+  // Orden fijo: quien más debe primero y, a igual deuda, por nombre.
+  const sortedAdminOverview = useMemo(
+    () =>
+      [...adminOverview].sort(
+        (a, b) =>
+          b.pendingAmount - a.pendingAmount ||
+          a.player.localeCompare(b.player, "es", { sensitivity: "base" })
+      ),
+    [adminOverview]
+  );
 
-    switch (adminSortField) {
-      case "name":
-        return rows.sort((a, b) => dir * byName(a, b));
-      case "debt":
-        return rows.sort(
-          (a, b) => dir * (a.pendingAmount - b.pendingAmount) || byName(a, b)
-        );
-      case "status":
-        return rows.sort(
-          (a, b) => dir * (statusRank(a.status) - statusRank(b.status)) || byName(a, b)
-        );
-      default:
-        return rows;
-    }
-  }, [adminOverview, adminSortField, adminSortDir]);
+  const summary = useMemo(() => {
+    const exempt = adminOverview.filter((r) => r.exempt).length;
+    const withDebt = adminOverview.filter((r) => !r.exempt && r.pendingAmount > 0);
+    return {
+      pending: withDebt.reduce((a, r) => a + r.pendingAmount, 0),
+      overdueFees: withDebt.reduce((a, r) => a + r.overdueCount, 0),
+      overduePlayers: withDebt.filter((r) => r.overdueCount > 0).length,
+      withDebt: withDebt.length,
+      upToDate: adminOverview.length - exempt - withDebt.length,
+      exempt,
+    };
+  }, [adminOverview]);
+
+  const visibleAdminOverview = useMemo(
+    () =>
+      sortedAdminOverview.filter((r) => {
+        if (adminFilter === "exempt") return Boolean(r.exempt);
+        if (adminFilter === "debt") return !r.exempt && r.pendingAmount > 0;
+        if (adminFilter === "ok") return !r.exempt && r.pendingAmount <= 0;
+        return true;
+      }),
+    [sortedAdminOverview, adminFilter]
+  );
 
   const filterConfigs: FilterConfig[] = [
     {
@@ -394,62 +387,51 @@ export default function PaymentsView({
         <>
           {user?.isAdmin ? (
             <section>
-              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold tracking-tight sm:text-xl">
-                    Jugadores sénior
-                  </h2>
-                  {adminOverview.length > 0 && (
-                    <p className="mt-1 text-sm text-[var(--text-muted)]">
-                      {sortedAdminOverview.length}{" "}
-                      {sortedAdminOverview.length === 1
-                        ? "jugador"
-                        : "jugadores"}{" "}
-                      · pulsa una fila para el detalle
+              {adminOverview.length > 0 && (
+                <div className="mb-6 grid grid-cols-3 gap-x-6 gap-y-5 pb-6 lg:grid-cols-[auto_auto_auto_auto] lg:justify-start lg:gap-x-16">
+                  <div className="col-span-3 lg:col-span-1">
+                    <p className="text-sm text-[var(--text-muted)]">
+                      Pendiente de cobro · {filters.season}
                     </p>
-                  )}
-                </div>
-                {adminOverview.length > 0 && (
-                  <div className="flex w-full flex-col gap-2 sm:max-w-none sm:flex-row sm:items-center sm:justify-end">
-                    <span className="text-xs font-medium text-[var(--text-muted)]">
-                      Ordenar
-                    </span>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <SegmentedControl
-                        aria-label="Criterio de orden"
-                        value={adminSortField}
-                        onChange={(field) => {
-                          if (field === adminSortField) {
-                            setAdminSortDir((d) =>
-                              d === "asc" ? "desc" : "asc"
-                            );
-                            return;
-                          }
-                          setAdminSortField(field);
-                          setAdminSortDir(defaultSortDir(field));
-                        }}
-                        options={[
-                          { value: "name", label: "Nombre" },
-                          { value: "debt", label: "Deuda" },
-                          { value: "status", label: "Estado" },
-                        ]}
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setAdminSortDir((d) => (d === "asc" ? "desc" : "asc"))
-                        }
-                        aria-label={`Invertir orden: ${sortDirLabel(adminSortField, adminSortDir)}`}
-                        className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--glass-border)] bg-[var(--surface-faint)] px-3 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:bg-[var(--glass-surface)] hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-                      >
-                        <FontAwesomeIcon
-                          icon={sortDirIcon(adminSortField, adminSortDir)}
-                        />
-                        {sortDirLabel(adminSortField, adminSortDir)}
-                      </button>
-                    </div>
+                    <p className="mt-1 text-4xl font-bold tabular-nums tracking-tight">
+                      {summary.pending}
+                      <span className="ml-0.5 text-xl font-semibold text-[var(--text-muted)]">€</span>
+                    </p>
+                    <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                      {summary.overdueFees > 0
+                        ? `${summary.overdueFees} ${summary.overdueFees === 1 ? "cuota atrasada" : "cuotas atrasadas"} de ${summary.overduePlayers} ${summary.overduePlayers === 1 ? "jugador" : "jugadores"}`
+                        : "Nada atrasado"}
+                    </p>
                   </div>
-                )}
+                  <div>
+                    <p className="text-sm text-[var(--text-muted)]">Con deuda</p>
+                    <p className="mt-1 text-2xl font-semibold tabular-nums">{summary.withDebt}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[var(--text-muted)]">Al día</p>
+                    <p className="mt-1 text-2xl font-semibold tabular-nums">{summary.upToDate}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[var(--text-muted)]">Exentos</p>
+                    <p className="mt-1 text-2xl font-semibold tabular-nums">{summary.exempt}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="mb-3 flex justify-end">
+                <SegmentedControl
+                  aria-label="Filtrar por estado"
+                  value={adminFilter}
+                  onChange={setAdminFilter}
+                  options={[
+                    { value: "all", label: "Todos" },
+                    { value: "debt", label: "Con deuda" },
+                    { value: "ok", label: "Al día" },
+                    ...(summary.exempt > 0
+                      ? [{ value: "exempt" as const, label: "Exentos" }]
+                      : []),
+                  ]}
+                />
               </div>
 
               {adminOverview.length === 0 ? (
@@ -458,8 +440,13 @@ export default function PaymentsView({
                   {filters.gender ? " / género" : ""}.
                 </p>
               ) : (
+                visibleAdminOverview.length === 0 ? (
+                  <p className="py-10 text-sm text-[var(--text-muted)]">
+                    Ningún jugador con este filtro.
+                  </p>
+                ) : (
                 <ul className="divide-y divide-[var(--glass-border)] border-t border-[var(--glass-border)]">
-                  {sortedAdminOverview.map((item) => {
+                  {visibleAdminOverview.map((item) => {
                     const avatarTone =
                       item.status === "danger"
                         ? "player-avatar-tint--danger"
@@ -477,7 +464,7 @@ export default function PaymentsView({
                               sessionStorage.setItem(
                                 PLAYER_ORDER_KEY,
                                 JSON.stringify(
-                                  sortedAdminOverview.map((r) => ({
+                                  visibleAdminOverview.map((r) => ({
                                     id: r.player_id,
                                     name: r.player,
                                   }))
@@ -488,7 +475,7 @@ export default function PaymentsView({
                             }
                             router.push(`/payments/admin/${item.player_id}`);
                           }}
-                          className="group flex w-full cursor-pointer flex-col gap-3 py-4 text-left transition-colors hover:bg-[var(--surface-faint)] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--accent)] sm:flex-row sm:items-center sm:gap-4"
+                          className="group flex w-full cursor-pointer flex-row items-center gap-3 py-4 text-left transition-colors hover:bg-[var(--surface-faint)] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--accent)] sm:gap-4"
                         >
                           <div className="flex min-w-0 flex-1 items-center gap-3">
                             <div
@@ -508,10 +495,10 @@ export default function PaymentsView({
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between gap-4 sm:justify-end sm:gap-6">
+                          <div className="flex shrink-0 flex-col items-end gap-1.5 sm:flex-row sm:items-center sm:gap-6">
                             {item.exempt ? (
                               <>
-                                <span className="max-w-[12rem] truncate text-sm text-[var(--text-muted)]">
+                                <span className="max-w-[8rem] truncate text-sm text-[var(--text-muted)] sm:max-w-[12rem]">
                                   {item.exempt.reason ?? "Sin motivo"}
                                 </span>
                                 <span className="badge badge-neutral">Exento</span>
@@ -549,9 +536,7 @@ export default function PaymentsView({
                                     ? "Crítico"
                                     : "Aviso"}
                               </span>
-                            ) : (
-                              <span className="badge badge-success">OK</span>
-                            )}
+                            ) : null}
                               </>
                             )}
                           </div>
@@ -560,6 +545,7 @@ export default function PaymentsView({
                     );
                   })}
                 </ul>
+                )
               )}
             </section>
           ) : payments.length === 0 ? (
@@ -569,11 +555,55 @@ export default function PaymentsView({
               </p>
             </div>
           ) : (
-            <QuotaSeasonLayout
-              pending={totalPending}
-              paid={totalPaid}
-              quotas={payments}
-            />
+            <div className="flex flex-col gap-10">
+              {carriedPending.length > 0 ? (
+                <section aria-labelledby="carried-pending">
+                  <h2 id="carried-pending" className="text-lg font-semibold tracking-tight">
+                    Pendiente de temporadas anteriores
+                  </h2>
+                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                    <span className="font-semibold tabular-nums payment-amount--pending">
+                      {carriedTotal}€
+                    </span>{" "}
+                    por pagar
+                  </p>
+                  <ul className="mt-3 divide-y divide-[var(--glass-border)] border-t border-[var(--glass-border)]">
+                    {carriedPending.map((p) => (
+                      <li key={p.id} className="flex items-center justify-between gap-4 py-3">
+                        <div className="min-w-0">
+                          <p className="truncate font-semibold text-[var(--text-primary)]">
+                            {p.concept}
+                          </p>
+                          <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+                            {p.season} · {formatQuotaDay(p.due_date)}
+                          </p>
+                        </div>
+                        <span className="shrink-0 text-lg font-bold tabular-nums payment-amount--pending">
+                          {p.amount}€
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+
+              <section aria-labelledby="season-current">
+                <h2 id="season-current" className="mb-4 text-lg font-semibold tracking-tight">
+                  Temporada {viewSeason}
+                </h2>
+                {seasonPayments.length === 0 ? (
+                  <p className="py-2 text-sm text-[var(--text-muted)]">
+                    Sin cuotas en esta temporada.
+                  </p>
+                ) : (
+                  <QuotaSeasonLayout
+                    pending={totalPending}
+                    paid={totalPaid}
+                    quotas={seasonPayments}
+                  />
+                )}
+              </section>
+            </div>
           )}
         </>
       )}

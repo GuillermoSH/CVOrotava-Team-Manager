@@ -1,19 +1,7 @@
 import { normalizeSeasonId } from "@/utils/getCurrentSeason";
 
-/**
- * Calendario de cuotas del Portal (a partir de la temporada 2026-27) para el
- * roster sénior: matrícula en septiembre y pago único en diciembre. Las
- * mensualidades son de base y no se prevén.
- */
+/** Códigos de cuota y sus fechas de vencimiento por defecto. Las tarifas e importes viven en `season_fee_lines` (feeLines.ts). */
 export type FeeCode = "matricula" | "mensualidad" | "equipacion" | "pago_unico";
-
-export type ExpectedFee = {
-  fee_code: FeeCode;
-  billing_month: number | null;
-  concept: string;
-  amount: number;
-  due_date: string;
-};
 
 type FeeRowLike = {
   concept?: string | null;
@@ -24,25 +12,9 @@ type FeeRowLike = {
 };
 
 const FIRST_SCHEDULED_YEAR = 2026;
-const ENROLMENT_AMOUNT = 75;
-const SINGLE_PAYMENT_AMOUNT = 90;
-const KIT_AMOUNT = 15;
 const ENROLMENT_MONTH = 9;
 const SINGLE_PAYMENT_MONTH = 12;
 const KIT_MONTH = 12;
-
-/**
- * Quién paga qué (espeja `season_fee_lines.audience` del Portal): sénior y aficionados,
- * matrícula + pago único; categorías de base, matrícula + equipación (y mensualidades
- * que no se prevén).
- */
-export type FeeAudience = "senior" | "aficionados" | "base";
-
-export function feeAudienceFor(category: string | null | undefined): FeeAudience {
-  if (!category || category === "senior") return "senior";
-  if (category === "aficionados") return "aficionados";
-  return "base";
-}
 
 const MONTH_NAMES = [
   "enero",
@@ -139,44 +111,4 @@ export function resolveDueDate(row: FeeRowLike): string | null {
   if (row.due_date) return row.due_date;
   const { code, month } = inferFee(row);
   return code ? feeDueDate(code, month, row.season) : null;
-}
-
-/** Cuotas que le tocan a un jugador según su audiencia y aún no tiene registradas. */
-export function missingFees(
-  rows: FeeRowLike[],
-  season: string,
-  audience: FeeAudience = "senior"
-): ExpectedFee[] {
-  const start = seasonStartYear(season);
-  if (!start || start < FIRST_SCHEDULED_YEAR) return [];
-
-  const seasonKey = normalizeSeasonId(season);
-  const have = new Set<string>();
-  for (const row of rows) {
-    if (row.season && normalizeSeasonId(row.season) !== seasonKey) continue;
-    const { code, month } = inferFee(row);
-    if (code) have.add(`${code}:${month ?? ""}`);
-  }
-
-  const out: ExpectedFee[] = [];
-  const push = (
-    fee_code: FeeCode,
-    billing_month: number | null,
-    concept: string,
-    amount: number
-  ) => {
-    if (have.has(`${fee_code}:${billing_month ?? ""}`)) return;
-    const due_date = feeDueDate(fee_code, billing_month, season);
-    if (due_date) out.push({ fee_code, billing_month, concept, amount, due_date });
-  };
-
-  push("matricula", null, "Matrícula", ENROLMENT_AMOUNT);
-
-  if (audience === "base") {
-    push("equipacion", null, "Equipación", KIT_AMOUNT);
-  } else {
-    push("pago_unico", null, "Pago único", SINGLE_PAYMENT_AMOUNT);
-  }
-
-  return out;
 }

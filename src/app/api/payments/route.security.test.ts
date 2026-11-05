@@ -12,6 +12,9 @@ vi.mock("@/lib/supabase/server", () => ({
   supabaseServer: vi.fn(async () => ({})),
 }));
 
+// unstable_cache necesita la caché incremental de Next, que no existe en las pruebas.
+vi.mock("next/cache", () => ({ unstable_cache: <T,>(fn: T) => fn, revalidateTag: vi.fn() }));
+
 const listUsers = vi.hoisted(() => vi.fn());
 const from = vi.hoisted(() => vi.fn());
 
