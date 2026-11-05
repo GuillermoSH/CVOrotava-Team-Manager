@@ -14,9 +14,11 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import PageHeader from "@/components/ui/PageHeader";
 import QuotaSeasonLayout from "@/components/payments/QuotaSeasonLayout";
 import {
+  formatQuotaDay,
   isQuotaOverdue,
   isQuotaOwed,
 } from "@/components/payments/quotaDates";
+import { getCurrentSeason, normalizeSeasonId } from "@/utils/getCurrentSeason";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import { useSeasons } from "@/contexts/SeasonContext";
@@ -234,10 +236,18 @@ export default function PaymentsView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, filters.season, filters.gender]);
 
-  const totalPaid = payments
+  // El jugador ve la temporada elegida (por defecto la actual) y, aparte, lo que dejó pendiente en otras.
+  const viewSeason = normalizeSeasonId(filters.season ?? getCurrentSeason());
+  const seasonOf = (p: Payment) => (p.season ? normalizeSeasonId(p.season) : viewSeason);
+  const seasonPayments = payments.filter((p) => seasonOf(p) === viewSeason);
+  const carriedPending = payments
+    .filter((p) => seasonOf(p) !== viewSeason && p.status === "pending" && !p.expected)
+    .sort((a, b) => (a.due_date ?? "").localeCompare(b.due_date ?? ""));
+  const carriedTotal = carriedPending.reduce((acc, p) => acc + Number(p.amount), 0);
+  const totalPaid = seasonPayments
     .filter((p) => p.status === "paid")
     .reduce((acc, p) => acc + Number(p.amount), 0);
-  const totalPending = payments
+  const totalPending = seasonPayments
     .filter(isQuotaOwed)
     .reduce((acc, p) => acc + Number(p.amount), 0);
 
@@ -545,11 +555,55 @@ export default function PaymentsView({
               </p>
             </div>
           ) : (
-            <QuotaSeasonLayout
-              pending={totalPending}
-              paid={totalPaid}
-              quotas={payments}
-            />
+            <div className="flex flex-col gap-10">
+              {carriedPending.length > 0 ? (
+                <section aria-labelledby="carried-pending">
+                  <h2 id="carried-pending" className="text-lg font-semibold tracking-tight">
+                    Pendiente de temporadas anteriores
+                  </h2>
+                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                    <span className="font-semibold tabular-nums payment-amount--pending">
+                      {carriedTotal}€
+                    </span>{" "}
+                    por pagar
+                  </p>
+                  <ul className="mt-3 divide-y divide-[var(--glass-border)] border-t border-[var(--glass-border)]">
+                    {carriedPending.map((p) => (
+                      <li key={p.id} className="flex items-center justify-between gap-4 py-3">
+                        <div className="min-w-0">
+                          <p className="truncate font-semibold text-[var(--text-primary)]">
+                            {p.concept}
+                          </p>
+                          <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+                            {p.season} · {formatQuotaDay(p.due_date)}
+                          </p>
+                        </div>
+                        <span className="shrink-0 text-lg font-bold tabular-nums payment-amount--pending">
+                          {p.amount}€
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+
+              <section aria-labelledby="season-current">
+                <h2 id="season-current" className="mb-4 text-lg font-semibold tracking-tight">
+                  Temporada {viewSeason}
+                </h2>
+                {seasonPayments.length === 0 ? (
+                  <p className="py-2 text-sm text-[var(--text-muted)]">
+                    Sin cuotas en esta temporada.
+                  </p>
+                ) : (
+                  <QuotaSeasonLayout
+                    pending={totalPending}
+                    paid={totalPaid}
+                    quotas={seasonPayments}
+                  />
+                )}
+              </section>
+            </div>
           )}
         </>
       )}
