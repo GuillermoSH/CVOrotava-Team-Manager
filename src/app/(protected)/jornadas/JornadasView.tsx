@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { reveal } from "@/lib/ui/reveal";
 import { useRouter } from "next/navigation";
 import FilterBar, { type FilterConfig } from "@/components/ui/FilterBar";
 import PageHeader from "@/components/ui/PageHeader";
@@ -122,7 +123,7 @@ export default function JornadasView({
     <div className="w-full max-w-[80rem]">
       <PageHeader title="Jornadas" subtitle={subtitle} />
 
-      <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-3">
+      <div className="reveal mb-6 flex flex-wrap items-center gap-x-4 gap-y-3" style={reveal(1)}>
         <FilterBar
           className="mb-0"
           filters={{ season, gender: canPickGender ? gender : undefined }}
@@ -151,7 +152,7 @@ export default function JornadasView({
         </p>
       ) : (
         <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-x-8 gap-y-8 xl:grid-cols-[minmax(0,1fr)_26rem]">
-          <section aria-labelledby="round-title" className="min-w-0">
+          <section aria-labelledby="round-title" className="reveal min-w-0" style={reveal(2)}>
             {useStrip ? (
               <div role="group" aria-label="Jornadas" className="mb-4 flex gap-1 overflow-x-auto pb-1">
                 {group.rounds.map((r, i) => {
@@ -215,7 +216,7 @@ export default function JornadasView({
           </section>
 
           {table ? (
-            <aside aria-labelledby="standings-title" className="flex min-w-0 flex-col gap-8 xl:sticky xl:top-20">
+            <aside aria-labelledby="standings-title" className="reveal flex min-w-0 flex-col gap-8 xl:sticky xl:top-20" style={reveal(3)}>
               <div>
                 <div className="mb-3 flex items-baseline justify-between gap-3">
                   <h2 id="standings-title" className="text-xl font-semibold tracking-tight">

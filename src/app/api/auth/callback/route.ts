@@ -6,6 +6,13 @@ import {
   isEmailAllowlisted,
   normalizeEmail,
 } from "@/lib/auth/allowlist";
+import { getUserActivity } from "@/lib/auth/userActivity";
+import {
+  GATE_COOKIE,
+  GATE_TTL_SEC,
+  gateCookieOptions,
+  signGate,
+} from "@/lib/auth/gate";
 
 type PendingCookie = {
   name: string;
@@ -59,15 +66,16 @@ export async function GET(request: NextRequest) {
     return response;
   };
 
-  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+  // El intercambio ya devuelve el usuario (respuesta directa de Auth): no hace
+  // falta un getUser aparte, que sería otro viaje a Supabase.
+  const { data: exchanged, error: exchangeError } =
+    await supabase.auth.exchangeCodeForSession(code);
   if (exchangeError) {
     console.error("OAuth code exchange failed:", exchangeError.message);
     return finish("/login?error=auth", true);
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = exchanged.user;
 
   if (!user?.email) {
     await supabase.auth.signOut();
@@ -75,7 +83,13 @@ export async function GET(request: NextRequest) {
   }
 
   const email = normalizeEmail(user.email);
-  const allowed = await isEmailAllowlisted(supabaseAdmin, email);
+
+  // Allowlist y perfil no dependen entre sí: en paralelo (un viaje en vez de
+  // dos). El perfil solo se usa si el correo está permitido.
+  const [allowed, activity] = await Promise.all([
+    isEmailAllowlisted(supabaseAdmin, email),
+    getUserActivity(user.id),
+  ]);
 
   if (!allowed) {
     // Kill refresh tokens server-side even if a cookie leaks through.
@@ -90,5 +104,23 @@ export async function GET(request: NextRequest) {
     return finish("/login?error=unauthorized", true);
   }
 
-  return finish("/");
+  // Correo ya verificado arriba: se entrega el gate firmado para que la primera
+  // página protegida no repita allowlist + perfil en el proxy. Sin secreto
+  // (producción mal configurada) signGate devuelve null y el proxy lo resuelve.
+  const gateToken = await signGate({
+    sub: user.id,
+    email,
+    is_active: activity.is_active,
+    isAdmin: activity.isAdmin,
+    role: activity.role,
+    user_name: activity.user_name ?? email,
+    gender: activity.gender,
+    exp: Math.floor(Date.now() / 1000) + GATE_TTL_SEC,
+  });
+
+  const response = finish(activity.is_active ? "/" : "/payments");
+  if (gateToken) {
+    response.cookies.set(GATE_COOKIE, gateToken, gateCookieOptions());
+  }
+  return response;
 }

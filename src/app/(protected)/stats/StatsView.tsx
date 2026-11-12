@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
-import { motion, useReducedMotion } from "framer-motion";
+import { reveal } from "@/lib/ui/reveal";
 import FilterBar, { FilterConfig } from "@/components/ui/FilterBar";
 import PageHeader from "@/components/ui/PageHeader";
 import SegmentedControl from "@/components/ui/SegmentedControl";
@@ -45,7 +45,6 @@ type Filters = {
   gender?: string;
 };
 
-const EASE = [0.16, 1, 0.3, 1] as const;
 
 type Tab = "resumen" | "rivales" | "versus";
 type Scope = "liga" | "todas";
@@ -90,7 +89,6 @@ export default function StatsView({
   initialFilters: Filters;
   initialCompetitive: CompetitiveStats | null;
 }) {
-  const reduceMotion = useReducedMotion();
   const { user } = useUser();
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const { seasons } = useSeasons();
@@ -429,12 +427,7 @@ export default function StatsView({
   );
 
   return (
-    <motion.div
-      className="flex w-full flex-col text-[var(--text-primary)]"
-      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, ease: EASE }}
-    >
+    <div className="flex w-full flex-col text-[var(--text-primary)]">
       <PageHeader
         title="Estadísticas"
         subtitle={
@@ -450,9 +443,11 @@ export default function StatsView({
         }
       />
 
-      <FilterBar filters={filters} setFilters={setFilters} configs={filterConfigs} />
+      <div className="reveal" style={reveal(1)}>
+        <FilterBar filters={filters} setFilters={setFilters} configs={filterConfigs} />
+      </div>
 
-      <div className="mb-8">
+      <div className="reveal mb-8" style={reveal(2)}>
         <SegmentedControl
           aria-label="Sección de estadísticas"
           value={tab}
@@ -478,6 +473,7 @@ export default function StatsView({
         </p>
       ) : null}
 
+      <div key={loading ? "loading" : tab} className="reveal" style={reveal(3)}>
       {loading ? (
         <StatsSummarySkeleton />
       ) : tab === "rivales" ? (
@@ -522,6 +518,7 @@ export default function StatsView({
           {seasonDetails}
         </div>
       )}
-    </motion.div>
+      </div>
+    </div>
   );
 }
