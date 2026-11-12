@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, type CSSProperties } from "react";
 import dynamic from "next/dynamic";
 import { motion, useReducedMotion } from "framer-motion";
+import { reveal } from "@/lib/ui/reveal";
 import { PaymentsListSkeleton } from "@/components/skeletons/PaymentsSkeleton";
 import { useUser } from "@/contexts/UserContext";
 import { useRouter } from "next/navigation";
@@ -388,7 +389,7 @@ export default function PaymentsView({
           {user?.isAdmin ? (
             <section>
               {adminOverview.length > 0 && (
-                <div className="mb-6 grid grid-cols-3 gap-x-6 gap-y-5 pb-6 lg:grid-cols-[auto_auto_auto_auto] lg:justify-start lg:gap-x-16">
+                <div className="reveal mb-6 grid grid-cols-3 gap-x-6 gap-y-5 pb-6 lg:grid-cols-[auto_auto_auto_auto] lg:justify-start lg:gap-x-16">
                   <div className="col-span-3 lg:col-span-1">
                     <p className="text-sm text-[var(--text-muted)]">
                       Pendiente de cobro · {filters.season}
@@ -445,7 +446,7 @@ export default function PaymentsView({
                     Ningún jugador con este filtro.
                   </p>
                 ) : (
-                <ul className="divide-y divide-[var(--glass-border)] border-t border-[var(--glass-border)]">
+                <ul className="reveal-children divide-y divide-[var(--glass-border)] border-t border-[var(--glass-border)]" style={{ "--base": 2 } as CSSProperties}>
                   {visibleAdminOverview.map((item) => {
                     const avatarTone =
                       item.status === "danger"
@@ -557,7 +558,7 @@ export default function PaymentsView({
           ) : (
             <div className="flex flex-col gap-10">
               {carriedPending.length > 0 ? (
-                <section aria-labelledby="carried-pending">
+                <section aria-labelledby="carried-pending" className="reveal" style={reveal(1)}>
                   <h2 id="carried-pending" className="text-lg font-semibold tracking-tight">
                     Pendiente de temporadas anteriores
                   </h2>
@@ -587,7 +588,7 @@ export default function PaymentsView({
                 </section>
               ) : null}
 
-              <section aria-labelledby="season-current">
+              <section aria-labelledby="season-current" className="reveal" style={reveal(2)}>
                 <h2 id="season-current" className="mb-4 text-lg font-semibold tracking-tight">
                   Temporada {viewSeason}
                 </h2>

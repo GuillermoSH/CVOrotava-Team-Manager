@@ -834,3 +834,62 @@ html[data-theme="light"] .match-status-pill--past {
     animation: dialog-backdrop-out 0.16s ease-in both;
   }
 }
+
+/* ── Entrada progresiva tras cargar datos: arriba→abajo, izquierda→derecha ──
+   Cada pieza fija su turno con `--i` (ver lib/ui/reveal.ts); 55 ms entre turnos. */
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(10px); }
+}
+@keyframes reveal-grow-x {
+  from { transform: scaleX(0); }
+}
+
+.reveal {
+  animation: reveal-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+.reveal-grow-x {
+  transform-origin: left;
+  animation: reveal-grow-x 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+
+/* Lista que entra elemento a elemento sin numerar cada hijo: `reveal-children` en el contenedor
+   (hasta 24 hijos; `--base` desplaza el arranque). */
+.reveal-children > * {
+  animation: reveal-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 24) * 55ms);
+}
+.reveal-children > :nth-child(1) { --i: calc(var(--base, 0) + 0); }
+.reveal-children > :nth-child(2) { --i: calc(var(--base, 0) + 1); }
+.reveal-children > :nth-child(3) { --i: calc(var(--base, 0) + 2); }
+.reveal-children > :nth-child(4) { --i: calc(var(--base, 0) + 3); }
+.reveal-children > :nth-child(5) { --i: calc(var(--base, 0) + 4); }
+.reveal-children > :nth-child(6) { --i: calc(var(--base, 0) + 5); }
+.reveal-children > :nth-child(7) { --i: calc(var(--base, 0) + 6); }
+.reveal-children > :nth-child(8) { --i: calc(var(--base, 0) + 7); }
+.reveal-children > :nth-child(9) { --i: calc(var(--base, 0) + 8); }
+.reveal-children > :nth-child(10) { --i: calc(var(--base, 0) + 9); }
+.reveal-children > :nth-child(11) { --i: calc(var(--base, 0) + 10); }
+.reveal-children > :nth-child(12) { --i: calc(var(--base, 0) + 11); }
+.reveal-children > :nth-child(13) { --i: calc(var(--base, 0) + 12); }
+.reveal-children > :nth-child(14) { --i: calc(var(--base, 0) + 13); }
+.reveal-children > :nth-child(15) { --i: calc(var(--base, 0) + 14); }
+.reveal-children > :nth-child(16) { --i: calc(var(--base, 0) + 15); }
+.reveal-children > :nth-child(17) { --i: calc(var(--base, 0) + 16); }
+.reveal-children > :nth-child(18) { --i: calc(var(--base, 0) + 17); }
+.reveal-children > :nth-child(19) { --i: calc(var(--base, 0) + 18); }
+.reveal-children > :nth-child(20) { --i: calc(var(--base, 0) + 19); }
+.reveal-children > :nth-child(21) { --i: calc(var(--base, 0) + 20); }
+.reveal-children > :nth-child(22) { --i: calc(var(--base, 0) + 21); }
+.reveal-children > :nth-child(23) { --i: calc(var(--base, 0) + 22); }
+.reveal-children > :nth-child(24) { --i: calc(var(--base, 0) + 23); }
+.reveal-children > :nth-child(n + 25) { --i: 24; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-children > *,
+  .reveal,
+  .reveal-grow-x {
+    animation: none;
+  }
+}

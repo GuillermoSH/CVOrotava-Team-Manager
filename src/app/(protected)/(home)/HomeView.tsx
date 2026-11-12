@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRight,
@@ -15,6 +14,7 @@ import {
 import { useUser } from "@/contexts/UserContext";
 import HomeSkeleton from "@/components/skeletons/HomeSkeleton";
 import PageHeader from "@/components/ui/PageHeader";
+import { reveal } from "@/lib/ui/reveal";
 import {
   isQuotaOverdue,
   isQuotaOwed,
@@ -167,8 +167,6 @@ function NextMatchCard({ match, now }: Readonly<{ match: HomeMatch; now: Date }>
   );
 }
 
-const EASE = [0.16, 1, 0.3, 1] as const;
-
 export type HomeExtras = {
   videos: VideoListItem[];
   achievements: Achievement[];
@@ -206,7 +204,6 @@ export default function HomeView({
   } | null;
 }) {
   const { user, loading } = useUser();
-  const reduceMotion = useReducedMotion();
   const [matches] = useState<HomeMatch[]>(initialMatches);
   const [paymentsData] = useState(initialPayments);
 
@@ -277,12 +274,7 @@ export default function HomeView({
     user?.gender === "female" ? "Bienvenida" : "Bienvenido";
 
   return (
-    <motion.div
-      className="flex w-full flex-col text-[var(--text-primary)]"
-      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, ease: EASE }}
-    >
+    <div className="flex w-full flex-col text-[var(--text-primary)]">
       <PageHeader
         title={`${greeting}, ${user?.user_name}`}
         subtitle="Resumen de la temporada en curso."
@@ -291,7 +283,7 @@ export default function HomeView({
       <div className="grid gap-8 lg:grid-cols-12 lg:gap-x-10 lg:gap-y-8">
         {/* ── Left column: next match + season ── */}
         <div className="flex flex-col gap-8 lg:col-span-7">
-          <section>
+          <section className="reveal" style={reveal(1)}>
             <h2 className="mb-3 text-lg font-semibold tracking-tight sm:text-xl">
               Próximo partido
             </h2>
@@ -313,7 +305,7 @@ export default function HomeView({
             )}
           </section>
 
-          <section>
+          <section className="reveal" style={reveal(2)}>
             <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
               <h2 className="text-lg font-semibold tracking-tight sm:text-xl">
                 Tu temporada
@@ -362,8 +354,8 @@ export default function HomeView({
                   aria-label={`Progreso del calendario: ${Math.round(playedShare)} por ciento jugado`}
                 >
                   <div
-                    className="h-full bg-[var(--accent)] transition-[width] duration-500 ease-out"
-                    style={{ width: `${playedShare}%` }}
+                    className="reveal-grow-x h-full bg-[var(--accent)]"
+                    style={{ width: `${playedShare}%`, ...reveal(4) }}
                   />
                 </div>
               </div>
@@ -395,7 +387,7 @@ export default function HomeView({
         </div>
 
         {/* ── Columna derecha: lo que pide atención ── */}
-        <div className="flex flex-col gap-8 lg:col-span-5">
+        <div className="reveal-children flex flex-col gap-8 lg:col-span-5" style={{ "--base": 2 } as CSSProperties}>
           {user?.isAdmin && extras.adminPending ? (
             <AdminPending
               data={extras.adminPending}
@@ -437,7 +429,7 @@ export default function HomeView({
         </div>
       </div>
 
-      <div className="mt-10 flex flex-col gap-10">
+      <div className="reveal-children mt-10 flex flex-col gap-10" style={{ "--base": 5 } as CSSProperties}>
         {user?.isAdmin ? (
           (() => {
             const achievements = extras.gender ? (
@@ -472,6 +464,6 @@ export default function HomeView({
           <LatestVideos videos={extras.videos} />
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
