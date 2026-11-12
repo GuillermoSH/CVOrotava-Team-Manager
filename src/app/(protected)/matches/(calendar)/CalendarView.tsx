@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { reveal } from "@/lib/ui/reveal";
 import dynamic from "next/dynamic";
 import MatchCard, { Match } from "@/components/calendar/MatchCard";
 import MatchMonthView from "@/components/calendar/MatchMonthView";
@@ -316,7 +317,7 @@ export default function CalendarView({
         }
       />
 
-      <div className="mb-4">
+      <div className="reveal mb-4" style={reveal(1)}>
         <label className="relative block">
           <span className="sr-only">Buscar partidos</span>
           <FontAwesomeIcon
@@ -333,7 +334,7 @@ export default function CalendarView({
         </label>
       </div>
 
-      <div className="mb-8 [&_.mb-6]:mb-0">
+      <div className="reveal mb-8 [&_.mb-6]:mb-0" style={reveal(2)}>
         <FilterBar
           filters={filters}
           setFilters={setFilters}
@@ -353,7 +354,7 @@ export default function CalendarView({
         />
       ) : (
         <div className="space-y-10">
-          <section>
+          <section className="reveal" style={reveal(3)}>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-xl font-semibold tracking-tight">
                 Próximos
@@ -375,7 +376,7 @@ export default function CalendarView({
                 No hay partidos próximos con estos filtros.
               </p>
             ) : (
-              <ul className="grid gap-3 sm:gap-4 xl:grid-cols-2 xl:gap-4">
+              <ul className="reveal-children grid gap-3 sm:gap-4 xl:grid-cols-2 xl:gap-4" style={{ "--base": 4 } as CSSProperties}>
                 {upcomingSlice.map((match) => (
                   <li key={match.id} className="min-w-0">
                     <MatchCard
@@ -390,7 +391,7 @@ export default function CalendarView({
           </section>
 
           {played.length > 0 && (
-            <section>
+            <section className="reveal" style={reveal(8)}>
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-xl font-semibold tracking-tight">
                   Jugados
