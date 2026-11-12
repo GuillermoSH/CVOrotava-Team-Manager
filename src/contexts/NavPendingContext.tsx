@@ -10,7 +10,6 @@ import {
 } from "react";
 import { usePathname } from "next/navigation";
 import { isNavActive } from "@/components/layout/navItems";
-import HomeSkeleton from "@/components/skeletons/HomeSkeleton";
 import MatchesSkeleton from "@/components/skeletons/MatchesSkeleton";
 import VideosSkeleton from "@/components/skeletons/VideosSkeleton";
 import StatsSkeleton from "@/components/skeletons/StatsSkeleton";
@@ -26,7 +25,6 @@ type NavPendingContextValue = {
 const NavPendingContext = createContext<NavPendingContextValue | null>(null);
 
 function skeletonFor(href: string) {
-  if (href === "/") return <HomeSkeleton />;
   if (href === "/matches") return <MatchesSkeleton />;
   if (href === "/videos") return <VideosSkeleton />;
   if (href === "/stats") return <StatsSkeleton />;
