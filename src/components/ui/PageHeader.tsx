@@ -21,7 +21,7 @@ export default function PageHeader({
 }: Readonly<PageHeaderProps>) {
   return (
     <header
-      className={`reveal mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between ${className ?? ""}`}
+      className={`mb-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between ${className ?? ""}`}
     >
       <div className="min-w-0">
         <h1 className="text-[1.65rem] font-semibold tracking-tight text-[var(--text-primary)] sm:text-3xl">

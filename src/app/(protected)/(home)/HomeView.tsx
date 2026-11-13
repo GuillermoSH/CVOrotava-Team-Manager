@@ -12,7 +12,6 @@ import {
   faPlaneDeparture,
 } from "@fortawesome/free-solid-svg-icons";
 import { useUser } from "@/contexts/UserContext";
-import HomeSkeleton from "@/components/skeletons/HomeSkeleton";
 import PageHeader from "@/components/ui/PageHeader";
 import { reveal } from "@/lib/ui/reveal";
 import {
@@ -203,7 +202,7 @@ export default function HomeView({
     }[];
   } | null;
 }) {
-  const { user, loading } = useUser();
+  const { user } = useUser();
   const [matches] = useState<HomeMatch[]>(initialMatches);
   const [paymentsData] = useState(initialPayments);
 
@@ -246,8 +245,6 @@ export default function HomeView({
       return { id: m.id, won: us > them, result: String(m.result), opponent: m.opponent };
     });
 
-  if (loading) return <HomeSkeleton />;
-
   const pendingPayments =
     paymentsData?.data?.filter((p) => isQuotaOwed({ ...p, due_date: p.due_date ?? null, status: p.status as "pending" | "paid" })) || [];
   const overduePayments = pendingPayments.filter((p) =>
@@ -276,7 +273,7 @@ export default function HomeView({
   return (
     <div className="flex w-full flex-col text-[var(--text-primary)]">
       <PageHeader
-        title={`${greeting}, ${user?.user_name}`}
+        title={`${greeting}, ${user?.user_name ?? ""}`}
         subtitle="Resumen de la temporada en curso."
       />
 

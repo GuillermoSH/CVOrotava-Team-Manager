@@ -10,7 +10,7 @@ export default function BetaNotice() {
     >
       <FontAwesomeIcon icon={faVial} className="text-[var(--accent)]" aria-hidden />
       <span className="rounded bg-[var(--accent-muted)] px-1.5 py-0.5 font-semibold text-[var(--accent)]">Beta</span>
-      <span>Esta sección está en desarrollo y irá cambiando de forma poco a poco: lo importante ahora son los datos y las estadísticas.</span>
+      <span>Esta sección está en desarrollo e irá cambiando de forma poco a poco: lo importante ahora son los datos y las estadísticas.</span>
     </p>
   );
 }
