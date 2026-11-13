@@ -3,6 +3,10 @@ import { Poppins } from "next/font/google";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import AppToaster from "@/components/ui/AppToaster";
 import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
+// CSS de Font Awesome en la hoja inicial (sin esto la librería lo inyecta tras
+// hidratar y los iconos salen a pantalla completa hasta entonces).
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import "@/lib/fontawesome";
 import "./globals.css";
 
 const poppins = Poppins({
